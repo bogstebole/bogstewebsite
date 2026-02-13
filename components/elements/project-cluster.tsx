@@ -38,6 +38,9 @@ export function ProjectCluster() {
     <div className="absolute inset-0 pointer-events-none">
       {PROJECTS.map((project) => {
         const pos = positions[project.key];
+        const transform =
+          project.key === "uselessNote" ? "rotate(12deg)" : undefined;
+
         return (
           <div
             key={project.key}
@@ -45,6 +48,7 @@ export function ProjectCluster() {
             style={{
               left: `${figmaX(pos.x)}%`,
               top: `${figmaY(pos.y)}%`,
+              transform,
             }}
           >
             <ProjectIcon

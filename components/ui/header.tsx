@@ -58,11 +58,27 @@ export function Header() {
   return (
     <div
       className="fixed top-0 left-0 right-0 z-40 pointer-events-none"
-      style={{ paddingTop: 32 }}
+      style={{
+        paddingTop: 32,
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        textAlign: "left",
+      }}
     >
       <div
         className="mx-auto flex items-center justify-center"
-        style={{ maxWidth: 800, paddingLeft: 24, paddingRight: 24, gap: 16 }}
+        style={{
+          width: "100%",
+          paddingLeft: 24,
+          paddingRight: 24,
+          gap: 0,
+          maxWidth: 800,
+          minWidth: 640,
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
         {/* Logo */}
         <div className="pointer-events-auto">
