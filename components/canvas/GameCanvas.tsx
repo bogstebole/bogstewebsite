@@ -24,7 +24,7 @@ export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const cursorXRef = useRef(0);
-  const warpTriggerRef = useRef<"shivering" | "warping_in" | "warping_out" | "warped" | null>(null);
+  const warpTriggerRef = useRef<"shivering" | "warping_in" | "warping_out" | "warped" | "idle" | null>(null);
   const [character, setCharacter] = useState<CharacterState | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [nearZone, setNearZone] = useState<string | null>(null);
@@ -36,6 +36,20 @@ export function GameCanvas() {
     if (!container) return;
     setCharacter(createInitialState(container.clientWidth));
   }, []);
+
+  // Sound design
+  useEffect(() => {
+    const warpState = character?.warpState;
+    if (warpState === "shivering") {
+      const audio = new Audio("/sounds/glitch.mp3");
+      audio.volume = 0.5;
+      audio.play().catch(() => { }); // Ignore autoplay errors
+    } else if (warpState === "warping_in") {
+      const audio = new Audio("/sounds/woosh.mp3");
+      audio.volume = 0.4;
+      audio.play().catch(() => { });
+    }
+  }, [character?.warpState]);
 
   // Game loop
   useEffect(() => {
@@ -100,6 +114,7 @@ export function GameCanvas() {
   const handlePortalClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     warpTriggerRef.current = "shivering";
+    // Don't set activeSection here; wait for disintegration to finish
   }, []);
 
   const handleClick = useCallback(() => {
@@ -122,10 +137,21 @@ export function GameCanvas() {
     setShedSet(new Set()); // reset shed pixels
   }, []);
 
-  // Called by WarpParticles when all particles have been consumed
+  // Called by WarpParticles when all particles have been consumed (or integrated)
   const handleAllConsumed = useCallback(() => {
-    warpTriggerRef.current = "warped";
-  }, []);
+    const currentState = character?.warpState;
+    if (currentState === "warping_in") {
+      // Disintegration complete → Open Timeline immediately
+      warpTriggerRef.current = "warped";
+      setActiveSection("timeline");
+    } else if (currentState === "warping_out") {
+      // Integration complete → Character restored
+      warpTriggerRef.current = "idle";
+    } else {
+      // Fallback
+      warpTriggerRef.current = "warped";
+    }
+  }, [character?.warpState]);
 
   // Called by WarpParticles each frame with the set of shed pixel keys
   const handleShedUpdate = useCallback((shed: Set<string>) => {
@@ -146,6 +172,8 @@ export function GameCanvas() {
   // Portal center as viewport percentages
   const portalXPercent = figmaX(FIGMA_POSITIONS.portal.x);
   const portalYPercent = figmaY(FIGMA_POSITIONS.portal.y);
+  const active = !!character && (character.warpState === "warping_in" || character.warpState === "warping_out");
+  const particleMode = character?.warpState === "warping_out" ? "integrate" : "shed";
 
   return (
     <div
@@ -192,7 +220,8 @@ export function GameCanvas() {
 
           {/* Layer 8: Warp particle system overlay */}
           <WarpParticles
-            active={character.warpState === "warping_in"}
+            active={active}
+            mode={particleMode}
             characterX={character.x}
             groundYPercent={CANVAS.GROUND_Y}
             portalXPercent={portalXPercent}

@@ -70,9 +70,13 @@ export function updateCharacter(
         warpTimer = 0;
       }
     } else if (warpState === "warping_out") {
-      // Warp out is instant (character just reappears)
-      warpState = "idle";
-      warpTimer = 0;
+      // warping_out stays active — GameCanvas decides when to transition
+      // via onAllConsumed callback from the particle system (integration complete).
+      // Safety cap:
+      if (warpTimer >= CHARACTER.WARP_MAX_DURATION) {
+        warpState = "idle";
+        warpTimer = 0;
+      }
     }
 
     // Cancel jump state during warp

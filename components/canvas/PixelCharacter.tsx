@@ -120,13 +120,15 @@ export function PixelCharacter({ state, groundY, shedSet }: PixelCharacterProps)
     if (state.warpState === "warped") return;
 
     const breathY = Math.sin(state.breathTimer * 0.03) * 1.5;
-    const isShivering = state.warpState === "shivering";
+    const isShivering = state.warpState === "shivering" || state.warpState === "warping_in";
 
     // Chromatic aberration: compute per-channel offsets
     // Ramp intensity from 0 → max over SHIVER_DURATION
-    const shiverT = isShivering
+    // If warping_in, lock at max intensity (1.0)
+    const shiverT = state.warpState === "shivering"
       ? Math.min(1, state.warpTimer / CHARACTER.SHIVER_DURATION)
-      : 0;
+      : isShivering ? 1.0 : 0;
+
     // Ease-in-quad for more explosive final distortion
     const shiverIntensity = shiverT * shiverT;
     const maxOff = CHARACTER.SHIVER_MAX_OFFSET * shiverIntensity;
