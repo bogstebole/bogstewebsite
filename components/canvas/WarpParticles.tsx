@@ -235,7 +235,8 @@ export function WarpParticles({
                         const dy = portalCY - p.y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
 
-                        if (dist < 20) {
+                        // Increased radius to catch fast particles
+                        if (dist < 30) {
                             p.consumed = true;
                             p.opacity = 0;
                             p.scale = 0;
@@ -394,7 +395,8 @@ export function WarpParticles({
             }
 
             // Force-complete logic
-            const forceCompleteFrame = CHARACTER.WARP_SHED_DURATION + 90;
+            // Reduced safety buffer for snappier transition
+            const forceCompleteFrame = CHARACTER.WARP_SHED_DURATION + 60;
             if (allFinished || frameCount >= forceCompleteFrame) {
                 doneRef.current = true;
                 onAllConsumed();

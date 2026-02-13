@@ -147,7 +147,7 @@ export function GameCanvas() {
     if (currentState === "warping_in") {
       // Disintegration complete → Open Timeline immediately
       warpTriggerRef.current = "warped";
-      setActiveSection("timeline");
+      setActiveSection("about");
     } else if (currentState === "warping_out") {
       // Integration complete → Character restored
       warpTriggerRef.current = "idle";
