@@ -1,0 +1,291 @@
+/* ═══════════════════════════════════════════════════════════════
+   GlassButton.module.css
+   
+   Glassmorphic concave-glass button.
+   13-layer box-shadow system (8 inset + 4 outer) + gradient
+   border via ::before + top rim highlight via ::after.
+   
+   Inspired by wabi.ai's "Join waitlist" button.
+   ═══════════════════════════════════════════════════════════════ */
+
+.glassBtn {
+  /* ── Tokens ── */
+  --glass-border-width: 1px;
+  --glass-radius: 6.25rem;
+  --glass-blur: 2.5px;
+  --glass-fill: rgba(255, 255, 255, 0.06);
+  --glass-text: rgba(0, 0, 0, 0.62);
+  --glass-transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* ── Reset ── */
+  all: unset;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+
+  /* ── Layout ── */
+  display: inline-flex;
+  padding: 1rem 2.5rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+
+  /* ── Shape ── */
+  border-radius: var(--glass-radius);
+
+  /* ── Glass fill ── */
+  background: var(--glass-fill);
+
+  /* ── 12-layer shadow system ── */
+  box-shadow:
+    /* INSET: sculpted concave glass */
+    3px -1px 2px 0 #fff inset,                            /* top-left bright rim */
+    -1px -3px 3px -2px rgba(0, 0, 0, 0.41) inset,         /* bottom-right dark edge */
+    2px 1px 5px -5px rgba(0, 0, 0, 0.84) inset,           /* tight inner depth */
+    0 0 8px 6px rgba(255, 255, 255, 0.65) inset,           /* inner glow */
+    0 -10px 16px -4px rgba(0, 0, 0, 0.25) inset,          /* bottom concave scoop */
+    0 3px 6px 1px rgba(0, 0, 0, 0.42) inset,              /* top concave shadow */
+    0 21px 10px 0 rgba(255, 255, 255, 0.75) inset,         /* pooled light upper half */
+    0 40px 42px -10px rgba(0, 0, 0, 0.15) inset,          /* deep atmospheric haze */
+    /* OUTER: elevation stack */
+    0 20px 8px -2px rgba(0, 0, 0, 0.01),
+    0 11px 7px -1px rgba(0, 0, 0, 0.05),
+    0 5px 5px 0 rgba(0, 0, 0, 0.09),
+    0 1px 3px 0 rgba(0, 0, 0, 0.1);
+
+  /* ── Blur ── */
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+
+  /* ── Typography ── */
+  font-size: 1.125rem;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--glass-text);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+
+  /* ── Transition ── */
+  transition: all var(--glass-transition);
+}
+
+/* ── Gradient border ──
+   Brighter top-left, darker bottom-right — matches light direction */
+.glassBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--glass-border-width);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(0, 0, 0, 0.12) 40%,
+    rgba(0, 0, 0, 0.22) 70%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  transition: all var(--glass-transition);
+}
+
+/* ── Top rim highlight ── */
+.glassBtn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: var(--glass-border-width);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.7) 30%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(255, 255, 255, 0.7) 70%,
+    transparent 100%
+  );
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity var(--glass-transition);
+}
+
+/* ═══════════════════════════════════════════
+   HOVER
+   Glass fills with light, lifts slightly
+   ═══════════════════════════════════════════ */
+
+.glassBtn:hover:not(:disabled) {
+  --glass-fill: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+  color: rgba(0, 0, 0, 0.72);
+  box-shadow:
+    3px -1px 3px 0 #fff inset,
+    -1px -3px 3px -2px rgba(0, 0, 0, 0.35) inset,
+    2px 1px 5px -5px rgba(0, 0, 0, 0.7) inset,
+    0 0 10px 8px rgba(255, 255, 255, 0.72) inset,
+    0 -10px 16px -4px rgba(0, 0, 0, 0.2) inset,
+    0 3px 6px 1px rgba(0, 0, 0, 0.36) inset,
+    0 21px 12px 0 rgba(255, 255, 255, 0.82) inset,
+    0 40px 42px -10px rgba(0, 0, 0, 0.1) inset,
+    0 22px 10px -2px rgba(0, 0, 0, 0.02),
+    0 13px 9px -1px rgba(0, 0, 0, 0.06),
+    0 6px 6px 0 rgba(0, 0, 0, 0.1),
+    0 2px 4px 0 rgba(0, 0, 0, 0.12);
+}
+
+.glassBtn:hover:not(:disabled)::before {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(0, 0, 0, 0.1) 40%,
+    rgba(0, 0, 0, 0.18) 70%,
+    rgba(0, 0, 0, 0.12) 100%
+  );
+}
+
+.glassBtn:hover:not(:disabled)::after {
+  opacity: 0.85;
+}
+
+/* ═══════════════════════════════════════════
+   ACTIVE
+   Concavity deepens, pressed into surface
+   ═══════════════════════════════════════════ */
+
+.glassBtn:active:not(:disabled) {
+  --glass-fill: rgba(0, 0, 0, 0.02);
+  transform: translateY(1px) scale(0.98);
+  transition-duration: 0.08s;
+  color: rgba(0, 0, 0, 0.55);
+  box-shadow:
+    2px -1px 1px 0 rgba(255, 255, 255, 0.6) inset,
+    -1px -2px 3px -2px rgba(0, 0, 0, 0.5) inset,
+    2px 1px 5px -5px rgba(0, 0, 0, 0.9) inset,
+    0 0 5px 4px rgba(255, 255, 255, 0.45) inset,
+    0 -12px 18px -4px rgba(0, 0, 0, 0.32) inset,
+    0 4px 8px 2px rgba(0, 0, 0, 0.5) inset,
+    0 20px 10px 0 rgba(255, 255, 255, 0.6) inset,
+    0 40px 42px -10px rgba(0, 0, 0, 0.22) inset,
+    0 8px 4px -1px rgba(0, 0, 0, 0.01),
+    0 4px 4px 0 rgba(0, 0, 0, 0.04),
+    0 2px 3px 0 rgba(0, 0, 0, 0.06),
+    0 0 2px 0 rgba(0, 0, 0, 0.07);
+}
+
+.glassBtn:active:not(:disabled)::before {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(0, 0, 0, 0.15) 40%,
+    rgba(0, 0, 0, 0.28) 70%,
+    rgba(0, 0, 0, 0.18) 100%
+  );
+}
+
+.glassBtn:active:not(:disabled)::after {
+  opacity: 0.3;
+}
+
+/* ═══════════════════════════════════════════
+   FOCUS-VISIBLE
+   Accessible keyboard ring
+   ═══════════════════════════════════════════ */
+
+.glassBtn:focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0.18);
+  outline-offset: 5px;
+}
+
+/* ═══════════════════════════════════════════
+   DISABLED
+   Faded, flattened, no interaction
+   ═══════════════════════════════════════════ */
+
+.glassBtn:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.45;
+  box-shadow:
+    0 0 6px 4px rgba(255, 255, 255, 0.3) inset,
+    0 -6px 10px -3px rgba(0, 0, 0, 0.1) inset,
+    0 2px 4px 0 rgba(0, 0, 0, 0.08) inset,
+    0 18px 8px 0 rgba(255, 255, 255, 0.35) inset,
+    0 3px 4px 0 rgba(0, 0, 0, 0.04),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.glassBtn:disabled::after {
+  opacity: 0.15;
+}
+
+/* ═══════════════════════════════════════════
+   LOADING
+   Spinner replaces content
+   ═══════════════════════════════════════════ */
+
+.loading {
+  pointer-events: none;
+}
+
+.loading .label {
+  visibility: hidden;
+}
+
+.loading .icon {
+  visibility: hidden;
+}
+
+/* ═══════════════════════════════════════════
+   CHILD ELEMENTS
+   ═══════════════════════════════════════════ */
+
+.label {
+  position: relative;
+  z-index: 1;
+}
+
+.icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  width: 1.125em;
+  height: 1.125em;
+  flex-shrink: 0;
+}
+
+.icon > svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.spinner {
+  position: absolute;
+  z-index: 1;
+  width: 1.25em;
+  height: 1.25em;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-top-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

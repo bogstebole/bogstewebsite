@@ -12,8 +12,10 @@ export interface CharacterState {
   breathTimer: number;
   blinkTimer: number;
   isBlinking: boolean;
-  warpState: "idle" | "shivering" | "warping_in" | "warped" | "warping_out";
+  warpState: "idle" | "shivering" | "warping_in" | "warped" | "warping_out" | "headbutt";
   warpTimer: number;
+  /** Y offset the character needs to reach for headbutt (negative = upward) */
+  headbuttTargetY?: number;
 }
 
 export function createInitialState(canvasWidth: number): CharacterState {
@@ -77,9 +79,33 @@ export function updateCharacter(
         warpState = "idle";
         warpTimer = 0;
       }
+    } else if (warpState === "headbutt") {
+      // Headbutt jump: physics-driven vertical movement
+      velocityY += CHARACTER.GRAVITY;
+      y += velocityY;
+
+      // Landed back on ground
+      if (y >= 0 && warpTimer > 5) {
+        y = 0;
+        velocityY = 0;
+        warpState = "idle";
+        warpTimer = 0;
+        return {
+          x, y, velocityY, isJumping: false, isWalking: false, direction,
+          walkFrame, breathTimer, blinkTimer, isBlinking,
+          warpState, warpTimer,
+        };
+      }
+
+      // Still in the air during headbutt
+      return {
+        x, y, velocityY, isJumping: false, isWalking: false, direction,
+        walkFrame, breathTimer, blinkTimer, isBlinking,
+        warpState, warpTimer, headbuttTargetY: state.headbuttTargetY,
+      };
     }
 
-    // Cancel jump state during warp
+    // Non-headbutt warp states: cancel jump and lock position
     y = 0;
     velocityY = 0;
     isJumping = false;
