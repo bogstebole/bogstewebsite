@@ -1,12 +1,15 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
-import { PixelCharacter } from "./PixelCharacter";
+import { PixelCharacter, DISPLAY_H } from "./PixelCharacter";
 import { GroundLine } from "./GroundLine";
 import { Clouds } from "./clouds";
 import { PixelPortal } from "./pixel-portal";
+import { WarpParticles } from "./WarpParticles";
 import { ProjectCluster } from "@/components/elements/project-cluster";
 import { WorkCluster } from "@/components/elements/work-cluster";
+import { RetroWindow } from "@/components/ui/retro-window";
+import { AboutTimeline } from "@/components/sections/about-timeline";
 import { INTERACTION_ZONES, CANVAS, FIGMA_POSITIONS } from "@/lib/constants";
 import { figmaX, figmaY } from "@/lib/figma-scale";
 import {
@@ -21,9 +24,11 @@ export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const cursorXRef = useRef(0);
+  const warpTriggerRef = useRef<"warping_in" | "warping_out" | "warped" | null>(null);
   const [character, setCharacter] = useState<CharacterState | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [nearZone, setNearZone] = useState<string | null>(null);
+  const [shedSet, setShedSet] = useState<Set<string>>(new Set());
 
   // Initialize character state once we know canvas size
   useEffect(() => {
@@ -41,7 +46,28 @@ export function GameCanvas() {
 
     function loop() {
       const width = container!.clientWidth;
-      animState = updateCharacter(animState, cursorXRef.current, width);
+
+      // Check for warp trigger from click handlers or particle system
+      const trigger = warpTriggerRef.current;
+      if (trigger) {
+        warpTriggerRef.current = null;
+        animState = { ...animState, warpState: trigger, warpTimer: 0 };
+        // When transitioning to warped, open the about section
+        if (trigger === "warped") {
+          setActiveSection("about");
+        }
+      }
+
+      // Update character logic
+      const prevWarpState = animState.warpState;
+      const nextState = updateCharacter(animState, cursorXRef.current, width);
+
+      // If engine safety cap forced warped state, open the section too
+      if (prevWarpState === "warping_in" && nextState.warpState === "warped") {
+        setActiveSection("about");
+      }
+
+      animState = nextState;
       const zone = checkInteractionZone(animState.x, width, INTERACTION_ZONES);
       setCharacter({ ...animState });
       setNearZone(zone);
@@ -71,29 +97,55 @@ export function GameCanvas() {
     }
   }, []);
 
+  const handlePortalClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    warpTriggerRef.current = "warping_in";
+  }, []);
+
   const handleClick = useCallback(() => {
+    if (nearZone === "portal") {
+      warpTriggerRef.current = "warping_in";
+      return;
+    }
+
     if (nearZone) {
       setActiveSection(nearZone);
     }
 
-    // Click also triggers jump (like prototype)
-    setCharacter((prev) => (prev ? jump(prev) : prev));
+    // Click also triggers jump — only if not warping
+    setCharacter((prev) => (prev && prev.warpState === "idle" ? jump(prev) : prev));
   }, [nearZone]);
 
   const handleCloseSection = useCallback(() => {
     setActiveSection(null);
+    warpTriggerRef.current = "warping_out";
+    setShedSet(new Set()); // reset shed pixels
+  }, []);
+
+  // Called by WarpParticles when all particles have been consumed
+  const handleAllConsumed = useCallback(() => {
+    warpTriggerRef.current = "warped";
+  }, []);
+
+  // Called by WarpParticles each frame with the set of shed pixel keys
+  const handleShedUpdate = useCallback((shed: Set<string>) => {
+    setShedSet(shed);
   }, []);
 
   // ESC key to close sections
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.code === "Escape") {
-        setActiveSection(null);
+        handleCloseSection();
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [handleCloseSection]);
+
+  // Portal center as viewport percentages
+  const portalXPercent = figmaX(FIGMA_POSITIONS.portal.x);
+  const portalYPercent = figmaY(FIGMA_POSITIONS.portal.y);
 
   return (
     <div
@@ -114,14 +166,16 @@ export function GameCanvas() {
           {/* Layer 4: Work cluster */}
           <WorkCluster />
 
-          {/* Layer 5: Pixel portal */}
+          {/* Layer 5: Pixel portal — clickable to trigger warp */}
           <div
-            className="absolute pointer-events-none"
+            className="absolute cursor-pointer z-10"
             style={{
-              left: `${figmaX(FIGMA_POSITIONS.portal.x)}%`,
-              top: `${figmaY(FIGMA_POSITIONS.portal.y)}%`,
+              left: `${portalXPercent}%`,
+              top: `${portalYPercent}%`,
               transform: "translate(-50%, -50%)",
+              padding: "16px",
             }}
+            onClick={handlePortalClick}
           >
             <PixelPortal scale={3} />
           </div>
@@ -130,10 +184,33 @@ export function GameCanvas() {
           <GroundLine y={CANVAS.GROUND_Y} />
 
           {/* Layer 7: The pixel character */}
-          <PixelCharacter state={character} groundY={CANVAS.GROUND_Y} />
+          <PixelCharacter
+            state={character}
+            groundY={CANVAS.GROUND_Y}
+            shedSet={shedSet}
+          />
+
+          {/* Layer 8: Warp particle system overlay */}
+          <WarpParticles
+            active={character.warpState === "warping_in"}
+            characterX={character.x}
+            groundYPercent={CANVAS.GROUND_Y}
+            portalXPercent={portalXPercent}
+            portalYPercent={portalYPercent}
+            onAllConsumed={handleAllConsumed}
+            onShedUpdate={handleShedUpdate}
+          />
 
           {/* Active section overlay */}
-          {activeSection && (
+          <RetroWindow
+            isOpen={activeSection === "about"}
+            onClose={handleCloseSection}
+            title="TIMELINE"
+          >
+            <AboutTimeline />
+          </RetroWindow>
+
+          {activeSection && activeSection !== "about" && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80">
               <button
                 onClick={(e) => {

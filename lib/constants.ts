@@ -24,6 +24,10 @@ export const CHARACTER = {
   JUMP_VELOCITY: -12,
   /** Gravity acceleration */
   GRAVITY: 0.6,
+  /** Frames over which noise-mask ramps 0→1 for particle shedding (~0.4s) */
+  WARP_SHED_DURATION: 25,
+  /** Hard-cap frame limit before force-completing warp (~5s safety) */
+  WARP_MAX_DURATION: 300,
 } as const;
 
 /** Figma-derived element positions (x, y in Figma pixels on 1440x1024 canvas) */

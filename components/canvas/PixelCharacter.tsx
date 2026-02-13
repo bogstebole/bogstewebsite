@@ -8,7 +8,7 @@ import type { CharacterState } from "@/lib/game-engine";
 // Colors: 0=transparent, 1=cap dark, 2=cap main, 3=skin, 4=eye, 5=beard dark,
 // 6=beard main, 7=shirt dark, 8=shirt main, 9=pants dark, A=pants main,
 // B=shoe dark, C=shoe main, D=skin shadow, E=beard mid, F=cap highlight
-const PALETTE: Record<string, string> = {
+export const PALETTE: Record<string, string> = {
   "0": "transparent",
   "1": "#1a1a2e",
   "2": "#2d3a6e",
@@ -27,7 +27,7 @@ const PALETTE: Record<string, string> = {
   F: "#243555",
 };
 
-const IDLE_FRAME = [
+export const IDLE_FRAME = [
   "00000000000000000000000000000000",
   "00000000000000000000000000000000",
   "00000000000000000000000000000000",
@@ -85,15 +85,17 @@ const CANVAS_W = COLS * PX;
 const CANVAS_H = ROWS * PX;
 
 /** Displayed size — 72px height, maintain 2:3 aspect ratio */
-const DISPLAY_H = 72;
-const DISPLAY_W = 48;
+export const DISPLAY_H = 72;
+export const DISPLAY_W = 48;
 
 interface PixelCharacterProps {
   state: CharacterState;
   groundY: number;
+  /** Set of "row,col" keys for pixels that have been shed to the particle system */
+  shedSet?: Set<string>;
 }
 
-export function PixelCharacter({ state, groundY }: PixelCharacterProps) {
+export function PixelCharacter({ state, groundY, shedSet }: PixelCharacterProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -103,6 +105,9 @@ export function PixelCharacter({ state, groundY }: PixelCharacterProps) {
     if (!ctx) return;
 
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+    // Don't draw anything if fully warped
+    if (state.warpState === "warped") return;
 
     const breathY = Math.sin(state.breathTimer * 0.03) * 1.5;
 
@@ -116,6 +121,9 @@ export function PixelCharacter({ state, groundY }: PixelCharacterProps) {
 
         const color = PALETTE[colorKey];
         if (!color || color === "transparent") continue;
+
+        // Skip pixels that have been shed to the particle system
+        if (shedSet?.has(`${row},${col}`)) continue;
 
         let px = col * PX;
         const py = row * PX + breathY;
@@ -133,13 +141,19 @@ export function PixelCharacter({ state, groundY }: PixelCharacterProps) {
     }
 
     // Shadow under character
-    ctx.fillStyle = "rgba(0,0,0,0.3)";
-    ctx.beginPath();
-    ctx.ellipse(CANVAS_W / 2, CANVAS_H - 2, CANVAS_W * 0.35, 6, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }, [state]);
+    if (state.warpState === "idle") {
+      ctx.fillStyle = "rgba(0,0,0,0.3)";
+      ctx.beginPath();
+      ctx.ellipse(CANVAS_W / 2, CANVAS_H - 2, CANVAS_W * 0.35, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }, [state, shedSet]);
 
   const scale = DISPLAY_H / CANVAS_H;
+
+  // Simple visibility: hidden when warped
+  const opacity = state.warpState === "warped" ? 0 : 1;
+  const transform = state.direction === "left" ? "scaleX(-1)" : "scaleX(1)";
 
   return (
     <div
@@ -149,6 +163,7 @@ export function PixelCharacter({ state, groundY }: PixelCharacterProps) {
         top: `calc(${groundY}% - ${DISPLAY_H}px + ${state.y * scale}px)`,
         width: DISPLAY_W,
         height: DISPLAY_H,
+        opacity,
       }}
     >
       <canvas
@@ -159,7 +174,7 @@ export function PixelCharacter({ state, groundY }: PixelCharacterProps) {
           width: "100%",
           height: "100%",
           imageRendering: "pixelated",
-          transform: state.direction === "left" ? "scaleX(-1)" : "scaleX(1)",
+          transform,
         }}
       />
     </div>

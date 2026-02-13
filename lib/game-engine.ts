@@ -12,6 +12,8 @@ export interface CharacterState {
   breathTimer: number;
   blinkTimer: number;
   isBlinking: boolean;
+  warpState: "idle" | "warping_in" | "warped" | "warping_out";
+  warpTimer: number;
 }
 
 export function createInitialState(canvasWidth: number): CharacterState {
@@ -26,6 +28,8 @@ export function createInitialState(canvasWidth: number): CharacterState {
     breathTimer: 0,
     blinkTimer: 0,
     isBlinking: false,
+    warpState: "idle",
+    warpTimer: 0,
   };
 }
 
@@ -44,7 +48,38 @@ export function updateCharacter(
   let {
     x, y, velocityY, isJumping, isWalking, direction,
     walkFrame, breathTimer, blinkTimer, isBlinking,
+    warpState, warpTimer,
   } = state;
+
+  // Handle warping states - lock movement
+  if (warpState !== "idle") {
+    warpTimer++;
+
+    if (warpState === "warping_in") {
+      // warping_in stays active — GameCanvas decides when to transition
+      // via onAllConsumed callback from the particle system.
+      // Safety cap to prevent infinite warp:
+      if (warpTimer >= CHARACTER.WARP_MAX_DURATION) {
+        warpState = "warped";
+        warpTimer = 0;
+      }
+    } else if (warpState === "warping_out") {
+      // Warp out is instant (character just reappears)
+      warpState = "idle";
+      warpTimer = 0;
+    }
+
+    // Cancel jump state during warp
+    y = 0;
+    velocityY = 0;
+    isJumping = false;
+
+    return {
+      x, y, velocityY, isJumping, isWalking: false, direction,
+      walkFrame, breathTimer, blinkTimer, isBlinking,
+      warpState, warpTimer,
+    };
+  }
 
   // Horizontal movement toward cursor (smooth easing like prototype)
   if (Math.abs(dx) > deadZone) {
@@ -85,6 +120,7 @@ export function updateCharacter(
   return {
     x, y, velocityY, isJumping, isWalking, direction,
     walkFrame, breathTimer, blinkTimer, isBlinking,
+    warpState, warpTimer,
   };
 }
 
