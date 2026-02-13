@@ -31,7 +31,10 @@ const PROJECTS = [
   },
 ];
 
+import { useTheme } from "@/components/providers/theme-provider";
+
 export function ProjectCluster() {
+  const { isDark } = useTheme();
   const positions = FIGMA_POSITIONS.projects;
 
   return (
@@ -63,13 +66,13 @@ export function ProjectCluster() {
 
       {/* "Personal projects" label — centered under the icon grid */}
       <span
-        className="absolute select-none"
+        className="absolute select-none transition-colors duration-700"
         style={{
           left: `${figmaX(positions.label.x)}%`,
           top: `${figmaY(positions.label.y)}%`,
           fontFamily: `"SF Mono", "SFMono-Regular", var(--font-geist-mono), monospace`,
           fontSize: 14,
-          color: "rgba(0,0,0,0.5)",
+          color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)",
           whiteSpace: "nowrap",
         }}
       >

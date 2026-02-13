@@ -8,6 +8,7 @@ import { PixelPortal } from "./pixel-portal";
 import { WarpParticles } from "./WarpParticles";
 import { ProjectCluster } from "@/components/elements/project-cluster";
 import { WorkCluster } from "@/components/elements/work-cluster";
+import { Stars } from "./stars";
 import { RetroWindow } from "@/components/ui/retro-window";
 import { AboutTimeline } from "@/components/sections/about-timeline";
 import { INTERACTION_ZONES, CANVAS, FIGMA_POSITIONS } from "@/lib/constants";
@@ -20,7 +21,10 @@ import {
   type CharacterState,
 } from "@/lib/game-engine";
 
+import { useTheme } from "@/components/providers/theme-provider";
+
 export function GameCanvas() {
+  const { isDark } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const cursorXRef = useRef(0);
@@ -178,13 +182,16 @@ export function GameCanvas() {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 overflow-hidden cursor-default"
-      style={{ background: "#DAD9D2" }}
+      className="fixed inset-0 overflow-hidden cursor-default transition-colors duration-700"
+      style={{ background: isDark ? "#1a1a2e" : "#DAD9D2" }}
       onMouseMove={handleMouseMove}
       onClick={handleClick}
     >
       {character && (
         <>
+          {/* Layer 0: Background Stars (Dark mode only) */}
+          <Stars />
+
           {/* Layer 1: Decorative clouds */}
           <Clouds />
 

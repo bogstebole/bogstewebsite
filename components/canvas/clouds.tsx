@@ -8,33 +8,33 @@ import { FIGMA_POSITIONS } from "@/lib/constants";
 const CLOUD_PATTERNS = [
   // Pattern A — wide flat cloud
   [
-    [0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0],
-    [0,0,0,1,1,1,1,1,1,1,0,1,1,0,0,0],
-    [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
-    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+    [0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0],
+    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
   ],
   // Pattern B — tall bumpy cloud
   [
-    [0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,1,1,1,1,0,0,1,1,0,0,0,0],
-    [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0],
-    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-    [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0],
+    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0],
+    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
   ],
   // Pattern C — small puffy cloud
   [
-    [0,0,0,1,1,1,0,0,0,0,0,0],
-    [0,0,1,1,1,1,1,0,1,1,0,0],
-    [0,1,1,1,1,1,1,1,1,1,1,0],
-    [1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1],
-    [0,1,1,1,1,1,1,1,1,1,1,0],
+    [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
   ],
 ];
 
@@ -43,9 +43,10 @@ interface PixelCloudProps {
   y: number;
   delay: number;
   patternIndex: number;
+  isDark?: boolean;
 }
 
-function PixelCloud({ x, y, delay, patternIndex }: PixelCloudProps) {
+function PixelCloud({ x, y, delay, patternIndex, isDark }: PixelCloudProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pattern = CLOUD_PATTERNS[patternIndex % CLOUD_PATTERNS.length];
   const pw = pattern[0].length;
@@ -58,7 +59,7 @@ function PixelCloud({ x, y, delay, patternIndex }: PixelCloudProps) {
     if (!ctx) return;
 
     ctx.clearRect(0, 0, pw, ph);
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.fillStyle = isDark ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.55)";
 
     for (let row = 0; row < ph; row++) {
       for (let col = 0; col < pw; col++) {
@@ -67,7 +68,7 @@ function PixelCloud({ x, y, delay, patternIndex }: PixelCloudProps) {
         }
       }
     }
-  }, [pattern, pw, ph]);
+  }, [pattern, pw, ph, isDark]);
 
   return (
     <div
@@ -75,7 +76,7 @@ function PixelCloud({ x, y, delay, patternIndex }: PixelCloudProps) {
       style={{
         left: `${figmaX(x)}%`,
         top: `${figmaY(y)}%`,
-        animation: `cloud-float ${6 + delay}s ease-in-out ${delay}s infinite alternate`,
+        animation: `cloud-float ${120 + delay}s ease-in-out ${delay}s infinite alternate`,
       }}
     >
       <canvas
@@ -92,13 +93,16 @@ function PixelCloud({ x, y, delay, patternIndex }: PixelCloudProps) {
   );
 }
 
+import { useTheme } from "@/components/providers/theme-provider";
+
 export function Clouds() {
+  const { isDark } = useTheme();
   return (
     <>
       <style>{`
         @keyframes cloud-float {
           0% { transform: translateX(0) translateY(0); }
-          100% { transform: translateX(12px) translateY(2px); }
+          100% { transform: translateX(200px) translateY(10px); }
         }
       `}</style>
       {FIGMA_POSITIONS.clouds.map((cloud, i) => (
@@ -106,8 +110,9 @@ export function Clouds() {
           key={i}
           x={cloud.x}
           y={cloud.y}
-          delay={i * 0.7}
+          delay={i * 5}
           patternIndex={i}
+          isDark={isDark}
         />
       ))}
     </>

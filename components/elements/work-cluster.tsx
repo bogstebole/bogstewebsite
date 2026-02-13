@@ -6,7 +6,10 @@ import { FIGMA_POSITIONS } from "@/lib/constants";
 
 const CARD_SHADOW = '0 12px 3px 0 rgba(0,0,0,0), 0 8px 3px 0 rgba(0,0,0,0.01), 0 4px 3px 0 rgba(0,0,0,0.05), 0 2px 2px 0 rgba(0,0,0,0.09), 0 0 1px 0 rgba(0,0,0,0.10)';
 
+import { useTheme } from "@/components/providers/theme-provider";
+
 export function WorkCluster() {
+  const { isDark } = useTheme();
   const pos = FIGMA_POSITIONS.work;
 
   return (
@@ -66,13 +69,13 @@ export function WorkCluster() {
 
       {/* "Selected work" label */}
       <span
-        className="absolute select-none"
+        className="absolute select-none transition-colors duration-700"
         style={{
           left: `${figmaX(pos.label.x)}%`,
           top: `${figmaY(pos.label.y)}%`,
           fontFamily: `"SF Mono", "SFMono-Regular", var(--font-geist-mono), monospace`,
           fontSize: 14,
-          color: "rgba(0,0,0,0.5)",
+          color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)",
         }}
       >
         Selected work

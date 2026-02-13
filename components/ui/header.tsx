@@ -1,59 +1,12 @@
 "use client";
 
-import { useState, useCallback, useSyncExternalStore } from "react";
+import { useTheme } from "@/components/providers/theme-provider";
 import { Logo } from "./logo";
 import { LiveClock } from "./live-clock";
 import CelestialToggle from "./celestial-toggle";
 
-function shouldBeDark(): boolean {
-  const hour = new Date().getHours();
-  return hour < 6 || hour >= 19;
-}
-
-let timeListeners: Array<() => void> = [];
-let timeDarkSnapshot = false;
-
-function startTimeSubscription() {
-  timeDarkSnapshot = shouldBeDark();
-  const id = setInterval(() => {
-    const next = shouldBeDark();
-    if (next !== timeDarkSnapshot) {
-      timeDarkSnapshot = next;
-      timeListeners.forEach((l) => l());
-    }
-  }, 60_000);
-  return () => clearInterval(id);
-}
-
-// Start immediately on module load (client only)
-if (typeof window !== "undefined") {
-  startTimeSubscription();
-}
-
-function subscribeTime(callback: () => void) {
-  timeListeners.push(callback);
-  return () => {
-    timeListeners = timeListeners.filter((l) => l !== callback);
-  };
-}
-
-function getTimeSnapshot(): boolean {
-  return timeDarkSnapshot;
-}
-
-function getServerTimeSnapshot(): boolean {
-  return false;
-}
-
 export function Header() {
-  const timeDark = useSyncExternalStore(subscribeTime, getTimeSnapshot, getServerTimeSnapshot);
-  const [manualDark, setManualDark] = useState<boolean | null>(null);
-
-  const isDark = manualDark ?? timeDark;
-
-  const handleToggle = useCallback((next: boolean) => {
-    setManualDark(next);
-  }, []);
+  const { isDark, setManual } = useTheme();
 
   return (
     <div
@@ -96,7 +49,7 @@ export function Header() {
             }}
           >
             <div style={{ transform: "scale(0.27)", transformOrigin: "top left" }}>
-              <CelestialToggle isDark={isDark} onToggle={handleToggle} />
+              <CelestialToggle isDark={isDark} onToggle={setManual} />
             </div>
           </div>
         </div>
