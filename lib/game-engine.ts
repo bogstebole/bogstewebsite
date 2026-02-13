@@ -12,7 +12,7 @@ export interface CharacterState {
   breathTimer: number;
   blinkTimer: number;
   isBlinking: boolean;
-  warpState: "idle" | "warping_in" | "warped" | "warping_out";
+  warpState: "idle" | "shivering" | "warping_in" | "warped" | "warping_out";
   warpTimer: number;
 }
 
@@ -55,7 +55,13 @@ export function updateCharacter(
   if (warpState !== "idle") {
     warpTimer++;
 
-    if (warpState === "warping_in") {
+    if (warpState === "shivering") {
+      // Chromatic aberration shiver — auto-transition to warping_in
+      if (warpTimer >= CHARACTER.SHIVER_DURATION) {
+        warpState = "warping_in";
+        warpTimer = 0;
+      }
+    } else if (warpState === "warping_in") {
       // warping_in stays active — GameCanvas decides when to transition
       // via onAllConsumed callback from the particle system.
       // Safety cap to prevent infinite warp:

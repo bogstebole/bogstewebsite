@@ -24,7 +24,7 @@ export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const cursorXRef = useRef(0);
-  const warpTriggerRef = useRef<"warping_in" | "warping_out" | "warped" | null>(null);
+  const warpTriggerRef = useRef<"shivering" | "warping_in" | "warping_out" | "warped" | null>(null);
   const [character, setCharacter] = useState<CharacterState | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [nearZone, setNearZone] = useState<string | null>(null);
@@ -99,12 +99,12 @@ export function GameCanvas() {
 
   const handlePortalClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    warpTriggerRef.current = "warping_in";
+    warpTriggerRef.current = "shivering";
   }, []);
 
   const handleClick = useCallback(() => {
     if (nearZone === "portal") {
-      warpTriggerRef.current = "warping_in";
+      warpTriggerRef.current = "shivering";
       return;
     }
 

@@ -24,6 +24,10 @@ export const CHARACTER = {
   JUMP_VELOCITY: -12,
   /** Gravity acceleration */
   GRAVITY: 0.6,
+  /** Frames of chromatic aberration shiver before disintegration (~1000ms) */
+  SHIVER_DURATION: 60,
+  /** Max pixel offset for RGB channel separation during shiver */
+  SHIVER_MAX_OFFSET: 10,
   /** Frames over which noise-mask ramps 0→1 for particle shedding (~0.4s) */
   WARP_SHED_DURATION: 25,
   /** Hard-cap frame limit before force-completing warp (~5s safety) */

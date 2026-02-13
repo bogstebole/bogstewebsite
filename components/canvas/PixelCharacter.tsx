@@ -88,6 +88,16 @@ const CANVAS_H = ROWS * PX;
 export const DISPLAY_H = 72;
 export const DISPLAY_W = 48;
 
+/** Parse hex color to [r, g, b] tuple */
+function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace("#", "");
+  return [
+    parseInt(h.substring(0, 2), 16),
+    parseInt(h.substring(2, 4), 16),
+    parseInt(h.substring(4, 6), 16),
+  ];
+}
+
 interface PixelCharacterProps {
   state: CharacterState;
   groundY: number;
@@ -110,6 +120,29 @@ export function PixelCharacter({ state, groundY, shedSet }: PixelCharacterProps)
     if (state.warpState === "warped") return;
 
     const breathY = Math.sin(state.breathTimer * 0.03) * 1.5;
+    const isShivering = state.warpState === "shivering";
+
+    // Chromatic aberration: compute per-channel offsets
+    // Ramp intensity from 0 → max over SHIVER_DURATION
+    const shiverT = isShivering
+      ? Math.min(1, state.warpTimer / CHARACTER.SHIVER_DURATION)
+      : 0;
+    // Ease-in-quad for more explosive final distortion
+    const shiverIntensity = shiverT * shiverT;
+    const maxOff = CHARACTER.SHIVER_MAX_OFFSET * shiverIntensity;
+
+    // Smooth pseudo-random drift per channel (seeded by warpTimer)
+    const t = state.warpTimer * 0.7;
+    const channelOffsets = isShivering
+      ? [
+        { dx: Math.sin(t * 1.3 + 0.0) * maxOff, dy: Math.cos(t * 1.7 + 2.0) * maxOff },  // R
+        { dx: Math.sin(t * 1.1 + 4.0) * maxOff, dy: Math.cos(t * 0.9 + 1.0) * maxOff },  // G
+        { dx: Math.sin(t * 1.5 + 2.5) * maxOff, dy: Math.cos(t * 1.3 + 5.0) * maxOff },  // B
+      ]
+      : null;
+
+    // Build pixel data for the frame
+    const pixels: { px: number; py: number; color: string }[] = [];
 
     for (let row = 0; row < ROWS; row++) {
       const line = IDLE_FRAME[row];
@@ -135,6 +168,51 @@ export function PixelCharacter({ state, groundY, shedSet }: PixelCharacterProps)
           px += isLeftLeg ? step * 3 : -(step * 3);
         }
 
+        pixels.push({ px, py, color });
+      }
+    }
+
+    if (isShivering && channelOffsets) {
+      // Three-pass chromatic aberration rendering
+      ctx.globalCompositeOperation = "lighter";
+
+      // Red pass
+      for (const { px, py, color } of pixels) {
+        const [r] = hexToRgb(color);
+        ctx.fillStyle = `rgb(${r},0,0)`;
+        ctx.fillRect(
+          Math.floor(px + channelOffsets[0].dx),
+          Math.floor(py + channelOffsets[0].dy),
+          PX, PX
+        );
+      }
+
+      // Green pass
+      for (const { px, py, color } of pixels) {
+        const [, g] = hexToRgb(color);
+        ctx.fillStyle = `rgb(0,${g},0)`;
+        ctx.fillRect(
+          Math.floor(px + channelOffsets[1].dx),
+          Math.floor(py + channelOffsets[1].dy),
+          PX, PX
+        );
+      }
+
+      // Blue pass
+      for (const { px, py, color } of pixels) {
+        const [, , b] = hexToRgb(color);
+        ctx.fillStyle = `rgb(0,0,${b})`;
+        ctx.fillRect(
+          Math.floor(px + channelOffsets[2].dx),
+          Math.floor(py + channelOffsets[2].dy),
+          PX, PX
+        );
+      }
+
+      ctx.globalCompositeOperation = "source-over";
+    } else {
+      // Normal single-pass rendering
+      for (const { px, py, color } of pixels) {
         ctx.fillStyle = color;
         ctx.fillRect(Math.floor(px), Math.floor(py), PX, PX);
       }
