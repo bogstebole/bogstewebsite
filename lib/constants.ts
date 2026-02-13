@@ -55,7 +55,7 @@ export const FIGMA_POSITIONS = {
   },
   /** Work cluster */
   work: {
-    contentSnare: { x: 300, y: 420, size: 55 },
+    contentSnare: { x: 300, y: 420, size: 48 },
     fynnio: { x: 281, y: 475, size: 48 },
     label: { x: 280, y: 510 },
   },
