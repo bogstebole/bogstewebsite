@@ -145,7 +145,7 @@ const celestialStyles = `
     height: 100%;
     border-radius: 999px;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     transition: background 0.7s cubic-bezier(0.4,0,0.2,1),
                 box-shadow 0.7s cubic-bezier(0.4,0,0.2,1);
   }

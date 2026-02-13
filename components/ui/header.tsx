@@ -92,7 +92,7 @@ export function Header() {
             style={{
               width: 200 * 0.27,
               height: 88 * 0.27,
-              overflow: "hidden",
+              overflow: "visible",
             }}
           >
             <div style={{ transform: "scale(0.27)", transformOrigin: "top left" }}>
