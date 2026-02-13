@@ -17,7 +17,7 @@ export function WorkCluster() {
         style={{
           left: `${figmaX(pos.fynnio.x)}%`,
           top: `${figmaY(pos.fynnio.y)}%`,
-          transform: "none",
+          transform: "rotate(-8deg)",
           width: pos.fynnio.size,
           height: pos.fynnio.size,
           background: "#CDEBFF",
