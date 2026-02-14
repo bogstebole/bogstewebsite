@@ -45,6 +45,7 @@ export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const cursorXRef = useRef(0);
+  const characterXRef = useRef(0);
   const warpTriggerRef = useRef<"shivering" | "warping_in" | "warping_out" | "warped" | "idle" | "headbutt_sprint" | "headbutt_jump" | "headbutt_falling" | null>(null);
   const [character, setCharacter] = useState<CharacterState | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -101,19 +102,23 @@ export function GameCanvas() {
         if (trigger === "headbutt_sprint") {
           const params = headbuttParamsRef.current;
           if (params) {
-            // Short sprint edge case: if already within 80px, skip to jump
+            // Short sprint edge case: if already close, snap X and jump straight up
             const distToTarget = Math.abs(animState.x - params.sprintTargetX);
+            const apexFrames = CHARACTER.HEADBUTT_APEX_FRAMES;
+            const hbGrav = (2 * Math.abs(params.headbuttTargetY)) / (apexFrames * apexFrames);
+            const jumpVelShort = -hbGrav * apexFrames;
             if (distToTarget < 80) {
-              const jumpVel = -Math.sqrt(2 * CHARACTER.GRAVITY * Math.abs(params.headbuttTargetY));
               animState = {
                 ...animState,
+                x: params.sprintTargetX,
                 warpState: "headbutt_jump",
                 warpTimer: 0,
-                velocityY: jumpVel,
+                velocityY: jumpVelShort,
                 isJumping: true,
                 headbuttTargetY: params.headbuttTargetY,
                 sprintTargetX: params.sprintTargetX,
                 sprintSpeed: 0,
+                headbuttGravity: hbGrav,
               };
             } else {
               animState = {
@@ -175,7 +180,7 @@ export function GameCanvas() {
           setImpactIconKey(hb.project.key);
           setDustBurst({ x: iconX, y: iconY, color: hb.project.color });
 
-          // After 150ms: squash ends, icon pops, character starts falling
+          // After 80ms: squash ends, icon pops, character starts falling
           setTimeout(() => {
             setImpactIconKey(null);
             setPoppedIconKey(hb.project.key);
@@ -186,7 +191,7 @@ export function GameCanvas() {
               setHeadbutt(prev => prev ? { ...prev, phase: "iconReaction" } : null);
             }
 
-            // After 200ms more: hide icon, open window
+            // After 100ms more: hide icon, open window
             setTimeout(() => {
               setPoppedIconKey(null);
               const hbNow = headbuttRef.current;
@@ -203,12 +208,13 @@ export function GameCanvas() {
                 headbuttRef.current = { ...hbNow, phase: "window" };
                 setHeadbutt(prev => prev ? { ...prev, phase: "window" } : null);
               }
-            }, 200);
-          }, 150);
+            }, 100);
+          }, 80);
         }
       }
 
       animState = nextState;
+      characterXRef.current = animState.x;
       const zone = checkInteractionZone(animState.x, width, INTERACTION_ZONES);
       setCharacter({ ...animState });
       setNearZone(zone);
@@ -349,7 +355,6 @@ export function GameCanvas() {
 
   // Lightning trail props — active during sprint + jump, fading intensity during jump
   const trailActive = !!headbutt && (headbutt.phase === "sprint" || headbutt.phase === "jump");
-  const trailSourceX = character?.x ?? 0;
   const trailIntensity = headbutt?.phase === "sprint"
     ? Math.min((character?.sprintSpeed ?? 0) / CHARACTER.SPRINT_MAX_SPEED, 1)
     : headbutt?.phase === "jump" ? 0.3 : 0;
@@ -410,7 +415,7 @@ export function GameCanvas() {
 
           {/* Lightning trail during sprint + jump */}
           <LightningTrail
-            sourceX={trailSourceX}
+            sourceXRef={characterXRef}
             intensity={trailIntensity}
             active={trailActive}
           />

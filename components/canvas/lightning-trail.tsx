@@ -51,8 +51,8 @@ interface AnimState {
 }
 
 interface LightningTrailProps {
-  /** Character X position in viewport px — trail follows this each frame */
-  sourceX: number;
+  /** Ref to character X position — read every animation frame for real-time tracking */
+  sourceXRef: React.RefObject<number>;
   /** Effect intensity 0–1 (scales bolt frequency, ghost density, streak count) */
   intensity: number;
   /** Whether the trail is active (sprint + jump phases) */
@@ -103,7 +103,8 @@ function generateBranch(
 
 /** Refs container passed to drawFrame so it can read live values each frame */
 interface TrailRefs {
-  props: { current: { sourceX: number; intensity: number; active: boolean } };
+  sourceX: React.RefObject<number>;
+  props: { current: { intensity: number; active: boolean } };
   onComplete: { current: (() => void) | undefined };
 }
 
@@ -130,8 +131,9 @@ function drawFrame(
   const groundY = (CANVAS.GROUND_Y / 100) * h;
   const srcCenterY = groundY - 40;
 
-  // Read live props from ref each frame
-  const { sourceX: liveSourceX, intensity: liveIntensity, active: liveActive } = refs.props.current;
+  // Read live values from refs each frame
+  const liveSourceX = refs.sourceX.current;
+  const { intensity: liveIntensity, active: liveActive } = refs.props.current;
 
   // Update source position from props each frame
   s.sourceX = liveSourceX;
@@ -146,38 +148,38 @@ function drawFrame(
   // ─── Decay phase ───
   if (s.phase === "decay") {
     s.frame++;
-    if (s.frame <= 30 && Math.random() > 0.35) {
+    if (s.frame <= 6 && Math.random() > 0.5) {
       const cx = s.sourceX;
       const cy = srcCenterY;
       const angle = Math.random() * Math.PI * 2;
-      const branchPts = generateBranch(cx, cy, angle, 25 + Math.random() * 55, 0);
+      const branchPts = generateBranch(cx, cy, angle, 15 + Math.random() * 30, 0);
       if (branchPts.length > 1) {
         s.bolts.push({
           points: branchPts,
           born: s.time,
-          life: 0.08 + Math.random() * 0.12,
+          life: 0.04 + Math.random() * 0.06,
           color: [255, 220, 60],
           width: 1,
         });
       }
 
-      for (let i = 0; i < 3; i++) {
-        const px = cx + (Math.random() - 0.5) * 100;
-        const py = cy + (Math.random() - 0.5) * 70;
+      for (let i = 0; i < 2; i++) {
+        const px = cx + (Math.random() - 0.5) * 60;
+        const py = cy + (Math.random() - 0.5) * 40;
         s.particles.push({
           x: Math.round(px / SCALE) * SCALE,
           y: Math.round(py / SCALE) * SCALE,
-          vx: (Math.random() - 0.5) * 80,
-          vy: (Math.random() - 0.5) * 50 - 25,
+          vx: (Math.random() - 0.5) * 60,
+          vy: (Math.random() - 0.5) * 40 - 20,
           size: SCALE * (Math.random() > 0.5 ? 1 : 2),
           born: s.time,
-          life: 0.3 + Math.random() * 0.6,
+          life: 0.1 + Math.random() * 0.2,
           color: Math.random() > 0.5 ? [255, 220, 50] : [255, 250, 180],
         });
       }
     }
 
-    if (s.frame > 30 && s.bolts.length === 0 && s.particles.length === 0) {
+    if (s.frame > 6 && s.bolts.length === 0 && s.particles.length === 0) {
       s.phase = "done";
       ctx.clearRect(0, 0, w, h);
       onDone();
@@ -359,16 +361,16 @@ function drawFrame(
  * intensity-scaled bolts, ghosts, and streaks. When active goes false,
  * runs a decay with branching arcs + particle fadeout for ~500ms.
  */
-export function LightningTrail({ sourceX, intensity, active, onComplete }: LightningTrailProps) {
+export function LightningTrail({ sourceXRef, intensity, active, onComplete }: LightningTrailProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef<AnimState | null>(null);
   const animRef = useRef<number>(0);
   const onCompleteRef = useRef(onComplete);
-  const propsRef = useRef({ sourceX, intensity, active });
+  const propsRef = useRef({ intensity, active });
   // Sync refs in effect
   useEffect(() => {
     onCompleteRef.current = onComplete;
-    propsRef.current = { sourceX, intensity, active };
+    propsRef.current = { intensity, active };
   });
 
   // Start animation when active becomes true; decay runs via propsRef when active goes false
@@ -383,8 +385,9 @@ export function LightningTrail({ sourceX, intensity, active, onComplete }: Light
     // Make canvas visible (hidden by default via CSS)
     canvas.style.display = "block";
 
+    const initX = sourceXRef.current;
     const s: AnimState = {
-      sourceX,
+      sourceX: initX,
       sourceY: (CANVAS.GROUND_Y / 100) * canvas.height - 40,
       frame: 0,
       ghosts: [],
@@ -394,12 +397,12 @@ export function LightningTrail({ sourceX, intensity, active, onComplete }: Light
       time: 0,
       lastTime: 0,
       lastGhostTime: 0,
-      prevSourceX: sourceX,
+      prevSourceX: initX,
     };
     stateRef.current = s;
 
     const hideCanvas = () => { canvas.style.display = "none"; };
-    const refs: TrailRefs = { props: propsRef, onComplete: onCompleteRef };
+    const refs: TrailRefs = { sourceX: sourceXRef, props: propsRef, onComplete: onCompleteRef };
     animRef.current = requestAnimationFrame(() => {
       drawFrame(canvas, s, refs, animRef, hideCanvas);
     });

@@ -20,6 +20,8 @@ export interface CharacterState {
   sprintTargetX?: number;
   /** Current sprint speed (px/frame) */
   sprintSpeed?: number;
+  /** Computed gravity for headbutt jump/fall (varies by height) */
+  headbuttGravity?: number;
 }
 
 export function createInitialState(canvasWidth: number): CharacterState {
@@ -84,17 +86,21 @@ export function updateCharacter(
         warpTimer = 0;
       }
     } else if (warpState === "headbutt_sprint") {
-      // Sprint toward sprintTargetX, ignoring cursor
+      // Sprint to directly below the icon, then jump straight up
       const sprintTarget = state.sprintTargetX ?? x;
       const sprintDx = sprintTarget - x;
       const sprintDir = Math.sign(sprintDx);
       const currentSpeed = state.sprintSpeed ?? CHARACTER.SPEED;
       const newSpeed = Math.min(currentSpeed + CHARACTER.SPRINT_ACCEL, CHARACTER.SPRINT_MAX_SPEED);
 
-      if (Math.abs(sprintDx) < 4) {
-        // Arrived — transition to jump
+      // Snap to target if we'd overshoot this frame
+      if (Math.abs(sprintDx) <= newSpeed) {
+        x = sprintTarget;
         const targetY = state.headbuttTargetY ?? -100;
-        const jumpVel = -Math.sqrt(2 * CHARACTER.GRAVITY * Math.abs(targetY));
+        const apexFrames = CHARACTER.HEADBUTT_APEX_FRAMES;
+        // Dynamic gravity: guarantees reaching targetY in exactly apexFrames
+        const hbGravity = (2 * Math.abs(targetY)) / (apexFrames * apexFrames);
+        const jumpVel = -hbGravity * apexFrames;
         return {
           x, y: 0, velocityY: jumpVel, isJumping: true, isWalking: false,
           direction: sprintDir >= 0 ? "right" : "left",
@@ -102,7 +108,8 @@ export function updateCharacter(
           warpState: "headbutt_jump", warpTimer: 0,
           headbuttTargetY: state.headbuttTargetY,
           sprintTargetX: state.sprintTargetX,
-          sprintSpeed: 0,
+          sprintSpeed: newSpeed,
+          headbuttGravity: hbGravity,
         };
       }
 
@@ -129,10 +136,10 @@ export function updateCharacter(
         sprintSpeed: newSpeed,
       };
     } else if (warpState === "headbutt_jump") {
-      // Physics-based jump — gravity only, no horizontal movement
-      velocityY += CHARACTER.GRAVITY;
+      // Straight up — no horizontal movement, dynamic headbutt gravity
+      const hbGrav = state.headbuttGravity ?? CHARACTER.GRAVITY;
+      velocityY += hbGrav;
       y += velocityY;
-      isWalking = false;
 
       // Safety cap
       if (warpTimer >= CHARACTER.HEADBUTT_DURATION) {
@@ -151,10 +158,12 @@ export function updateCharacter(
         headbuttTargetY: state.headbuttTargetY,
         sprintTargetX: state.sprintTargetX,
         sprintSpeed: state.sprintSpeed,
+        headbuttGravity: state.headbuttGravity,
       };
     } else if (warpState === "headbutt_falling") {
-      // Continue gravity until landing
-      velocityY += CHARACTER.GRAVITY;
+      // Continue dynamic headbutt gravity until landing
+      const hbGrav = state.headbuttGravity ?? CHARACTER.GRAVITY;
+      velocityY += hbGrav;
       y += velocityY;
 
       if (y >= 0) {
@@ -172,6 +181,7 @@ export function updateCharacter(
         headbuttTargetY: state.headbuttTargetY,
         sprintTargetX: state.sprintTargetX,
         sprintSpeed: state.sprintSpeed,
+        headbuttGravity: state.headbuttGravity,
       };
     }
 
