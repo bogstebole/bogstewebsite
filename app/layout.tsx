@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { geistSans, geistMono, inter } from "@/lib/fonts";
+import { StyledComponentsRegistry } from "@/lib/styled-components-registry";
+import { React95Provider } from "@/components/providers/react95-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +20,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
       >
-        {children}
+        <StyledComponentsRegistry>
+          <React95Provider>
+            {children}
+          </React95Provider>
+        </StyledComponentsRegistry>
       </body>
     </html>
   );

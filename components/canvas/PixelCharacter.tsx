@@ -103,9 +103,11 @@ interface PixelCharacterProps {
   groundY: number;
   /** Set of "row,col" keys for pixels that have been shed to the particle system */
   shedSet?: Set<string>;
+  /** Forward lean angle in degrees during sprint (0–15) */
+  leanAngle?: number;
 }
 
-export function PixelCharacter({ state, groundY, shedSet }: PixelCharacterProps) {
+export function PixelCharacter({ state, groundY, shedSet, leanAngle }: PixelCharacterProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -233,7 +235,8 @@ export function PixelCharacter({ state, groundY, shedSet }: PixelCharacterProps)
 
   // Simple visibility: hidden when warped
   const opacity = state.warpState === "warped" ? 0 : 1;
-  const transform = state.direction === "left" ? "scaleX(-1)" : "scaleX(1)";
+  const dirScale = state.direction === "left" ? "scaleX(-1)" : "scaleX(1)";
+  const lean = leanAngle ? `rotate(${state.direction === "left" ? -leanAngle : leanAngle}deg)` : "";
 
   return (
     <div
@@ -244,6 +247,8 @@ export function PixelCharacter({ state, groundY, shedSet }: PixelCharacterProps)
         width: DISPLAY_W,
         height: DISPLAY_H,
         opacity,
+        transformOrigin: "bottom center",
+        transform: lean,
       }}
     >
       <canvas
@@ -254,7 +259,7 @@ export function PixelCharacter({ state, groundY, shedSet }: PixelCharacterProps)
           width: "100%",
           height: "100%",
           imageRendering: "pixelated",
-          transform,
+          transform: dirScale,
         }}
       />
     </div>

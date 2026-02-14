@@ -25,7 +25,8 @@
 
   /* ── Layout ── */
   display: inline-flex;
-  padding: 1rem 2.5rem;
+  height: 36px;
+  padding: 0 2.5rem;
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
@@ -58,7 +59,7 @@
   -webkit-backdrop-filter: blur(var(--glass-blur));
 
   /* ── Typography ── */
-  font-size: 1.125rem;
+  font-size: 0.875rem;
   font-weight: 500;
   font-style: italic;
   color: var(--glass-text);

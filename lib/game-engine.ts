@@ -12,10 +12,14 @@ export interface CharacterState {
   breathTimer: number;
   blinkTimer: number;
   isBlinking: boolean;
-  warpState: "idle" | "shivering" | "warping_in" | "warped" | "warping_out" | "headbutt";
+  warpState: "idle" | "shivering" | "warping_in" | "warped" | "warping_out" | "headbutt_sprint" | "headbutt_jump" | "headbutt_falling";
   warpTimer: number;
   /** Y offset the character needs to reach for headbutt (negative = upward) */
   headbuttTargetY?: number;
+  /** Target X position for sprint phase */
+  sprintTargetX?: number;
+  /** Current sprint speed (px/frame) */
+  sprintSpeed?: number;
 }
 
 export function createInitialState(canvasWidth: number): CharacterState {
@@ -79,29 +83,95 @@ export function updateCharacter(
         warpState = "idle";
         warpTimer = 0;
       }
-    } else if (warpState === "headbutt") {
-      // Headbutt jump: physics-driven vertical movement
-      velocityY += CHARACTER.GRAVITY;
-      y += velocityY;
+    } else if (warpState === "headbutt_sprint") {
+      // Sprint toward sprintTargetX, ignoring cursor
+      const sprintTarget = state.sprintTargetX ?? x;
+      const sprintDx = sprintTarget - x;
+      const sprintDir = Math.sign(sprintDx);
+      const currentSpeed = state.sprintSpeed ?? CHARACTER.SPEED;
+      const newSpeed = Math.min(currentSpeed + CHARACTER.SPRINT_ACCEL, CHARACTER.SPRINT_MAX_SPEED);
 
-      // Landed back on ground
-      if (y >= 0 && warpTimer > 5) {
-        y = 0;
-        velocityY = 0;
-        warpState = "idle";
-        warpTimer = 0;
+      if (Math.abs(sprintDx) < 4) {
+        // Arrived — transition to jump
+        const targetY = state.headbuttTargetY ?? -100;
+        const jumpVel = -Math.sqrt(2 * CHARACTER.GRAVITY * Math.abs(targetY));
         return {
-          x, y, velocityY, isJumping: false, isWalking: false, direction,
-          walkFrame, breathTimer, blinkTimer, isBlinking,
-          warpState, warpTimer,
+          x, y: 0, velocityY: jumpVel, isJumping: true, isWalking: false,
+          direction: sprintDir >= 0 ? "right" : "left",
+          walkFrame, breathTimer: breathTimer + 1, blinkTimer, isBlinking,
+          warpState: "headbutt_jump", warpTimer: 0,
+          headbuttTargetY: state.headbuttTargetY,
+          sprintTargetX: state.sprintTargetX,
+          sprintSpeed: 0,
         };
       }
 
-      // Still in the air during headbutt
+      x += sprintDir * newSpeed;
+      direction = sprintDir > 0 ? "right" : "left";
+      walkFrame += CHARACTER.SPRINT_WALK_RATE;
+      isWalking = true;
+
+      // Safety cap
+      if (warpTimer >= CHARACTER.HEADBUTT_DURATION) {
+        return {
+          x, y: 0, velocityY: 0, isJumping: false, isWalking: false, direction,
+          walkFrame, breathTimer, blinkTimer, isBlinking,
+          warpState: "idle", warpTimer: 0,
+        };
+      }
+
       return {
-        x, y, velocityY, isJumping: false, isWalking: false, direction,
-        walkFrame, breathTimer, blinkTimer, isBlinking,
-        warpState, warpTimer, headbuttTargetY: state.headbuttTargetY,
+        x, y: 0, velocityY: 0, isJumping: false, isWalking: true, direction,
+        walkFrame, breathTimer: breathTimer + 1, blinkTimer, isBlinking,
+        warpState, warpTimer,
+        headbuttTargetY: state.headbuttTargetY,
+        sprintTargetX: state.sprintTargetX,
+        sprintSpeed: newSpeed,
+      };
+    } else if (warpState === "headbutt_jump") {
+      // Physics-based jump — gravity only, no horizontal movement
+      velocityY += CHARACTER.GRAVITY;
+      y += velocityY;
+      isWalking = false;
+
+      // Safety cap
+      if (warpTimer >= CHARACTER.HEADBUTT_DURATION) {
+        return {
+          x, y: 0, velocityY: 0, isJumping: false, isWalking: false, direction,
+          walkFrame, breathTimer, blinkTimer, isBlinking,
+          warpState: "idle", warpTimer: 0,
+        };
+      }
+
+      // Do NOT auto-transition — GameCanvas detects peak (velocityY >= 0) and sets headbutt_falling
+      return {
+        x, y, velocityY, isJumping: true, isWalking: false, direction,
+        walkFrame, breathTimer: breathTimer + 1, blinkTimer, isBlinking,
+        warpState, warpTimer,
+        headbuttTargetY: state.headbuttTargetY,
+        sprintTargetX: state.sprintTargetX,
+        sprintSpeed: state.sprintSpeed,
+      };
+    } else if (warpState === "headbutt_falling") {
+      // Continue gravity until landing
+      velocityY += CHARACTER.GRAVITY;
+      y += velocityY;
+
+      if (y >= 0) {
+        return {
+          x, y: 0, velocityY: 0, isJumping: false, isWalking: false, direction,
+          walkFrame, breathTimer: breathTimer + 1, blinkTimer, isBlinking,
+          warpState: "idle", warpTimer: 0,
+        };
+      }
+
+      return {
+        x, y, velocityY, isJumping: true, isWalking: false, direction,
+        walkFrame, breathTimer: breathTimer + 1, blinkTimer, isBlinking,
+        warpState, warpTimer,
+        headbuttTargetY: state.headbuttTargetY,
+        sprintTargetX: state.sprintTargetX,
+        sprintSpeed: state.sprintSpeed,
       };
     }
 

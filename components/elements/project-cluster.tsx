@@ -49,31 +49,56 @@ export const PROJECTS: ProjectData[] = [
 ];
 
 interface ProjectClusterProps {
-  /** Key of the icon currently being launched (hidden from cluster) */
+  /** Key of the icon currently hidden (e.g. during window phase) */
   launchedIconKey?: string | null;
-  /** Key of the icon being targeted for headbutt (squash-stretch) */
+  /** Key of the icon being impacted (squash-stretch on headbutt hit) */
   impactIconKey?: string | null;
+  /** Key of the icon popping up after impact (translateY(-40px) scale(1.1)) */
+  poppedIconKey?: string | null;
   /** Callback when a project icon is clicked */
   onIconClick?: (project: ProjectData, rect: DOMRect) => void;
 }
 
-export function ProjectCluster({ launchedIconKey, impactIconKey, onIconClick }: ProjectClusterProps) {
+export function ProjectCluster({ launchedIconKey, impactIconKey, poppedIconKey, onIconClick }: ProjectClusterProps) {
   const { isDark } = useTheme();
   const positions = FIGMA_POSITIONS.projects;
 
   return (
     <div className="absolute inset-0 pointer-events-none">
+      {/* Dock bounce keyframe */}
+      <style>{`
+        @keyframes dockBounce {
+          0% { transform: scale(1); }
+          30% { transform: scale(1.4); }
+          50% { transform: scale(0.9); }
+          70% { transform: scale(1.15); }
+          100% { transform: scale(1); }
+        }
+      `}</style>
+
       {PROJECTS.map((project) => {
         const pos = positions[project.key as keyof typeof positions];
         if (!pos || !("size" in pos)) return null;
 
-        const transform =
-          project.key === "uselessNote" ? "rotate(12deg)" : undefined;
+        const baseTransform =
+          project.key === "uselessNote" ? "rotate(12deg)" : "";
 
-        // Hide icon if it's been launched
+        // Hide icon if it's been launched into the detail window
         if (project.key === launchedIconKey) return null;
 
         const isImpacted = project.key === impactIconKey;
+        const isPopped = project.key === poppedIconKey;
+
+        // Priority: impact (squash) > popped (pop up) > normal
+        let iconTransform = baseTransform || undefined;
+        let iconTransition = "transform 0.3s ease";
+        if (isImpacted) {
+          iconTransform = `${baseTransform} scaleX(1.3) scaleY(0.7)`;
+          iconTransition = "transform 0.1s ease-out";
+        } else if (isPopped) {
+          iconTransform = `${baseTransform} translateY(-40px) scale(1.1)`;
+          iconTransition = "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)";
+        }
 
         return (
           <div
@@ -82,10 +107,8 @@ export function ProjectCluster({ launchedIconKey, impactIconKey, onIconClick }: 
             style={{
               left: `${figmaX(pos.x)}%`,
               top: `${figmaY(pos.y)}%`,
-              transform: isImpacted
-                ? `${transform ?? ""} scaleX(1.3) scaleY(0.7)`
-                : transform,
-              transition: isImpacted ? "transform 0.1s ease-out" : "transform 0.3s ease",
+              transform: iconTransform,
+              transition: iconTransition,
             }}
             onClick={(e) => {
               e.stopPropagation(); // Prevent bubbling to GameCanvas

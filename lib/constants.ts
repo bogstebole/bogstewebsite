@@ -32,8 +32,14 @@ export const CHARACTER = {
   WARP_SHED_DURATION: 25,
   /** Hard-cap frame limit before force-completing warp (~5s safety) */
   WARP_MAX_DURATION: 300,
-  /** Jump velocity for headbutt (stronger than normal) */
-  HEADBUTT_VELOCITY: -18,
+  /** Safety-cap frame limit for headbutt sequence (~3s at 60fps) */
+  HEADBUTT_DURATION: 180,
+  /** Max px/frame during sprint (~3x normal SPEED) */
+  SPRINT_MAX_SPEED: 11,
+  /** px/frame² acceleration during sprint */
+  SPRINT_ACCEL: 0.35,
+  /** walkFrame increment during sprint (2x normal 0.15) */
+  SPRINT_WALK_RATE: 0.30,
 } as const;
 
 /** Figma-derived element positions (x, y in Figma pixels on 1440x1024 canvas) */

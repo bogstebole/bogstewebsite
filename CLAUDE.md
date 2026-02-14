@@ -124,6 +124,10 @@ Interactive pieces to embed as live components where possible:
 - Framer Motion for UI animations, React Three Fiber for 3D, raw Canvas API for the game engine if needed
 - Images via `next/image` with proper sizing and alt text
 - Commit messages: conventional commits (feat:, fix:, chore:)
+- **Always reuse existing components** from `components/ui/` when a matching component exists. Key reusable components:
+  - `Win95Button` — retro Windows 95 styled button with 3D inset/outset borders
+  - `GlassButton` — glassmorphic concave-glass button with 13-layer shadow system
+  - Check `components/ui/` before building new buttons, modals, or interactive primitives
 
 ## Performance
 - The game canvas should load fast — keep initial bundle light

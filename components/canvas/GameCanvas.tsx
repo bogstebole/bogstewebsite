@@ -7,6 +7,7 @@ import { Clouds } from "./clouds";
 import { PixelPortal } from "./pixel-portal";
 import { WarpParticles } from "./WarpParticles";
 import { PixelDust } from "./pixel-dust";
+import { LightningTrail } from "./lightning-trail";
 import { ProjectCluster, PROJECTS } from "@/components/elements/project-cluster";
 import { WorkCluster } from "@/components/elements/work-cluster";
 import { Stars } from "./stars";
@@ -26,14 +27,17 @@ import {
 
 import { useTheme } from "@/components/providers/theme-provider";
 
-/* ---------- Launched icon physics state ---------- */
-interface LaunchedIcon {
+/* ---------- Headbutt state ---------- */
+type HeadbuttPhase = "sprint" | "jump" | "impact" | "iconReaction" | "window";
+
+interface HeadbuttState {
   project: ProjectData;
-  x: number; // viewport px
-  y: number; // viewport px
-  vy: number; // velocity Y
-  phase: "flying" | "expanding";
-  iconRect: DOMRect; // original rect for origin animation
+  iconRect: DOMRect;
+  phase: HeadbuttPhase;
+  /** Canvas-local X of icon center */
+  sprintTargetX: number;
+  /** Negative Y offset from ground to icon center (for jump physics) */
+  headbuttTargetY: number;
 }
 
 export function GameCanvas() {
@@ -41,20 +45,21 @@ export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const cursorXRef = useRef(0);
-  const warpTriggerRef = useRef<"shivering" | "warping_in" | "warping_out" | "warped" | "idle" | "headbutt" | null>(null);
+  const warpTriggerRef = useRef<"shivering" | "warping_in" | "warping_out" | "warped" | "idle" | "headbutt_sprint" | "headbutt_jump" | "headbutt_falling" | null>(null);
   const [character, setCharacter] = useState<CharacterState | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [nearZone, setNearZone] = useState<string | null>(null);
   const [shedSet, setShedSet] = useState<Set<string>>(new Set());
 
   /* ---- Headbutt state ---- */
-  const [headbuttTarget, setHeadbuttTarget] = useState<{ project: ProjectData; iconRect: DOMRect } | null>(null);
+  const [headbutt, setHeadbutt] = useState<HeadbuttState | null>(null);
   const [impactIconKey, setImpactIconKey] = useState<string | null>(null);
-  const [launchedIcon, setLaunchedIcon] = useState<LaunchedIcon | null>(null);
+  const [poppedIconKey, setPoppedIconKey] = useState<string | null>(null);
   const [dustBurst, setDustBurst] = useState<{ x: number; y: number; color: string } | null>(null);
   const [projectWindow, setProjectWindow] = useState<{ project: ProjectData; originRect: { x: number; y: number } } | null>(null);
-  const launchedIconRef = useRef<LaunchedIcon | null>(null);
-  const headbuttTargetYRef = useRef<number | null>(null);
+  const headbuttRef = useRef<HeadbuttState | null>(null);
+  /** Params for the engine to pick up on next sprint trigger */
+  const headbuttParamsRef = useRef<{ sprintTargetX: number; headbuttTargetY: number } | null>(null);
 
   // Initialize character state once we know canvas size
   useEffect(() => {
@@ -83,6 +88,7 @@ export function GameCanvas() {
     if (!container || !character) return;
 
     let animState = character;
+    let impactFired = false;
 
     function loop() {
       const width = container!.clientWidth;
@@ -92,19 +98,41 @@ export function GameCanvas() {
       const trigger = warpTriggerRef.current;
       if (trigger) {
         warpTriggerRef.current = null;
-        if (trigger === "headbutt") {
-          const targetY = headbuttTargetYRef.current;
-          // Slide character X toward the icon's X position
-          const iconX = launchedIconRef.current?.iconRect
-            ? launchedIconRef.current.iconRect.left + launchedIconRef.current.iconRect.width / 2
-            : animState.x;
+        if (trigger === "headbutt_sprint") {
+          const params = headbuttParamsRef.current;
+          if (params) {
+            // Short sprint edge case: if already within 80px, skip to jump
+            const distToTarget = Math.abs(animState.x - params.sprintTargetX);
+            if (distToTarget < 80) {
+              const jumpVel = -Math.sqrt(2 * CHARACTER.GRAVITY * Math.abs(params.headbuttTargetY));
+              animState = {
+                ...animState,
+                warpState: "headbutt_jump",
+                warpTimer: 0,
+                velocityY: jumpVel,
+                isJumping: true,
+                headbuttTargetY: params.headbuttTargetY,
+                sprintTargetX: params.sprintTargetX,
+                sprintSpeed: 0,
+              };
+            } else {
+              animState = {
+                ...animState,
+                warpState: "headbutt_sprint",
+                warpTimer: 0,
+                velocityY: 0,
+                headbuttTargetY: params.headbuttTargetY,
+                sprintTargetX: params.sprintTargetX,
+                sprintSpeed: CHARACTER.SPEED,
+              };
+            }
+          }
+          impactFired = false;
+        } else if (trigger === "headbutt_falling") {
           animState = {
             ...animState,
-            warpState: "headbutt",
+            warpState: "headbutt_falling",
             warpTimer: 0,
-            velocityY: CHARACTER.HEADBUTT_VELOCITY,
-            headbuttTargetY: targetY ?? undefined,
-            x: iconX, // teleport to below the icon
           };
         } else {
           animState = { ...animState, warpState: trigger, warpTimer: 0 };
@@ -124,58 +152,59 @@ export function GameCanvas() {
         setActiveSection("about");
       }
 
-      // --- Headbutt collision detection ---
-      // Trigger impact at peak height (velocity crosses from negative to positive)
-      if (nextState.warpState === "headbutt" && nextState.headbuttTargetY !== undefined) {
-        const wasGoingUp = animState.velocityY < 0;
-        const nowComingDown = nextState.velocityY >= 0;
-
-        if (wasGoingUp && nowComingDown) {
-          // PEAK HEIGHT — trigger impact!
-          const target = launchedIconRef.current;
-          if (target && target.phase !== "flying") {
-            setImpactIconKey(target.project.key);
-
-            setDustBurst({
-              x: target.iconRect.left + target.iconRect.width / 2,
-              y: target.iconRect.top + target.iconRect.height / 2,
-              color: target.project.color,
-            });
-
-            setLaunchedIcon({
-              ...target,
-              x: target.iconRect.left + target.iconRect.width / 2,
-              y: target.iconRect.top,
-              vy: -14,
-              phase: "flying",
-            });
-
-            setTimeout(() => setImpactIconKey(null), 150);
-          }
+      // --- Detect sprint → jump transition (engine handles this internally) ---
+      if (prevWarpState === "headbutt_sprint" && nextState.warpState === "headbutt_jump") {
+        const hb = headbuttRef.current;
+        if (hb) {
+          headbuttRef.current = { ...hb, phase: "jump" };
+          setHeadbutt(prev => prev ? { ...prev, phase: "jump" } : null);
         }
       }
 
-      // --- Launched icon physics ---
-      const launched = launchedIconRef.current;
-      if (launched && launched.phase === "flying") {
-        launched.vy += 0.8; // gravity
-        launched.y += launched.vy;
+      // --- Impact detection: peak of jump (velocityY flips from negative to >= 0) ---
+      if (nextState.warpState === "headbutt_jump" && !impactFired && nextState.velocityY >= 0) {
+        impactFired = true;
+        const hb = headbuttRef.current;
+        if (hb) {
+          const iconX = hb.iconRect.left + hb.iconRect.width / 2;
+          const iconY = hb.iconRect.top + hb.iconRect.height / 2;
 
-        // Hit the floor
-        if (launched.y >= height - 60) {
-          launched.y = height - 60;
-          launched.phase = "expanding";
-          setLaunchedIcon({ ...launched });
-          // Open project detail window
-          setProjectWindow({
-            project: launched.project,
-            originRect: {
-              x: launched.x - width / 2,
-              y: launched.y - height / 2,
-            },
-          });
-        } else {
-          setLaunchedIcon({ ...launched });
+          // Impact phase
+          headbuttRef.current = { ...hb, phase: "impact" };
+          setHeadbutt(prev => prev ? { ...prev, phase: "impact" } : null);
+          setImpactIconKey(hb.project.key);
+          setDustBurst({ x: iconX, y: iconY, color: hb.project.color });
+
+          // After 150ms: squash ends, icon pops, character starts falling
+          setTimeout(() => {
+            setImpactIconKey(null);
+            setPoppedIconKey(hb.project.key);
+            warpTriggerRef.current = "headbutt_falling";
+
+            if (headbuttRef.current) {
+              headbuttRef.current = { ...headbuttRef.current, phase: "iconReaction" };
+              setHeadbutt(prev => prev ? { ...prev, phase: "iconReaction" } : null);
+            }
+
+            // After 200ms more: hide icon, open window
+            setTimeout(() => {
+              setPoppedIconKey(null);
+              const hbNow = headbuttRef.current;
+              if (hbNow) {
+                const ix = hbNow.iconRect.left + hbNow.iconRect.width / 2;
+                const iy = hbNow.iconRect.top + hbNow.iconRect.height / 2;
+                setProjectWindow({
+                  project: hbNow.project,
+                  originRect: {
+                    x: ix - (width / 2),
+                    y: iy - (height / 2) - 40, // offset for popped position
+                  },
+                });
+                headbuttRef.current = { ...hbNow, phase: "window" };
+                setHeadbutt(prev => prev ? { ...prev, phase: "window" } : null);
+              }
+            }, 200);
+          }, 150);
         }
       }
 
@@ -189,11 +218,6 @@ export function GameCanvas() {
     frameRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameRef.current);
   }, [character !== null]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Keep launchedIconRef in sync
-  useEffect(() => {
-    launchedIconRef.current = launchedIcon;
-  }, [launchedIcon]);
 
   // Keyboard: space to jump
   useEffect(() => {
@@ -240,38 +264,45 @@ export function GameCanvas() {
     setShedSet(new Set()); // reset shed pixels
   }, []);
 
-  /** Handle project icon click — start headbutt sequence */
+  /** Handle project icon click — headbutt only for Useless Notes */
   const handleProjectIconClick = useCallback((project: ProjectData, rect: DOMRect) => {
+    if (project.key !== "uselessNote") return;
     if (character?.warpState !== "idle") return;
-
     const container = containerRef.current;
     if (!container) return;
 
-    // Store headbutt target info
-    const target: LaunchedIcon = {
+    const containerRect = container.getBoundingClientRect();
+    // Icon center X in canvas-local pixels
+    const sprintTargetX = rect.left + rect.width / 2 - containerRect.left;
+    // Jump target: character HEAD (top of sprite) should reach icon center.
+    // PixelCharacter top = groundYPx - DISPLAY_H + state.y * scale
+    // So for head to reach iconCenterY: state.y = (iconCenterY - groundYPx + DISPLAY_H) / scale
+    const groundYPx = (CANVAS.GROUND_Y / 100) * container.clientHeight;
+    const iconCenterY = rect.top + rect.height / 2 - containerRect.top;
+    const displayScale = DISPLAY_H / (CHARACTER.SPRITE_ROWS * CHARACTER.PIXEL_SIZE);
+    const headbuttTargetY = (iconCenterY - groundYPx + DISPLAY_H) / displayScale;
+
+    const hb: HeadbuttState = {
       project,
-      x: rect.left + rect.width / 2,
-      y: rect.top,
-      vy: 0,
-      phase: "expanding", // not flying yet — waiting for impact
       iconRect: rect,
+      phase: "sprint",
+      sprintTargetX,
+      headbuttTargetY,
     };
-    launchedIconRef.current = target;
-    setHeadbuttTarget({ project, iconRect: rect });
+    headbuttRef.current = hb;
+    setHeadbutt(hb);
 
-    // Set the target Y for collision detection (viewport relative) via ref
-    headbuttTargetYRef.current = rect.top;
-
-    // Trigger the headbutt jump
-    warpTriggerRef.current = "headbutt";
+    // Set params for engine and trigger sprint
+    headbuttParamsRef.current = { sprintTargetX, headbuttTargetY };
+    warpTriggerRef.current = "headbutt_sprint";
   }, [character?.warpState]);
 
   /** Close project detail window */
   const handleCloseProject = useCallback(() => {
     setProjectWindow(null);
-    setLaunchedIcon(null);
-    setHeadbuttTarget(null);
-    launchedIconRef.current = null;
+    setHeadbutt(null);
+    headbuttRef.current = null;
+    setPoppedIconKey(null);
   }, []);
 
   // Called by WarpParticles when all particles have been consumed (or integrated)
@@ -316,6 +347,23 @@ export function GameCanvas() {
   const active = !!character && (character.warpState === "warping_in" || character.warpState === "warping_out");
   const particleMode = character?.warpState === "warping_out" ? "integrate" : "shed";
 
+  // Lightning trail props — active during sprint + jump, fading intensity during jump
+  const trailActive = !!headbutt && (headbutt.phase === "sprint" || headbutt.phase === "jump");
+  const trailSourceX = character?.x ?? 0;
+  const trailIntensity = headbutt?.phase === "sprint"
+    ? Math.min((character?.sprintSpeed ?? 0) / CHARACTER.SPRINT_MAX_SPEED, 1)
+    : headbutt?.phase === "jump" ? 0.3 : 0;
+
+  // Lean angle during sprint
+  const leanAngle = character?.warpState === "headbutt_sprint"
+    ? Math.min(15, ((character?.sprintSpeed ?? 0) / CHARACTER.SPRINT_MAX_SPEED) * 15)
+    : 0;
+
+  // Determine which icon to hide (during window phase)
+  const hiddenIconKey = headbutt && headbutt.phase === "window"
+    ? headbutt.project.key
+    : undefined;
+
   return (
     <div
       ref={containerRef}
@@ -334,8 +382,9 @@ export function GameCanvas() {
 
           {/* Layer 2: Project cluster */}
           <ProjectCluster
-            launchedIconKey={launchedIcon?.phase === "flying" || projectWindow ? launchedIcon?.project.key ?? headbuttTarget?.project.key : undefined}
+            launchedIconKey={hiddenIconKey}
             impactIconKey={impactIconKey}
+            poppedIconKey={poppedIconKey}
             onIconClick={handleProjectIconClick}
           />
 
@@ -359,11 +408,19 @@ export function GameCanvas() {
           {/* Layer 6: Invisible ground line */}
           <GroundLine y={CANVAS.GROUND_Y} />
 
+          {/* Lightning trail during sprint + jump */}
+          <LightningTrail
+            sourceX={trailSourceX}
+            intensity={trailIntensity}
+            active={trailActive}
+          />
+
           {/* Layer 7: The pixel character */}
           <PixelCharacter
             state={character}
             groundY={CANVAS.GROUND_Y}
             shedSet={shedSet}
+            leanAngle={leanAngle}
           />
 
           {/* Layer 8: Warp particle system overlay */}
@@ -387,37 +444,6 @@ export function GameCanvas() {
               active={true}
               onComplete={() => setDustBurst(null)}
             />
-          )}
-
-          {/* Launched icon flying through the air */}
-          {launchedIcon && launchedIcon.phase === "flying" && (
-            <div
-              className="absolute pointer-events-none z-30"
-              style={{
-                left: launchedIcon.x - 24,
-                top: launchedIcon.y,
-                width: 48,
-                height: 48,
-                borderRadius: 12,
-                background: launchedIcon.project.color,
-                overflow: "hidden",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-                transition: "transform 0.05s linear",
-                // Rotation based on velocity for dynamic feel
-                transform: `rotate(${launchedIcon.vy * 3}deg)`,
-              }}
-            >
-              {launchedIcon.project.videoSrc && (
-                <video
-                  src={launchedIcon.project.videoSrc}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-              )}
-            </div>
           )}
 
           {/* Project detail window */}
