@@ -48,6 +48,40 @@ export const PROJECTS: ProjectData[] = [
   },
 ];
 
+/** 13-layer glassmorphic box-shadow — light mode */
+const GLASS_BOX_SHADOW_LIGHT = [
+  "3px -1px 2px 0 #FFF inset",
+  "-1px -3px 3px -2px rgba(0, 0, 0, 0.41) inset",
+  "2px 1px 5px -5px rgba(0, 0, 0, 0.84) inset",
+  "0 0 8px 6px rgba(255, 255, 255, 0.65) inset",
+  "0 -10px 16px -4px rgba(0, 0, 0, 0.25) inset",
+  "0 3px 6px 1px rgba(0, 0, 0, 0.42) inset",
+  "0 21px 10px 0 rgba(255, 255, 255, 0.75) inset",
+  "0 40px 42px -10px rgba(0, 0, 0, 0.15) inset",
+  "0 32px 9px 0 rgba(0, 0, 0, 0.00)",
+  "0 20px 8px 0 rgba(0, 0, 0, 0.01)",
+  "0 11px 7px 0 rgba(0, 0, 0, 0.05)",
+  "0 5px 5px 0 rgba(0, 0, 0, 0.09)",
+  "0 1px 3px 0 rgba(0, 0, 0, 0.10)",
+].join(", ");
+
+/** 13-layer glassmorphic box-shadow — dark mode */
+const GLASS_BOX_SHADOW_DARK = [
+  "3px -1px 2px 0 rgba(255, 255, 255, 0.12) inset",
+  "-1px -3px 3px -2px rgba(0, 0, 0, 0.6) inset",
+  "2px 1px 5px -5px rgba(0, 0, 0, 0.9) inset",
+  "0 0 8px 6px rgba(255, 255, 255, 0.06) inset",
+  "0 -10px 16px -4px rgba(0, 0, 0, 0.4) inset",
+  "0 3px 6px 1px rgba(0, 0, 0, 0.55) inset",
+  "0 21px 10px 0 rgba(255, 255, 255, 0.08) inset",
+  "0 40px 42px -10px rgba(0, 0, 0, 0.3) inset",
+  "0 32px 9px 0 rgba(0, 0, 0, 0.00)",
+  "0 20px 8px 0 rgba(0, 0, 0, 0.04)",
+  "0 11px 7px 0 rgba(0, 0, 0, 0.12)",
+  "0 5px 5px 0 rgba(0, 0, 0, 0.18)",
+  "0 1px 3px 0 rgba(0, 0, 0, 0.22)",
+].join(", ");
+
 interface ProjectClusterProps {
   /** Key of the icon currently hidden (e.g. during window phase) */
   launchedIconKey?: string | null;
@@ -63,6 +97,10 @@ export function ProjectCluster({ launchedIconKey, impactIconKey, poppedIconKey, 
   const { isDark } = useTheme();
   const positions = FIGMA_POSITIONS.projects;
 
+  // Container center — midpoint of the icon cluster
+  const containerX = (positions.weather.x + positions.scanspend.x + 48) / 2;
+  const containerY = (positions.weather.y + positions.uselessNote.y + 48) / 2;
+
   return (
     <div className="absolute inset-0 pointer-events-none">
       {/* Dock bounce keyframe */}
@@ -76,70 +114,106 @@ export function ProjectCluster({ launchedIconKey, impactIconKey, poppedIconKey, 
         }
       `}</style>
 
-      {PROJECTS.map((project) => {
-        const pos = positions[project.key as keyof typeof positions];
-        if (!pos || !("size" in pos)) return null;
-
-        const baseTransform =
-          project.key === "uselessNote" ? "rotate(12deg)" : "";
-
-        // Hide icon if it's been launched into the detail window
-        if (project.key === launchedIconKey) return null;
-
-        const isImpacted = project.key === impactIconKey;
-        const isPopped = project.key === poppedIconKey;
-
-        // Priority: impact (squash) > popped (pop up) > normal
-        let iconTransform = baseTransform || undefined;
-        let iconTransition = "transform 0.3s ease";
-        if (isImpacted) {
-          iconTransform = `${baseTransform} scaleX(1.3) scaleY(0.7)`;
-          iconTransition = "transform 0.1s ease-out";
-        } else if (isPopped) {
-          iconTransform = `${baseTransform} translateY(-40px) scale(1.1)`;
-          iconTransition = "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)";
-        }
-
-        return (
-          <div
-            key={project.key}
-            className="absolute pointer-events-auto"
-            style={{
-              left: `${figmaX(pos.x)}%`,
-              top: `${figmaY(pos.y)}%`,
-              transform: iconTransform,
-              transition: iconTransition,
-            }}
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent bubbling to GameCanvas
-              const rect = e.currentTarget.getBoundingClientRect();
-              onIconClick?.(project, rect);
-            }}
-          >
-            <ProjectIcon
-              color={project.color}
-              size={48}
-              label={project.label}
-              videoSrc={project.videoSrc}
-            />
-          </div>
-        );
-      })}
-
-      {/* "Personal projects" label — centered under the icon grid */}
-      <span
-        className="absolute select-none transition-colors duration-700"
+      {/* Glass container — gradient border via background trick */}
+      <div
+        className="absolute pointer-events-auto transition-all duration-700"
         style={{
-          left: `${figmaX(positions.label.x)}%`,
-          top: `${figmaY(positions.label.y)}%`,
-          fontFamily: `"SF Mono", "SFMono-Regular", var(--font-geist-mono), monospace`,
-          fontSize: 14,
-          color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)",
-          whiteSpace: "nowrap",
+          left: `${figmaX(containerX)}%`,
+          top: `${figmaY(containerY)}%`,
+          transform: "translate(-50%, -50%)",
+          borderRadius: 24,
+          padding: 1,
+          background: isDark
+            ? "linear-gradient(132deg, rgba(255, 255, 255, 0.12) 7%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.25) 97%)"
+            : "linear-gradient(132deg, rgba(0, 0, 0, 0.21) 7%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.15) 97%)",
         }}
       >
-        Personal projects
-      </span>
+        <div
+          className="transition-all duration-700"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: 16,
+            height: "fit-content",
+            padding: 16,
+            borderRadius: 23,
+            background: isDark ? "rgba(255, 255, 255, 0.02)" : "rgba(255, 255, 255, 0)",
+            boxShadow: isDark ? GLASS_BOX_SHADOW_DARK : GLASS_BOX_SHADOW_LIGHT,
+            backdropFilter: "blur(2.5px)",
+            WebkitBackdropFilter: "blur(2.5px)",
+          }}
+        >
+        {/* Label */}
+        <span
+          className="select-none transition-colors duration-700"
+          style={{
+            fontFamily: `"SF Mono", "SFMono-Regular", var(--font-geist-mono), monospace`,
+            fontSize: 14,
+            lineHeight: "1.36em",
+            color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.8)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Personal projects
+        </span>
+
+        {/* Icons row — overlapping by 16px */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          {PROJECTS.map((project, index) => {
+            // Hide icon if it's been launched into the detail window
+            if (project.key === launchedIconKey) return null;
+
+            const rotation = index % 2 === 0 ? -8 : 8;
+            const baseTransform = `rotate(${rotation}deg)`;
+
+            const isImpacted = project.key === impactIconKey;
+            const isPopped = project.key === poppedIconKey;
+
+            // Priority: impact (squash) > popped (pop up) > normal
+            let iconTransform = baseTransform;
+            let iconTransition = "transform 0.3s ease";
+            if (isImpacted) {
+              iconTransform = `${baseTransform} scaleX(1.3) scaleY(0.7)`;
+              iconTransition = "transform 0.1s ease-out";
+            } else if (isPopped) {
+              iconTransform = `${baseTransform} translateY(-40px) scale(1.1)`;
+              iconTransition = "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)";
+            }
+
+            return (
+              <div
+                key={project.key}
+                style={{
+                  marginLeft: index === 0 ? 0 : -16,
+                  transform: iconTransform,
+                  transition: iconTransition,
+                  zIndex: index,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  onIconClick?.(project, rect);
+                }}
+              >
+                <ProjectIcon
+                  color={project.color}
+                  size={48}
+                  label={project.label}
+                  videoSrc={project.videoSrc}
+                />
+              </div>
+            );
+          })}
+        </div>
+        </div>
+      </div>
     </div>
   );
 }

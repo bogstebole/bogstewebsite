@@ -1,0 +1,231 @@
+/* ============================
+   Project Detail Window Styles
+   ============================ */
+
+/* --- Overlay & Backdrop --- */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    pointer-events: none;
+}
+
+.overlayUseless {
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.overlayStandard {
+    align-items: center;
+    justify-content: center;
+}
+
+.backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+}
+
+/* --- Useless Notes Window --- */
+
+.uselessWindow {
+    position: relative;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 32px 32px 0 0;
+    background: linear-gradient(180deg, rgba(0, 139, 255, 1) 0%, rgba(59, 163, 249, 1) 100%);
+}
+
+/* Sticky header — transparent by default, blur applied via JS only on scroll */
+.uselessHeader {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 24px 24px 0 24px;
+    width: 100%;
+    border-radius: 32px 32px 0 0;
+    /* No background or blur by default — added dynamically via style prop */
+}
+
+.scrollContainer {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    width: 100%;
+    scrollbar-width: none;
+}
+
+.scrollContainer::-webkit-scrollbar {
+    display: none;
+}
+
+.contentInner {
+    max-width: 736px;
+    margin: 0 auto;
+    padding: 0 24px 24px 24px;
+}
+
+/* --- Shared Icon --- */
+
+.appIcon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.appIcon video,
+.appIcon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* --- Standard Project Window --- */
+
+.standardWindow {
+    position: relative;
+    width: 100%;
+    max-width: 56rem;
+    /* max-w-4xl = 896px */
+    pointer-events: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px;
+    border-radius: 24px;
+}
+
+.standardHeader {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.standardContent {
+    padding: 32px;
+    padding-bottom: 0;
+}
+
+.standardScreenshots {
+    padding: 0 32px 32px;
+}
+
+.screenshotsRow {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.screenshotCard {
+    flex: 1;
+    max-width: 200px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+    aspect-ratio: 9 / 19.5;
+}
+
+.screenshotCard video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* --- Content Section --- */
+
+.contentSection {
+    padding-top: 24px;
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.tags {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+    font-family: "SF Mono", "SFMono-Regular", monospace;
+}
+
+.titleRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    gap: 0;
+}
+
+.titleColumn {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 32px;
+    justify-content: space-between;
+    width: fit-content;
+}
+
+.title {
+    color: white;
+    font-weight: 700;
+    line-height: 1.1;
+    font-size: 2.5rem;
+}
+
+.downloadWrap {
+    margin-top: 16px;
+}
+
+.description {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.875rem;
+    line-height: 1.625;
+    max-width: 28rem;
+    margin-top: 8px;
+    font-family: "SF Mono", "SFMono-Regular", monospace;
+}
+
+/* --- Masonry Grid (Useless Notes) --- */
+
+.masonryGrid {
+    background-color: rgb(255, 226, 167);
+    border-radius: 32px;
+    padding: 8px;
+    columns: 3;
+    column-gap: 8px;
+    width: 100%;
+}
+
+.masonryItem {
+    break-inside: avoid;
+    margin-bottom: 8px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.masonryItem img,
+.masonryItem video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.masonrySpacer {
+    height: 40px;
+}

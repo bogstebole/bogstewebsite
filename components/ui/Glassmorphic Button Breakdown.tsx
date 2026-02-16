@@ -3,6 +3,14 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import styles from "./GlassButton.module.css";
 
+type GlassButtonSize = "s" | "m" | "l";
+
+const sizeClassMap: Record<GlassButtonSize, string> = {
+  s: styles.sizeS,
+  m: styles.sizeM,
+  l: styles.sizeL,
+};
+
 interface GlassButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   /** Show loading spinner and disable interaction */
@@ -11,15 +19,21 @@ interface GlassButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   iconLeft?: ReactNode;
   /** Trailing icon element */
   iconRight?: ReactNode;
+  /** Button size: s=32px, m=40px, l=48px */
+  size?: GlassButtonSize;
+  /** Dark mode variant */
+  dark?: boolean;
 }
 
 const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
-  ({ children, loading = false, iconLeft, iconRight, className, disabled, ...props }, ref) => {
+  ({ children, loading = false, iconLeft, iconRight, size = "m", dark = false, className, disabled, ...props }, ref) => {
     return (
       <button
         ref={ref}
         className={`
           ${styles.glassBtn}
+          ${sizeClassMap[size]}
+          ${dark ? styles.dark : ""}
           ${loading ? styles.loading : ""}
           ${className ?? ""}
         `}
