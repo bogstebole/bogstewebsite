@@ -81,6 +81,7 @@
     min-height: 0;
     width: 100%;
     scrollbar-width: none;
+    padding-bottom: 32px;
 }
 
 .scrollContainer::-webkit-scrollbar {
@@ -90,7 +91,7 @@
 .contentInner {
     max-width: 736px;
     margin: 0 auto;
-    padding: 100px 24px 24px 24px;
+    padding-top: 100px;
     /* increased top padding to clear absolute header */
 }
 

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform, useMotionTemplate } from "framer-motion";
 import { Win95Button } from "./win95-button";
+import { NervousBoule } from "../canvas/NervousBoule";
 import GlassButton from "./Glassmorphic Button Breakdown";
 import styles from "./project-detail-window.module.css";
 
@@ -107,7 +108,7 @@ export function ProjectDetailWindow({
 
 // ---- Sub-components to isolate hooks and logic ----
 
-function UselessNoteWindow({ project, onClose, layoutId }: ProjectDetailWindowProps) {
+function UselessNoteWindow({ project, onClose, layoutId, isOpen }: ProjectDetailWindowProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const { scrollY } = useScroll({ container: scrollRef });
 
@@ -141,83 +142,86 @@ function UselessNoteWindow({ project, onClose, layoutId }: ProjectDetailWindowPr
     );
 
     return (
-        <motion.div
-            layoutId={layoutId}
-            initial={{
-                opacity: 0,
-                y: 200,
-            }}
-            animate={{
-                opacity: 1,
-                y: 0,
-                transition: {
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                    mass: 1,
-                },
-            }}
-            style={{ width, height, maxWidth: "100vw" }}
-            exit={{
-                opacity: 0,
-                y: 200,
-                transition: { duration: 0.3, ease: "easeIn" },
-            }}
-            className={styles.uselessWindow}
-        >
+        <>
+            <NervousBoule scrollY={scrollY} isOpen={isOpen} />
+            <motion.div
+                layoutId={layoutId}
+                initial={{
+                    opacity: 0,
+                    y: 200,
+                }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                        mass: 1,
+                    },
+                }}
+                style={{ width, height, maxWidth: "100vw" }}
+                exit={{
+                    opacity: 0,
+                    y: 200,
+                    transition: { duration: 0.3, ease: "easeIn" },
+                }}
+                className={styles.uselessWindow}
+            >
 
 
-            {/* Sticky header — transparent at rest, blurs on scroll */}
-            <div className={styles.uselessHeader}>
-                {/* Background (with mask for progressive blur) */}
-                <motion.div
-                    className={styles.uselessHeaderBackground}
-                    style={{
-                        background: headerBg,
-                        backdropFilter: headerBackdropFilter,
-                        WebkitBackdropFilter: headerBackdropFilter,
-                        maskImage: 'linear-gradient(to bottom, black 0%, black 10%, rgba(0,0,0,0.5) 70%, transparent 100%)',
-                        WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 10%, rgba(0,0,0,0.5) 70%, transparent 100%)',
-                    }}
-                />
-
-                {/* Content (fully opaque) */}
-                <div className={styles.uselessHeaderContent}>
-                    {/* Icon */}
-                    <div
-                        className={styles.appIcon}
-                        style={{ background: `${project?.color}dd` }}
-                    >
-                        {project?.videoSrc && (
-                            <video
-                                src={project.videoSrc}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                            />
-                        )}
-                    </div>
-
-                    <Win95Button
-                        onClick={(e: React.MouseEvent) => {
-                            e.stopPropagation();
-                            onClose();
+                {/* Sticky header — transparent at rest, blurs on scroll */}
+                <div className={styles.uselessHeader}>
+                    {/* Background (with mask for progressive blur) */}
+                    <motion.div
+                        className={styles.uselessHeaderBackground}
+                        style={{
+                            background: headerBg,
+                            backdropFilter: headerBackdropFilter,
+                            WebkitBackdropFilter: headerBackdropFilter,
+                            maskImage: 'linear-gradient(to bottom, black 0%, black 10%, rgba(0,0,0,0.5) 70%, transparent 100%)',
+                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 10%, rgba(0,0,0,0.5) 70%, transparent 100%)',
                         }}
-                        square
-                    >
-                        ✕
-                    </Win95Button>
-                </div>
-            </div>
+                    />
 
-            {/* Scrollable content */}
-            <div ref={scrollRef} className={styles.scrollContainer}>
-                <div className={styles.contentInner}>
-                    <ProjectContent project={project} isUselessNote={true} />
+                    {/* Content (fully opaque) */}
+                    <div className={styles.uselessHeaderContent}>
+                        {/* Icon */}
+                        <div
+                            className={styles.appIcon}
+                            style={{ background: `${project?.color}dd` }}
+                        >
+                            {project?.videoSrc && (
+                                <video
+                                    src={project.videoSrc}
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                />
+                            )}
+                        </div>
+
+                        <Win95Button
+                            onClick={(e: React.MouseEvent) => {
+                                e.stopPropagation();
+                                onClose();
+                            }}
+                            square
+                        >
+                            ✕
+                        </Win95Button>
+                    </div>
                 </div>
-            </div>
-        </motion.div>
+
+                {/* Scrollable content */}
+                <div ref={scrollRef} className={styles.scrollContainer}>
+                    <div className={styles.contentInner}>
+                        <ProjectContent project={project} isUselessNote={true} />
+                    </div>
+                </div>
+            </motion.div>
+        </>
     );
 }
 

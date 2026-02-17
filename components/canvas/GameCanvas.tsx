@@ -421,12 +421,14 @@ export function GameCanvas() {
           />
 
           {/* Layer 7: The pixel character */}
-          <PixelCharacter
-            state={character}
-            groundY={CANVAS.GROUND_Y}
-            shedSet={shedSet}
-            leanAngle={leanAngle}
-          />
+          <div style={{ opacity: projectWindow ? 0 : 1, transition: "opacity 0.2s" }}>
+            <PixelCharacter
+              state={character}
+              groundY={CANVAS.GROUND_Y}
+              shedSet={shedSet}
+              leanAngle={leanAngle}
+            />
+          </div>
 
           {/* Layer 8: Warp particle system overlay */}
           <WarpParticles
