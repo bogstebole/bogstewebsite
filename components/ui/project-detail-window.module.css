@@ -25,7 +25,6 @@
 .backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
     pointer-events: auto;
 }
 
@@ -41,18 +40,36 @@
     background: linear-gradient(180deg, rgba(0, 139, 255, 1) 0%, rgba(59, 163, 249, 1) 100%);
 }
 
-/* Sticky header — transparent by default, blur applied via JS only on scroll */
+/* Header — overlays content, transparent by default, blur applied via JS on scroll */
 .uselessHeader {
-    position: sticky;
+    position: absolute;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 20;
+    height: 120px;
+    width: 100%;
+    pointer-events: none;
+}
+
+/* Background layer — mask-image applied inline for backdrop-filter compatibility */
+.uselessHeaderBackground {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 32px 32px 0 0;
+    pointer-events: none;
+}
+
+.uselessHeaderContent {
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 24px 24px 0 24px;
     width: 100%;
-    border-radius: 32px 32px 0 0;
-    /* No background or blur by default — added dynamically via style prop */
+    padding: 24px 24px 16px 24px;
 }
 
 .scrollContainer {
@@ -70,7 +87,8 @@
 .contentInner {
     max-width: 736px;
     margin: 0 auto;
-    padding: 0 24px 24px 24px;
+    padding: 100px 24px 24px 24px;
+    /* increased top padding to clear absolute header */
 }
 
 /* --- Shared Icon --- */
@@ -158,16 +176,21 @@
 .tags {
     color: rgba(255, 255, 255, 0.6);
     font-size: 0.875rem;
-    margin-bottom: 8px;
     font-family: "SF Mono", "SFMono-Regular", monospace;
+}
+
+.titleSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 32px;
 }
 
 .titleRow {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 24px;
-    gap: 0;
+    gap: 64px;
 }
 
 .titleColumn {
