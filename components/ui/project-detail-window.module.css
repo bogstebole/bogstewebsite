@@ -25,6 +25,9 @@
 .backdrop {
     position: absolute;
     inset: 0;
+    background-color: rgba(255, 255, 255, 0.01);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     pointer-events: auto;
 }
 
@@ -200,7 +203,7 @@
     height: 100%;
     gap: 32px;
     justify-content: space-between;
-    width: fit-content;
+    width: 40%;
 }
 
 .title {
@@ -212,6 +215,7 @@
 
 .downloadWrap {
     margin-top: 16px;
+    rotate: -4deg;
 }
 
 .description {

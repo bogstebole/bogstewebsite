@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform, useMotionTemplate } from "framer-motion";
 import { Win95Button } from "./win95-button";
@@ -47,11 +48,17 @@ export function ProjectDetailWindow({
     layoutId,
     originRect,
 }: ProjectDetailWindowProps) {
-    if (!project) return null;
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
+    if (!project || !mounted) return null;
 
     const isUselessNote = project.key === "uselessNote";
-
-    return (
+    const content = (
         <AnimatePresence>
             {isOpen && (
                 <div
@@ -64,6 +71,11 @@ export function ProjectDetailWindow({
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
                         className={styles.backdrop}
+                        style={{
+                            backdropFilter: "blur(8px)",
+                            WebkitBackdropFilter: "blur(8px)",
+                            backgroundColor: "rgba(255, 255, 255, 0.01)"
+                        }}
                         onClick={onClose}
                     />
 
@@ -89,6 +101,8 @@ export function ProjectDetailWindow({
             )}
         </AnimatePresence>
     );
+
+    return createPortal(content, document.body);
 }
 
 // ---- Sub-components to isolate hooks and logic ----
