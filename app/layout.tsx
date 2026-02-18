@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { geistSans, geistMono, inter } from "@/lib/fonts";
+import { geistSans, geistMono, inter, silkscreen } from "@/lib/fonts";
 import { StyledComponentsRegistry } from "@/lib/styled-components-registry";
 import { React95Provider } from "@/components/providers/react95-provider";
 import "./globals.css";
@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${silkscreen.variable} antialiased`}
       >
         <StyledComponentsRegistry>
           <React95Provider>

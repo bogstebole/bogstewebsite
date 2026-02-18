@@ -148,7 +148,7 @@ export function ProjectCluster({ launchedIconKey, impactIconKey, poppedIconKey, 
         <span
           className="select-none transition-colors duration-700"
           style={{
-            fontFamily: `"SF Mono", "SFMono-Regular", var(--font-geist-mono), monospace`,
+            fontFamily: `var(--font-silkscreen), "Silkscreen", cursive`,
             fontSize: 14,
             lineHeight: "1.36em",
             color: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.8)",
@@ -164,6 +164,8 @@ export function ProjectCluster({ launchedIconKey, impactIconKey, poppedIconKey, 
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
           }}
         >
           {PROJECTS.map((project, index) => {
@@ -191,7 +193,7 @@ export function ProjectCluster({ launchedIconKey, impactIconKey, poppedIconKey, 
               <div
                 key={project.key}
                 style={{
-                  marginLeft: index === 0 ? 0 : -16,
+                  marginLeft: 0,
                   transform: iconTransform,
                   transition: iconTransition,
                   zIndex: index,
