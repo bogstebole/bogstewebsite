@@ -41,17 +41,8 @@ export function NervousBoule({ scrollY, isOpen }: NervousBouleProps) {
     }, []);
 
     useEffect(() => {
-        if (isOpen) {
-            const timer = setTimeout(() => setShouldRender(true), 300);
-            return () => clearTimeout(timer);
-        } else {
-            setShouldRender(false);
-        }
-    }, [isOpen]);
-
-    useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas || dimensions.w === 0 || !shouldRender) return;
+        if (!canvas || dimensions.w === 0 || !isOpen) return;
 
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
@@ -220,9 +211,9 @@ export function NervousBoule({ scrollY, isOpen }: NervousBouleProps) {
 
         render();
         return () => cancelAnimationFrame(animationFrameId);
-    }, [dimensions, scrollY, shouldRender]);
+    }, [dimensions, scrollY, isOpen]);
 
-    if (!shouldRender) return null;
+    if (!isOpen) return null;
 
     return (
         <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 60 }}>

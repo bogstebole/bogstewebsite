@@ -111,6 +111,7 @@ export function ProjectDetailWindow({
 function UselessNoteWindow({ project, onClose, layoutId, isOpen }: ProjectDetailWindowProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const { scrollY } = useScroll({ container: scrollRef });
+    const [isAnimationComplete, setIsAnimationComplete] = useState(false);
 
     // Map scroll progress (0px -> 300px) to a normalized 0→1 progress
     const scrollProgress = useTransform(scrollY, [0, 300], [0, 1]);
@@ -143,9 +144,10 @@ function UselessNoteWindow({ project, onClose, layoutId, isOpen }: ProjectDetail
 
     return (
         <>
-            <NervousBoule scrollY={scrollY} isOpen={isOpen} />
+            <NervousBoule scrollY={scrollY} isOpen={isOpen && isAnimationComplete} />
             <motion.div
                 layoutId={layoutId}
+                onAnimationComplete={() => setIsAnimationComplete(true)}
                 initial={{
                     opacity: 0,
                     y: 200,
