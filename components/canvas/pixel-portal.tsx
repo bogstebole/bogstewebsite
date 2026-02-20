@@ -3,7 +3,7 @@
 import { useRef, useEffect } from "react";
 
 const WIDTH = 35;
-const HEIGHT = 39;
+const HEIGHT = 62;
 
 function quantize(val: number, steps = 10): number {
   return Math.round(Math.min(255, Math.max(0, val)) / (255 / steps)) * (255 / steps);
@@ -36,17 +36,19 @@ export function PixelPortal({ scale = 6 }: PixelPortalProps) {
       ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, w, h);
 
-      const cx = WIDTH * 0.47;
-      const cy = HEIGHT * 0.40;
-      const portalR = WIDTH * 0.30;
+      const cx = WIDTH  * 0.50;
+      const cy = HEIGHT * 0.50;
+      const portalRx = WIDTH  * 0.40;
+      const portalRy = HEIGHT * 0.42;
 
       for (let py = 0; py < HEIGHT; py++) {
         for (let px = 0; px < WIDTH; px++) {
           const dx = px - cx;
           const dy = py - cy;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const angle = Math.atan2(dy, dx);
-          const normR = dist / portalR;
+          // Elliptical distance — normalise X and Y against separate radii
+          const normR = Math.sqrt((dx / portalRx) ** 2 + (dy / portalRy) ** 2);
+          // Angle in ellipse-space so spiral arms stay uniform on the ellipse
+          const angle = Math.atan2(dy / portalRy, dx / portalRx);
 
           let r = 0, g = 0, b = 0, a = 0;
           let shouldDraw = false;

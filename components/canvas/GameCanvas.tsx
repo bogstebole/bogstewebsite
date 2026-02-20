@@ -392,7 +392,7 @@ export function GameCanvas() {
       {character && (
         <>
           {/* Layer 0: Live weather background */}
-          <WeatherCanvas weatherState={weather.condition} />
+          <WeatherCanvas weatherState={weather.condition} isDark={isDark} />
 
           {/* Layer 2: Project cluster */}
           <ProjectCluster
@@ -416,7 +416,7 @@ export function GameCanvas() {
             }}
             onClick={handlePortalClick}
           >
-            <PixelPortal scale={3} />
+            <PixelPortal scale={2.25} />
           </div>
 
           {/* Layer 6: Invisible ground line */}

@@ -212,18 +212,28 @@ function buildClouds(state: WeatherState, W: number, H: number): CloudDescriptor
 
 // ─── Particle helpers ─────────────────────────────────────────────────────────
 
-function spawnParticles(state: WeatherState, W: number, H: number): Particle[] {
+// Darker rain values for light mode — more contrast against the light background
+const RAIN_LIGHT_MODE: Record<string, { rgba: RGB; alphaRange: [number, number] }> = {
+  rain:        { rgba: [15,  40,  90], alphaRange: [0.72, 0.94] },
+  heavy_rain:  { rgba: [10,  30,  80], alphaRange: [0.68, 0.92] },
+  thunderstorm:{ rgba: [15,  35,  75], alphaRange: [0.50, 0.72] },
+};
+
+function spawnParticles(state: WeatherState, W: number, H: number, isDark: boolean): Particle[] {
   const c = CONFIG[state].particles;
   if (!c) return [];
+  const lightOverride = !isDark && c.type === "rain" ? RAIN_LIGHT_MODE[state] : null;
+  const rgba       = lightOverride ? lightOverride.rgba       : c.rgba;
+  const alphaRange = lightOverride ? lightOverride.alphaRange : c.alphaRange;
   return Array.from({ length: c.count }, () => {
-    const alpha = c.alphaRange[0] + Math.random() * (c.alphaRange[1] - c.alphaRange[0]);
+    const alpha = alphaRange[0] + Math.random() * (alphaRange[1] - alphaRange[0]);
     return {
       x: Math.random() * W,
       y: Math.random() * H,
       vx: c.vx + (Math.random() - 0.5) * 0.4,
       vy: c.vy * (0.7 + Math.random() * 0.6),
       alpha,
-      color: `rgba(${c.rgba[0]},${c.rgba[1]},${c.rgba[2]},${alpha.toFixed(2)})`,
+      color: `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${alpha.toFixed(2)})`,
       w: c.w,
       h: c.h,
       drift: Math.random() * Math.PI * 2,
@@ -384,12 +394,14 @@ function render(
 
 interface WeatherCanvasProps {
   weatherState: WeatherState;
+  isDark: boolean;
 }
 
-export function WeatherCanvas({ weatherState }: WeatherCanvasProps) {
+export function WeatherCanvas({ weatherState, isDark }: WeatherCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef    = useRef<HTMLCanvasElement>(null);
   const stateRef     = useRef<WeatherState>(weatherState);
+  const isDarkRef    = useRef<boolean>(isDark);
   const cloudsRef    = useRef<CloudDescriptor[]>([]);
   const particlesRef = useRef<Particle[]>([]);
   const rafRef       = useRef<number>(0);
@@ -404,9 +416,17 @@ export function WeatherCanvas({ weatherState }: WeatherCanvasProps) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     cloudsRef.current    = buildClouds(weatherState, canvas.width, canvas.height);
-    particlesRef.current = spawnParticles(weatherState, canvas.width, canvas.height);
+    particlesRef.current = spawnParticles(weatherState, canvas.width, canvas.height, isDarkRef.current);
     ltRef.current        = { active: false, x: 0, opacity: 0, timer: 60 + Math.random() * 120, seed: [] };
   }, [weatherState]);
+
+  // Respawn particles when theme flips so rain colour updates immediately
+  useEffect(() => {
+    isDarkRef.current = isDark;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    particlesRef.current = spawnParticles(stateRef.current, canvas.width, canvas.height, isDark);
+  }, [isDark]);
 
   // Animation loop — runs once, reads stateRef to stay current
   useEffect(() => {
@@ -418,7 +438,7 @@ export function WeatherCanvas({ weatherState }: WeatherCanvasProps) {
     canvas.width  = container.clientWidth;
     canvas.height = container.clientHeight;
     cloudsRef.current    = buildClouds(stateRef.current, canvas.width, canvas.height);
-    particlesRef.current = spawnParticles(stateRef.current, canvas.width, canvas.height);
+    particlesRef.current = spawnParticles(stateRef.current, canvas.width, canvas.height, isDarkRef.current);
 
     const loop = (ts: number) => {
       const W = canvas.width;
@@ -467,7 +487,7 @@ export function WeatherCanvas({ weatherState }: WeatherCanvasProps) {
       canvas.width  = container.clientWidth;
       canvas.height = container.clientHeight;
       cloudsRef.current    = buildClouds(stateRef.current, canvas.width, canvas.height);
-      particlesRef.current = spawnParticles(stateRef.current, canvas.width, canvas.height);
+      particlesRef.current = spawnParticles(stateRef.current, canvas.width, canvas.height, isDarkRef.current);
     });
     observer.observe(container);
     return () => observer.disconnect();
