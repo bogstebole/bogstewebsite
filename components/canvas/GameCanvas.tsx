@@ -26,6 +26,7 @@ import {
 } from "@/lib/game-engine";
 
 import { useTheme } from "@/components/providers/theme-provider";
+import { IntroSequence } from "./intro-sequence";
 
 /* ---------- Headbutt state ---------- */
 type HeadbuttPhase = "sprint" | "jump" | "impact" | "iconReaction" | "window";
@@ -48,6 +49,7 @@ export function GameCanvas() {
   const characterXRef = useRef(0);
   const warpTriggerRef = useRef<"shivering" | "warping_in" | "warping_out" | "warped" | "idle" | "headbutt_sprint" | "headbutt_jump" | "headbutt_falling" | null>(null);
   const [character, setCharacter] = useState<CharacterState | null>(null);
+  const [introActive, setIntroActive] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [nearZone, setNearZone] = useState<string | null>(null);
   const [shedSet, setShedSet] = useState<Set<string>>(new Set());
@@ -66,7 +68,13 @@ export function GameCanvas() {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    // Keep character centered during intro — freeze cursor at center
+    cursorXRef.current = container.clientWidth / 2;
     setCharacter(createInitialState(container.clientWidth));
+    if (!localStorage.getItem("boule-visited")) {
+      setIntroActive(true);
+      localStorage.setItem("boule-visited", "1");
+    }
   }, []);
 
   // Sound design
@@ -238,11 +246,12 @@ export function GameCanvas() {
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (introActive) return;
     const rect = containerRef.current?.getBoundingClientRect();
     if (rect) {
       cursorXRef.current = e.clientX - rect.left;
     }
-  }, []);
+  }, [introActive]);
 
   const handlePortalClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -251,6 +260,7 @@ export function GameCanvas() {
   }, []);
 
   const handleClick = useCallback(() => {
+    if (introActive) return;
     if (nearZone === "portal") {
       warpTriggerRef.current = "shivering";
       return;
@@ -262,7 +272,7 @@ export function GameCanvas() {
 
     // Click also triggers jump — only if not warping
     setCharacter((prev) => (prev && prev.warpState === "idle" ? jump(prev) : prev));
-  }, [nearZone]);
+  }, [introActive, nearZone]);
 
   const handleCloseSection = useCallback(() => {
     setActiveSection(null);
@@ -420,8 +430,8 @@ export function GameCanvas() {
             active={trailActive}
           />
 
-          {/* Layer 7: The pixel character */}
-          <div style={{ opacity: projectWindow ? 0 : 1, transition: "opacity 0.2s" }}>
+          {/* Layer 7: The pixel character — hidden during intro */}
+          <div style={{ opacity: projectWindow || introActive ? 0 : 1, transition: "opacity 0.2s" }}>
             <PixelCharacter
               state={character}
               groundY={CANVAS.GROUND_Y}
@@ -429,6 +439,15 @@ export function GameCanvas() {
               leanAngle={leanAngle}
             />
           </div>
+
+          {/* First-visit intro sequence */}
+          {introActive && (
+            <IntroSequence
+              characterX={character.x}
+              groundY={CANVAS.GROUND_Y}
+              onDismiss={() => setIntroActive(false)}
+            />
+          )}
 
           {/* Layer 8: Warp particle system overlay */}
           <WarpParticles

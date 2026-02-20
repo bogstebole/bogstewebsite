@@ -27,7 +27,6 @@ export function NervousBoule({ scrollY, isOpen }: NervousBouleProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const particlesRef = useRef<Particle[]>([]);
     const [dimensions, setDimensions] = useState({ w: 0, h: 0 });
-    const [shouldRender, setShouldRender] = useState(false);
 
     useEffect(() => {
         if (typeof window !== "undefined") {

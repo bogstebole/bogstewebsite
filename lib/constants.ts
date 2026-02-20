@@ -69,11 +69,8 @@ export const FIGMA_POSITIONS = {
   },
   /** Work cluster */
   work: {
-    // Overlapping configuration:
-    // Content Snare (top)
-    contentSnare: { x: 270, y: 420, size: 48 },
-    // Fynn.io (bottom/under)
-    fynnio: { x: 290, y: 440, size: 48 },
+    /** Top-left anchor of the folder container */
+    folder: { x: 280, y: 375 },
     label: { x: 280, y: 510 },
   },
   /** Header */
