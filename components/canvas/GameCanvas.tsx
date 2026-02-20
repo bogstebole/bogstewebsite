@@ -3,14 +3,15 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { PixelCharacter, DISPLAY_H } from "./PixelCharacter";
 import { GroundLine } from "./GroundLine";
-import { Clouds } from "./clouds";
+import { WeatherCanvas } from "./weather/WeatherCanvas";
+import { WeatherReadout } from "./weather/WeatherReadout";
+import { useWeather } from "./weather/useWeather";
 import { PixelPortal } from "./pixel-portal";
 import { WarpParticles } from "./WarpParticles";
 import { PixelDust } from "./pixel-dust";
 import { LightningTrail } from "./lightning-trail";
 import { ProjectCluster, PROJECTS } from "@/components/elements/project-cluster";
 import { WorkCluster } from "@/components/elements/work-cluster";
-import { Stars } from "./stars";
 import { RetroWindow } from "@/components/ui/retro-window";
 import { ProjectDetailWindow } from "@/components/ui/project-detail-window";
 import type { ProjectData } from "@/components/ui/project-detail-window";
@@ -43,6 +44,7 @@ interface HeadbuttState {
 
 export function GameCanvas() {
   const { isDark } = useTheme();
+  const weather = useWeather();
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
   const cursorXRef = useRef(0);
@@ -389,11 +391,8 @@ export function GameCanvas() {
     >
       {character && (
         <>
-          {/* Layer 0: Background Stars (Dark mode only) */}
-          <Stars />
-
-          {/* Layer 1: Decorative clouds */}
-          <Clouds />
+          {/* Layer 0: Live weather background */}
+          <WeatherCanvas weatherState={weather.condition} />
 
           {/* Layer 2: Project cluster */}
           <ProjectCluster
@@ -489,6 +488,13 @@ export function GameCanvas() {
           >
             <AboutTimeline />
           </RetroWindow>
+
+          {/* Weather info overlay */}
+          <WeatherReadout
+            tempC={weather.tempC}
+            condition={weather.condition}
+            loading={weather.loading}
+          />
 
           {activeSection && activeSection !== "about" && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80">
