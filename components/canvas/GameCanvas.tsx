@@ -4,7 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { PixelCharacter, DISPLAY_H } from "./PixelCharacter";
 import { GroundLine } from "./GroundLine";
 import { WeatherCanvas } from "./weather/WeatherCanvas";
-import { WeatherReadout } from "./weather/WeatherReadout";
+import { InfoPanel } from "@/components/ui/info-panel";
 import { useWeather } from "./weather/useWeather";
 import { PixelPortal } from "./pixel-portal";
 import { WarpParticles } from "./WarpParticles";
@@ -489,8 +489,8 @@ export function GameCanvas() {
             <AboutTimeline />
           </RetroWindow>
 
-          {/* Weather info overlay */}
-          <WeatherReadout
+          {/* Info panel — whoami, projects, last listened, weather */}
+          <InfoPanel
             tempC={weather.tempC}
             condition={weather.condition}
             loading={weather.loading}
