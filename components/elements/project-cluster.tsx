@@ -117,6 +117,7 @@ export function ProjectCluster({ launchedIconKey, impactIconKey, poppedIconKey, 
       {/* Glass container — gradient border via background trick */}
       <div
         className="absolute pointer-events-auto transition-all duration-700"
+        onClick={(e) => e.stopPropagation()}
         style={{
           left: `${figmaX(containerX)}%`,
           top: `${figmaY(containerY)}%`,
