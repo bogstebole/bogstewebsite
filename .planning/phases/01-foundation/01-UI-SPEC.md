@@ -57,7 +57,7 @@ Phase 1 has no typographic content. The close-up sprite is pure pixel art — no
 | Game / pixel label | Silkscreen | 14px | 400 | 1.4 | Reserved for future pixel-aesthetic UI labels |
 | Game / pixel heading | Silkscreen | 20px | 700 | 1.2 | Reserved for future pixel-aesthetic headings |
 | UI body | Geist Sans | 16px | 400 | 1.5 | Standard UI copy (Phase 3 greeting text target) |
-| UI display | Geist Sans | 28px | 600 | 1.2 | Large impactful copy — not used in Phase 1 |
+| UI display | Geist Sans | 28px | 700 | 1.2 | Large impactful copy — not used in Phase 1 |
 
 Phase 1 active typography: none (sprite-only phase).
 
