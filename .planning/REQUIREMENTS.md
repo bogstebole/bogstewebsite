@@ -7,7 +7,7 @@
 
 ### Intro Animation
 
-- [ ] **INTRO-01**: First-time visitor gate via `localStorage` flag — repeat visitors skip straight to canvas
+- [x] **INTRO-01**: First-time visitor gate via `localStorage` flag — repeat visitors skip straight to canvas
 - [ ] **INTRO-02**: Boule lunges toward the camera with fast snap motion (anime style — no ease-in float)
 - [ ] **INTRO-03**: At close-up peak, character's head is dominant and fills the viewport
 - [ ] **INTRO-04**: Transition from normal position to close-up is smooth but fast (≤0.4s lunge duration)
@@ -26,8 +26,8 @@
 
 ### Art
 
-- [ ] **ART-01**: New higher-resolution pixel art sprite for the close-up moment — same palette as `PALETTE` in `PixelCharacter.tsx`, but more facial detail (eyes, nose, expression readable at large scale)
-- [ ] **ART-02**: Close-up sprite is a self-contained component/asset separate from the walking character
+- [x] **ART-01**: New higher-resolution pixel art sprite for the close-up moment — same palette as `PALETTE` in `PixelCharacter.tsx`, but more facial detail (eyes, nose, expression readable at large scale)
+- [x] **ART-02**: Close-up sprite is a self-contained component/asset separate from the walking character
 
 ### Cleanup
 
@@ -53,9 +53,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ART-01 | Phase 1 | Pending |
-| ART-02 | Phase 1 | Pending |
-| INTRO-01 | Phase 1 | Pending |
+| ART-01 | Phase 1 | Complete |
+| ART-02 | Phase 1 | Complete |
+| INTRO-01 | Phase 1 | Complete |
 | INTRO-02 | Phase 2 | Pending |
 | INTRO-03 | Phase 2 | Pending |
 | INTRO-04 | Phase 2 | Pending |

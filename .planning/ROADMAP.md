@@ -12,7 +12,7 @@ Three phases to replace the existing intro sequence with a dramatic anime close-
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Close-up sprite asset and first-visit gate logic
+- [x] **Phase 1: Foundation** - Close-up sprite asset and first-visit gate logic (completed 2026-03-16)
 - [ ] **Phase 2: Cinematic** - Lunge animation and full visual effects stack
 - [ ] **Phase 3: Resolution** - Greeting sequence, auto-dismiss, and old component cleanup
 
@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. A higher-resolution pixel art close-up sprite renders correctly using the same `PALETTE` as `PixelCharacter.tsx` with `imageRendering: pixelated`
   2. The close-up sprite lives in its own self-contained component, independent from the walking character
   3. A first-time visitor sees the intro overlay; a repeat visitor (returning after the flag is set) lands directly on the canvas with no intro
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 01-01-PLAN.md — Create close-up sprite component and wire first-visit localStorage gate
@@ -61,6 +61,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/1 | Planning complete | - |
+| 1. Foundation | 1/1 | Complete   | 2026-03-16 |
 | 2. Cinematic | 0/TBD | Not started | - |
 | 3. Resolution | 0/TBD | Not started | - |
