@@ -5,6 +5,8 @@ import { PixelCharacter, DISPLAY_H } from "./PixelCharacter";
 import { GroundLine } from "./GroundLine";
 import { WeatherCanvas } from "./weather/WeatherCanvas";
 import { InfoPanel } from "@/components/ui/info-panel";
+import { Logo } from "@/components/ui/logo";
+import CelestialToggle from "@/components/ui/celestial-toggle";
 import { useWeather } from "./weather/useWeather";
 import { PixelPortal } from "./pixel-portal";
 import { WarpParticles } from "./WarpParticles";
@@ -27,7 +29,27 @@ import {
 } from "@/lib/game-engine";
 
 import { useTheme } from "@/components/providers/theme-provider";
-import { IntroSequence } from "./intro-sequence";
+// TODO(CLEAN-01): Remove IntroSequence import — kept until Phase 3 cleanup
+// import { IntroSequence } from "./intro-sequence";
+import { CloseupSprite } from "./closeup-sprite";
+import dynamic from "next/dynamic";
+
+
+function isFirstVisit(): boolean {
+  try {
+    return localStorage.getItem("intro_seen") === null;
+  } catch {
+    return true; // Storage blocked (incognito strict mode) — treat as first visit
+  }
+}
+
+function markVisited(): void {
+  try {
+    localStorage.setItem("intro_seen", "true");
+  } catch {
+    // Storage unavailable — silent, will show intro again next visit
+  }
+}
 
 /* ---------- Headbutt state ---------- */
 type HeadbuttPhase = "sprint" | "jump" | "impact" | "iconReaction" | "window";
@@ -43,7 +65,7 @@ interface HeadbuttState {
 }
 
 export function GameCanvas() {
-  const { isDark } = useTheme();
+  const { isDark, setManual } = useTheme();
   const weather = useWeather();
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
@@ -73,9 +95,9 @@ export function GameCanvas() {
     // Keep character centered during intro — freeze cursor at center
     cursorXRef.current = container.clientWidth / 2;
     setCharacter(createInitialState(container.clientWidth));
-    if (!localStorage.getItem("boule-visited")) {
+    if (isFirstVisit()) {
       setIntroActive(true);
-      localStorage.setItem("boule-visited", "1");
+      // NOTE: do NOT call markVisited() here — flag is set in onDismiss
     }
   }, []);
 
@@ -247,6 +269,11 @@ export function GameCanvas() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const handleIntroDismiss = useCallback(() => {
+    markVisited();
+    setIntroActive(false);
+  }, []);
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (introActive) return;
     const rect = containerRef.current?.getBoundingClientRect();
@@ -389,6 +416,19 @@ export function GameCanvas() {
       onMouseMove={handleMouseMove}
       onClick={handleClick}
     >
+      {/* Fixed top-right: CelestialToggle — always visible */}
+      <div
+        className="fixed z-40 pointer-events-auto"
+        style={{ top: 32, right: 32 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ width: 200 * 0.27, height: 88 * 0.27, overflow: "visible" }}>
+          <div style={{ transform: "scale(0.27)", transformOrigin: "top left" }}>
+            <CelestialToggle isDark={isDark} onToggle={setManual} />
+          </div>
+        </div>
+      </div>
+
       {character && (
         <>
           {/* Layer 0: Live weather background */}
@@ -439,13 +479,9 @@ export function GameCanvas() {
             />
           </div>
 
-          {/* First-visit intro sequence */}
+          {/* First-visit intro overlay */}
           {introActive && (
-            <IntroSequence
-              characterX={character.x}
-              groundY={CANVAS.GROUND_Y}
-              onDismiss={() => setIntroActive(false)}
-            />
+            <CloseupSprite onDismiss={handleIntroDismiss} />
           )}
 
           {/* Layer 8: Warp particle system overlay */}
@@ -489,12 +525,26 @@ export function GameCanvas() {
             <AboutTimeline />
           </RetroWindow>
 
-          {/* Info panel — whoami, projects, last listened, weather */}
-          <InfoPanel
-            tempC={weather.tempC}
-            condition={weather.condition}
-            loading={weather.loading}
-          />
+          {/* Top-left: Logo */}
+          <div
+            className="absolute pointer-events-auto z-20"
+            style={{ top: 28, left: 28 }}
+          >
+            <Logo />
+          </div>
+
+          {/* Bottom-left: InfoPanel */}
+          <div
+            className="absolute pointer-events-none"
+            style={{ bottom: 28, left: 28 }}
+          >
+            <InfoPanel
+              tempC={weather.tempC}
+              condition={weather.condition}
+              loading={weather.loading}
+            />
+          </div>
+
 
           {activeSection && activeSection !== "about" && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80">
