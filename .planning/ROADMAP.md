@@ -26,7 +26,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. A higher-resolution pixel art close-up sprite renders correctly using the same `PALETTE` as `PixelCharacter.tsx` with `imageRendering: pixelated`
   2. The close-up sprite lives in its own self-contained component, independent from the walking character
   3. A first-time visitor sees the intro overlay; a repeat visitor (returning after the flag is set) lands directly on the canvas with no intro
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 01-01-PLAN.md — Create close-up sprite component and wire first-visit localStorage gate
 
 ### Phase 2: Cinematic
 **Goal**: The dramatic lunge animation plays with fish-eye distortion and a dark vignette
@@ -58,6 +61,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
+| 1. Foundation | 0/1 | Planning complete | - |
 | 2. Cinematic | 0/TBD | Not started | - |
 | 3. Resolution | 0/TBD | Not started | - |
