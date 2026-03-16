@@ -53,6 +53,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| ART-01 | Phase 1 | Pending |
+| ART-02 | Phase 1 | Pending |
 | INTRO-01 | Phase 1 | Pending |
 | INTRO-02 | Phase 2 | Pending |
 | INTRO-03 | Phase 2 | Pending |
@@ -63,8 +65,6 @@
 | GREET-01 | Phase 3 | Pending |
 | GREET-02 | Phase 3 | Pending |
 | GREET-03 | Phase 3 | Pending |
-| ART-01 | Phase 1 | Pending |
-| ART-02 | Phase 1 | Pending |
 | CLEAN-01 | Phase 3 | Pending |
 
 **Coverage:**
@@ -74,4 +74,4 @@
 
 ---
 *Requirements defined: 2026-03-16*
-*Last updated: 2026-03-16 after initial definition*
+*Last updated: 2026-03-16 after roadmap creation — traceability grouped by phase*
