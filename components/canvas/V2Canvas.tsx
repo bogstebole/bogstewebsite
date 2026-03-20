@@ -229,37 +229,6 @@ export function V2Canvas() {
       >
         <Logo />
 
-        {/* Water shader icon */}
-        <div
-          style={{
-            marginTop: 24,
-            width: 48,
-            height: 48,
-            flexShrink: 0,
-            borderRadius: 16,
-            overflow: "clip",
-            backdropFilter: "blur(1px)",
-            boxShadow:
-              "#FFFFFF -2px 2px 2px 1px inset, #00000069 -1px -3px 3px -2px inset, #000000D6 2px 1px 4px -4px inset, #FFFFFF 0px 0px 7px 4px inset, #00000040 0px -9px 14px 4px inset, #0000001A -2px -3px 5px 3px inset, #FFFFFF 0px 20px 8px -9px inset, #0000001A 0px 34px 10px -9px inset, #00000003 0px 27px 8px, #00000003 0px 17px 6px, #0000000D 0px 10px 6px, #0000001A 0px 4px 4px, #0000001A 0px 1px 3px",
-          }}
-        >
-          <Water
-            speed={1}
-            size={1}
-            highlights={0.07}
-            layering={0.73}
-            edges={1}
-            waves={0.46}
-            caustic={0.15}
-            scale={0.54}
-            fit="contain"
-            image="https://workers.paper.design/file-assets/01KM2PRGZVJ24AH6QP30SA1ZFC/01KM43617TW5JDA9KV97W8XJ8Z.png"
-            colorBack="#00000000"
-            colorHighlight="#FFFFFF"
-            style={{ width: "100%", height: "100%", backgroundColor: "transparent" }}
-          />
-        </div>
-
         {/* Name block */}
         <div style={{ marginTop: 16, textAlign: "center" }}>
           <div
