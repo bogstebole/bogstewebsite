@@ -29,9 +29,103 @@ const GLASS_CARD_SHADOW = [
 ]; */
 
 const POOL_ITEMS = [
-  { label: "Dress Up", image: "/images/notes.png",   tx: 162.823, ty: 156.559, rotate: "339.17deg", width: 31, transformOrigin: "0% 0%" },
-  { label: "Vorli",    image: "/images/receipt.png", tx: 244.5,   ty: 156,     rotate: "0deg",      width: 32, transformOrigin: undefined },
+  { label: "Dress Up", image: "/images/notes.png",   width: 31 },
+  { label: "Vorli",    image: "/images/receipt.png", width: 32 },
 ];
+
+const POOL_W = 603;
+const POOL_H = 337;
+const WALL_PAD = 28;
+const ICON_H = 32;
+const SPEED = 0.0165;
+
+function usePoolFloat(items: Array<{ width: number }>) {
+  const refs = useRef<Array<HTMLImageElement | null>>(items.map(() => null));
+  const state = useRef(
+    items.map((item, i) => ({
+      x: 80 + i * 160,
+      y: 100 + i * 60,
+      vx: SPEED * (i % 2 === 0 ? 1 : -0.7),
+      vy: SPEED * (i % 2 === 0 ? 0.6 : -1),
+      rot: i * 5,
+      rotV: 0.006 * (i % 2 === 0 ? 1 : -1),
+      width: item.width,
+    }))
+  );
+
+  useEffect(() => {
+    let rafId: number;
+
+    function tick() {
+      state.current.forEach((s, i) => {
+        const el = refs.current[i];
+        if (!el) return;
+
+        s.x += s.vx;
+        s.y += s.vy;
+        s.rot += s.rotV;
+
+        const minX = WALL_PAD;
+        const maxX = POOL_W - WALL_PAD - s.width;
+        const minY = WALL_PAD;
+        const maxY = POOL_H - WALL_PAD - ICON_H;
+
+        if (s.x <= minX) { s.x = minX; s.vx = Math.abs(s.vx); }
+        if (s.x >= maxX) { s.x = maxX; s.vx = -Math.abs(s.vx); }
+        if (s.y <= minY) { s.y = minY; s.vy = Math.abs(s.vy); }
+        if (s.y >= maxY) { s.y = maxY; s.vy = -Math.abs(s.vy); }
+
+        if (s.rot > 12)  { s.rot = 12;  s.rotV = -Math.abs(s.rotV); }
+        if (s.rot < -12) { s.rot = -12; s.rotV =  Math.abs(s.rotV); }
+      });
+
+      // Icon-icon elastic collision
+      const [a, b] = state.current;
+      const acx = a.x + a.width / 2;
+      const acy = a.y + ICON_H / 2;
+      const bcx = b.x + b.width / 2;
+      const bcy = b.y + ICON_H / 2;
+      const dx = bcx - acx;
+      const dy = bcy - acy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const minDist = (a.width + b.width) / 2;
+
+      if (dist < minDist && dist > 0) {
+        const nx = dx / dist;
+        const ny = dy / dist;
+        // Separate
+        const overlap = (minDist - dist) / 2;
+        a.x -= nx * overlap;
+        a.y -= ny * overlap;
+        b.x += nx * overlap;
+        b.y += ny * overlap;
+        // Reflect velocities along collision normal (equal mass elastic)
+        const dvDotN = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+        if (dvDotN > 0) {
+          a.vx -= dvDotN * nx;
+          a.vy -= dvDotN * ny;
+          b.vx += dvDotN * nx;
+          b.vy += dvDotN * ny;
+        }
+      }
+
+      // Write to DOM
+      state.current.forEach((s, i) => {
+        const el = refs.current[i];
+        if (!el) return;
+        el.style.translate = `${s.x}px ${s.y}px`;
+        el.style.rotate = `${s.rot}deg`;
+      });
+
+      rafId = requestAnimationFrame(tick);
+    }
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return refs;
+}
 
 const TYPEWRITER_PHRASES = [
   "Product Designer",
@@ -96,6 +190,7 @@ function useTypewriter() {
 export function V2Canvas() {
   const { isDark } = useTheme();
   const { displayText, isIdle } = useTypewriter();
+  const poolRefs = usePoolFloat(POOL_ITEMS);
 
   const primaryColor = isDark ? "#d0d0d0" : "#000000";
   const primary80 = isDark ? "rgba(208,208,208,0.80)" : "rgba(0,0,0,0.80)";
@@ -116,6 +211,7 @@ export function V2Canvas() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
         }
+
       `}</style>
 
       {/* ── Intro text block ── */}
@@ -304,19 +400,17 @@ export function V2Canvas() {
             }}
           />
           {/* Floating project icons */}
-          {POOL_ITEMS.map((item) => (
+          {POOL_ITEMS.map((item, index) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={item.label}
+              ref={(el) => { poolRefs.current[index] = el; }}
               src={item.image}
               alt={item.label}
               style={{
                 position: "absolute",
                 left: 0,
                 top: 0,
-                translate: `${item.tx}px ${item.ty}px`,
-                rotate: item.rotate,
-                transformOrigin: item.transformOrigin,
                 width: item.width,
                 height: 32,
                 borderRadius: 6,
