@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTheme } from "@/components/providers/theme-provider";
 import type { WeatherState } from "@/components/canvas/weather/wmo-map";
+import { LiveClock } from "@/components/ui/live-clock";
 
 const CONDITION_LABELS: Record<WeatherState, string> = {
   clear_day: "Clear",
@@ -96,68 +97,6 @@ function TerminalCommand({
   );
 }
 
-// ── Project row — whole row highlights when it contains links ─────────────────
-interface TagDef {
-  label: string;
-  color: string;
-  href?: string;
-}
-
-function ProjectRow({
-  name,
-  tags,
-  textPrimary,
-  isDark,
-}: {
-  name: string;
-  tags: TagDef[];
-  textPrimary: string;
-  isDark: boolean;
-}) {
-  const hasLinks = tags.some((t) => !!t.href);
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      className={hasLinks ? "pointer-events-auto" : undefined}
-      style={{
-        display: "flex",
-        gap: 8,
-        alignItems: "center",
-        whiteSpace: "nowrap",
-        padding: "2px 6px",
-        margin: "0 -6px",
-        borderRadius: 2,
-        backgroundColor: hovered && hasLinks ? hoverBg(isDark) : "transparent",
-        transition: "background-color 0.12s",
-      }}
-      onMouseEnter={() => hasLinks && setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <span style={{ color: "#666" }}>→</span>
-      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-        <span style={{ color: textPrimary }}>{name}</span>
-        {tags.map((tag) =>
-          tag.href ? (
-            <a
-              key={tag.label}
-              href={tag.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: tag.color, textDecoration: "none", cursor: "pointer" }}
-            >
-              {tag.label}
-            </a>
-          ) : (
-            <span key={tag.label} style={{ color: tag.color }}>
-              {tag.label}
-            </span>
-          )
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ── Main component ────────────────────────────────────────────────────────────
 export function InfoPanel({ tempC, condition, loading }: InfoPanelProps) {
@@ -168,15 +107,12 @@ export function InfoPanel({ tempC, condition, loading }: InfoPanelProps) {
   const displayTemp = isCelsius ? tempC : Math.round((tempC * 9) / 5 + 32);
 
   const textPrimary = isDark ? "rgba(255,255,255,0.7)" : "rgba(4,4,4,0.7)";
-  const textMuted = isDark ? "rgba(255,255,255,0.29)" : "rgba(0,0,0,0.29)";
 
   return (
     <div
-      className="absolute pointer-events-none select-none"
+      className="pointer-events-none select-none"
       style={{
-        bottom: 28,
-        left: 28,
-        fontFamily: `var(--font-geist-mono), "SF Mono", "SFMono-Regular", monospace`,
+        fontFamily: `var(--font-jetbrains-mono), "JetBrains Mono", monospace`,
         fontSize: 12,
         lineHeight: 1.3,
         display: "flex",
@@ -196,7 +132,7 @@ export function InfoPanel({ tempC, condition, loading }: InfoPanelProps) {
               <span style={{ color: textPrimary }}>design engineer</span>
               <span style={{ color: textPrimary }}>
                 {"design lead at "}
-                <HoverLink href="https://tenscope.io" color="#4f73ff" isDark={isDark}>
+                <HoverLink href="https://www.tenscope.com/" color="#4f73ff" isDark={isDark}>
                   tenscope [↗]
                 </HoverLink>
               </span>
@@ -209,83 +145,12 @@ export function InfoPanel({ tempC, condition, loading }: InfoPanelProps) {
           </div>
         </div>
 
-        {/* ~ $ personal projects */}
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <TerminalCommand command="personal projects" isDark={isDark} />
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <ProjectRow
-              name="useless notes"
-              textPrimary={textPrimary}
-              isDark={isDark}
-              tags={[
-                { label: "[finished]", color: "#03940d" },
-                {
-                  label: "[app store]",
-                  color: "#4f73ff",
-                  href: "https://apps.apple.com/us/app/useless-notes/id6443455183",
-                },
-                {
-                  label: "[↗]",
-                  color: "#167fff",
-                  href: "https://apps.apple.com/us/app/useless-notes/id6443455183",
-                },
-              ]}
-            />
-            <ProjectRow
-              name="receipt"
-              textPrimary={textPrimary}
-              isDark={isDark}
-              tags={[
-                { label: "[finished]", color: "#03940d" },
-                { label: "[local]", color: textMuted },
-              ]}
-            />
-            <ProjectRow
-              name="weather"
-              textPrimary={textPrimary}
-              isDark={isDark}
-              tags={[{ label: "[in progress]", color: "#e57112" }]}
-            />
-            <ProjectRow
-              name="zones"
-              textPrimary={textPrimary}
-              isDark={isDark}
-              tags={[{ label: "[in progress]", color: "#e57112" }]}
-            />
-            <ProjectRow
-              name="pacer"
-              textPrimary={textPrimary}
-              isDark={isDark}
-              tags={[{ label: "[on hold]", color: textMuted }]}
-            />
-            <ProjectRow
-              name="pauschal tracker"
-              textPrimary={textPrimary}
-              isDark={isDark}
-              tags={[
-                { label: "[finished]", color: "#03940d" },
-                { label: "[local]", color: textMuted },
-              ]}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ── ~ $ last listened to ── */}
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <TerminalCommand command="last listened to" isDark={isDark} />
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span style={{ color: "#666" }}>♫</span>
-          <span style={{ color: textPrimary }}>Tool - The pot</span>
-          <span style={{ color: "#e57112" }}>[in progress]</span>
-        </div>
       </div>
 
       {/* ── ~ $ weather -- location current ── */}
       <div style={{ display: "flex", flexDirection: "column" }}>
         <TerminalCommand command="weather" isDark={isDark} suffix="-- location current" />
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span style={{ color: "#666" }}>♫</span>
           <span
             style={{
               color: textPrimary,
@@ -342,6 +207,12 @@ export function InfoPanel({ tempC, condition, loading }: InfoPanelProps) {
             {CONDITION_LABELS[condition]}
           </span>
         </div>
+      </div>
+
+      {/* ── ~ $ date ── */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <TerminalCommand command="date" isDark={isDark} />
+        <LiveClock />
       </div>
     </div>
   );

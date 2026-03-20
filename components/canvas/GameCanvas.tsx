@@ -489,12 +489,14 @@ export function GameCanvas() {
             <AboutTimeline />
           </RetroWindow>
 
-          {/* Info panel — whoami, projects, last listened, weather */}
-          <InfoPanel
-            tempC={weather.tempC}
-            condition={weather.condition}
-            loading={weather.loading}
-          />
+          {/* Info panel — bottom-left corner */}
+          <div className="absolute bottom-0 left-0 z-30 pointer-events-none" style={{ padding: 24 }}>
+            <InfoPanel
+              tempC={weather.tempC}
+              condition={weather.condition}
+              loading={weather.loading}
+            />
+          </div>
 
           {activeSection && activeSection !== "about" && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80">

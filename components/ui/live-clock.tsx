@@ -38,8 +38,8 @@ export function LiveClock() {
     <span
       className="select-none transition-colors duration-700"
       style={{
-        fontFamily: `"SF Mono", "SFMono-Regular", var(--font-geist-mono), monospace`,
-        fontSize: 14,
+        fontFamily: `var(--font-jetbrains-mono), "JetBrains Mono", monospace`,
+        fontSize: 12,
         color: isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)",
         letterSpacing: "0.02em",
       }}
