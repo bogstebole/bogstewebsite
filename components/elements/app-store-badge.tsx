@@ -1,0 +1,113 @@
+"use client";
+
+interface AppStoreBadgeProps {
+  active: boolean;
+}
+
+export function AppStoreBadge({ active }: AppStoreBadgeProps) {
+  return active ? (
+    <div
+      style={{
+        alignItems: "center",
+        backdropFilter: "blur(1px)",
+        borderRadius: "calc(infinity * 1px)",
+        boxShadow: [
+          "#FFFFFF -2px 2px 2px 1px inset",
+          "#00000069 -1px -3px 3px -2px inset",
+          "#000000D6 2px 1px 4px -4px inset",
+          "#FFFFFF 0px 0px 7px 4px inset",
+          "#00000040 0px -9px 14px 4px inset",
+          "#0000001A -2px -3px 5px 3px inset",
+          "#FFFFFF 0px 20px 8px -9px inset",
+          "#0000001A 0px 34px 10px -9px inset",
+          "#00000003 0px 27px 8px",
+          "#00000003 0px 17px 6px",
+          "#0000000D 0px 10px 6px",
+          "#0000001A 0px 4px 4px",
+          "#0000001A 0px 1px 3px",
+        ].join(", "),
+        display: "flex",
+        gap: 4,
+        height: 21,
+        justifyContent: "space-between",
+        paddingBottom: 9,
+        paddingLeft: 6,
+        paddingRight: 12,
+        paddingTop: 9,
+        transition: "all 0.25s ease",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/images/app-store-icon.png"
+        alt=""
+        style={{
+          flexShrink: 0,
+          height: 16,
+          objectFit: "cover",
+          rotate: "6.64deg",
+          transformOrigin: "50% 50%",
+          transition: "filter 0.25s ease",
+          width: 16,
+        }}
+      />
+      <span
+        style={{
+          color: "#111111",
+          display: "inline-block",
+          fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+          fontSize: 10,
+          letterSpacing: "0.03em",
+          lineHeight: "16px",
+        }}
+      >
+        Live on App Store
+      </span>
+    </div>
+  ) : (
+    <div
+      style={{
+        alignItems: "center",
+        backgroundColor: "#F3F3F3",
+        borderRadius: 4,
+        display: "flex",
+        gap: 6,
+        height: 18,
+        paddingBottom: 3,
+        paddingLeft: 4,
+        paddingRight: 6,
+        paddingTop: 3,
+        transition: "all 0.25s ease",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/images/app-store-icon.png"
+        alt=""
+        style={{
+          filter: "grayscale(100%)",
+          flexShrink: 0,
+          height: 16,
+          objectFit: "cover",
+          rotate: "6.64deg",
+          transformOrigin: "50% 50%",
+          transition: "filter 0.25s ease",
+          width: 16,
+        }}
+      />
+      <span
+        style={{
+          color: "#888888",
+          fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+          fontSize: 9.5,
+          letterSpacing: "0.03em",
+          lineHeight: "12px",
+        }}
+      >
+        Live on App Store
+      </span>
+    </div>
+  );
+}

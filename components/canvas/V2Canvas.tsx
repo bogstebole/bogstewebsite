@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Water } from "@paper-design/shaders-react";
 import { Logo } from "@/components/ui/logo";
 import { useTheme } from "@/components/providers/theme-provider";
+import { ProjectSection } from "@/components/elements/project-section";
 
 const GLASS_CARD_SHADOW = [
   "#FFFFFF -2px 2px 2px 1px inset",
@@ -32,6 +33,7 @@ const POOL_ITEMS = [
   { label: "Dress Up", image: "/images/notes.png",   width: 31 },
   { label: "Vorli",    image: "/images/receipt.png", width: 32 },
 ];
+
 
 const POOL_W = 603;
 const POOL_H = 337;
@@ -200,10 +202,11 @@ export function V2Canvas() {
   return (
     <div
       style={{
-        position: "relative",
         width: "100%",
-        height: "100vh",
         background: isDark ? "#111" : "#fff",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
       }}
     >
       <style>{`
@@ -211,16 +214,12 @@ export function V2Canvas() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
         }
-
       `}</style>
 
       {/* ── Intro text block ── */}
       <div
         style={{
-          position: "absolute",
-          left: "50%",
-          top: 95,
-          transform: "translateX(-50%)",
+          paddingTop: 80,
           width: 355,
           display: "flex",
           flexDirection: "column",
@@ -313,84 +312,83 @@ export function V2Canvas() {
           web experiences. This site is a deliberate rejection of one-style
           portfolio design.
         </p>
-
       </div>
 
-      {/* ── Glass cards ── */}
       {/* ── Pool ── */}
       <div
         style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          translate: "-50% -50%",
+          marginTop: 60,
+          position: "relative",
+          width: 603,
+          height: 337,
+          borderRadius: 24,
+          overflow: "hidden",
+          boxShadow: "#00000033 -4px 4px 8px",
+          flexShrink: 0,
         }}
       >
+        {/* Water shader — animated pool surface */}
+        <Water
+          speed={0.28}
+          size={0.01}
+          highlights={0.06}
+          layering={0}
+          edges={0.58}
+          waves={0.05}
+          caustic={0}
+          scale={0.93}
+          fit="cover"
+          image="https://workers.paper.design/file-assets/01KM2PRGZVJ24AH6QP30SA1ZFC/01KM5BCACYB6D00EJHTVG5P7MV.png"
+          colorBack="#00000000"
+          colorHighlight="#FFFFFF"
+          style={{ backgroundColor: "#138FCD00", height: 337, left: 10, position: "absolute", top: 0, width: 590 }}
+        />
+        {/* Pool photo overlay — sits above the water shader */}
         <div
           style={{
-            position: "relative",
-            width: 603,
-            height: 337,
+            backgroundImage: "url(/images/pool-side.png)",
+            backgroundPosition: "center",
+            backgroundSize: "cover",
             borderRadius: 24,
-            overflow: "hidden",
-            boxShadow: "#00000033 -4px 4px 8px",
+            height: 337,
+            left: "50%",
+            position: "absolute",
+            top: 0,
+            translate: "-50%",
+            width: 603,
+            zIndex: 1,
           }}
-        >
-          {/* Water shader — animated pool surface */}
-          <Water
-            speed={0.28}
-            size={0.01}
-            highlights={0.06}
-            layering={0}
-            edges={0.58}
-            waves={0.05}
-            caustic={0}
-            scale={0.93}
-            fit="cover"
-            image="https://workers.paper.design/file-assets/01KM2PRGZVJ24AH6QP30SA1ZFC/01KM5BCACYB6D00EJHTVG5P7MV.png"
-            colorBack="#00000000"
-            colorHighlight="#FFFFFF"
-            style={{ backgroundColor: "#138FCD00", height: 337, left: 10, position: "absolute", top: 0, width: 590 }}
-          />
-          {/* Pool photo overlay — sits above the water shader */}
-          <div
+        />
+        {/* Floating project icons */}
+        {POOL_ITEMS.map((item, index) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={item.label}
+            ref={(el) => { poolRefs.current[index] = el; }}
+            src={item.image}
+            alt={item.label}
             style={{
-              backgroundImage: "url(/images/pool-side.png)",
-              backgroundPosition: "center",
-              backgroundSize: "cover",
-              borderRadius: 24,
-              height: 337,
-              left: "50%",
               position: "absolute",
+              left: 0,
               top: 0,
-              translate: "-50%",
-              width: 603,
-              zIndex: 1,
+              width: item.width,
+              height: 32,
+              borderRadius: 6,
+              objectFit: "cover" as const,
+              boxShadow: "#00000033 0px 6px 3px",
+              zIndex: 2,
             }}
           />
-          {/* Floating project icons */}
-          {POOL_ITEMS.map((item, index) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={item.label}
-              ref={(el) => { poolRefs.current[index] = el; }}
-              src={item.image}
-              alt={item.label}
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: item.width,
-                height: 32,
-                borderRadius: 6,
-                objectFit: "cover" as const,
-                boxShadow: "#00000033 0px 6px 3px",
-                zIndex: 2,
-              }}
-            />
-          ))}
-        </div>
+        ))}
       </div>
+
+      {/* ── Project section ── */}
+      <ProjectSection
+        primaryColor={primaryColor}
+        primary40={primary40}
+        isDark={isDark}
+        style={{ marginTop: 80, marginBottom: 120 }}
+      />
     </div>
   );
 }
