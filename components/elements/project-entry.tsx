@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 
@@ -12,14 +13,17 @@ interface ProjectEntryProps {
   appStore?: boolean;
   isHovered: boolean;
   isDimmed: boolean;
+  isActive?: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  onClick?: (key: string, rect: DOMRect) => void;
   primaryColor: string;
   primary40: string;
   isDark: boolean;
 }
 
 export function ProjectEntry({
+  entryKey,
   icon,
   label,
   tags,
@@ -27,21 +31,32 @@ export function ProjectEntry({
   appStore,
   isHovered,
   isDimmed,
+  isActive,
   onMouseEnter,
   onMouseLeave,
+  onClick,
   primaryColor,
   primary40,
   isDark,
 }: ProjectEntryProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const tagBg = isDark ? "rgba(255,255,255,0.08)" : "#F3F3F3";
+
+  const handleClick = () => {
+    if (!onClick || inProgress) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) onClick(entryKey, rect);
+  };
 
   return (
     <div
+      ref={containerRef}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onClick={handleClick}
       style={{
         alignItems: "start",
-        cursor: "pointer",
+        cursor: inProgress ? "default" : "pointer",
         display: "flex",
         flexDirection: "column",
         flexShrink: 0,
@@ -51,6 +66,7 @@ export function ProjectEntry({
         paddingBlock: 8,
         paddingInline: 0,
         transition: "opacity 0.2s ease",
+        visibility: isActive ? "hidden" : "visible",
         width: "fit-content",
       }}
     >

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Water } from "@paper-design/shaders-react";
 import { Logo } from "@/components/ui/logo";
-import { useTheme } from "@/components/providers/theme-provider";
 import { ProjectSection } from "@/components/elements/project-section";
+import { ProjectDetailCard } from "@/components/ui/project-detail-card";
 
 const GLASS_CARD_SHADOW = [
   "#FFFFFF -2px 2px 2px 1px inset",
@@ -190,23 +191,46 @@ function useTypewriter() {
 
 
 export function V2Canvas() {
-  const { isDark } = useTheme();
   const { displayText, isIdle } = useTypewriter();
   const poolRefs = usePoolFloat(POOL_ITEMS);
+  const [activeProject, setActiveProject] = useState<string | null>(null);
+  const [sourceRect, setSourceRect] = useState<DOMRect | null>(null);
 
-  const primaryColor = isDark ? "#d0d0d0" : "#000000";
-  const primary80 = isDark ? "rgba(208,208,208,0.80)" : "rgba(0,0,0,0.80)";
-  const primary70 = isDark ? "rgba(208,208,208,0.70)" : "rgba(0,0,0,0.70)";
-  const primary40 = isDark ? "rgba(208,208,208,0.40)" : "rgba(0,0,0,0.40)";
+  const handleProjectClick = (key: string, rect: DOMRect) => {
+    setSourceRect(rect);
+    setActiveProject(key);
+  };
+
+  const handleClose = () => {
+    setActiveProject(null);
+  };
+
+  // Lock body scroll when detail is open
+  useEffect(() => {
+    document.body.style.overflow = activeProject ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [activeProject]);
+
+  // Light mode only for V2
+  const primaryColor = "#000000";
+  const primary80 = "rgba(0,0,0,0.80)";
+  const primary70 = "rgba(0,0,0,0.70)";
+  const primary40 = "rgba(0,0,0,0.40)";
+
+  const blurAnim = activeProject
+    ? { scale: 0.93, filter: "blur(10px)", pointerEvents: "none" as const }
+    : { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const };
+  const blurTransition = { type: "spring" as const, stiffness: 250, damping: 30 };
 
   return (
     <div
       style={{
         width: "100%",
-        background: isDark ? "#111" : "#fff",
+        background: "#fff",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        position: "relative",
       }}
     >
       <style>{`
@@ -217,13 +241,16 @@ export function V2Canvas() {
       `}</style>
 
       {/* ── Intro text block ── */}
-      <div
+      <motion.div
+        animate={blurAnim}
+        transition={blurTransition}
         style={{
           paddingTop: 80,
           width: 355,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          transformOrigin: "50% 50%",
         }}
       >
         <Logo />
@@ -312,10 +339,12 @@ export function V2Canvas() {
           web experiences. This site is a deliberate rejection of one-style
           portfolio design.
         </p>
-      </div>
+      </motion.div>
 
       {/* ── Pool ── */}
-      <div
+      <motion.div
+        animate={blurAnim}
+        transition={blurTransition}
         style={{
           marginTop: 60,
           position: "relative",
@@ -325,6 +354,7 @@ export function V2Canvas() {
           overflow: "hidden",
           boxShadow: "#00000033 -4px 4px 8px",
           flexShrink: 0,
+          transformOrigin: "50% 50%",
         }}
       >
         {/* Water shader — animated pool surface */}
@@ -380,15 +410,38 @@ export function V2Canvas() {
             }}
           />
         ))}
-      </div>
+      </motion.div>
 
       {/* ── Project section ── */}
-      <ProjectSection
-        primaryColor={primaryColor}
-        primary40={primary40}
-        isDark={isDark}
-        style={{ marginTop: 80, marginBottom: 120 }}
-      />
+      <motion.div
+        animate={blurAnim}
+        transition={blurTransition}
+        style={{ transformOrigin: "50% 50%" }}
+      >
+        <ProjectSection
+          primaryColor={primaryColor}
+          primary40={primary40}
+          isDark={false}
+          activeProject={activeProject}
+          onProjectClick={handleProjectClick}
+          style={{ marginTop: 80, marginBottom: 120 }}
+        />
+      </motion.div>
+
+      {/* ── Project detail card — outside blurred sections ── */}
+      <AnimatePresence onExitComplete={() => setSourceRect(null)}>
+        {activeProject && sourceRect && (
+          <ProjectDetailCard
+            key={activeProject}
+            projectKey={activeProject}
+            sourceRect={sourceRect}
+            onClose={handleClose}
+            isDark={false}
+            primaryColor={primaryColor}
+            primary40={primary40}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
