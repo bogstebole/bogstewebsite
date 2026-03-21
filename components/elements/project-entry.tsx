@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 
@@ -13,10 +13,9 @@ interface ProjectEntryProps {
   appStore?: boolean;
   isHovered: boolean;
   isDimmed: boolean;
-  isActive?: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  onClick?: (key: string, rect: DOMRect) => void;
+  onClick?: (key: string) => void;
   primaryColor: string;
   primary40: string;
   isDark: boolean;
@@ -31,7 +30,6 @@ export function ProjectEntry({
   appStore,
   isHovered,
   isDimmed,
-  isActive,
   onMouseEnter,
   onMouseLeave,
   onClick,
@@ -39,18 +37,18 @@ export function ProjectEntry({
   primary40,
   isDark,
 }: ProjectEntryProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const tagBg = isDark ? "rgba(255,255,255,0.08)" : "#F3F3F3";
 
   const handleClick = () => {
     if (!onClick || inProgress) return;
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) onClick(entryKey, rect);
+    onClick(entryKey);
   };
 
   return (
-    <div
-      ref={containerRef}
+    <motion.div
+      layoutId={`project-card-${entryKey}`}
+      layout
+      transition={{ type: "spring", stiffness: 420, damping: 42 }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={handleClick}
@@ -66,7 +64,6 @@ export function ProjectEntry({
         paddingBlock: 8,
         paddingInline: 0,
         transition: "opacity 0.2s ease",
-        visibility: isActive ? "hidden" : "visible",
         width: "fit-content",
       }}
     >
@@ -80,8 +77,12 @@ export function ProjectEntry({
           height: "fit-content",
         }}
       >
-        {icon}
-        <span
+        <motion.div layoutId={`project-icon-${entryKey}`} layout>
+          {icon}
+        </motion.div>
+        <motion.span
+          layoutId={`project-title-${entryKey}`}
+          layout
           style={{
             color: primaryColor,
             display: "inline-block",
@@ -92,7 +93,7 @@ export function ProjectEntry({
           }}
         >
           {label}
-        </span>
+        </motion.span>
         <ArrowUpRight
           size={12}
           color={primaryColor}
@@ -119,7 +120,9 @@ export function ProjectEntry({
       </div>
 
       {/* Tags row */}
-      <div
+      <motion.div
+        layoutId={`project-tags-${entryKey}`}
+        layout
         style={{
           alignItems: "center",
           display: "flex",
@@ -155,7 +158,7 @@ export function ProjectEntry({
           </div>
         ))}
         {appStore && <AppStoreBadge active={isHovered} />}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

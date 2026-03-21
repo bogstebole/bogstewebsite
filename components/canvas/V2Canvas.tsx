@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Water } from "@paper-design/shaders-react";
 import { Logo } from "@/components/ui/logo";
 import { ProjectSection } from "@/components/elements/project-section";
@@ -194,10 +194,8 @@ export function V2Canvas() {
   const { displayText, isIdle } = useTypewriter();
   const poolRefs = usePoolFloat(POOL_ITEMS);
   const [activeProject, setActiveProject] = useState<string | null>(null);
-  const [sourceRect, setSourceRect] = useState<DOMRect | null>(null);
 
-  const handleProjectClick = (key: string, rect: DOMRect) => {
-    setSourceRect(rect);
+  const handleProjectClick = (key: string) => {
     setActiveProject(key);
   };
 
@@ -223,6 +221,7 @@ export function V2Canvas() {
   const blurTransition = { type: "spring" as const, stiffness: 250, damping: 30 };
 
   return (
+    <LayoutGroup>
     <div
       style={{
         width: "100%",
@@ -429,12 +428,11 @@ export function V2Canvas() {
       </motion.div>
 
       {/* ── Project detail card — outside blurred sections ── */}
-      <AnimatePresence onExitComplete={() => setSourceRect(null)}>
-        {activeProject && sourceRect && (
+      <AnimatePresence>
+        {activeProject && (
           <ProjectDetailCard
             key={activeProject}
             projectKey={activeProject}
-            sourceRect={sourceRect}
             onClose={handleClose}
             isDark={false}
             primaryColor={primaryColor}
@@ -443,5 +441,6 @@ export function V2Canvas() {
         )}
       </AnimatePresence>
     </div>
+    </LayoutGroup>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
+import { motion, useAnimation, type Variants } from "framer-motion";
 import GlassButton from "./Glassmorphic Button Breakdown";
 
 const USELESS_NOTES_ASSETS = [
@@ -33,105 +33,19 @@ const itemVariants: Variants = {
   exit: { opacity: 0, y: 6 },
 };
 
+type AnimationControls = ReturnType<typeof useAnimation>;
+
 interface UselessNotesDetailProps {
-  primaryColor: string;
-  primary40: string;
-  isDark: boolean;
+  controls: AnimationControls;
 }
 
-export function UselessNotesDetail({
-  primaryColor,
-  primary40,
-}: UselessNotesDetailProps) {
-  const tagBg = "#F3F3F3";
-
+export function UselessNotesDetail({ controls }: UselessNotesDetailProps) {
   return (
     <>
-      {/* Tags row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          flexWrap: "wrap",
-          flexShrink: 0,
-        }}
-      >
-        {["iOS", "Canvas"].map((tag) => (
-          <div
-            key={tag}
-            style={{
-              alignItems: "center",
-              backgroundColor: tagBg,
-              borderRadius: 4,
-              display: "flex",
-              height: 18,
-              paddingBlock: 3,
-              paddingInline: 7,
-            }}
-          >
-            <span
-              style={{
-                color: primary40,
-                fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                fontSize: 9.5,
-                letterSpacing: "0.03em",
-                lineHeight: "12px",
-              }}
-            >
-              {tag}
-            </span>
-          </div>
-        ))}
-
-        {/* Live on App Store */}
-        <div
-          style={{
-            alignItems: "center",
-            backgroundColor: tagBg,
-            borderRadius: 4,
-            display: "flex",
-            gap: 4,
-            height: 18,
-            paddingBottom: 3,
-            paddingLeft: 4,
-            paddingRight: 6,
-            paddingTop: 3,
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/receipt.png"
-            alt=""
-            style={{
-              filter: "grayscale(100%)",
-              flexShrink: 0,
-              height: 12,
-              objectFit: "cover",
-              rotate: "6.64deg",
-              transformOrigin: "50% 50%",
-              width: 12,
-            }}
-          />
-          <span
-            style={{
-              color: primary40,
-              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-              fontSize: 9.5,
-              letterSpacing: "0.03em",
-              lineHeight: "12px",
-            }}
-          >
-            Live on App Store
-          </span>
-        </div>
-      </div>
-
       {/* Description — staggered in first */}
       <motion.div
         initial="hidden"
-        animate="visible"
-        exit="exit"
+        animate={controls}
         variants={itemVariants}
         transition={{ delay: 0.22 }}
         style={{
@@ -147,15 +61,20 @@ export function UselessNotesDetail({
       </motion.div>
 
       {/* Download button */}
-      <div style={{ flexShrink: 0 }}>
+      <motion.div
+        initial="hidden"
+        animate={controls}
+        variants={itemVariants}
+        transition={{ delay: 0.29 }}
+        style={{ flexShrink: 0 }}
+      >
         <GlassButton>Download the app</GlassButton>
-      </div>
+      </motion.div>
 
       {/* Media grid — stagger driven by gridContainerVariants */}
       <motion.div
         initial="hidden"
-        animate="visible"
-        exit="exit"
+        animate={controls}
         variants={gridContainerVariants}
         style={{
           borderRadius: 32,

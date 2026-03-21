@@ -9,7 +9,7 @@ interface ProjectSectionProps {
   primary40: string;
   isDark: boolean;
   activeProject: string | null;
-  onProjectClick: (key: string, rect: DOMRect) => void;
+  onProjectClick: (key: string) => void;
   style?: React.CSSProperties;
 }
 
@@ -56,7 +56,6 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
     entryKey: key,
     isHovered: hoveredKey === key,
     isDimmed: hoveredKey !== null && hoveredKey !== key,
-    isActive: activeProject === key,
     onMouseEnter: () => setHoveredKey(key),
     onMouseLeave: () => setHoveredKey(null),
     onClick: onProjectClick,

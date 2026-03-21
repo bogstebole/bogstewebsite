@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { useCallback, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
+import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { UselessNotesDetail } from "./useless-notes-detail";
 
 interface ProjectDetailCardProps {
   projectKey: string;
-  sourceRect: DOMRect;
   onClose: () => void;
   isDark: boolean;
   primaryColor: string;
@@ -34,48 +34,49 @@ const PROJECT_ICONS: Record<string, { src: string; rotate?: string }> = {
   pauschalTracker: { src: "/images/pauschal-tracker.png", rotate: "7.68deg" },
 };
 
-const CARD_WIDTH = 600;
+const PROJECT_TAGS: Record<string, { tags: string[]; appStore?: boolean }> = {
+  uselessNotes: { tags: ["iOS", "Canvas"], appStore: true },
+  fynn: { tags: ["Web", "HealthTech", "B2B"] },
+  contentSnare: { tags: ["Web", "Productivity", "B2B, B2C"] },
+  vorli: { tags: ["iOS", "AI Financial Assistant", "Personal Usage"] },
+  timezoneGlobe: { tags: ["iOS", "Time Zone Tracker"] },
+  weatherWear: { tags: ["iOS", "Weather Through Clothes"] },
+  svgParticles: { tags: ["Web", "Canvas, Loader Tool", "Personal Usage"] },
+  pauschalTracker: { tags: ["Web", "Earning limit tracker", "Personal Usage"] },
+};
 
 export function ProjectDetailCard({
   projectKey,
-  sourceRect,
   onClose,
   primaryColor,
   primary40,
 }: ProjectDetailCardProps) {
+  const contentControls = useAnimation();
+
+  const initiateClose = useCallback(async () => {
+    await contentControls.start("exit");
+    onClose();
+  }, [contentControls, onClose]);
+
   // ESC to close
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") void initiateClose();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  // Compute transform-based initial position once (stable — sourceRect doesn't change)
-  const { initialX, initialY, initialScale } = useMemo(() => {
-    const cardLeft = (window.innerWidth - CARD_WIDTH) / 2;
-    const cardTop = window.innerHeight * 0.08;
-    return {
-      initialX: sourceRect.left - cardLeft,
-      initialY: sourceRect.top - cardTop,
-      initialScale: sourceRect.width / CARD_WIDTH,
-    };
-  }, [sourceRect]);
+  }, [initiateClose]);
 
   const label = PROJECT_LABELS[projectKey] ?? projectKey;
   const iconInfo = PROJECT_ICONS[projectKey];
+  const tagInfo = PROJECT_TAGS[projectKey];
+  const tagBg = "#F3F3F3";
 
   return (
     <>
       {/* Scroll wrapper — fixed fullscreen, handles scrolling and backdrop click */}
-      <motion.div
-        key="scroll-wrapper"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        onClick={onClose}
+      <div
+        onClick={() => void initiateClose()}
         style={{
           position: "fixed",
           inset: 0,
@@ -92,18 +93,16 @@ export function ProjectDetailCard({
             paddingBottom: "80px",
           }}
         >
-          {/* Card — transform-animated, no background */}
+          {/* Card — layoutId FLIP animates from entry position */}
           <motion.div
-            key="card"
-            initial={{ x: initialX, y: initialY, scale: initialScale }}
-            animate={{ x: 0, y: 0, scale: 1 }}
-            exit={{ x: initialX, y: initialY, scale: initialScale, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 420, damping: 42 }}
+            layoutId={`project-card-${projectKey}`}
+            layout
+            onLayoutAnimationComplete={() => void contentControls.start("visible")}
             onClick={(e) => e.stopPropagation()}
+            transition={{ type: "spring", stiffness: 420, damping: 42 }}
             style={{
-              width: CARD_WIDTH,
+              width: 600,
               position: "relative",
-              transformOrigin: "top left",
               display: "flex",
               flexDirection: "column",
               gap: 16,
@@ -125,21 +124,25 @@ export function ProjectDetailCard({
               }}
             >
               {iconInfo && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={iconInfo.src}
-                  alt={label}
-                  style={{
-                    width: 24,
-                    height: 24,
-                    objectFit: "cover",
-                    flexShrink: 0,
-                    rotate: iconInfo.rotate,
-                    transformOrigin: "50% 50%",
-                  }}
-                />
+                <motion.div layoutId={`project-icon-${projectKey}`} layout>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={iconInfo.src}
+                    alt={label}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      objectFit: "cover",
+                      flexShrink: 0,
+                      rotate: iconInfo.rotate,
+                      transformOrigin: "50% 50%",
+                    }}
+                  />
+                </motion.div>
               )}
-              <span
+              <motion.span
+                layoutId={`project-title-${projectKey}`}
+                layout
                 style={{
                   color: primaryColor,
                   fontFamily: '"JetBrains Mono", system-ui, sans-serif',
@@ -149,16 +152,55 @@ export function ProjectDetailCard({
                 }}
               >
                 {label}
-              </span>
+              </motion.span>
             </div>
 
-            {/* Project-specific content */}
+            {/* Tags row — shared with entry via layoutId */}
+            {tagInfo && (
+              <motion.div
+                layoutId={`project-tags-${projectKey}`}
+                layout
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  flexWrap: "wrap",
+                  flexShrink: 0,
+                }}
+              >
+                {tagInfo.tags.map((tag) => (
+                  <div
+                    key={tag}
+                    style={{
+                      alignItems: "center",
+                      backgroundColor: tagBg,
+                      borderRadius: 4,
+                      display: "flex",
+                      height: 18,
+                      paddingBlock: 3,
+                      paddingInline: 7,
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: primary40,
+                        fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+                        fontSize: 9.5,
+                        letterSpacing: "0.03em",
+                        lineHeight: "12px",
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  </div>
+                ))}
+                {tagInfo.appStore && <AppStoreBadge active />}
+              </motion.div>
+            )}
+
+            {/* Project-specific inner content — staggers in after layoutId settles */}
             {projectKey === "uselessNotes" ? (
-              <UselessNotesDetail
-                primaryColor={primaryColor}
-                primary40={primary40}
-                isDark={false}
-              />
+              <UselessNotesDetail controls={contentControls} />
             ) : (
               <div
                 style={{
@@ -173,7 +215,7 @@ export function ProjectDetailCard({
             )}
           </motion.div>
         </div>
-      </motion.div>
+      </div>
     </>
   );
 }
