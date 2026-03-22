@@ -19,7 +19,7 @@ const USELESS_NOTES_ASSETS = [
 const gridContainerVariants: Variants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.07, delayChildren: 0.32 },
+    transition: { staggerChildren: 0.07, delayChildren: 0.08 },
   },
   exit: {
     transition: { staggerChildren: 0.02, staggerDirection: -1 },
@@ -36,14 +36,14 @@ const itemVariants: Variants = {
 // Button exits after most grid items have gone (t=120ms)
 const buttonExitVariants: Variants = {
   hidden: { opacity: 0, y: 14 },
-  visible: { opacity: 1, y: 0, transition: { delay: 0.29 } },
+  visible: { opacity: 1, y: 0, transition: { delay: 0.08 } },
   exit: { opacity: 0, y: 6, transition: { duration: 0.1, delay: 0.12 } },
 };
 
 // Description exits last of the content block (t=170ms), before header
 const descriptionExitVariants: Variants = {
   hidden: { opacity: 0, y: 14 },
-  visible: { opacity: 1, y: 0, transition: { delay: 0.22 } },
+  visible: { opacity: 1, y: 0, transition: { delay: 0.04 } },
   exit: { opacity: 0, y: 6, transition: { duration: 0.1, delay: 0.17 } },
 };
 

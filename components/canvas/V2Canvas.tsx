@@ -226,7 +226,6 @@ export function V2Canvas() {
     <div
       style={{
         width: "100%",
-        background: "#fff",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
