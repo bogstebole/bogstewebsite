@@ -7,6 +7,14 @@ import { Logo } from "@/components/ui/logo";
 import { ProjectSection } from "@/components/elements/project-section";
 import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
 
+function getBuildVersion(): string {
+  const now = new Date();
+  const age = now.getFullYear() - 1993;
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  return `v${age}.${month}.${day}`;
+}
+
 const POOL_ITEMS = [
   { label: "Dress Up", image: "/images/notes.png",   width: 31 },
   { label: "Vorli",    image: "/images/receipt.png", width: 32 },
@@ -284,7 +292,7 @@ export function V2Canvas() {
               color: primary70,
             }}
           >
-            v33.3.18
+            {getBuildVersion()}
           </div>
         </div>
 
