@@ -1,34 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { motion } from "framer-motion";
 import { Water } from "@paper-design/shaders-react";
 import { Logo } from "@/components/ui/logo";
 import { ProjectSection } from "@/components/elements/project-section";
-import { ProjectDetailCard } from "@/components/ui/project-detail-card";
-
-const GLASS_CARD_SHADOW = [
-  "#FFFFFF -2px 2px 2px 1px inset",
-  "#00000069 -1px -3px 3px -2px inset",
-  "#000000D6 2px 1px 4px -4px inset",
-  "#FFFFFF 0px 0px 7px 4px inset",
-  "#00000040 0px -9px 14px 4px inset",
-  "#0000001A -2px -3px 5px 3px inset",
-  "#FFFFFF 0px 20px 8px -9px inset",
-  "#0000001A 0px 45px 26px -9px inset",
-  "#00000003 0px 27px 8px",
-  "#00000003 0px 17px 6px",
-  "#0000000D 0px 10px 6px",
-  "#0000001A 0px 4px 4px",
-  "#0000001A 0px 1px 3px",
-].join(", ");
-
-/* const GLASS_CARDS = [
-  { label: "Dress Up", image: "/images/puffer.png",  tx: 3.782,   ty: 3,      rotate: "1.72deg"   },
-  { label: "Vorli",    image: "/images/receipt.png", tx: 62.782,  ty: 20,     rotate: "354deg"    },
-  { label: "Uslss Nts",image: "/images/notes.png",   tx: 145.782, ty: 0,      rotate: "6deg"      },
-  { label: "Zoun",     image: "/images/globe.png",   tx: 207.987, ty: 14.182, rotate: "358.79deg" },
-]; */
+import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
 
 const POOL_ITEMS = [
   { label: "Dress Up", image: "/images/notes.png",   width: 31 },
@@ -194,13 +171,28 @@ export function V2Canvas() {
   const { displayText, isIdle } = useTypewriter();
   const poolRefs = usePoolFloat(POOL_ITEMS);
   const [activeProject, setActiveProject] = useState<string | null>(null);
+  const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const entryRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const handleProjectClick = (key: string) => {
-    setActiveProject(key);
+    const el = entryRefs.current[key];
+    if (el) {
+      setOriginRect(el.getBoundingClientRect());
+      setActiveProject(key);
+      setIsClosing(false);
+    }
+  };
+
+  // Called when the close sequence begins — un-blur background immediately
+  const handleCloseStart = () => {
+    setIsClosing(true);
   };
 
   const handleClose = () => {
     setActiveProject(null);
+    setOriginRect(null);
+    setIsClosing(false);
   };
 
   // Lock body scroll when detail is open
@@ -215,13 +207,14 @@ export function V2Canvas() {
   const primary70 = "rgba(0,0,0,0.70)";
   const primary40 = "rgba(0,0,0,0.40)";
 
-  const blurAnim = activeProject
+  // Un-blur background as soon as close begins, not just when activeProject clears
+  const shouldBlur = activeProject !== null && !isClosing;
+  const blurAnim = shouldBlur
     ? { scale: 0.93, filter: "blur(10px)", pointerEvents: "none" as const }
     : { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const };
   const blurTransition = { type: "spring" as const, stiffness: 250, damping: 30 };
 
   return (
-    <LayoutGroup>
     <div
       style={{
         width: "100%",
@@ -423,24 +416,25 @@ export function V2Canvas() {
           isDark={false}
           activeProject={activeProject}
           onProjectClick={handleProjectClick}
+          entryRefs={entryRefs}
           style={{ marginTop: 80, marginBottom: 120 }}
         />
       </motion.div>
 
-      {/* ── Project detail card — outside blurred sections ── */}
-      <AnimatePresence>
-        {activeProject && (
-          <ProjectDetailCard
-            key={activeProject}
-            projectKey={activeProject}
-            onClose={handleClose}
-            isDark={false}
-            primaryColor={primaryColor}
-            primary40={primary40}
-          />
-        )}
-      </AnimatePresence>
+      {/* ── Project floating card — single animated element ── */}
+      {activeProject && originRect && (
+        <ProjectFloatingCard
+          key={activeProject}
+          projectKey={activeProject}
+          originRect={originRect}
+          entryRef={entryRefs.current[activeProject] ?? null}
+          onCloseStart={handleCloseStart}
+          onClose={handleClose}
+          isDark={false}
+          primaryColor={primaryColor}
+          primary40={primary40}
+        />
+      )}
     </div>
-    </LayoutGroup>
   );
 }
