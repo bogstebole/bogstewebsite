@@ -93,20 +93,12 @@ export function ProjectFloatingCard({
     closingRef.current = true;
     setPhase("closing");
 
-    // 1. Grid fades out — fire non-blocking so stagger starts immediately
-    void contentControls.start("exit");
+    // 1. All UselessNotesDetail content exits: grid stagger → button → description (~270ms)
+    await contentControls.start("exit");
 
-    setExitStage("grid");
-    await wait(50);
-
-    setExitStage("button");
-    await wait(50);
-
-    setExitStage("description");
-    await wait(50);
-
+    // 2. Tags then header exit last
     setExitStage("tags");
-    await wait(50);
+    await wait(40);
 
     setExitStage("header");
     await wait(100);

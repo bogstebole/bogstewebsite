@@ -22,15 +22,29 @@ const gridContainerVariants: Variants = {
     transition: { staggerChildren: 0.07, delayChildren: 0.32 },
   },
   exit: {
-    transition: { staggerChildren: 0.04, staggerDirection: -1 },
+    transition: { staggerChildren: 0.02, staggerDirection: -1 },
   },
 };
 
-// Each staggered item
+// Each staggered grid item — fast exit so grid finishes first
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 14 },
   visible: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 6 },
+  exit: { opacity: 0, y: 6, transition: { duration: 0.1 } },
+};
+
+// Button exits after most grid items have gone (t=120ms)
+const buttonExitVariants: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: { opacity: 1, y: 0, transition: { delay: 0.29 } },
+  exit: { opacity: 0, y: 6, transition: { duration: 0.1, delay: 0.12 } },
+};
+
+// Description exits last of the content block (t=170ms), before header
+const descriptionExitVariants: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: { opacity: 1, y: 0, transition: { delay: 0.22 } },
+  exit: { opacity: 0, y: 6, transition: { duration: 0.1, delay: 0.17 } },
 };
 
 type AnimationControls = ReturnType<typeof useAnimation>;
@@ -42,12 +56,11 @@ interface UselessNotesDetailProps {
 export function UselessNotesDetail({ controls }: UselessNotesDetailProps) {
   return (
     <>
-      {/* Description — staggered in first */}
+      {/* Description — exits last of content block */}
       <motion.div
         initial="hidden"
         animate={controls}
-        variants={itemVariants}
-        transition={{ delay: 0.22 }}
+        variants={descriptionExitVariants}
         style={{
           color: "rgba(0,0,0,0.8)",
           fontFamily: '"Geist", system-ui, sans-serif',
@@ -60,12 +73,11 @@ export function UselessNotesDetail({ controls }: UselessNotesDetailProps) {
         {`It's a conceptual work that visually shows how we clutter our mental space.\nThe main "canvas" gets more "useless" over time, totally packed with notes and links, and the "find" mode is kind of the opposite, showing how we can only find things when we really need them. It's a reflection on the whole concept of how we deal with information overload today.`}
       </motion.div>
 
-      {/* Download button */}
+      {/* Download button — exits after grid, before description */}
       <motion.div
         initial="hidden"
         animate={controls}
-        variants={itemVariants}
-        transition={{ delay: 0.29 }}
+        variants={buttonExitVariants}
         style={{ flexShrink: 0 }}
       >
         <GlassButton>Download the app</GlassButton>
