@@ -6,6 +6,7 @@ import { Water } from "@paper-design/shaders-react";
 import { Logo } from "@/components/ui/logo";
 import { ProjectSection } from "@/components/elements/project-section";
 import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
+import { VorliReceiptDetail } from "@/components/ui/vorli-receipt-detail";
 
 function getBuildVersion(): string {
   const now = new Date();
@@ -428,8 +429,8 @@ export function V2Canvas() {
         />
       </motion.div>
 
-      {/* ── Project floating card — single animated element ── */}
-      {activeProject && originRect && (
+      {/* ── Project floating card — all projects except Vorli ── */}
+      {activeProject && originRect && activeProject !== "vorli" && (
         <ProjectFloatingCard
           key={activeProject}
           projectKey={activeProject}
@@ -440,6 +441,14 @@ export function V2Canvas() {
           isDark={false}
           primaryColor={primaryColor}
           primary40={primary40}
+        />
+      )}
+
+      {/* ── Vorli — receipt bottom sheet ── */}
+      {activeProject === "vorli" && (
+        <VorliReceiptDetail
+          onCloseStart={handleCloseStart}
+          onClose={handleClose}
         />
       )}
     </div>
