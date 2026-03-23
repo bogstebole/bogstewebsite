@@ -9,6 +9,7 @@ interface ProjectSectionProps {
   primary40: string;
   isDark: boolean;
   activeProject: string | null;
+  returningProject: string | null;
   onProjectClick: (key: string) => void;
   entryRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
   style?: React.CSSProperties;
@@ -50,7 +51,7 @@ function ProjectIcon({
   );
 }
 
-export function ProjectSection({ primaryColor, primary40, isDark, activeProject, onProjectClick, entryRefs, style }: ProjectSectionProps) {
+export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, style }: ProjectSectionProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   const entryProps = (key: string) => ({
@@ -58,6 +59,7 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
     isHovered: hoveredKey === key,
     isDimmed: hoveredKey !== null && hoveredKey !== key,
     isActive: activeProject === key,
+    isReturning: returningProject === key,
     onMouseEnter: () => setHoveredKey(key),
     onMouseLeave: () => setHoveredKey(null),
     onClick: onProjectClick,

@@ -85,17 +85,13 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
 
   return (
     <>
-      {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isClosing ? 0 : 1 }}
-        transition={{ duration: 0.2 }}
+      {/* Backdrop — transparent, click-outside-to-close only */}
+      <div
         onClick={() => void initiateClose()}
         style={{
           position: "fixed",
           inset: 0,
           zIndex: 10,
-          backgroundColor: "rgba(0,0,0,0.12)",
         }}
       />
 
@@ -125,7 +121,7 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
             overflowY: "auto",
             borderTopLeftRadius: 16,
             borderTopRightRadius: 16,
-            boxShadow: "0 -4px 40px rgba(0,0,0,0.18)",
+            filter: "drop-shadow(rgba(0,0,0,0.2) 0px 2px 20px)",
             position: "relative",
             pointerEvents: "auto",
             overscrollBehavior: "contain",

@@ -182,6 +182,7 @@ export function V2Canvas() {
   const [activeProject, setActiveProject] = useState<string | null>(null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [returningProject, setReturningProject] = useState<string | null>(null);
   const entryRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const handleProjectClick = (key: string) => {
@@ -199,9 +200,14 @@ export function V2Canvas() {
   };
 
   const handleClose = () => {
+    const closingKey = activeProject;
     setActiveProject(null);
     setOriginRect(null);
     setIsClosing(false);
+    if (closingKey) {
+      setReturningProject(closingKey);
+      setTimeout(() => setReturningProject(null), 350);
+    }
   };
 
   // Lock body scroll when detail is open
@@ -423,6 +429,7 @@ export function V2Canvas() {
           primary40={primary40}
           isDark={false}
           activeProject={activeProject}
+          returningProject={returningProject}
           onProjectClick={handleProjectClick}
           entryRefs={entryRefs}
           style={{ marginTop: 80, marginBottom: 120 }}

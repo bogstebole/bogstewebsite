@@ -1,6 +1,7 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
+import { motion, useAnimation } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 
@@ -14,6 +15,7 @@ interface ProjectEntryProps {
   isHovered: boolean;
   isDimmed: boolean;
   isActive: boolean;
+  isReturning?: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onClick?: (key: string) => void;
@@ -34,6 +36,7 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
       isHovered,
       isDimmed,
       isActive,
+      isReturning,
       onMouseEnter,
       onMouseLeave,
       onClick,
@@ -42,7 +45,16 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
     },
     ref,
   ) {
+    const controls = useAnimation();
     const tagBg = "#F3F3F3";
+
+    useEffect(() => {
+      if (isActive) {
+        controls.set("hidden");
+      } else if (isReturning) {
+        controls.start("visible");
+      }
+    }, [isActive, isReturning, controls]);
 
     const handleClick = () => {
       if (!onClick || inProgress) return;
@@ -72,7 +84,12 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
         }}
       >
         {/* Icon + name row */}
-        <div
+        <motion.div
+          animate={controls}
+          variants={{
+            hidden: { opacity: 0, y: 5 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.18, ease: "easeOut" } },
+          }}
           style={{
             alignItems: "center",
             display: "flex",
@@ -117,10 +134,15 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
               In progress...
             </span>
           )}
-        </div>
+        </motion.div>
 
         {/* Tags row */}
-        <div
+        <motion.div
+          animate={controls}
+          variants={{
+            hidden: { opacity: 0, y: 5 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.18, ease: "easeOut", delay: 0.07 } },
+          }}
           style={{
             alignItems: "center",
             display: "flex",
@@ -156,7 +178,7 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
             </div>
           ))}
           {appStore && <AppStoreBadge active={isHovered} />}
-        </div>
+        </motion.div>
       </div>
     );
   },
