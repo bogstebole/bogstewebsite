@@ -110,3 +110,19 @@ export interface InteractionZone {
   x: number;
   label: string;
 }
+
+/** Shuffled cringy motivational messages revealed inside the envelope widget */
+export const ENVELOPE_MESSAGES: string[] = [
+  "You have a great fuckin' day...",
+  "Someone out there thinks you're doing great.\nIt might just be me, but still.",
+  "You got this.\nWhatever 'this' is.",
+  "Not all heroes wear capes.\nSome just open random envelopes.",
+  "You are enough.\nAlso you have excellent taste in websites.",
+  "Today is a great day to be embarrassingly proud of yourself.",
+  "The fact that you dragged this open?\nThat's the kind of energy we need.",
+  "You're doing better than you think.\nUnless you think you're doing amazing. Then same.",
+  "Sending you unsolicited but completely genuine good vibes.",
+  "You opened the envelope.\nThat took courage. Also curiosity. Mostly curiosity.",
+  "No notes. Genuinely.\nYou're killing it.",
+  "This message was randomly selected just for you.\nCoincidence? Probably. But still.",
+];

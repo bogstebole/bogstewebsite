@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { DotGrid } from "@paper-design/shaders-react";
 import { ProjectEntry } from "@/components/elements/project-entry";
+import { EnvelopeWidget } from "@/components/elements/EnvelopeWidget";
 
 interface ProjectSectionProps {
   primaryColor: string;
@@ -12,6 +13,9 @@ interface ProjectSectionProps {
   returningProject: string | null;
   onProjectClick: (key: string) => void;
   entryRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
+  onEnvelopeOpen?: () => void;
+  onEnvelopeCloseStart?: () => void;
+  onEnvelopeClose?: () => void;
   style?: React.CSSProperties;
 }
 
@@ -51,7 +55,7 @@ function ProjectIcon({
   );
 }
 
-export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, style }: ProjectSectionProps) {
+export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, onEnvelopeOpen, onEnvelopeCloseStart, onEnvelopeClose, style }: ProjectSectionProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   const entryProps = (key: string) => ({
@@ -234,30 +238,8 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             </div>
           </div>
 
-          {/* Envelope — 284×204 source, scaled to 34×24 */}
-          <div style={{
-            backgroundColor: "#e4e3de",
-            borderRadius: 3,
-            boxShadow: "42px 25px 14px 0px rgba(0,0,0,0), 27px 16px 12px 0px rgba(0,0,0,0.02), 15px 9px 11px 0px rgba(0,0,0,0.08), 7px 4px 8px 0px rgba(0,0,0,0.14), 2px 1px 4px 0px rgba(0,0,0,0.16)",
-            flexShrink: 0,
-            height: 24,
-            overflow: "hidden",
-            position: "relative",
-            width: 34,
-          }}>
-            {/* Bottom fold: top 30.4% (62/204), height 69.6% (142/204) — no rotation, no inset needed */}
-            <div style={{ height: "69.6%", left: 0, position: "absolute", top: "30.4%", width: "100%" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt="" src="/images/envelope-bottom.svg" style={{ display: "block", height: "100%", maxWidth: "none", width: "100%" }} />
-            </div>
-            {/* Top fold: top 0, height 69.6% — inset lets 150px SVG fill 142px slot */}
-            <div style={{ height: "69.6%", left: 0, position: "absolute", top: 0, width: "100%" }}>
-              <div style={{ bottom: "-5.02%", left: "-0.7%", position: "absolute", right: "-4.58%", top: "-3.79%" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img alt="" src="/images/envelope-top.svg" style={{ display: "block", height: "100%", maxWidth: "none", width: "100%" }} />
-              </div>
-            </div>
-          </div>
+          {/* Envelope widget — interactive, FLIP-animates from footer to overlay */}
+          <EnvelopeWidget onOpen={onEnvelopeOpen} onCloseStart={onEnvelopeCloseStart} onClose={onEnvelopeClose} />
 
         </div>
       </div>
