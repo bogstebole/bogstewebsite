@@ -2,7 +2,7 @@
    GlassButton.module.css
    
    Glassmorphic concave-glass button.
-   13-layer box-shadow system (8 inset + 4 outer) + gradient
+   13-layer box-shadow system (8 inset + 5 outer) + gradient
    border via ::before + top rim highlight via ::after.
    
    Inspired by wabi.ai's "Join waitlist" button.
@@ -37,30 +37,23 @@
   /* ── Glass fill ── */
   background: var(--glass-fill);
 
-  /* ── 12-layer shadow system ── */
+  /* ── 13-layer shadow system (from Paper) ── */
   box-shadow:
     /* INSET: sculpted concave glass */
-    3px -1px 2px 0 #fff inset,
-    /* top-left bright rim */
+    -2px 2px 2px 1px #fff inset,
     -1px -3px 3px -2px rgba(0, 0, 0, 0.41) inset,
-    /* bottom-right dark edge */
-    2px 1px 5px -5px rgba(0, 0, 0, 0.84) inset,
-    /* tight inner depth */
-    0 0 8px 6px rgba(255, 255, 255, 0.65) inset,
-    /* inner glow */
-    0 -10px 16px -4px rgba(0, 0, 0, 0.25) inset,
-    /* bottom concave scoop */
-    0 3px 6px 1px rgba(0, 0, 0, 0.42) inset,
-    /* top concave shadow */
-    0 21px 10px 0 rgba(255, 255, 255, 0.75) inset,
-    /* pooled light upper half */
-    0 40px 42px -10px rgba(0, 0, 0, 0.15) inset,
-    /* deep atmospheric haze */
+    2px 1px 4px -4px rgba(0, 0, 0, 0.84) inset,
+    0 0 7px 4px #fff inset,
+    0 -9px 14px 4px rgba(0, 0, 0, 0.25) inset,
+    -2px -3px 5px 3px rgba(0, 0, 0, 0.10) inset,
+    0 20px 8px -9px #fff inset,
+    0 34px 10px -9px rgba(0, 0, 0, 0.10) inset,
     /* OUTER: elevation stack */
-    0 20px 8px -2px rgba(0, 0, 0, 0.01),
-    0 11px 7px -1px rgba(0, 0, 0, 0.05),
-    0 5px 5px 0 rgba(0, 0, 0, 0.09),
-    0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    0 27px 8px rgba(0, 0, 0, 0.01),
+    0 17px 6px rgba(0, 0, 0, 0.01),
+    0 10px 6px rgba(0, 0, 0, 0.05),
+    0 4px 4px rgba(0, 0, 0, 0.10),
+    0 1px 3px rgba(0, 0, 0, 0.10);
 
   /* ── Blur ── */
   backdrop-filter: blur(var(--glass-blur));
