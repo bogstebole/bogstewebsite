@@ -150,14 +150,23 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
               }}
             >
               {/* Top part: Video Loop */}
-              <div style={{ width: "100%", flex: 1, position: "relative", backgroundColor: "#fff" }}>
+              <div style={{ 
+                width: "100%", 
+                flex: 1, 
+                backgroundColor: "#fff",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                paddingBottom: 16
+              }}>
                 <video 
                   src="/assets/Wear/wear.mp4" 
                   autoPlay 
                   loop 
                   muted 
                   playsInline
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  style={{ width: "60%", height: "auto", display: "block" }}
                 />
               </div>
 
@@ -170,9 +179,6 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: "#fff",
-                position: "absolute",
-                bottom: 0,
-                left: 0,
                 paddingBottom: 24
               }}>
                 <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, color: "#666", marginBottom: 6 }}>
