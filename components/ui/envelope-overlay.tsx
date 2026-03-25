@@ -10,6 +10,7 @@ interface EnvelopeOverlayProps {
 }
 
 const ENVELOPE_ASPECT = 24 / 34; // height / width ratio of the envelope
+
 const spring = { type: "spring" as const, stiffness: 380, damping: 38 };
 
 export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeOverlayProps) {
@@ -48,7 +49,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
         style={{ position: "fixed", inset: 0, zIndex: 10 }}
       />
 
-      {/* Envelope — FLIP from footer to top */}
+      {/* Envelope body — FLIP from footer to top */}
       <motion.div
         initial={{
           top: originRect.top,
@@ -89,12 +90,12 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           zIndex: 11,
         }}
       >
-        {/* Left fold — z 0 */}
+        {/* Left fold — z 0, left-aligned */}
         <div style={{ height: "100%", left: 0, position: "absolute", top: 0, width: "38.03%", zIndex: 0 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt="" src="/images/envelope-left.svg" style={{ display: "block", height: "100%", width: "100%" }} />
         </div>
-        {/* Right fold — z 0 */}
+        {/* Right fold — z 0, right-aligned */}
         <div style={{ height: "100%", position: "absolute", right: 0, top: 0, width: "37.68%", zIndex: 0 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt="" src="/images/envelope-right.svg" style={{ display: "block", height: "100%", width: "100%" }} />
