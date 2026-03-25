@@ -87,8 +87,8 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
               style={{
                 width: CARD_W,
                 backgroundColor: "#2c2c2c",
-                borderRadius: 12,
-                padding: "20px 24px",
+                borderRadius: 18,
+                padding: 12,
                 boxShadow: "0 20px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.07)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 display: "flex",
@@ -107,7 +107,19 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
                 </button>
               </div>
 
-              <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+              <p style={{ 
+                color: "#ebebeb", 
+                fontFamily: "var(--font-geist-sans), sans-serif", 
+                fontSize: 12,
+                lineHeight: "18px",
+                margin: 0,
+                marginBottom: 16,
+                opacity: 0.8
+              }}>
+                Wear is a simple app that gives you an idea what to wear outside based on the weather
+              </p>
+
+              <div style={{ display: "flex", gap: 8 }}>
                 {["iOS", "Weather", "In progress.."].map((tag) => (
                   <div key={tag} style={{ 
                     backgroundColor: "#4c4c4c", 
@@ -121,17 +133,6 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
                   </div>
                 ))}
               </div>
-
-              <p style={{ 
-                color: "#ebebeb", 
-                fontFamily: "var(--font-geist-sans), sans-serif", 
-                fontSize: 12,
-                lineHeight: "18px",
-                margin: 0,
-                opacity: 0.8
-              }}>
-                Wear is a simple app that gives you an idea what to wear outside based on the weather
-              </p>
             </div>
 
             {/* 2. Phone Mockup */}
