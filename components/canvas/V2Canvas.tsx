@@ -7,6 +7,7 @@ import { Logo } from "@/components/ui/logo";
 import { ProjectSection } from "@/components/elements/project-section";
 import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
 import { VorliReceiptDetail } from "@/components/ui/vorli-receipt-detail";
+import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
 
 function getBuildVersion(): string {
   const now = new Date();
@@ -183,9 +184,11 @@ export function V2Canvas() {
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isClosing, setIsClosing] = useState(false);
   const [returningProject, setReturningProject] = useState<string | null>(null);
+  const entryRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [envelopeOpen, setEnvelopeOpen] = useState(false);
   const [isEnvelopeClosing, setIsEnvelopeClosing] = useState(false);
-  const entryRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [envelopeOriginRect, setEnvelopeOriginRect] = useState<DOMRect | null>(null);
+  const envelopeRef = useRef<HTMLDivElement>(null);
 
   const handleProjectClick = (key: string) => {
     const el = entryRefs.current[key];
@@ -212,11 +215,30 @@ export function V2Canvas() {
     }
   };
 
+  const handleEnvelopeClick = () => {
+    const el = envelopeRef.current;
+    if (el) {
+      setEnvelopeOriginRect(el.getBoundingClientRect());
+      setEnvelopeOpen(true);
+      setIsEnvelopeClosing(false);
+    }
+  };
+
+  const handleEnvelopeCloseStart = () => {
+    setIsEnvelopeClosing(true);
+  };
+
+  const handleEnvelopeClose = () => {
+    setEnvelopeOpen(false);
+    setEnvelopeOriginRect(null);
+    setIsEnvelopeClosing(false);
+  };
+
   // Lock body scroll when detail is open
   useEffect(() => {
-    document.body.style.overflow = activeProject ? "hidden" : "";
+    document.body.style.overflow = activeProject || envelopeOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [activeProject]);
+  }, [activeProject, envelopeOpen]);
 
   // Light mode only for V2
   const primaryColor = "#000000";
@@ -229,7 +251,7 @@ export function V2Canvas() {
   const blurAnim = shouldBlur
     ? { scale: 0.93, filter: "blur(10px)", pointerEvents: "none" as const }
     : { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const };
-  const blurTransition = { type: "spring" as const, stiffness: 250, damping: 30 };
+  const blurTransition = { type: "tween" as const, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] };
 
   return (
     <div
@@ -434,9 +456,8 @@ export function V2Canvas() {
           returningProject={returningProject}
           onProjectClick={handleProjectClick}
           entryRefs={entryRefs}
-          onEnvelopeOpen={() => { setEnvelopeOpen(true); setIsEnvelopeClosing(false); }}
-          onEnvelopeCloseStart={() => setIsEnvelopeClosing(true)}
-          onEnvelopeClose={() => { setEnvelopeOpen(false); setIsEnvelopeClosing(false); }}
+          envelopeRef={envelopeRef}
+          onEnvelopeClick={handleEnvelopeClick}
           style={{ marginTop: 80, marginBottom: 120 }}
         />
       </motion.div>
@@ -461,6 +482,15 @@ export function V2Canvas() {
         <VorliReceiptDetail
           onCloseStart={handleCloseStart}
           onClose={handleClose}
+        />
+      )}
+
+      {/* ── Envelope overlay ── */}
+      {envelopeOpen && envelopeOriginRect && (
+        <EnvelopeOverlay
+          originRect={envelopeOriginRect}
+          onCloseStart={handleEnvelopeCloseStart}
+          onClose={handleEnvelopeClose}
         />
       )}
     </div>
