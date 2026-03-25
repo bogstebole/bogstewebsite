@@ -68,10 +68,9 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
       <AnimatePresence>
         {!isClosing && isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: "-45%", scale: 0.98 }}
-            animate={{ opacity: 1, y: "-50%", scale: 1 }}
-            exit={{ opacity: 0, y: "-45%", scale: 0.98 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            initial={{ opacity: 0, y: "-50%" }}
+            animate={{ opacity: 1, y: "-50%" }}
+            exit={{ opacity: 0, y: "-48%", transition: { duration: 0.25, ease: "easeIn" } }}
             style={{
               position: "absolute",
               left: leftPos,
@@ -83,7 +82,10 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
             }}
           >
             {/* 1. Info Card */}
-            <div
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 350, delay: 0.08 }}
               style={{
                 width: CARD_W,
                 backgroundColor: "#2c2c2c",
@@ -133,10 +135,13 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* 2. Phone Mockup */}
-            <div
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 25 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ type: "spring", damping: 18, stiffness: 300 }}
               style={{
                 width: 247,
                 height: 534,
@@ -182,20 +187,14 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
                 backgroundColor: "#fff",
                 paddingBottom: 24
               }}>
-                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 10, color: "#666", marginBottom: 6 }}>
+                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, color: "#666", opacity: 0.7, marginBottom: 6 }}>
                   Belgrade
                 </div>
-                <div style={{ fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 42, color: "#000", fontWeight: 300, lineHeight: 1, letterSpacing: "-0.04em", marginBottom: 12 }}>
-                  18°
-                </div>
-                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, color: "#666", marginBottom: 4 }}>
+                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, color: "#666" }}>
                   Light, noticeable wind.
                 </div>
-                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, color: "#888" }}>
-                  H: 20° | L: 14°
-                </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
