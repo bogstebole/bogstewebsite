@@ -15,6 +15,7 @@ const spring = { type: "spring" as const, stiffness: 380, damping: 38 };
 
 export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeOverlayProps) {
   const [isClosing, setIsClosing] = useState(false);
+  const [flapOpen, setFlapOpen] = useState(false);
 
   const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
   const vh = typeof window !== "undefined" ? window.innerHeight : 900;
@@ -26,6 +27,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
 
   const initiateClose = () => {
     if (isClosing) return;
+    setFlapOpen(false);
     setIsClosing(true);
     onCloseStart();
   };
@@ -78,6 +80,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
         transition={spring}
         onAnimationComplete={() => {
           if (isClosing) onClose();
+          else setFlapOpen(true);
         }}
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -85,7 +88,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           borderRadius: 3,
           boxShadow:
             "42px 25px 14px 0px rgba(0,0,0,0), 27px 16px 12px 0px rgba(0,0,0,0.02), 15px 9px 11px 0px rgba(0,0,0,0.08), 7px 4px 8px 0px rgba(0,0,0,0.14), 2px 1px 4px 0px rgba(0,0,0,0.16)",
-          overflow: "hidden",
+          perspective: "600px",
           position: "fixed",
           zIndex: 11,
         }}
@@ -105,13 +108,27 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt="" src="/images/envelope-bottom.svg" style={{ display: "block", height: "100%", maxWidth: "none", width: "100%" }} />
         </div>
-        {/* Top fold — z 2 */}
-        <div style={{ height: "69.6%", left: 0, position: "absolute", top: 0, width: "100%", zIndex: 2 }}>
-          <div style={{ bottom: "-5.02%", left: "-0.7%", position: "absolute", right: "-0.7%", top: "-3.79%" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="" src="/images/envelope-top.svg" style={{ display: "block", height: "100%", maxWidth: "none", width: "100%" }} />
+        {/* Top fold — z 2, rotates open around top edge */}
+        <motion.div
+          animate={{ rotateX: flapOpen ? -180 : 0 }}
+          transition={{ type: "spring", stiffness: 180, damping: 28 }}
+          style={{ height: "69.6%", left: 0, position: "absolute", top: 0, transformOrigin: "top center", transformStyle: "preserve-3d", width: "100%", zIndex: 2 }}
+        >
+          {/* Front face — visible when closed */}
+          <div style={{ backfaceVisibility: "hidden", bottom: 0, left: 0, position: "absolute", right: 0, top: 0 }}>
+            <div style={{ bottom: "-5.02%", left: "-0.7%", position: "absolute", right: "-0.7%", top: "-3.79%" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt="" src="/images/envelope-top.svg" style={{ display: "block", height: "100%", maxWidth: "none", width: "100%" }} />
+            </div>
           </div>
-        </div>
+          {/* Back face — visible when open (rotateX -180deg on parent) */}
+          <div style={{ backfaceVisibility: "hidden", bottom: 0, left: 0, position: "absolute", right: 0, top: 0, transform: "rotateX(180deg) scaleY(-1)" }}>
+            <div style={{ bottom: 0, left: 0, position: "absolute", right: 0, top: "-3.79%" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt="" src="/images/envelope-top-open.svg" style={{ display: "block", height: "100%", maxWidth: "none", width: "100%" }} />
+            </div>
+          </div>
+        </motion.div>
       </motion.div>
     </>
   );
