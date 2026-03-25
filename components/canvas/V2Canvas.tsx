@@ -8,6 +8,7 @@ import { ProjectSection } from "@/components/elements/project-section";
 import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
 import { VorliReceiptDetail } from "@/components/ui/vorli-receipt-detail";
 import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
+import { ZounDetail } from "@/components/ui/zoun-detail";
 
 function getBuildVersion(): string {
   const now = new Date();
@@ -463,8 +464,16 @@ export function V2Canvas() {
         />
       </motion.div>
 
-      {/* ── Project floating card — all projects except Vorli ── */}
-      {activeProject && originRect && activeProject !== "vorli" && (
+      {/* ── Zoun detail overlay ── */}
+      {activeProject === "zoun" && (
+        <ZounDetail
+          onCloseStart={handleCloseStart}
+          onClose={handleClose}
+        />
+      )}
+
+      {/* ── Project floating card — all projects except Vorli and Zoun ── */}
+      {activeProject && originRect && activeProject !== "vorli" && activeProject !== "zoun" && (
         <ProjectFloatingCard
           key={activeProject}
           projectKey={activeProject}
