@@ -22,8 +22,8 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
 
   const targetWidth = vw * 0.30;
   const targetHeight = targetWidth * ENVELOPE_ASPECT;
-  const targetLeft = vw / 2 - targetWidth / 2;
-  const targetTop = vh * 0.10;
+  const targetTop = (vh - targetHeight) / 2;
+  const targetLeft = (vw - targetWidth) / 2;
 
   const initiateClose = () => {
     if (isClosing) return;
@@ -56,6 +56,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
         initial={{
           top: originRect.top,
           left: originRect.left,
+          x: 0,
           width: originRect.width,
           height: originRect.height,
           opacity: 0,
@@ -65,6 +66,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
             ? {
                 top: originRect.top,
                 left: originRect.left,
+                x: 0,
                 width: originRect.width,
                 height: originRect.height,
                 opacity: 0,
@@ -72,6 +74,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
             : {
                 top: targetTop,
                 left: targetLeft,
+                x: 0,
                 width: targetWidth,
                 height: targetHeight,
                 opacity: 1,
