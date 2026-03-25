@@ -15,6 +15,7 @@ interface ProjectSectionProps {
   entryRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
   envelopeRef?: React.RefObject<HTMLDivElement | null>;
   onEnvelopeClick?: () => void;
+  isEnvelopeOpen?: boolean;
   style?: React.CSSProperties;
 }
 
@@ -54,7 +55,7 @@ function ProjectIcon({
   );
 }
 
-export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, envelopeRef, onEnvelopeClick, style }: ProjectSectionProps) {
+export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, envelopeRef, onEnvelopeClick, isEnvelopeOpen, style }: ProjectSectionProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   const entryProps = (key: string) => ({
@@ -238,7 +239,9 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
           </div>
 
           {/* Envelope widget — interactive, FLIP-animates from footer to overlay */}
-          <EnvelopeWidget ref={envelopeRef} onClick={onEnvelopeClick} />
+          <div style={{ opacity: isEnvelopeOpen ? 0 : 1, transition: "opacity 0.15s" }}>
+            <EnvelopeWidget ref={envelopeRef} onClick={onEnvelopeClick} />
+          </div>
 
         </div>
       </div>

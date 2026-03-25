@@ -458,6 +458,7 @@ export function V2Canvas() {
           entryRefs={entryRefs}
           envelopeRef={envelopeRef}
           onEnvelopeClick={handleEnvelopeClick}
+          isEnvelopeOpen={envelopeOpen || isEnvelopeClosing}
           style={{ marginTop: 80, marginBottom: 120 }}
         />
       </motion.div>
