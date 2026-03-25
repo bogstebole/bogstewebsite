@@ -164,6 +164,7 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             label="Weather Wear"
             tags={["iOS", "Weather Through Clothes"]}
             inProgress
+            clickable
           />
 
           <ProjectEntry

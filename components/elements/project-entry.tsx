@@ -11,6 +11,7 @@ interface ProjectEntryProps {
   label: string;
   tags: string[];
   inProgress?: boolean;
+  clickable?: boolean;
   appStore?: boolean;
   isHovered: boolean;
   isDimmed: boolean;
@@ -32,6 +33,7 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
       label,
       tags,
       inProgress,
+      clickable,
       appStore,
       isHovered,
       isDimmed,
@@ -57,7 +59,7 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
     }, [isActive, isReturning, controls]);
 
     const handleClick = () => {
-      if (!onClick || inProgress) return;
+      if (!onClick || (inProgress && !clickable)) return;
       onClick(entryKey);
     };
 
@@ -69,7 +71,7 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
         onClick={handleClick}
         style={{
           alignItems: "start",
-          cursor: inProgress ? "default" : "pointer",
+          cursor: (inProgress && !clickable) ? "default" : "pointer",
           display: "flex",
           flexDirection: "column",
           flexShrink: 0,

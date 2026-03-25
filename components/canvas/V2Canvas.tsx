@@ -9,6 +9,7 @@ import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
 import { VorliReceiptDetail } from "@/components/ui/vorli-receipt-detail";
 import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
 import { ZounDetail } from "@/components/ui/zoun-detail";
+import { WearDetail } from "@/components/ui/wear-detail";
 
 function getBuildVersion(): string {
   const now = new Date();
@@ -472,8 +473,17 @@ export function V2Canvas() {
         />
       )}
 
-      {/* ── Project floating card — all projects except Vorli and Zoun ── */}
-      {activeProject && originRect && activeProject !== "vorli" && activeProject !== "zoun" && (
+      {/* ── Wear detail overlay ── */}
+      {activeProject === "weatherWear" && originRect && (
+        <WearDetail
+          originRect={originRect}
+          onCloseStart={handleCloseStart}
+          onClose={handleClose}
+        />
+      )}
+
+      {/* ── Project floating card — all projects except Vorli, Zoun, and WeatherWear ── */}
+      {activeProject && originRect && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear" && (
         <ProjectFloatingCard
           key={activeProject}
           projectKey={activeProject}
