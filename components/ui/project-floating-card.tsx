@@ -17,6 +17,8 @@ interface ProjectFloatingCardProps {
   isDark: boolean;
   primaryColor: string;
   primary40: string;
+  /** Optional background colour — pass to create seamless FLIP from a coloured card */
+  backgroundColor?: string;
 }
 
 const PROJECT_LABELS: Record<string, string> = {
@@ -72,6 +74,7 @@ export function ProjectFloatingCard({
   // isDark — reserved for future dark mode
   primaryColor,
   primary40,
+  backgroundColor,
 }: ProjectFloatingCardProps) {
   const contentControls = useAnimation();
   const [phase, setPhase] = useState<"expanding" | "open" | "closing" | "closed">("expanding");
@@ -202,6 +205,7 @@ export function ProjectFloatingCard({
               boxSizing: "border-box",
               fontFamily: '"JetBrains Mono", system-ui, sans-serif',
               fontSize: 12,
+              ...(backgroundColor && { backgroundColor }),
             }}
           >
             {/* Header: icon + title — exits last */}

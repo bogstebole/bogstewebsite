@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Water } from "@paper-design/shaders-react";
+// import { Water } from "@paper-design/shaders-react"; // POOL_HIDDEN
 import { Logo } from "@/components/ui/logo";
 import { ProjectSection } from "@/components/elements/project-section";
 import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
@@ -10,6 +10,7 @@ import { VorliReceiptDetail } from "@/components/ui/vorli-receipt-detail";
 import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
 import { ZounDetail } from "@/components/ui/zoun-detail";
 import { WearDetail } from "@/components/ui/wear-detail";
+import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
 
 function getBuildVersion(): string {
   const now = new Date();
@@ -19,105 +20,18 @@ function getBuildVersion(): string {
   return `v${age}.${month}.${day}`;
 }
 
+/* POOL_HIDDEN — restore by uncommenting this block and the Water import above
 const POOL_ITEMS = [
   { label: "Dress Up", image: "/images/notes.png",   width: 31 },
   { label: "Vorli",    image: "/images/receipt.png", width: 32 },
 ];
-
-
 const POOL_W = 603;
 const POOL_H = 337;
 const WALL_PAD = 28;
 const ICON_H = 32;
 const SPEED = 0.0165;
-
-function usePoolFloat(items: Array<{ width: number }>) {
-  const refs = useRef<Array<HTMLImageElement | null>>(items.map(() => null));
-  const state = useRef(
-    items.map((item, i) => ({
-      x: 80 + i * 160,
-      y: 100 + i * 60,
-      vx: SPEED * (i % 2 === 0 ? 1 : -0.7),
-      vy: SPEED * (i % 2 === 0 ? 0.6 : -1),
-      rot: i * 5,
-      rotV: 0.006 * (i % 2 === 0 ? 1 : -1),
-      width: item.width,
-    }))
-  );
-
-  useEffect(() => {
-    let rafId: number;
-
-    function tick() {
-      state.current.forEach((s, i) => {
-        const el = refs.current[i];
-        if (!el) return;
-
-        s.x += s.vx;
-        s.y += s.vy;
-        s.rot += s.rotV;
-
-        const minX = WALL_PAD;
-        const maxX = POOL_W - WALL_PAD - s.width;
-        const minY = WALL_PAD;
-        const maxY = POOL_H - WALL_PAD - ICON_H;
-
-        if (s.x <= minX) { s.x = minX; s.vx = Math.abs(s.vx); }
-        if (s.x >= maxX) { s.x = maxX; s.vx = -Math.abs(s.vx); }
-        if (s.y <= minY) { s.y = minY; s.vy = Math.abs(s.vy); }
-        if (s.y >= maxY) { s.y = maxY; s.vy = -Math.abs(s.vy); }
-
-        if (s.rot > 12)  { s.rot = 12;  s.rotV = -Math.abs(s.rotV); }
-        if (s.rot < -12) { s.rot = -12; s.rotV =  Math.abs(s.rotV); }
-      });
-
-      // Icon-icon elastic collision
-      const [a, b] = state.current;
-      const acx = a.x + a.width / 2;
-      const acy = a.y + ICON_H / 2;
-      const bcx = b.x + b.width / 2;
-      const bcy = b.y + ICON_H / 2;
-      const dx = bcx - acx;
-      const dy = bcy - acy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const minDist = (a.width + b.width) / 2;
-
-      if (dist < minDist && dist > 0) {
-        const nx = dx / dist;
-        const ny = dy / dist;
-        // Separate
-        const overlap = (minDist - dist) / 2;
-        a.x -= nx * overlap;
-        a.y -= ny * overlap;
-        b.x += nx * overlap;
-        b.y += ny * overlap;
-        // Reflect velocities along collision normal (equal mass elastic)
-        const dvDotN = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
-        if (dvDotN > 0) {
-          a.vx -= dvDotN * nx;
-          a.vy -= dvDotN * ny;
-          b.vx += dvDotN * nx;
-          b.vy += dvDotN * ny;
-        }
-      }
-
-      // Write to DOM
-      state.current.forEach((s, i) => {
-        const el = refs.current[i];
-        if (!el) return;
-        el.style.translate = `${s.x}px ${s.y}px`;
-        el.style.rotate = `${s.rot}deg`;
-      });
-
-      rafId = requestAnimationFrame(tick);
-    }
-
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return refs;
-}
+function usePoolFloat(items: Array<{ width: number }>) { ... }
+*/
 
 const TYPEWRITER_PHRASES = [
   "Product Designer",
@@ -181,7 +95,6 @@ function useTypewriter() {
 
 export function V2Canvas() {
   const { displayText, isIdle } = useTypewriter();
-  const poolRefs = usePoolFloat(POOL_ITEMS);
   const [activeProject, setActiveProject] = useState<string | null>(null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -191,14 +104,28 @@ export function V2Canvas() {
   const [isEnvelopeClosing, setIsEnvelopeClosing] = useState(false);
   const [envelopeOriginRect, setEnvelopeOriginRect] = useState<DOMRect | null>(null);
   const envelopeRef = useRef<HTMLDivElement>(null);
+  const [projectCardBg, setProjectCardBg] = useState<string | undefined>(undefined);
 
   const handleProjectClick = (key: string) => {
     const el = entryRefs.current[key];
     if (el) {
       setOriginRect(el.getBoundingClientRect());
       setActiveProject(key);
+      setProjectCardBg(undefined);
       setIsClosing(false);
     }
+  };
+
+  const handleNotesCardClick = (rect: DOMRect) => {
+    setOriginRect(rect);
+    setActiveProject("uselessNotes");
+    setProjectCardBg("#ffffff");
+    setIsClosing(false);
+  };
+
+  const handleVorliCardClick = () => {
+    setActiveProject("vorli");
+    setIsClosing(false);
   };
 
   // Called when the close sequence begins — un-blur background immediately
@@ -373,76 +300,13 @@ export function V2Canvas() {
         </p>
       </motion.div>
 
-      {/* ── Pool ── */}
-      <motion.div
+      {/* ── Selected projects ── */}
+      <SelectedProjectsSection
+        onNotesClick={handleNotesCardClick}
+        onVorliClick={handleVorliCardClick}
         animate={blurAnim}
         transition={blurTransition}
-        style={{
-          marginTop: 60,
-          position: "relative",
-          width: 603,
-          height: 337,
-          borderRadius: 24,
-          overflow: "hidden",
-          boxShadow: "#00000033 -4px 4px 8px",
-          flexShrink: 0,
-          transformOrigin: "50% 50%",
-        }}
-      >
-        {/* Water shader — animated pool surface */}
-        <Water
-          speed={0.28}
-          size={0.01}
-          highlights={0.06}
-          layering={0}
-          edges={0.58}
-          waves={0.05}
-          caustic={0}
-          scale={0.93}
-          fit="cover"
-          image="https://workers.paper.design/file-assets/01KM2PRGZVJ24AH6QP30SA1ZFC/01KM5BCACYB6D00EJHTVG5P7MV.png"
-          colorBack="#00000000"
-          colorHighlight="#FFFFFF"
-          style={{ backgroundColor: "#138FCD00", height: 337, left: 10, position: "absolute", top: 0, width: 590 }}
-        />
-        {/* Pool photo overlay — sits above the water shader */}
-        <div
-          style={{
-            backgroundImage: "url(/images/pool-side.png)",
-            backgroundPosition: "center",
-            backgroundSize: "cover",
-            borderRadius: 24,
-            height: 337,
-            left: "50%",
-            position: "absolute",
-            top: 0,
-            translate: "-50%",
-            width: 603,
-            zIndex: 1,
-          }}
-        />
-        {/* Floating project icons */}
-        {POOL_ITEMS.map((item, index) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={item.label}
-            ref={(el) => { poolRefs.current[index] = el; }}
-            src={item.image}
-            alt={item.label}
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              width: item.width,
-              height: 32,
-              borderRadius: 6,
-              objectFit: "cover" as const,
-              boxShadow: "#00000033 0px 6px 3px",
-              zIndex: 2,
-            }}
-          />
-        ))}
-      </motion.div>
+      />
 
       {/* ── Project section ── */}
       <motion.div
@@ -494,6 +358,7 @@ export function V2Canvas() {
           isDark={false}
           primaryColor={primaryColor}
           primary40={primary40}
+          backgroundColor={projectCardBg}
         />
       )}
 
