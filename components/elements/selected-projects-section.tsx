@@ -12,6 +12,8 @@ interface SelectedProjectsSectionProps {
   animate: MotionProps["animate"];
   /** blurTransition from V2Canvas */
   transition: MotionProps["transition"];
+  /** True when the Notes detail card is expanded — hides this card while keeping it in DOM for reverse animation */
+  notesExpanded?: boolean;
 }
 
 // 5-layer depth shadow matching Figma spec
@@ -24,18 +26,16 @@ const CARD_SHADOW = [
 ].join(", ");
 
 const CARD_STYLE: React.CSSProperties = {
-  width: 138,
-  height: 188,
-  borderRadius: 23.5,
+  width: 160,
+  height: 220,
+  borderRadius: 30,
   background: "linear-gradient(to bottom, #ffffff, #f4f4f4)",
   border: "2.948px solid white",
   boxShadow: CARD_SHADOW,
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  justifyContent: "center",
-  gap: 13.5,
-  padding: "47px 11px",
+  padding: "16px",
   boxSizing: "border-box",
   cursor: "pointer",
   position: "relative",
@@ -77,6 +77,7 @@ export function SelectedProjectsSection({
   onVorliClick,
   animate,
   transition,
+  notesExpanded,
 }: SelectedProjectsSectionProps) {
   const [notesHovered, setNotesHovered] = useState(false);
   const [vorliHovered, setVorliHovered] = useState(false);
@@ -116,48 +117,63 @@ export function SelectedProjectsSection({
     >
       {/* ── Notes card ── */}
       <motion.div
+        layoutId="mini-card-notes"
         ref={setNotesRefs}
-        animate={{ y: notesHovered ? -6 : 0 }}
+        animate={{ y: notesExpanded ? 0 : (notesHovered ? -6 : 0), rotate: "5deg" }}
         transition={hoverSpring}
-        onMouseEnter={() => setNotesHovered(true)}
+        onMouseEnter={() => { if (!notesExpanded) setNotesHovered(true); }}
         onMouseLeave={() => setNotesHovered(false)}
         onClick={(e) => {
           e.stopPropagation();
-          if (notesCardRef.current) onNotesClick(notesCardRef.current.getBoundingClientRect());
+          if (!notesExpanded && notesCardRef.current) onNotesClick(notesCardRef.current.getBoundingClientRect());
         }}
         style={{
           ...CARD_STYLE,
-          rotate: "5deg",
           marginRight: -21,
           zIndex: 1,
+          opacity: notesExpanded ? 0 : 1,
+          pointerEvents: notesExpanded ? "none" : "auto",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/notes.png"
-          alt="Useless Notes"
+        {/* Icon + title — centered in remaining space */}
+        <div
           style={{
-            width: 40,
-            height: 40,
-            objectFit: "cover",
-            borderRadius: 8,
-            flexShrink: 0,
-            rotate: "342.8deg",
-            transformOrigin: "50% 50%",
-          }}
-        />
-        <span
-          style={{
-            fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-            fontSize: 16.8,
-            letterSpacing: "-0.04em",
-            color: "#434343",
-            whiteSpace: "nowrap",
-            lineHeight: 1.3,
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
           }}
         >
-          Notes
-        </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/notes.png"
+            alt="Useless Notes"
+            style={{
+              width: 40,
+              height: 40,
+              objectFit: "cover",
+              borderRadius: 8,
+              flexShrink: 0,
+              rotate: "342.8deg",
+              transformOrigin: "50% 50%",
+            }}
+          />
+          <span
+            style={{
+              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+              fontSize: 16.8,
+              letterSpacing: "-0.04em",
+              color: "#434343",
+              whiteSpace: "nowrap",
+              lineHeight: 1.3,
+            }}
+          >
+            Notes
+          </span>
+        </div>
+        {/* Tags — bottom aligned */}
         <div
           style={{
             display: "flex",
@@ -191,32 +207,45 @@ export function SelectedProjectsSection({
           zIndex: 2,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/receipt.png"
-          alt="Vorli"
+        {/* Icon + title — centered in remaining space */}
+        <div
           style={{
-            width: 40,
-            height: 40,
-            objectFit: "cover",
-            borderRadius: 8,
-            flexShrink: 0,
-            rotate: "359.41deg",
-            transformOrigin: "50% 50%",
-          }}
-        />
-        <span
-          style={{
-            fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-            fontSize: 16.8,
-            letterSpacing: "-0.04em",
-            color: "#434343",
-            whiteSpace: "nowrap",
-            lineHeight: 1.3,
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
           }}
         >
-          Vorli
-        </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/receipt.png"
+            alt="Vorli"
+            style={{
+              width: 40,
+              height: 40,
+              objectFit: "cover",
+              borderRadius: 8,
+              flexShrink: 0,
+              rotate: "359.41deg",
+              transformOrigin: "50% 50%",
+            }}
+          />
+          <span
+            style={{
+              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+              fontSize: 16.8,
+              letterSpacing: "-0.04em",
+              color: "#434343",
+              whiteSpace: "nowrap",
+              lineHeight: 1.3,
+            }}
+          >
+            Vorli
+          </span>
+        </div>
+        {/* Tags — bottom aligned */}
         <div
           style={{
             display: "flex",

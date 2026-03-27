@@ -7,8 +7,8 @@ import { UselessNotesDetail } from "./useless-notes-detail";
 
 interface ProjectFloatingCardProps {
   projectKey: string;
-  /** Bounding rect of the list entry at click time */
-  originRect: DOMRect;
+  /** Bounding rect of the list entry at click time — optional when layoutId is used */
+  originRect?: DOMRect | null;
   /** Ref to the list entry element */
   entryRef: HTMLDivElement | null;
   /** Called when all content has faded out — lets parent un-blur + show list item */
@@ -19,6 +19,8 @@ interface ProjectFloatingCardProps {
   primary40: string;
   /** Optional background colour — pass to create seamless FLIP from a coloured card */
   backgroundColor?: string;
+  /** When set, uses Framer layoutId shared element transition instead of manual FLIP */
+  layoutId?: string;
 }
 
 const PROJECT_LABELS: Record<string, string> = {
@@ -75,7 +77,9 @@ export function ProjectFloatingCard({
   primaryColor,
   primary40,
   backgroundColor,
+  layoutId,
 }: ProjectFloatingCardProps) {
+  const usingLayoutId = !!layoutId;
   const contentControls = useAnimation();
   const [phase, setPhase] = useState<"expanding" | "open" | "closing" | "closed">("expanding");
   const [exitStage, setExitStage] = useState<ExitStage>("none");
@@ -180,23 +184,34 @@ export function ProjectFloatingCard({
         >
           {/* ── The card ── */}
           <motion.div
-            initial={{
-              top: originRect.top,
-              left: originRect.left,
-              width: originRect.width,
-              opacity: 0,
-            }}
-            animate={{
-              top: targetTop,
-              left: targetLeft,
-              width: CARD_WIDTH,
-              opacity: 1,
-            }}
-            transition={spring}
-            onAnimationComplete={handleExpandComplete}
+            {...(usingLayoutId
+              ? {
+                  layoutId,
+                  animate: { rotate: "0deg" },
+                  transition: spring,
+                  onLayoutAnimationComplete: handleExpandComplete,
+                }
+              : {
+                  initial: {
+                    top: originRect!.top,
+                    left: originRect!.left,
+                    width: originRect!.width,
+                    opacity: 0,
+                  },
+                  animate: {
+                    top: targetTop,
+                    left: targetLeft,
+                    width: CARD_WIDTH,
+                    opacity: 1,
+                  },
+                  transition: spring,
+                  onAnimationComplete: handleExpandComplete,
+                }
+            )}
             onClick={(e) => e.stopPropagation()}
             style={{
-              position: "absolute",
+              position: usingLayoutId ? "fixed" : "absolute",
+              ...(usingLayoutId ? { top: targetTop, left: targetLeft, width: CARD_WIDTH } : {}),
               display: "flex",
               flexDirection: "column",
               gap: 16,

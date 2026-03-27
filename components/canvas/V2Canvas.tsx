@@ -306,6 +306,7 @@ export function V2Canvas() {
         onVorliClick={handleVorliCardClick}
         animate={blurAnim}
         transition={blurTransition}
+        notesExpanded={activeProject === "uselessNotes"}
       />
 
       {/* ── Project section ── */}
@@ -347,7 +348,8 @@ export function V2Canvas() {
       )}
 
       {/* ── Project floating card — all projects except Vorli, Zoun, and WeatherWear ── */}
-      {activeProject && originRect && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear" && (
+      {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear"
+        && (activeProject === "uselessNotes" || !!originRect) && (
         <ProjectFloatingCard
           key={activeProject}
           projectKey={activeProject}
@@ -359,6 +361,7 @@ export function V2Canvas() {
           primaryColor={primaryColor}
           primary40={primary40}
           backgroundColor={projectCardBg}
+          layoutId={activeProject === "uselessNotes" ? "mini-card-notes" : undefined}
         />
       )}
 
