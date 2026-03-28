@@ -137,21 +137,6 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
           <div style={labelStyle}>Personal_</div>
 
           <ProjectEntry
-            {...entryProps("uselessNotes")}
-            icon={<ProjectIcon src="/images/notes.png" alt="Useless Notes" rotate="342.8deg" />}
-            label="Useless Notes"
-            tags={["iOS", "Canvas"]}
-            appStore
-          />
-
-          <ProjectEntry
-            {...entryProps("vorli")}
-            icon={<ProjectIcon src="/images/receipt.png" alt="Vorli" rotate="359.41deg" />}
-            label="Vorli"
-            tags={["iOS", "AI Financial Assistant", "Personal Usage"]}
-          />
-
-          <ProjectEntry
             {...entryProps("zoun")}
             icon={<ProjectIcon src="/images/globe.png" alt="Zoun" grayscale={false} opacity={1} />}
             label="Zoun"

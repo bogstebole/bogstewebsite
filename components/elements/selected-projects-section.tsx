@@ -11,6 +11,14 @@ interface SelectedProjectsSectionProps {
   animate: MotionProps["animate"];
   /** blurTransition from V2Canvas */
   transition: MotionProps["transition"];
+  /** Called when Notes card starts expanding */
+  onNotesExpand?: () => void;
+  /** Called the moment Notes close sequence begins (un-blur immediately) */
+  onNotesCloseStart?: () => void;
+  /** Called after Notes card has fully returned to mini state */
+  onNotesClose?: () => void;
+  /** Called when Vorli hero card is clicked */
+  onVorliClick?: () => void;
 }
 
 // 5-layer depth shadow matching Figma spec
@@ -73,32 +81,43 @@ function Tag({ label }: { label: string }) {
 export function SelectedProjectsSection({
   animate,
   transition,
+  onNotesExpand,
+  onNotesCloseStart,
+  onNotesClose,
+  onVorliClick,
 }: SelectedProjectsSectionProps) {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const contentControls = useAnimation();
-  const isExpandingRef = useRef(false);
+  const expandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closingRef = useRef(false);
 
   const handleExpand = useCallback(() => {
     if (isNotesExpanded || closingRef.current) return;
-    isExpandingRef.current = true;
     setIsNotesExpanded(true);
-  }, [isNotesExpanded]);
+    onNotesExpand?.();
+    expandTimerRef.current = setTimeout(() => {
+      void contentControls.start("visible");
+    }, 450);
+  }, [isNotesExpanded, onNotesExpand, contentControls]);
 
   const handleClose = useCallback(async () => {
     if (closingRef.current) return;
     closingRef.current = true;
+    if (expandTimerRef.current) {
+      clearTimeout(expandTimerRef.current);
+      expandTimerRef.current = null;
+    }
+    onNotesCloseStart?.();
     await contentControls.start("exit");
     setIsNotesExpanded(false);
+    onNotesClose?.();
     closingRef.current = false;
-  }, [contentControls]);
+  }, [contentControls, onNotesCloseStart, onNotesClose]);
 
-  const handleCardSettled = useCallback(() => {
-    if (isExpandingRef.current) {
-      isExpandingRef.current = false;
-      void contentControls.start("visible");
-    }
-  }, [contentControls]);
+  // Cancel timer on unmount
+  useEffect(() => {
+    return () => { if (expandTimerRef.current) clearTimeout(expandTimerRef.current); };
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -111,8 +130,10 @@ export function SelectedProjectsSection({
   return (
     <LayoutGroup id="selected-projects">
       <motion.div
-        animate={animate}
-        transition={transition}
+        animate={isNotesExpanded
+          ? { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const }
+          : animate}
+        transition={isNotesExpanded ? { duration: 0 } : transition}
         style={{
           marginTop: 60,
           display: "flex",
@@ -126,13 +147,12 @@ export function SelectedProjectsSection({
         {!isNotesExpanded && (
           <motion.div
             layoutId="notes-card"
-            initial={{ rotate: 5 }}
             animate={{ rotate: 5 }}
             transition={CARD_SPRING}
             style={{
               ...CARD_STYLE,
               marginRight: -21,
-              zIndex: 1,
+              zIndex: 3,
               cursor: "pointer",
             }}
             onClick={handleExpand}
@@ -194,13 +214,15 @@ export function SelectedProjectsSection({
           </motion.div>
         )}
 
-        {/* ── Vorli card — completely untouched ── */}
+        {/* ── Vorli card ── */}
         <div
           style={{
             ...CARD_STYLE,
             rotate: "-5deg",
             zIndex: 2,
+            cursor: onVorliClick ? "pointer" : "default",
           }}
+          onClick={onVorliClick}
         >
           <div
             style={{
@@ -283,7 +305,6 @@ export function SelectedProjectsSection({
             layoutId="notes-card"
             animate={{ rotate: 0 }}
             transition={CARD_SPRING}
-            onLayoutAnimationComplete={handleCardSettled}
             onClick={(e) => e.stopPropagation()}
             style={{
               ...CARD_STYLE,

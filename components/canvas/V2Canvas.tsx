@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 // import { Water } from "@paper-design/shaders-react"; // POOL_HIDDEN
 import { Logo } from "@/components/ui/logo";
 import { ProjectSection } from "@/components/elements/project-section";
@@ -104,28 +104,15 @@ export function V2Canvas() {
   const [isEnvelopeClosing, setIsEnvelopeClosing] = useState(false);
   const [envelopeOriginRect, setEnvelopeOriginRect] = useState<DOMRect | null>(null);
   const envelopeRef = useRef<HTMLDivElement>(null);
-  const [projectCardBg, setProjectCardBg] = useState<string | undefined>(undefined);
-
+  const [isNotesExpanded, setIsNotesExpanded] = useState(false);
+  const [isNotesClosing, setIsNotesClosing] = useState(false);
   const handleProjectClick = (key: string) => {
     const el = entryRefs.current[key];
     if (el) {
       setOriginRect(el.getBoundingClientRect());
       setActiveProject(key);
-      setProjectCardBg(undefined);
       setIsClosing(false);
     }
-  };
-
-  const handleNotesCardClick = (rect: DOMRect) => {
-    setOriginRect(rect);
-    setActiveProject("uselessNotes");
-    setProjectCardBg("#ffffff");
-    setIsClosing(false);
-  };
-
-  const handleVorliCardClick = () => {
-    setActiveProject("vorli");
-    setIsClosing(false);
   };
 
   // Called when the close sequence begins — un-blur background immediately
@@ -163,11 +150,26 @@ export function V2Canvas() {
     setIsEnvelopeClosing(false);
   };
 
+  const handleNotesExpand = () => {
+    setIsNotesExpanded(true);
+    setIsNotesClosing(false);
+  };
+  const handleNotesCloseStart = () => setIsNotesClosing(true);
+  const handleNotesClose = () => {
+    setIsNotesExpanded(false);
+    setIsNotesClosing(false);
+  };
+
+  const handleVorliHeroClick = () => {
+    setActiveProject("vorli");
+    setIsClosing(false);
+  };
+
   // Lock body scroll when detail is open
   useEffect(() => {
-    document.body.style.overflow = activeProject || envelopeOpen ? "hidden" : "";
+    document.body.style.overflow = activeProject || envelopeOpen || isNotesExpanded ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [activeProject, envelopeOpen]);
+  }, [activeProject, envelopeOpen, isNotesExpanded]);
 
   // Light mode only for V2
   const primaryColor = "#000000";
@@ -176,7 +178,10 @@ export function V2Canvas() {
   const primary40 = "rgba(0,0,0,0.40)";
 
   // Un-blur background as soon as close begins
-  const shouldBlur = (activeProject !== null && !isClosing) || (envelopeOpen && !isEnvelopeClosing);
+  const shouldBlur =
+    (activeProject !== null && !isClosing) ||
+    (envelopeOpen && !isEnvelopeClosing) ||
+    (isNotesExpanded && !isNotesClosing);
   const blurAnim = shouldBlur
     ? { scale: 0.93, filter: "blur(10px)", pointerEvents: "none" as const }
     : { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const };
@@ -302,11 +307,12 @@ export function V2Canvas() {
 
       {/* ── Selected projects ── */}
       <SelectedProjectsSection
-        onNotesClick={handleNotesCardClick}
-        onVorliClick={handleVorliCardClick}
         animate={blurAnim}
         transition={blurTransition}
-        notesExpanded={activeProject === "uselessNotes"}
+        onNotesExpand={handleNotesExpand}
+        onNotesCloseStart={handleNotesCloseStart}
+        onNotesClose={handleNotesClose}
+        onVorliClick={handleVorliHeroClick}
       />
 
       {/* ── Project section ── */}
@@ -348,22 +354,22 @@ export function V2Canvas() {
       )}
 
       {/* ── Project floating card — all projects except Vorli, Zoun, and WeatherWear ── */}
-      {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear"
-        && (activeProject === "uselessNotes" || !!originRect) && (
-        <ProjectFloatingCard
-          key={activeProject}
-          projectKey={activeProject}
-          originRect={originRect}
-          entryRef={entryRefs.current[activeProject] ?? null}
-          onCloseStart={handleCloseStart}
-          onClose={handleClose}
-          isDark={false}
-          primaryColor={primaryColor}
-          primary40={primary40}
-          backgroundColor={projectCardBg}
-          layoutId={activeProject === "uselessNotes" ? "mini-card-notes" : undefined}
-        />
-      )}
+      <AnimatePresence>
+        {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear"
+          && !!originRect && (
+          <ProjectFloatingCard
+            key={activeProject}
+            projectKey={activeProject}
+            originRect={originRect}
+            entryRef={entryRefs.current[activeProject] ?? null}
+            onCloseStart={handleCloseStart}
+            onClose={handleClose}
+            isDark={false}
+            primaryColor={primaryColor}
+            primary40={primary40}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Vorli — receipt bottom sheet ── */}
       {activeProject === "vorli" && (
