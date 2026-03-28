@@ -1,19 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, type MotionProps } from "framer-motion";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { motion, AnimatePresence, LayoutGroup, useAnimation } from "framer-motion";
+import type { MotionProps } from "framer-motion";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
-import { useRippleWave } from "@/hooks/useRippleWave";
+import { UselessNotesDetail } from "@/components/ui/useless-notes-detail";
 
 interface SelectedProjectsSectionProps {
-  onNotesClick: (rect: DOMRect) => void;
-  onVorliClick: () => void;
   /** blurAnim object from V2Canvas — passed straight to motion.div */
   animate: MotionProps["animate"];
   /** blurTransition from V2Canvas */
   transition: MotionProps["transition"];
-  /** True when the Notes detail card is expanded — hides this card while keeping it in DOM for reverse animation */
-  notesExpanded?: boolean;
 }
 
 // 5-layer depth shadow matching Figma spec
@@ -37,11 +34,12 @@ const CARD_STYLE: React.CSSProperties = {
   alignItems: "center",
   padding: "16px",
   boxSizing: "border-box",
-  cursor: "pointer",
   position: "relative",
   overflow: "hidden",
   userSelect: "none",
 };
+
+const CARD_SPRING = { type: "spring" as const, stiffness: 300, damping: 30 };
 
 function Tag({ label }: { label: string }) {
   return (
@@ -73,192 +71,324 @@ function Tag({ label }: { label: string }) {
 }
 
 export function SelectedProjectsSection({
-  onNotesClick,
-  onVorliClick,
   animate,
   transition,
-  notesExpanded,
 }: SelectedProjectsSectionProps) {
-  const [notesHovered, setNotesHovered] = useState(false);
-  const [vorliHovered, setVorliHovered] = useState(false);
+  const [isNotesExpanded, setIsNotesExpanded] = useState(false);
+  const contentControls = useAnimation();
+  const isExpandingRef = useRef(false);
+  const closingRef = useRef(false);
 
-  // Ripple wave refs
-  const notesRippleRef = useRippleWave({ textStrength: 28, imageStrength: 0, speed: 380 });
-  const vorliRippleRef = useRippleWave({ textStrength: 28, imageStrength: 0, speed: 380 });
+  const handleExpand = useCallback(() => {
+    if (isNotesExpanded || closingRef.current) return;
+    isExpandingRef.current = true;
+    setIsNotesExpanded(true);
+  }, [isNotesExpanded]);
 
-  // Card refs for FLIP origin rect
-  const notesCardRef = useRef<HTMLDivElement | null>(null);
-  const vorliCardRef = useRef<HTMLDivElement | null>(null);
+  const handleClose = useCallback(async () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    await contentControls.start("exit");
+    setIsNotesExpanded(false);
+    closingRef.current = false;
+  }, [contentControls]);
 
-  // Merge ripple ref + card ref onto the same DOM node
-  const setNotesRefs = (el: HTMLDivElement | null) => {
-    notesCardRef.current = el;
-    (notesRippleRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
-  };
-  const setVorliRefs = (el: HTMLDivElement | null) => {
-    vorliCardRef.current = el;
-    (vorliRippleRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
-  };
+  const handleCardSettled = useCallback(() => {
+    if (isExpandingRef.current) {
+      isExpandingRef.current = false;
+      void contentControls.start("visible");
+    }
+  }, [contentControls]);
 
-  const hoverSpring = { type: "spring" as const, stiffness: 400, damping: 28 };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isNotesExpanded) void handleClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [handleClose, isNotesExpanded]);
 
   return (
-    <motion.div
-      animate={animate}
-      transition={transition}
-      style={{
-        marginTop: 60,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        transformOrigin: "50% 50%",
-        flexShrink: 0,
-      }}
-    >
-      {/* ── Notes card ── */}
+    <LayoutGroup id="selected-projects">
       <motion.div
-        layoutId="mini-card-notes"
-        ref={setNotesRefs}
-        animate={{ y: notesExpanded ? 0 : (notesHovered ? -6 : 0), rotate: "5deg" }}
-        transition={hoverSpring}
-        onMouseEnter={() => { if (!notesExpanded) setNotesHovered(true); }}
-        onMouseLeave={() => setNotesHovered(false)}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (!notesExpanded && notesCardRef.current) onNotesClick(notesCardRef.current.getBoundingClientRect());
-        }}
+        animate={animate}
+        transition={transition}
         style={{
-          ...CARD_STYLE,
-          marginRight: -21,
-          zIndex: 1,
-          opacity: notesExpanded ? 0 : 1,
-          pointerEvents: notesExpanded ? "none" : "auto",
+          marginTop: 60,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transformOrigin: "50% 50%",
+          flexShrink: 0,
         }}
       >
-        {/* Icon + title — centered in remaining space */}
+        {/* ── Notes card — only rendered when collapsed ── */}
+        {!isNotesExpanded && (
+          <motion.div
+            layoutId="notes-card"
+            initial={{ rotate: 5 }}
+            animate={{ rotate: 5 }}
+            transition={CARD_SPRING}
+            style={{
+              ...CARD_STYLE,
+              marginRight: -21,
+              zIndex: 1,
+              cursor: "pointer",
+            }}
+            onClick={handleExpand}
+          >
+            {/* Icon + title — layout="position" prevents stretch during morph */}
+            <motion.div
+              layout="position"
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 12,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/notes.png"
+                alt="Useless Notes"
+                style={{
+                  width: 40,
+                  height: 40,
+                  objectFit: "cover",
+                  borderRadius: 8,
+                  flexShrink: 0,
+                  transformOrigin: "50% 50%",
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+                  fontSize: 16.8,
+                  letterSpacing: "-0.04em",
+                  color: "#434343",
+                  whiteSpace: "nowrap",
+                  lineHeight: 1.3,
+                }}
+              >
+                Notes
+              </span>
+            </motion.div>
+            {/* Tags — layout="position" prevents stretch */}
+            <motion.div
+              layout="position"
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+              }}
+            >
+              <Tag label="iOS" />
+              <Tag label="Canvas" />
+              <AppStoreBadge active={false} />
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* ── Vorli card — completely untouched ── */}
         <div
           style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 12,
+            ...CARD_STYLE,
+            rotate: "-5deg",
+            zIndex: 2,
           }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/notes.png"
-            alt="Useless Notes"
+          <div
             style={{
-              width: 40,
-              height: 40,
-              objectFit: "cover",
-              borderRadius: 8,
-              flexShrink: 0,
-              rotate: "342.8deg",
-              transformOrigin: "50% 50%",
-            }}
-          />
-          <span
-            style={{
-              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-              fontSize: 16.8,
-              letterSpacing: "-0.04em",
-              color: "#434343",
-              whiteSpace: "nowrap",
-              lineHeight: 1.3,
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
             }}
           >
-            Notes
-          </span>
-        </div>
-        {/* Tags — bottom aligned */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 8,
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-          }}
-        >
-          <Tag label="iOS" />
-          <Tag label="Canvas" />
-          <AppStoreBadge active={notesHovered} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/receipt.png"
+              alt="Vorli"
+              style={{
+                width: 40,
+                height: 40,
+                objectFit: "cover",
+                borderRadius: 8,
+                flexShrink: 0,
+                rotate: "359.41deg",
+                transformOrigin: "50% 50%",
+              }}
+            />
+            <span
+              style={{
+                fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+                fontSize: 16.8,
+                letterSpacing: "-0.04em",
+                color: "#434343",
+                whiteSpace: "nowrap",
+                lineHeight: 1.3,
+              }}
+            >
+              Vorli
+            </span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <Tag label="iOS" />
+            <Tag label="AI Financial Assistant" />
+          </div>
         </div>
       </motion.div>
 
-      {/* ── Vorli card ── */}
-      <motion.div
-        ref={setVorliRefs}
-        animate={{ y: vorliHovered ? -6 : 0 }}
-        transition={hoverSpring}
-        onMouseEnter={() => setVorliHovered(true)}
-        onMouseLeave={() => setVorliHovered(false)}
-        onClick={(e) => {
-          e.stopPropagation();
-          onVorliClick();
-        }}
-        style={{
-          ...CARD_STYLE,
-          rotate: "-5deg",
-          zIndex: 2,
-        }}
-      >
-        {/* Icon + title — centered in remaining space */}
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 12,
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/receipt.png"
-            alt="Vorli"
+      {/* ── Backdrop — blurs everything behind ── */}
+      <AnimatePresence>
+        {isNotesExpanded && (
+          <motion.div
+            key="notes-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => void handleClose()}
             style={{
-              width: 40,
-              height: 40,
-              objectFit: "cover",
-              borderRadius: 8,
-              flexShrink: 0,
-              rotate: "359.41deg",
-              transformOrigin: "50% 50%",
+              position: "fixed",
+              inset: 0,
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              zIndex: 50,
             }}
           />
-          <span
+        )}
+      </AnimatePresence>
+
+      {/* ── Expanded card — shares layoutId with the mini card ── */}
+      <AnimatePresence>
+        {isNotesExpanded && (
+          <motion.div
+            key="notes-expanded"
+            layoutId="notes-card"
+            animate={{ rotate: 0 }}
+            transition={CARD_SPRING}
+            onLayoutAnimationComplete={handleCardSettled}
+            onClick={(e) => e.stopPropagation()}
             style={{
-              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-              fontSize: 16.8,
-              letterSpacing: "-0.04em",
-              color: "#434343",
-              whiteSpace: "nowrap",
-              lineHeight: 1.3,
+              ...CARD_STYLE,
+              // Override mini-card dimensions and alignment
+              width: 600,
+              height: "auto",
+              maxHeight: "80vh",
+              overflowY: "auto",
+              overflowX: "hidden",
+              alignItems: "flex-start",
+              // Centered fixed position — marginLeft offsets exactly half of width
+              position: "fixed",
+              top: "10vh",
+              left: "50%",
+              marginLeft: -300,
+              zIndex: 51,
+              padding: 24,
+              gap: 16,
+              cursor: "default",
             }}
           >
-            Vorli
-          </span>
-        </div>
-        {/* Tags — bottom aligned */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <Tag label="iOS" />
-          <Tag label="AI Financial Assistant" />
-        </div>
-      </motion.div>
-    </motion.div>
+            {/* Close button — fades in after card settles */}
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { delay: 0.3 } }}
+              exit={{ opacity: 0, transition: { duration: 0.1 } }}
+              onClick={() => void handleClose()}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 16,
+                width: 28,
+                height: 28,
+                borderRadius: 14,
+                background: "rgba(0,0,0,0.06)",
+                border: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 13,
+                color: "#666",
+                flexShrink: 0,
+              }}
+            >
+              ✕
+            </motion.button>
+
+            {/* Card shell: icon + title — layout="position" prevents stretch */}
+            <motion.div
+              layout="position"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                flexShrink: 0,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/notes.png"
+                alt="Useless Notes"
+                style={{
+                  width: 40,
+                  height: 40,
+                  objectFit: "cover",
+                  borderRadius: 8,
+                  flexShrink: 0,
+                  transformOrigin: "50% 50%",
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+                  fontSize: 22,
+                  letterSpacing: "-0.04em",
+                  color: "#434343",
+                  lineHeight: 1.2,
+                }}
+              >
+                Useless Notes
+              </span>
+            </motion.div>
+
+            {/* Tags row — layout="position" prevents stretch */}
+            <motion.div
+              layout="position"
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                alignItems: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Tag label="iOS" />
+              <Tag label="Canvas" />
+              <AppStoreBadge active />
+            </motion.div>
+
+            {/* Detail content — fades in after card settles via contentControls */}
+            <UselessNotesDetail controls={contentControls} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </LayoutGroup>
   );
 }
