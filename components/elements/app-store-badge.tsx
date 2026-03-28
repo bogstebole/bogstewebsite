@@ -1,12 +1,16 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 interface AppStoreBadgeProps {
   active: boolean;
+  layoutId?: string;
 }
 
-export function AppStoreBadge({ active }: AppStoreBadgeProps) {
+export function AppStoreBadge({ active, layoutId }: AppStoreBadgeProps) {
   return active ? (
-    <div
+    <motion.div
+      layoutId={layoutId}
       style={{
         alignItems: "center",
         backdropFilter: "blur(1px)",
@@ -64,9 +68,10 @@ export function AppStoreBadge({ active }: AppStoreBadgeProps) {
       >
         Live on App Store
       </span>
-    </div>
+    </motion.div>
   ) : (
-    <div
+    <motion.div
+      layoutId={layoutId}
       style={{
         alignItems: "center",
         backgroundColor: "#F3F3F3",
@@ -108,6 +113,6 @@ export function AppStoreBadge({ active }: AppStoreBadgeProps) {
       >
         Live on App Store
       </span>
-    </div>
+    </motion.div>
   );
 }

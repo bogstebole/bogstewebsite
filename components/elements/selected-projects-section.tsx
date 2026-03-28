@@ -49,9 +49,10 @@ const CARD_STYLE: React.CSSProperties = {
 
 const CARD_SPRING = { type: "spring" as const, stiffness: 300, damping: 30 };
 
-function Tag({ label }: { label: string }) {
+function Tag({ label, layoutId }: { label: string; layoutId?: string }) {
   return (
-    <div
+    <motion.div
+      layoutId={layoutId}
       style={{
         backgroundColor: "#f3f3f3",
         borderRadius: 4,
@@ -74,7 +75,7 @@ function Tag({ label }: { label: string }) {
       >
         {label}
       </span>
-    </div>
+    </motion.div>
   );
 }
 
@@ -88,36 +89,24 @@ export function SelectedProjectsSection({
 }: SelectedProjectsSectionProps) {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const contentControls = useAnimation();
-  const expandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closingRef = useRef(false);
 
   const handleExpand = useCallback(() => {
     if (isNotesExpanded || closingRef.current) return;
     setIsNotesExpanded(true);
     onNotesExpand?.();
-    expandTimerRef.current = setTimeout(() => {
-      void contentControls.start("visible");
-    }, 450);
-  }, [isNotesExpanded, onNotesExpand, contentControls]);
+    // Content reveal is triggered by onLayoutAnimationComplete on the expanded card
+  }, [isNotesExpanded, onNotesExpand]);
 
   const handleClose = useCallback(async () => {
     if (closingRef.current) return;
     closingRef.current = true;
-    if (expandTimerRef.current) {
-      clearTimeout(expandTimerRef.current);
-      expandTimerRef.current = null;
-    }
     onNotesCloseStart?.();
     await contentControls.start("exit");
     setIsNotesExpanded(false);
     onNotesClose?.();
     closingRef.current = false;
   }, [contentControls, onNotesCloseStart, onNotesClose]);
-
-  // Cancel timer on unmount
-  useEffect(() => {
-    return () => { if (expandTimerRef.current) clearTimeout(expandTimerRef.current); };
-  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -143,19 +132,19 @@ export function SelectedProjectsSection({
           flexShrink: 0,
         }}
       >
-        {/* ── Notes card — only rendered when collapsed ── */}
-        {!isNotesExpanded && (
-          <motion.div
+        {/* ── Notes card — always mounted, invisible when expanded (stable FLIP target) ── */}
+        <motion.div
             layoutId="notes-card"
-            animate={{ rotate: 5 }}
+            animate={{ rotate: isNotesExpanded ? 0 : 5, opacity: isNotesExpanded ? 0 : 1 }}
             transition={CARD_SPRING}
             style={{
               ...CARD_STYLE,
               marginRight: -21,
               zIndex: 3,
-              cursor: "pointer",
+              cursor: isNotesExpanded ? "default" : "pointer",
+              pointerEvents: isNotesExpanded ? "none" : "auto",
             }}
-            onClick={handleExpand}
+            onClick={!isNotesExpanded ? handleExpand : undefined}
           >
             {/* Icon + title — layout="position" prevents stretch during morph */}
             <motion.div
@@ -170,7 +159,9 @@ export function SelectedProjectsSection({
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <motion.img
+                layoutId="notes-icon"
+                transition={CARD_SPRING}
                 src="/images/notes.png"
                 alt="Useless Notes"
                 style={{
@@ -182,7 +173,9 @@ export function SelectedProjectsSection({
                   transformOrigin: "50% 50%",
                 }}
               />
-              <span
+              <motion.span
+                layoutId="notes-title"
+                transition={CARD_SPRING}
                 style={{
                   fontFamily: '"JetBrains Mono", system-ui, sans-serif',
                   fontSize: 16.8,
@@ -193,7 +186,7 @@ export function SelectedProjectsSection({
                 }}
               >
                 Notes
-              </span>
+              </motion.span>
             </motion.div>
             {/* Tags — layout="position" prevents stretch */}
             <motion.div
@@ -207,12 +200,11 @@ export function SelectedProjectsSection({
                 width: "100%",
               }}
             >
-              <Tag label="iOS" />
-              <Tag label="Canvas" />
-              <AppStoreBadge active={false} />
+              <Tag label="iOS" layoutId="notes-tag-ios" />
+              <Tag label="Canvas" layoutId="notes-tag-canvas" />
+              <AppStoreBadge active={false} layoutId="notes-tag-appstore" />
             </motion.div>
           </motion.div>
-        )}
 
         {/* ── Vorli card ── */}
         <div
@@ -305,6 +297,9 @@ export function SelectedProjectsSection({
             layoutId="notes-card"
             animate={{ rotate: 0 }}
             transition={CARD_SPRING}
+            onLayoutAnimationComplete={() => {
+              if (!closingRef.current) void contentControls.start("visible");
+            }}
             onClick={(e) => e.stopPropagation()}
             style={{
               ...CARD_STYLE,
@@ -364,7 +359,9 @@ export function SelectedProjectsSection({
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <motion.img
+                layoutId="notes-icon"
+                transition={CARD_SPRING}
                 src="/images/notes.png"
                 alt="Useless Notes"
                 style={{
@@ -376,7 +373,9 @@ export function SelectedProjectsSection({
                   transformOrigin: "50% 50%",
                 }}
               />
-              <span
+              <motion.span
+                layoutId="notes-title"
+                transition={CARD_SPRING}
                 style={{
                   fontFamily: '"JetBrains Mono", system-ui, sans-serif',
                   fontSize: 22,
@@ -385,8 +384,8 @@ export function SelectedProjectsSection({
                   lineHeight: 1.2,
                 }}
               >
-                Useless Notes
-              </span>
+                Notes
+              </motion.span>
             </motion.div>
 
             {/* Tags row — layout="position" prevents stretch */}
@@ -400,9 +399,9 @@ export function SelectedProjectsSection({
                 flexShrink: 0,
               }}
             >
-              <Tag label="iOS" />
-              <Tag label="Canvas" />
-              <AppStoreBadge active />
+              <Tag label="iOS" layoutId="notes-tag-ios" />
+              <Tag label="Canvas" layoutId="notes-tag-canvas" />
+              <AppStoreBadge active={false} layoutId="notes-tag-appstore" />
             </motion.div>
 
             {/* Detail content — fades in after card settles via contentControls */}
