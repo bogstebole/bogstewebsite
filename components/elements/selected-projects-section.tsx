@@ -47,7 +47,7 @@ const CARD_STYLE: React.CSSProperties = {
   userSelect: "none",
 };
 
-const CARD_SPRING = { type: "spring" as const, stiffness: 300, damping: 30 };
+const CARD_SPRING = { type: "spring" as const, stiffness: 300, damping: 20, mass: 0.3 };
 
 const BADGE_CONTAINER_VARIANTS = {
   visible: { transition: { staggerChildren: 0.07 } },
@@ -157,7 +157,7 @@ export function SelectedProjectsSection({
           layoutId="notes-card"
           // Rotation never changes — keeping it stable prevents FLIP from capturing
           // a mid-animation state. The expanded card handles rotate 5→0 via FLIP.
-          animate={{ rotate: 5, opacity: isNotesExpanded ? 0 : 1 }}
+          animate={{ opacity: isNotesExpanded ? 0 : 1 }}
           transition={{ opacity: { duration: 0.15 } }}
           onLayoutAnimationComplete={() => {
             if (returningRef.current) {
