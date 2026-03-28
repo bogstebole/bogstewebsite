@@ -49,6 +49,18 @@ const CARD_STYLE: React.CSSProperties = {
 
 const CARD_SPRING = { type: "spring" as const, stiffness: 300, damping: 30 };
 
+const BADGE_CONTAINER_VARIANTS = {
+  visible: { transition: { staggerChildren: 0.07 } },
+  hidden: { transition: { staggerChildren: 0.05 } },
+  exit: { transition: { staggerChildren: 0.05 } },
+};
+
+const BADGE_ITEM_VARIANTS = {
+  visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 400, damping: 30 } },
+  hidden: { opacity: 0, y: 6 },
+  exit: { opacity: 0, y: -6, transition: { duration: 0.12 } },
+};
+
 function Tag({ label, layoutId }: { label: string; layoutId?: string }) {
   return (
     <motion.div
@@ -89,24 +101,32 @@ export function SelectedProjectsSection({
 }: SelectedProjectsSectionProps) {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const contentControls = useAnimation();
+  const badgeControls = useAnimation();
+  const miniTagControls = useAnimation();
   const closingRef = useRef(false);
+  const returningRef = useRef(false);
 
-  const handleExpand = useCallback(() => {
+  const handleExpand = useCallback(async () => {
     if (isNotesExpanded || closingRef.current) return;
     setIsNotesExpanded(true);
     onNotesExpand?.();
-    // Content reveal is triggered by onLayoutAnimationComplete on the expanded card
-  }, [isNotesExpanded, onNotesExpand]);
+    await miniTagControls.start("exit");
+  }, [isNotesExpanded, miniTagControls, onNotesExpand]);
 
   const handleClose = useCallback(async () => {
     if (closingRef.current) return;
     closingRef.current = true;
     onNotesCloseStart?.();
-    await contentControls.start("exit");
+    await Promise.all([
+      contentControls.start("exit"),
+      badgeControls.start("exit"),
+    ]);
+    // Mark returning so mini card's onLayoutAnimationComplete staggers badges back in
+    returningRef.current = true;
     setIsNotesExpanded(false);
     onNotesClose?.();
     closingRef.current = false;
-  }, [contentControls, onNotesCloseStart, onNotesClose]);
+  }, [contentControls, badgeControls, onNotesCloseStart, onNotesClose]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -134,77 +154,81 @@ export function SelectedProjectsSection({
       >
         {/* ── Notes card — always mounted, invisible when expanded (stable FLIP target) ── */}
         <motion.div
-            layoutId="notes-card"
-            animate={{ rotate: isNotesExpanded ? 0 : 5, opacity: isNotesExpanded ? 0 : 1 }}
-            transition={CARD_SPRING}
+          layoutId="notes-card"
+          // Rotation never changes — keeping it stable prevents FLIP from capturing
+          // a mid-animation state. The expanded card handles rotate 5→0 via FLIP.
+          animate={{ rotate: 5, opacity: isNotesExpanded ? 0 : 1 }}
+          transition={{ opacity: { duration: 0.15 } }}
+          onLayoutAnimationComplete={() => {
+            if (returningRef.current) {
+              returningRef.current = false;
+              void miniTagControls.start("visible");
+            }
+          }}
+          style={{
+            ...CARD_STYLE,
+            marginRight: -21,
+            zIndex: 3,
+            cursor: isNotesExpanded ? "default" : "pointer",
+            pointerEvents: isNotesExpanded ? "none" : "auto",
+          }}
+          onClick={!isNotesExpanded ? () => void handleExpand() : undefined}
+        >
+          {/* Icon + title — no layout="position" needed; mini card is invisible during FLIP */}
+          <div
             style={{
-              ...CARD_STYLE,
-              marginRight: -21,
-              zIndex: 3,
-              cursor: isNotesExpanded ? "default" : "pointer",
-              pointerEvents: isNotesExpanded ? "none" : "auto",
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
             }}
-            onClick={!isNotesExpanded ? handleExpand : undefined}
           >
-            {/* Icon + title — layout="position" prevents stretch during morph */}
-            <motion.div
-              layout="position"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/notes.png"
+              alt="Useless Notes"
               style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 12,
+                width: 40,
+                height: 40,
+                objectFit: "cover",
+                borderRadius: 8,
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+                fontSize: 16.8,
+                letterSpacing: "-0.04em",
+                color: "#434343",
+                whiteSpace: "nowrap",
+                lineHeight: 1.3,
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <motion.img
-                layoutId="notes-icon"
-                transition={CARD_SPRING}
-                src="/images/notes.png"
-                alt="Useless Notes"
-                style={{
-                  width: 40,
-                  height: 40,
-                  objectFit: "cover",
-                  borderRadius: 8,
-                  flexShrink: 0,
-                  transformOrigin: "50% 50%",
-                }}
-              />
-              <motion.span
-                layoutId="notes-title"
-                transition={CARD_SPRING}
-                style={{
-                  fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                  fontSize: 16.8,
-                  letterSpacing: "-0.04em",
-                  color: "#434343",
-                  whiteSpace: "nowrap",
-                  lineHeight: 1.3,
-                }}
-              >
-                Notes
-              </motion.span>
-            </motion.div>
-            {/* Tags — layout="position" prevents stretch */}
-            <motion.div
-              layout="position"
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 8,
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-              }}
-            >
-              <Tag label="iOS" layoutId="notes-tag-ios" />
-              <Tag label="Canvas" layoutId="notes-tag-canvas" />
-              <AppStoreBadge active={false} layoutId="notes-tag-appstore" />
-            </motion.div>
+              Notes
+            </span>
+          </div>
+          {/* Tags — stagger out before FLIP, stagger in after return FLIP */}
+          <motion.div
+            animate={miniTagControls}
+            initial="visible"
+            variants={BADGE_CONTAINER_VARIANTS}
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 8,
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+            }}
+          >
+            <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="iOS" /></motion.div>
+            <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="Canvas" /></motion.div>
+            <motion.div variants={BADGE_ITEM_VARIANTS}><AppStoreBadge active={false} /></motion.div>
           </motion.div>
+        </motion.div>
 
         {/* ── Vorli card ── */}
         <div
@@ -298,7 +322,10 @@ export function SelectedProjectsSection({
             animate={{ rotate: 0 }}
             transition={CARD_SPRING}
             onLayoutAnimationComplete={() => {
-              if (!closingRef.current) void contentControls.start("visible");
+              if (!closingRef.current) {
+                void badgeControls.start("visible");
+                void contentControls.start("visible");
+              }
             }}
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -348,9 +375,8 @@ export function SelectedProjectsSection({
               ✕
             </motion.button>
 
-            {/* Card shell: icon + title — layout="position" prevents stretch */}
-            <motion.div
-              layout="position"
+            {/* Card shell: icon + title */}
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -359,9 +385,7 @@ export function SelectedProjectsSection({
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <motion.img
-                layoutId="notes-icon"
-                transition={CARD_SPRING}
+              <img
                 src="/images/notes.png"
                 alt="Useless Notes"
                 style={{
@@ -370,12 +394,9 @@ export function SelectedProjectsSection({
                   objectFit: "cover",
                   borderRadius: 8,
                   flexShrink: 0,
-                  transformOrigin: "50% 50%",
                 }}
               />
-              <motion.span
-                layoutId="notes-title"
-                transition={CARD_SPRING}
+              <span
                 style={{
                   fontFamily: '"JetBrains Mono", system-ui, sans-serif',
                   fontSize: 22,
@@ -385,12 +406,14 @@ export function SelectedProjectsSection({
                 }}
               >
                 Notes
-              </motion.span>
-            </motion.div>
+              </span>
+            </div>
 
-            {/* Tags row — layout="position" prevents stretch */}
+            {/* Tags row — stagger in after FLIP, stagger out on close */}
             <motion.div
-              layout="position"
+              animate={badgeControls}
+              initial="hidden"
+              variants={BADGE_CONTAINER_VARIANTS}
               style={{
                 display: "flex",
                 flexWrap: "wrap",
@@ -399,9 +422,9 @@ export function SelectedProjectsSection({
                 flexShrink: 0,
               }}
             >
-              <Tag label="iOS" layoutId="notes-tag-ios" />
-              <Tag label="Canvas" layoutId="notes-tag-canvas" />
-              <AppStoreBadge active={false} layoutId="notes-tag-appstore" />
+              <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="iOS" /></motion.div>
+              <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="Canvas" /></motion.div>
+              <motion.div variants={BADGE_ITEM_VARIANTS}><AppStoreBadge active={false} /></motion.div>
             </motion.div>
 
             {/* Detail content — fades in after card settles via contentControls */}

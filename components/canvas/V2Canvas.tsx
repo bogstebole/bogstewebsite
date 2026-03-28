@@ -180,8 +180,7 @@ export function V2Canvas() {
   // Un-blur background as soon as close begins
   const shouldBlur =
     (activeProject !== null && !isClosing) ||
-    (envelopeOpen && !isEnvelopeClosing) ||
-    (isNotesExpanded && !isNotesClosing);
+    (envelopeOpen && !isEnvelopeClosing);
   const blurAnim = shouldBlur
     ? { scale: 0.93, filter: "blur(10px)", pointerEvents: "none" as const }
     : { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const };
@@ -357,18 +356,16 @@ export function V2Canvas() {
       <AnimatePresence>
         {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear"
           && !!originRect && (
-          <ProjectFloatingCard
-            key={activeProject}
-            projectKey={activeProject}
-            originRect={originRect}
-            entryRef={entryRefs.current[activeProject] ?? null}
-            onCloseStart={handleCloseStart}
-            onClose={handleClose}
-            isDark={false}
-            primaryColor={primaryColor}
-            primary40={primary40}
-          />
-        )}
+            <ProjectFloatingCard
+              key={activeProject}
+              projectKey={activeProject}
+              originRect={originRect}
+              onCloseStart={handleCloseStart}
+              onClose={handleClose}
+              primaryColor={primaryColor}
+              primary40={primary40}
+            />
+          )}
       </AnimatePresence>
 
       {/* ── Vorli — receipt bottom sheet ── */}
