@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence, LayoutGroup, useAnimation } from "framer-motion";
+import { useRippleWave } from "@/useRippleWave";
 import type { MotionProps } from "framer-motion";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { UselessNotesDetail } from "@/components/ui/useless-notes-detail";
@@ -49,6 +50,22 @@ const CARD_STYLE: React.CSSProperties = {
 
 const CARD_SPRING = { type: "spring" as const, stiffness: 300, damping: 20, mass: 0.3 };
 
+const GLASS_SHADOW = [
+  "#FFFFFF -2px 2px 2px 1px inset",
+  "#00000069 -1px -3px 3px -2px inset",
+  "#000000D6 2px 1px 4px -4px inset",
+  "#FFFFFF 0px 0px 7px 4px inset",
+  "#00000040 0px -9px 14px 4px inset",
+  "#0000001A -2px -3px 5px 3px inset",
+  "#FFFFFF 0px 20px 8px -9px inset",
+  "#0000001A 0px 34px 10px -9px inset",
+  "#00000003 0px 27px 8px",
+  "#00000003 0px 17px 6px",
+  "#0000000D 0px 10px 6px",
+  "#0000001A 0px 4px 4px",
+  "#0000001A 0px 1px 3px",
+].join(", ");
+
 const BADGE_CONTAINER_VARIANTS = {
   visible: { transition: { staggerChildren: 0.07 } },
   hidden: { transition: { staggerChildren: 0.05 } },
@@ -61,19 +78,23 @@ const BADGE_ITEM_VARIANTS = {
   exit: { opacity: 0, y: -6, transition: { duration: 0.12 } },
 };
 
-function Tag({ label, layoutId }: { label: string; layoutId?: string }) {
+function Tag({ label, layoutId, isGlass }: { label: string; layoutId?: string; isGlass?: boolean }) {
   return (
     <motion.div
       layoutId={layoutId}
       style={{
-        backgroundColor: "#f3f3f3",
-        borderRadius: 4,
+        backgroundColor: isGlass ? "transparent" : "#f3f3f3",
+        backdropFilter: isGlass ? "blur(1px)" : undefined,
+        WebkitBackdropFilter: isGlass ? "blur(1px)" : undefined,
+        borderRadius: isGlass ? 999 : 4,
+        boxShadow: isGlass ? GLASS_SHADOW : "none",
         height: 18,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: "0 8px",
         flexShrink: 0,
+        transition: "background-color 0.25s ease, border-radius 0.25s ease, box-shadow 0.25s ease",
       }}
     >
       <span
@@ -81,8 +102,9 @@ function Tag({ label, layoutId }: { label: string; layoutId?: string }) {
           fontFamily: '"JetBrains Mono", system-ui, sans-serif',
           fontSize: 10,
           letterSpacing: "-0.04em",
-          color: "#888",
+          color: isGlass ? "#111" : "#888",
           whiteSpace: "nowrap",
+          transition: "color 0.25s ease",
         }}
       >
         {label}
@@ -100,14 +122,21 @@ export function SelectedProjectsSection({
   onVorliClick,
 }: SelectedProjectsSectionProps) {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
+  const [isNotesHovered, setIsNotesHovered] = useState(false);
+  const [isVorliHovered, setIsVorliHovered] = useState(false);
   const contentControls = useAnimation();
   const badgeControls = useAnimation();
   const miniTagControls = useAnimation();
   const closingRef = useRef(false);
   const returningRef = useRef(false);
 
+  const RIPPLE_CONFIG = { speed: 270, ringWidth: 42, duration: 1000, textStrength: 7, imageStrength: 5 };
+  const notesRippleRef = useRippleWave(RIPPLE_CONFIG) as unknown as React.RefObject<HTMLDivElement>;
+  const vorliRippleRef = useRippleWave(RIPPLE_CONFIG) as unknown as React.RefObject<HTMLDivElement>;
+
   const handleExpand = useCallback(async () => {
     if (isNotesExpanded || closingRef.current) return;
+    setIsNotesHovered(false);
     setIsNotesExpanded(true);
     onNotesExpand?.();
     await miniTagControls.start("exit");
@@ -154,11 +183,14 @@ export function SelectedProjectsSection({
       >
         {/* ── Notes card — always mounted, invisible when expanded (stable FLIP target) ── */}
         <motion.div
+          ref={notesRippleRef}
           layoutId="notes-card"
           // Rotation never changes — keeping it stable prevents FLIP from capturing
           // a mid-animation state. The expanded card handles rotate 5→0 via FLIP.
           animate={{ opacity: isNotesExpanded ? 0 : 1 }}
           transition={{ opacity: { duration: 0.15 } }}
+          onMouseEnter={() => !isNotesExpanded && setIsNotesHovered(true)}
+          onMouseLeave={() => setIsNotesHovered(false)}
           onLayoutAnimationComplete={() => {
             if (returningRef.current) {
               returningRef.current = false;
@@ -224,14 +256,17 @@ export function SelectedProjectsSection({
               width: "100%",
             }}
           >
-            <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="iOS" /></motion.div>
-            <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="Canvas" /></motion.div>
-            <motion.div variants={BADGE_ITEM_VARIANTS}><AppStoreBadge active={false} /></motion.div>
+            <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="iOS" isGlass={isNotesHovered} /></motion.div>
+            <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="Canvas" isGlass={isNotesHovered} /></motion.div>
+            <motion.div variants={BADGE_ITEM_VARIANTS}><AppStoreBadge active={false} isGlass={isNotesHovered} /></motion.div>
           </motion.div>
         </motion.div>
 
         {/* ── Vorli card ── */}
         <div
+          ref={vorliRippleRef}
+          onMouseEnter={() => setIsVorliHovered(true)}
+          onMouseLeave={() => setIsVorliHovered(false)}
           style={{
             ...CARD_STYLE,
             rotate: "-5deg",
@@ -286,8 +321,8 @@ export function SelectedProjectsSection({
               width: "100%",
             }}
           >
-            <Tag label="iOS" />
-            <Tag label="AI Financial Assistant" />
+            <Tag label="iOS" isGlass={isVorliHovered} />
+            <Tag label="AI Financial Assistant" isGlass={isVorliHovered} />
           </div>
         </div>
       </motion.div>

@@ -5,9 +5,26 @@ import { motion } from "framer-motion";
 interface AppStoreBadgeProps {
   active: boolean;
   layoutId?: string;
+  isGlass?: boolean;
 }
 
-export function AppStoreBadge({ active, layoutId }: AppStoreBadgeProps) {
+const GLASS_BADGE_SHADOW = [
+  "#FFFFFF -2px 2px 2px 1px inset",
+  "#00000069 -1px -3px 3px -2px inset",
+  "#000000D6 2px 1px 4px -4px inset",
+  "#FFFFFF 0px 0px 7px 4px inset",
+  "#00000040 0px -9px 14px 4px inset",
+  "#0000001A -2px -3px 5px 3px inset",
+  "#FFFFFF 0px 20px 8px -9px inset",
+  "#0000001A 0px 34px 10px -9px inset",
+  "#00000003 0px 27px 8px",
+  "#00000003 0px 17px 6px",
+  "#0000000D 0px 10px 6px",
+  "#0000001A 0px 4px 4px",
+  "#0000001A 0px 1px 3px",
+].join(", ");
+
+export function AppStoreBadge({ active, layoutId, isGlass }: AppStoreBadgeProps) {
   return active ? (
     <motion.div
       layoutId={layoutId}
@@ -74,8 +91,11 @@ export function AppStoreBadge({ active, layoutId }: AppStoreBadgeProps) {
       layoutId={layoutId}
       style={{
         alignItems: "center",
-        backgroundColor: "#F3F3F3",
-        borderRadius: 4,
+        backgroundColor: isGlass ? "transparent" : "#F3F3F3",
+        backdropFilter: isGlass ? "blur(1px)" : undefined,
+        WebkitBackdropFilter: isGlass ? "blur(1px)" : undefined,
+        borderRadius: isGlass ? 999 : 4,
+        boxShadow: isGlass ? GLASS_BADGE_SHADOW : "none",
         display: "flex",
         gap: 6,
         height: 18,
@@ -83,7 +103,7 @@ export function AppStoreBadge({ active, layoutId }: AppStoreBadgeProps) {
         paddingLeft: 4,
         paddingRight: 6,
         paddingTop: 3,
-        transition: "all 0.25s ease",
+        transition: "background-color 0.25s ease, border-radius 0.25s ease, box-shadow 0.25s ease",
         whiteSpace: "nowrap",
       }}
     >
@@ -92,7 +112,7 @@ export function AppStoreBadge({ active, layoutId }: AppStoreBadgeProps) {
         src="/images/app-store-icon.png"
         alt=""
         style={{
-          filter: "grayscale(100%)",
+          filter: isGlass ? "none" : "grayscale(100%)",
           flexShrink: 0,
           height: 16,
           objectFit: "cover",
@@ -104,11 +124,12 @@ export function AppStoreBadge({ active, layoutId }: AppStoreBadgeProps) {
       />
       <span
         style={{
-          color: "#888888",
+          color: isGlass ? "#111111" : "#888888",
           fontFamily: '"JetBrains Mono", system-ui, sans-serif',
           fontSize: 9.5,
           letterSpacing: "0.03em",
           lineHeight: "12px",
+          transition: "color 0.25s ease",
         }}
       >
         Live on App Store
