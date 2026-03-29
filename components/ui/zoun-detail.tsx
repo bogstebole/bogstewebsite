@@ -12,9 +12,9 @@ interface ZounDetailProps {
 const spring = { type: "spring" as const, stiffness: 340, damping: 36 };
 
 const SCREENSHOTS = [
-  { src: "/assets/Zoun/home.png",    alt: "Zoun — globe view" },
+  { src: "/assets/Zoun/home.png", alt: "Zoun — globe view" },
   { src: "/assets/Zoun/compare.png", alt: "Zoun — compare time zones" },
-  { src: "/assets/Zoun/search.png",  alt: "Zoun — select country" },
+  { src: "/assets/Zoun/search.png", alt: "Zoun — select country" },
 ];
 
 const TAGS = ["iOS", "Time Zone Tracker", "In progress.."];
@@ -93,7 +93,7 @@ export function ZounDetail({ onCloseStart, onClose }: ZounDetailProps) {
             paddingInline: 16,
             pointerEvents: "auto",
             WebkitFontSmoothing: "antialiased",
-            width: 600,
+            width: "fit-content",
           }}
         >
           {/* ── Header ── */}
@@ -103,8 +103,9 @@ export function ZounDetail({ onCloseStart, onClose }: ZounDetailProps) {
               alignItems: "center",
               display: "flex",
               justifyContent: "space-between",
+              minWidth: "100%",
               paddingInline: 12,
-              width: "100%",
+              width: 0,
             }}
           >
             {/* Icon + title */}
@@ -137,14 +138,15 @@ export function ZounDetail({ onCloseStart, onClose }: ZounDetailProps) {
           </motion.div>
 
           {/* ── Description ── */}
-          <motion.div {...child(0.16)} style={{ paddingInline: 12, width: "100%" }}>
+          <motion.div {...child(0.16)} style={{ minWidth: "100%", paddingInline: 12, width: 0 }}>
             <p
               style={{
                 color: "#FFFFFFCC",
                 fontFamily: '"Geist-Regular", "Geist", system-ui, sans-serif',
-                fontSize: 12,
-                lineHeight: "16px",
+                fontSize: 14,
+                lineHeight: "21px",
                 margin: 0,
+                maxWidth: "60%",
               }}
             >
               Zoun is a simple app that visually displays your desired contact on the earth.
@@ -160,7 +162,7 @@ export function ZounDetail({ onCloseStart, onClose }: ZounDetailProps) {
               <motion.div
                 key={s.src}
                 {...child(0.26 + i * 0.1)}
-                style={{ borderRadius: 8, flexShrink: 0, height: 385, overflow: "hidden", width: 178 }}
+                style={{ borderRadius: 8, flexShrink: 0, height: 770, overflow: "hidden", width: 356 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
