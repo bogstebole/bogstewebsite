@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DotGrid } from "@paper-design/shaders-react";
+
 import { ProjectEntry } from "@/components/elements/project-entry";
 import { EnvelopeWidget } from "@/components/elements/EnvelopeWidget";
 
@@ -154,26 +154,6 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             clickable
           />
 
-          <ProjectEntry
-            {...entryProps("svgParticles")}
-            icon={
-              <DotGrid
-                size={2}
-                gapY={0}
-                gapX={0}
-                strokeWidth={0}
-                sizeRange={0}
-                opacityRange={0.9}
-                shape="circle"
-                colorFill={isDark ? "#d0d0d0" : "#000000"}
-                colorStroke="#FFFFFF"
-                colorBack="#00000000"
-                style={{ flexShrink: 0, height: 12, width: 12 }}
-              />
-            }
-            label="SVG Particles"
-            tags={["Web", "Canvas, Loader Tool", "Personal Usage"]}
-          />
 
           <ProjectEntry
             {...entryProps("pauschalTracker")}

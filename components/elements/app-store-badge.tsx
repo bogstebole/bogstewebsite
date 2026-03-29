@@ -83,7 +83,7 @@ export function AppStoreBadge({ active, layoutId, isGlass }: AppStoreBadgeProps)
           lineHeight: "16px",
         }}
       >
-        Live on App Store
+        App store
       </span>
     </motion.div>
   ) : (
@@ -126,13 +126,13 @@ export function AppStoreBadge({ active, layoutId, isGlass }: AppStoreBadgeProps)
         style={{
           color: isGlass ? "#111111" : "#888888",
           fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-          fontSize: 9.5,
+          fontSize: 10,
           letterSpacing: "0.03em",
           lineHeight: "12px",
           transition: "color 0.25s ease",
         }}
       >
-        Live on App Store
+        App store
       </span>
     </motion.div>
   );

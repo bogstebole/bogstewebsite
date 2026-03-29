@@ -6,6 +6,7 @@ import { useRippleWave } from "@/useRippleWave";
 import type { MotionProps } from "framer-motion";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { UselessNotesDetail } from "@/components/ui/useless-notes-detail";
+import { ProjectTag } from "@/components/ui/project-tag";
 
 interface SelectedProjectsSectionProps {
   /** blurAnim object from V2Canvas — passed straight to motion.div */
@@ -50,22 +51,6 @@ const CARD_STYLE: React.CSSProperties = {
 
 const CARD_SPRING = { type: "spring" as const, stiffness: 300, damping: 20, mass: 0.3 };
 
-const GLASS_SHADOW = [
-  "#FFFFFF -2px 2px 2px 1px inset",
-  "#00000069 -1px -3px 3px -2px inset",
-  "#000000D6 2px 1px 4px -4px inset",
-  "#FFFFFF 0px 0px 7px 4px inset",
-  "#00000040 0px -9px 14px 4px inset",
-  "#0000001A -2px -3px 5px 3px inset",
-  "#FFFFFF 0px 20px 8px -9px inset",
-  "#0000001A 0px 34px 10px -9px inset",
-  "#00000003 0px 27px 8px",
-  "#00000003 0px 17px 6px",
-  "#0000000D 0px 10px 6px",
-  "#0000001A 0px 4px 4px",
-  "#0000001A 0px 1px 3px",
-].join(", ");
-
 const BADGE_CONTAINER_VARIANTS = {
   visible: { transition: { staggerChildren: 0.07 } },
   hidden: { transition: { staggerChildren: 0.05 } },
@@ -78,40 +63,6 @@ const BADGE_ITEM_VARIANTS = {
   exit: { opacity: 0, y: -6, transition: { duration: 0.12 } },
 };
 
-function Tag({ label, layoutId, isGlass }: { label: string; layoutId?: string; isGlass?: boolean }) {
-  return (
-    <motion.div
-      layoutId={layoutId}
-      style={{
-        backgroundColor: isGlass ? "transparent" : "#f3f3f3",
-        backdropFilter: isGlass ? "blur(1px)" : undefined,
-        WebkitBackdropFilter: isGlass ? "blur(1px)" : undefined,
-        borderRadius: isGlass ? 999 : 4,
-        boxShadow: isGlass ? GLASS_SHADOW : "none",
-        height: 18,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 8px",
-        flexShrink: 0,
-        transition: "background-color 0.25s ease, border-radius 0.25s ease, box-shadow 0.25s ease",
-      }}
-    >
-      <span
-        style={{
-          fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-          fontSize: 10,
-          letterSpacing: "-0.04em",
-          color: isGlass ? "#111" : "#888",
-          whiteSpace: "nowrap",
-          transition: "color 0.25s ease",
-        }}
-      >
-        {label}
-      </span>
-    </motion.div>
-  );
-}
 
 export function SelectedProjectsSection({
   animate,
@@ -258,8 +209,8 @@ export function SelectedProjectsSection({
               width: "100%",
             }}
           >
-            <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="iOS" isGlass={isNotesHovered} /></motion.div>
-            <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="Canvas" isGlass={isNotesHovered} /></motion.div>
+            <motion.div variants={BADGE_ITEM_VARIANTS}><ProjectTag label="iOS" variant="glass" active={isNotesHovered} /></motion.div>
+            <motion.div variants={BADGE_ITEM_VARIANTS}><ProjectTag label="Canvas" variant="glass" active={isNotesHovered} /></motion.div>
             <motion.div variants={BADGE_ITEM_VARIANTS}><AppStoreBadge active={false} isGlass={isNotesHovered} /></motion.div>
           </motion.div>
         </motion.div>
@@ -323,8 +274,8 @@ export function SelectedProjectsSection({
               width: "100%",
             }}
           >
-            <Tag label="iOS" isGlass={isVorliHovered} />
-            <Tag label="AI Financial Assistant" isGlass={isVorliHovered} />
+            <ProjectTag label="iOS" variant="glass" active={isVorliHovered} />
+            <ProjectTag label="AI Financial Assistant" variant="glass" active={isVorliHovered} />
           </div>
         </div>
       </motion.div>
@@ -459,8 +410,8 @@ export function SelectedProjectsSection({
                 flexShrink: 0,
               }}
             >
-              <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="iOS" /></motion.div>
-              <motion.div variants={BADGE_ITEM_VARIANTS}><Tag label="Canvas" /></motion.div>
+              <motion.div variants={BADGE_ITEM_VARIANTS}><ProjectTag label="iOS" variant="glass" /></motion.div>
+              <motion.div variants={BADGE_ITEM_VARIANTS}><ProjectTag label="Canvas" variant="glass" /></motion.div>
               <motion.div variants={BADGE_ITEM_VARIANTS}><AppStoreBadge active={false} /></motion.div>
             </motion.div>
 

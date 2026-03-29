@@ -4,6 +4,7 @@ import { forwardRef, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
+import { ProjectTag } from "@/components/ui/project-tag";
 
 interface ProjectEntryProps {
   entryKey: string;
@@ -48,8 +49,6 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
     ref,
   ) {
     const controls = useAnimation();
-    const tagBg = "#F3F3F3";
-
     useEffect(() => {
       if (isActive) {
         controls.set("hidden");
@@ -153,31 +152,7 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
           }}
         >
           {tags.map((tag) => (
-            <div
-              key={tag}
-              style={{
-                alignItems: "center",
-                backgroundColor: tagBg,
-                borderRadius: 4,
-                display: "flex",
-                height: 18,
-                paddingBlock: 3,
-                paddingInline: 7,
-              }}
-            >
-              <span
-                style={{
-                  color: primary40,
-                  display: "inline-block",
-                  fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                  fontSize: 9.5,
-                  letterSpacing: "0.03em",
-                  lineHeight: "12px",
-                }}
-              >
-                {tag}
-              </span>
-            </div>
+            <ProjectTag key={tag} label={tag} variant="light" />
           ))}
           {appStore && <AppStoreBadge active={isHovered} />}
         </motion.div>

@@ -10,6 +10,7 @@ import { VorliReceiptDetail } from "@/components/ui/vorli-receipt-detail";
 import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
 import { ZounDetail } from "@/components/ui/zoun-detail";
 import { WearDetail } from "@/components/ui/wear-detail";
+import { PauschalDetail } from "@/components/ui/pauschal-detail";
 import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
 
 function getBuildVersion(): string {
@@ -331,7 +332,11 @@ export function V2Canvas() {
           transformOrigin: "50% 50%",
         }}
       >
-        <div style={{ width: 11, height: 1, borderTop: "1px dashed rgba(0,0,0,0.3)", flexShrink: 0 }} />
+        <div style={{ display: "flex", gap: 2, width: 11, flexShrink: 0, opacity: 0.2 }}>
+          {Array.from({ length: 1 }).map((_, i) => (
+            <div key={i} style={{ backgroundColor: "#585858", flex: 1, height: "1px" }} />
+          ))}
+        </div>
         <span
           style={{
             fontFamily: '"JetBrains Mono", system-ui, sans-serif',
@@ -345,7 +350,11 @@ export function V2Canvas() {
         >
           Projects
         </span>
-        <div style={{ flex: 1, height: 1, borderTop: "1px dashed rgba(0,0,0,0.3)" }} />
+        <div style={{ display: "flex", gap: 2, flex: 1, opacity: 0.2 }}>
+          {Array.from({ length: 53 }).map((_, i) => (
+            <div key={i} style={{ backgroundColor: "#585858", flex: 1, height: "1px" }} />
+          ))}
+        </div>
       </motion.div>
 
       {/* ── Project section ── */}
@@ -386,9 +395,17 @@ export function V2Canvas() {
         />
       )}
 
-      {/* ── Project floating card — all projects except Vorli, Zoun, and WeatherWear ── */}
+      {/* ── Pauschal Tracker detail overlay ── */}
+      {activeProject === "pauschalTracker" && (
+        <PauschalDetail
+          onCloseStart={handleCloseStart}
+          onClose={handleClose}
+        />
+      )}
+
+      {/* ── Project floating card — all projects except Vorli, Zoun, WeatherWear, and PauschalTracker ── */}
       <AnimatePresence>
-        {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear"
+        {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear" && activeProject !== "pauschalTracker"
           && !!originRect && (
             <ProjectFloatingCard
               key={activeProject}

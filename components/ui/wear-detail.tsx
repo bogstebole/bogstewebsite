@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { ProjectTag } from "@/components/ui/project-tag";
 
 interface WearDetailProps {
   originRect: DOMRect;
@@ -123,16 +124,7 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
 
               <div style={{ display: "flex", gap: 8 }}>
                 {["iOS", "Weather", "In progress.."].map((tag) => (
-                  <div key={tag} style={{ 
-                    backgroundColor: "#4c4c4c", 
-                    color: "#ebebeb", 
-                    fontFamily: "var(--font-jetbrains-mono), monospace", 
-                    fontSize: 12, 
-                    borderRadius: 6,
-                    padding: "4px 8px"
-                  }}>
-                    {tag}
-                  </div>
+                  <ProjectTag key={tag} label={tag} variant="dark" />
                 ))}
               </div>
             </motion.div>

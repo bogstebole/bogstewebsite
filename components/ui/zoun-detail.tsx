@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { ProjectTag } from "@/components/ui/project-tag";
 
 interface ZounDetailProps {
   onCloseStart: () => void;
@@ -130,30 +131,7 @@ export function ZounDetail({ onCloseStart, onClose }: ZounDetailProps) {
             {/* Tags */}
             <div style={{ alignItems: "center", display: "flex", gap: 6 }}>
               {TAGS.map((tag) => (
-                <div
-                  key={tag}
-                  style={{
-                    alignItems: "center",
-                    backgroundColor: "#000000",
-                    borderRadius: 4,
-                    display: "flex",
-                    height: 18,
-                    justifyContent: "center",
-                    paddingInline: 7,
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "#D0D0D0",
-                      fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                      fontSize: "9.5px",
-                      letterSpacing: "0.03em",
-                      lineHeight: "12px",
-                    }}
-                  >
-                    {tag}
-                  </span>
-                </div>
+                <ProjectTag key={tag} label={tag} variant="dark" />
               ))}
             </div>
           </motion.div>

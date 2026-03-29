@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { motion, useAnimation, type Variants } from "framer-motion";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
+import { ProjectTag } from "@/components/ui/project-tag";
 import { UselessNotesDetail } from "./useless-notes-detail";
 
 interface ProjectFloatingCardProps {
@@ -82,8 +83,6 @@ export function ProjectFloatingCard({
   const label = PROJECT_LABELS[projectKey] ?? projectKey;
   const iconInfo = PROJECT_ICONS[projectKey];
   const tagInfo = PROJECT_TAGS[projectKey];
-  const tagBg = "#F3F3F3";
-
   const targetLeft = (typeof window !== "undefined" ? window.innerWidth : 1440) / 2 - CARD_WIDTH / 2;
   const targetTop = (typeof window !== "undefined" ? window.innerHeight : 900) * (CARD_TOP_VH / 100);
 
@@ -221,30 +220,7 @@ export function ProjectFloatingCard({
                 }}
               >
                 {tagInfo.tags.map((tag) => (
-                  <div
-                    key={tag}
-                    style={{
-                      alignItems: "center",
-                      backgroundColor: tagBg,
-                      borderRadius: 4,
-                      display: "flex",
-                      height: 18,
-                      paddingBlock: 3,
-                      paddingInline: 7,
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: primary40,
-                        fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                        fontSize: 9.5,
-                        letterSpacing: "0.03em",
-                        lineHeight: "12px",
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  </div>
+                  <ProjectTag key={tag} label={tag} variant="light" />
                 ))}
                 {tagInfo.appStore && <AppStoreBadge active />}
               </div>
