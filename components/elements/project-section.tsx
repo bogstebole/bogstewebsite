@@ -111,10 +111,12 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
           alignItems: "start",
           display: "flex",
           gap: 8,
+          padding: "0 16px",
+          width: "100%",
         }}
       >
         {/* ── Client_ column ── */}
-        <div style={{ flexShrink: 0, width: 244 }}>
+        <div style={{ flexShrink: 0, width: "50%" }}>
           <div style={labelStyle}>Client_</div>
 
           <ProjectEntry
@@ -133,7 +135,7 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         </div>
 
         {/* ── Personal_ column ── */}
-        <div style={{ flexShrink: 0, width: "fit-content" }}>
+        <div style={{ flexShrink: 0, width: "50%" }}>
           <div style={labelStyle}>Personal_</div>
 
           <ProjectEntry
@@ -183,7 +185,7 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
       </div>
 
       {/* ── Footer ── */}
-      <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 24, marginTop: 40, width: "100%" }}>
+      <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 24, marginTop: 32, width: "100%" }}>
 
         {/* Segmented divider */}
         <div style={{ alignItems: "start", display: "flex", gap: 2, height: "fit-content", opacity: 0.2, width: "100%" }}>
@@ -193,7 +195,7 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         </div>
 
         {/* Footer row */}
-        <div style={{ alignItems: "center", display: "flex", gap: 24, justifyContent: "space-between", width: "100%" }}>
+        <div style={{ alignItems: "center", display: "flex", padding: "0 16px", gap: 24, justifyContent: "space-between", width: "100%" }}>
 
           {/* Social icon buttons */}
           <div style={{ alignItems: "start", display: "flex" }}>

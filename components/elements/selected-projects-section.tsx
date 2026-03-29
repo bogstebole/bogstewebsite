@@ -174,6 +174,8 @@ export function SelectedProjectsSection({
         transition={isNotesExpanded ? { duration: 0 } : transition}
         style={{
           marginTop: 60,
+          width: "100%",
+          maxWidth: 600,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

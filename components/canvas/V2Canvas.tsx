@@ -209,7 +209,8 @@ export function V2Canvas() {
         transition={blurTransition}
         style={{
           paddingTop: 80,
-          width: 355,
+          width: "100%",
+          maxWidth: 600,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -296,6 +297,7 @@ export function V2Canvas() {
             color: primary80,
             textAlign: "center",
             whiteSpace: "pre-wrap",
+            width: "60%",
           }}
         >
           I build things that feel considered — from iOS apps to interactive
@@ -314,11 +316,43 @@ export function V2Canvas() {
         onVorliClick={handleVorliHeroClick}
       />
 
+      {/* ── Projects divider ── */}
+      <motion.div
+        animate={blurAnim}
+        transition={blurTransition}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          width: "100%",
+          maxWidth: 600,
+          marginTop: 60,
+          alignSelf: "center",
+          transformOrigin: "50% 50%",
+        }}
+      >
+        <div style={{ width: 11, height: 1, borderTop: "1px dashed rgba(0,0,0,0.3)", flexShrink: 0 }} />
+        <span
+          style={{
+            fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+            fontSize: 10,
+            letterSpacing: "-0.04em",
+            color: "rgba(0,0,0,0.3)",
+            textTransform: "uppercase",
+            lineHeight: 1.3,
+            flexShrink: 0,
+          }}
+        >
+          Projects
+        </span>
+        <div style={{ flex: 1, height: 1, borderTop: "1px dashed rgba(0,0,0,0.3)" }} />
+      </motion.div>
+
       {/* ── Project section ── */}
       <motion.div
         animate={blurAnim}
         transition={blurTransition}
-        style={{ transformOrigin: "50% 50%" }}
+        style={{ transformOrigin: "50% 50%", width: "100%", maxWidth: 600 }}
       >
         <ProjectSection
           primaryColor={primaryColor}
@@ -331,7 +365,7 @@ export function V2Canvas() {
           envelopeRef={envelopeRef}
           onEnvelopeClick={handleEnvelopeClick}
           isEnvelopeOpen={envelopeOpen || isEnvelopeClosing}
-          style={{ marginTop: 80, marginBottom: 120 }}
+          style={{ marginTop: 32, marginBottom: 120 }}
         />
       </motion.div>
 
