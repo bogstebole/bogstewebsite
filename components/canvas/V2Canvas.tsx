@@ -12,6 +12,7 @@ import { ZounDetail } from "@/components/ui/zoun-detail";
 import { WearDetail } from "@/components/ui/wear-detail";
 import { PauschalDetail } from "@/components/ui/pauschal-detail";
 import { FynnDetail } from "@/components/ui/fynn-detail";
+import { ContentSnareDetail } from "@/components/ui/content-snare-detail";
 import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
 
 function getBuildVersion(): string {
@@ -413,9 +414,18 @@ export function V2Canvas() {
         />
       )}
 
+      {/* ── Content Snare detail overlay ── */}
+      {activeProject === "contentSnare" && !!originRect && (
+        <ContentSnareDetail
+          originRect={originRect}
+          onCloseStart={handleCloseStart}
+          onClose={handleClose}
+        />
+      )}
+
       {/* ── Project floating card — all projects except Vorli, Zoun, WeatherWear, and PauschalTracker ── */}
       <AnimatePresence>
-        {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear" && activeProject !== "pauschalTracker" && activeProject !== "fynn"
+        {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear" && activeProject !== "pauschalTracker" && activeProject !== "fynn" && activeProject !== "contentSnare"
           && !!originRect && (
             <ProjectFloatingCard
               key={activeProject}

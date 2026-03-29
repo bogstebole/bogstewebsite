@@ -5,33 +5,13 @@ import { motion, useAnimation, type Variants } from "framer-motion";
 import { ProjectTag } from "@/components/ui/project-tag";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 
-interface FynnDetailProps {
+interface ContentSnareDetailProps {
   originRect: DOMRect;
   onCloseStart: () => void;
   onClose: () => void;
 }
 
-const TAGS = ["Web", "HealthTech", "B2B"];
-
-const LEFT_COL_ITEMS: { src: string; alt: string }[] = [
-  { src: "/assets/Fynn/edit profile.png", alt: "Edit profile" },
-  { src: "/assets/Fynn/Incidents.png", alt: "Incidents" },
-];
-
-const RIGHT_COL_ITEMS: { src: string; alt: string }[] = [
-  { src: "/assets/Fynn/Signature flow.png", alt: "Signature flow" },
-  { src: "/assets/Fynn/Temporary warning.png", alt: "Temporary warning" },
-];
-
-const SPECS_LEFT: { src: string; alt: string }[] = [
-  { src: "/assets/Fynn/Design System Specs Assets/specs-overview.png", alt: "Design system — overview" },
-  { src: "/assets/Fynn/Design System Specs Assets/specs-building-blocks.png", alt: "Design system — building blocks" },
-];
-
-const SPECS_RIGHT: { src: string; alt: string }[] = [
-  { src: "/assets/Fynn/Design System Specs Assets/specs-type.png", alt: "Design system — type specs" },
-  { src: "/assets/Fynn/Design System Specs Assets/specs-behaviour.png", alt: "Design system — behaviour" },
-];
+const TAGS = ["Web", "Productivity", "B2B, B2C"];
 
 const expandSpring = { type: "spring" as const, stiffness: 300, damping: 34 };
 const stickySpring = { type: "spring" as const, stiffness: 400, damping: 36 };
@@ -54,7 +34,7 @@ const fadeUp: Variants = {
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
-export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProps) {
+export function ContentSnareDetail({ originRect, onCloseStart, onClose }: ContentSnareDetailProps) {
   const contentControls = useAnimation();
   const closingRef = useRef(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -102,40 +82,27 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
     return () => observer.disconnect();
   }, []);
 
-  const FynnLogo = () => (
-    <div style={{ transform: "rotate(-9.5deg)", transformOrigin: "center" }}>
-      <div
-        style={{
-          backgroundColor: "#cdebff",
-          border: "1.3px solid rgba(255,255,255,0.4)",
-          borderRadius: 13,
-          boxShadow:
-            "0px 1.33px 1.33px rgba(35,79,107,0.20), 0px 4px 4px rgba(35,79,107,0.17), 0px 8px 4px rgba(35,79,107,0.10), 0px 13.33px 5.33px rgba(35,79,107,0.03)",
-          display: "flex",
-          flexDirection: "column",
-          padding: "18px 5px",
-        }}
-      >
-        <div
-          style={{
-            alignItems: "center",
-            display: "flex",
-            fontSize: 12.4,
-            whiteSpace: "nowrap",
-          }}
-        >
-          <span style={{ color: "#0d3752", fontWeight: 700 }}>Fynn</span>
-          <span style={{ color: "#1272df", fontWeight: 500 }}>.</span>
-          <span style={{ color: "#0d3752", fontWeight: 700 }}>io</span>
-        </div>
-      </div>
-    </div>
+  const ContentSnareLogo = () => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/images/content-snare.png"
+      alt="Content Snare"
+      style={{
+        width: 55,
+        height: 55,
+        objectFit: "cover",
+        borderRadius: 8,
+        flexShrink: 0,
+        transform: "rotate(3.34deg)",
+        transformOrigin: "center",
+      }}
+    />
   );
 
   return (
     <>
       <style>{`
-        .fynn-scroll::-webkit-scrollbar { display: none; }
+        .content-snare-scroll::-webkit-scrollbar { display: none; }
       `}</style>
 
       {/* Backdrop — click to close */}
@@ -149,7 +116,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
 
       {/* Card — FLIP from list item origin to expanded position */}
       <motion.div
-        className="fynn-scroll"
+        className="content-snare-scroll"
         initial={{
           top: originRect.top,
           left: originRect.left,
@@ -197,7 +164,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
               paddingInline: 16,
             }}
           >
-            <FynnLogo />
+            <ContentSnareLogo />
 
             {/* Close button */}
             <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
@@ -237,9 +204,9 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
                     margin: 0,
                   }}
                 >
-                  <span style={{ color: "#141414" }}>Fynn.io</span>
+                  <span style={{ color: "#141414" }}>Content Snare</span>
                   <span style={{ color: "rgba(20,20,20,0.4)" }}>
-                    {" — Task completion time cut in half. Development speed doubled, this is how we transformed Fynn's senior living management system."}
+                    {" — Enhanced system led to faster request completion and reduced support tickets through clearer navigation and simplified user experience."}
                   </span>
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -260,7 +227,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
                   minWidth: 0,
                 }}
               >
-                {`Fynn is a U.S.-based senior living care management platform that came to us with a fragmented system built on Ionic, Angular, and Bootstrap — all mixing in ways they shouldn't. The goal was to redesign the core "Activities of Daily Living" feature, build a scalable design system, and set the product up for future growth. With no existing Ionic UI kit in Figma, we built one from scratch, establishing root-level tokens for color, typography, and spacing that matched Ionic's structure and made sense to developers immediately. Discovery started with lo-fi wireframes, moved through hi-fi prototypes, and was validated through in-person user testing — which revealed how users physically interacted with devices, directly shaping final decisions. We established a clear workflow from Jira stories through design, refinement, visual QA, and release, with a custom annotation system in Figma that made handoffs clean and reduced back-and-forth. The design system was organized into three layers — foundations, native Ionic components, and custom components — keeping the Figma file navigable as the project scaled. A pattern rulebook covering navigation, filters, drawers, and grid behavior reduced dev meetings and increased team efficiency by 13%. For the resident profile redesign, we moved from a single overloaded page to a tabbed layout with a drawer pattern for complex forms, keeping resident context visible throughout interactions. The drawer approach was a pragmatic call — not perfect, but fast to implement with existing components, and initial user feedback confirmed it worked. The Bulk ADL feature launch cut task completion time by 50%, and the design system accelerated development speed across all ongoing projects. The main lesson: lock in the technical stack before touching the design system — the Ionic vs. Angular split created avoidable complexity throughout. Moving forward, the priority is consolidating to a single framework, deepening design-dev collaboration, and expanding the system for new features.`}
+                {`ContentSnare is an Australian productivity platform that helps businesses collect content and information from clients through structured request forms. They came to us needing a full redesign of their end-user request experience — not a blank-slate redesign, but one built directly on top of existing user feedback they had already collected. Discovery started with a planned workshop that went off-script, but the unstructured conversation turned out to surface exactly the insights we needed. The core friction points were clear: users missed submit buttons, got confused by terminology like "reject" and "submit for review," struggled with rigid section structures, and couldn't easily navigate or understand their progress through a form. We restructured field information hierarchically so critical details stood out, and replaced text-heavy status indicators with visual cues — cleaning up the interface without breaking familiar patterns. The sidebar was rebuilt to separate progress tracking from navigation, with color coding and icons that communicate field states without adding visual noise. The comment system got a straightforward but effective fix: alignment and background color now instantly distinguish who said what and in what context. On the creator side, we improved the dashboard layout, filter organization, and tackled the recurring request feature — a deceptively simple concept that required multiple steps to implement properly. Collaboration was fast and direct, coming straight from an owner-developer, which kept decisions quick even if it occasionally meant realigning after missed updates. The main lesson: rigid process isn't a prerequisite for good outcomes — the quality came from collaboration and adaptability, not structure. Results are still being measured as the features roll out, with future iterations tied to actual usage patterns rather than assumptions.`}
               </p>
             </motion.div>
 
@@ -268,7 +235,6 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
             <motion.div
               variants={fadeUp}
               style={{
-                backgroundColor: "#347eff",
                 borderRadius: 32,
                 boxSizing: "border-box",
                 display: "flex",
@@ -278,57 +244,49 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
                 width: "100%",
               }}
             >
-              {/* Dashboard — full width hero */}
+              {/* Form layout — full width */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={encodeURI("/assets/Fynn/Billing dashboard - Rent roll.png")}
-                alt="Billing dashboard — rent roll"
+                src={encodeURI("/assets/Content snare/Form layout.png")}
+                alt="Form layout"
                 style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }}
               />
 
-              {/* Dashboard — 2 flex columns, 2 rows each */}
+              {/* Two columns: Sidebar | Comments */}
               <div style={{ display: "flex", gap: 8 }}>
-                <div style={{ display: "flex", flex: 1, flexDirection: "column", gap: 8 }}>
-                  {LEFT_COL_ITEMS.map((item) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={item.src} src={encodeURI(item.src)} alt={item.alt}
-                      style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }} />
-                  ))}
+                <div style={{ flex: 1 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={encodeURI("/assets/Content snare/sidebar.png")}
+                    alt="Sidebar"
+                    style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }}
+                  />
                 </div>
-                <div style={{ display: "flex", flex: 1, flexDirection: "column", gap: 8 }}>
-                  {RIGHT_COL_ITEMS.map((item) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={item.src} src={encodeURI(item.src)} alt={item.alt}
-                      style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }} />
-                  ))}
+                <div style={{ flex: 1 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={encodeURI("/assets/Content snare/comments.png")}
+                    alt="Comments"
+                    style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }}
+                  />
                 </div>
               </div>
 
-              {/* Dashboard — full width footer */}
+              {/* Input section — full width */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={encodeURI("/assets/Fynn/Resident care.png")}
-                alt="Resident care"
+                src={encodeURI("/assets/Content snare/Input section.png")}
+                alt="Input section"
                 style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }}
               />
 
-              {/* Design system specs — 2 flex columns, 2 rows each */}
-              <div style={{ display: "flex", gap: 8 }}>
-                <div style={{ display: "flex", flex: 1, flexDirection: "column", gap: 8 }}>
-                  {SPECS_LEFT.map((item) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={item.src} src={encodeURI(item.src)} alt={item.alt}
-                      style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }} />
-                  ))}
-                </div>
-                <div style={{ display: "flex", flex: 1, flexDirection: "column", gap: 8 }}>
-                  {SPECS_RIGHT.map((item) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={item.src} src={encodeURI(item.src)} alt={item.alt}
-                      style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }} />
-                  ))}
-                </div>
-              </div>
+              {/* Success — full width */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={encodeURI("/assets/Content snare/success.png")}
+                alt="Success"
+                style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }}
+              />
             </motion.div>
           </motion.div>
         </motion.div>
@@ -361,7 +319,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
           zIndex: 12,
         }}
       >
-        <FynnLogo />
+        <ContentSnareLogo />
         <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
             <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
