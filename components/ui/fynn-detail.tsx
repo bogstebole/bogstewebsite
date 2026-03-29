@@ -13,37 +13,24 @@ interface FynnDetailProps {
 
 const TAGS = ["Web", "HealthTech", "B2B"];
 
-const BENTO_ITEMS: { src: string; alt: string; gridColumn?: string }[] = [
-  {
-    src: "/assets/Fynn/Billing dashboard - Rent roll.png",
-    alt: "Billing dashboard — rent roll",
-    gridColumn: "1 / 3",
-  },
+const LEFT_COL_ITEMS: { src: string; alt: string }[] = [
   { src: "/assets/Fynn/edit profile.png", alt: "Edit profile" },
   { src: "/assets/Fynn/Incidents.png", alt: "Incidents" },
+];
+
+const RIGHT_COL_ITEMS: { src: string; alt: string }[] = [
   { src: "/assets/Fynn/Signature flow.png", alt: "Signature flow" },
   { src: "/assets/Fynn/Temporary warning.png", alt: "Temporary warning" },
-  {
-    src: "/assets/Fynn/Resident care.png",
-    alt: "Resident care",
-    gridColumn: "1 / 3",
-  },
-  {
-    src: "/assets/Fynn/Design System Specs Assets/specs-type.png",
-    alt: "Design system — type specs",
-  },
-  {
-    src: "/assets/Fynn/Design System Specs Assets/specs-overview.png",
-    alt: "Design system — overview",
-  },
-  {
-    src: "/assets/Fynn/Design System Specs Assets/specs-behaviour.png",
-    alt: "Design system — behaviour",
-  },
-  {
-    src: "/assets/Fynn/Design System Specs Assets/specs-building-blocks.png",
-    alt: "Design system — building blocks",
-  },
+];
+
+const SPECS_LEFT: { src: string; alt: string }[] = [
+  { src: "/assets/Fynn/Design System Specs Assets/specs-overview.png", alt: "Design system — overview" },
+  { src: "/assets/Fynn/Design System Specs Assets/specs-building-blocks.png", alt: "Design system — building blocks" },
+];
+
+const SPECS_RIGHT: { src: string; alt: string }[] = [
+  { src: "/assets/Fynn/Design System Specs Assets/specs-type.png", alt: "Design system — type specs" },
+  { src: "/assets/Fynn/Design System Specs Assets/specs-behaviour.png", alt: "Design system — behaviour" },
 ];
 
 const expandSpring = { type: "spring" as const, stiffness: 300, damping: 34 };
@@ -282,31 +269,64 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
                 backgroundColor: "#347eff",
                 borderRadius: 32,
                 boxSizing: "border-box",
-                display: "grid",
+                display: "flex",
+                flexDirection: "column",
                 gap: 8,
-                gridTemplateColumns: "repeat(3, 1fr)",
                 padding: 16,
                 width: "100%",
               }}
             >
-              {BENTO_ITEMS.map((item, i) => (
-                <div
-                  key={i}
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.08)",
-                    borderRadius: 8,
-                    gridColumn: item.gridColumn,
-                    overflow: "hidden",
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={encodeURI(item.src)}
-                    alt={item.alt}
-                    style={{ display: "block", height: "auto", width: "100%" }}
-                  />
+              {/* Dashboard — full width hero */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={encodeURI("/assets/Fynn/Billing dashboard - Rent roll.png")}
+                alt="Billing dashboard — rent roll"
+                style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }}
+              />
+
+              {/* Dashboard — 2 flex columns, 2 rows each */}
+              <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", flex: 1, flexDirection: "column", gap: 8 }}>
+                  {LEFT_COL_ITEMS.map((item) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={item.src} src={encodeURI(item.src)} alt={item.alt}
+                      style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }} />
+                  ))}
                 </div>
-              ))}
+                <div style={{ display: "flex", flex: 1, flexDirection: "column", gap: 8 }}>
+                  {RIGHT_COL_ITEMS.map((item) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={item.src} src={encodeURI(item.src)} alt={item.alt}
+                      style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Dashboard — full width footer */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={encodeURI("/assets/Fynn/Resident care.png")}
+                alt="Resident care"
+                style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }}
+              />
+
+              {/* Design system specs — 2 flex columns, 2 rows each */}
+              <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", flex: 1, flexDirection: "column", gap: 8 }}>
+                  {SPECS_LEFT.map((item) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={item.src} src={encodeURI(item.src)} alt={item.alt}
+                      style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }} />
+                  ))}
+                </div>
+                <div style={{ display: "flex", flex: 1, flexDirection: "column", gap: 8 }}>
+                  {SPECS_RIGHT.map((item) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={item.src} src={encodeURI(item.src)} alt={item.alt}
+                      style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }} />
+                  ))}
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         </motion.div>
