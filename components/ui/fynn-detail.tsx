@@ -47,6 +47,7 @@ const BENTO_ITEMS: { src: string; alt: string; gridColumn?: string }[] = [
 ];
 
 const expandSpring = { type: "spring" as const, stiffness: 300, damping: 34 };
+const stickySpring = { type: "spring" as const, stiffness: 400, damping: 36 };
 
 const staggerContainer: Variants = {
   hidden: {},
@@ -70,6 +71,8 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
   const contentControls = useAnimation();
   const closingRef = useRef(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   const cardWidth = typeof window !== "undefined" ? window.innerWidth * 0.6 : 1152;
   const targetLeft =
@@ -100,8 +103,54 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
     return () => window.removeEventListener("keydown", handler);
   }, [initiateClose]);
 
+  // Show sticky header when original header scrolls out of viewport
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyHeader(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const FynnLogo = () => (
+    <div style={{ transform: "rotate(-9.5deg)", transformOrigin: "center" }}>
+      <div
+        style={{
+          backgroundColor: "#cdebff",
+          border: "1.3px solid rgba(255,255,255,0.4)",
+          borderRadius: 13,
+          boxShadow:
+            "0px 1.33px 1.33px rgba(35,79,107,0.20), 0px 4px 4px rgba(35,79,107,0.17), 0px 8px 4px rgba(35,79,107,0.10), 0px 13.33px 5.33px rgba(35,79,107,0.03)",
+          display: "flex",
+          flexDirection: "column",
+          padding: "18px 5px",
+        }}
+      >
+        <div
+          style={{
+            alignItems: "center",
+            display: "flex",
+            fontSize: 12.4,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ color: "#0d3752", fontWeight: 700 }}>Fynn</span>
+          <span style={{ color: "#1272df", fontWeight: 500 }}>.</span>
+          <span style={{ color: "#0d3752", fontWeight: 700 }}>io</span>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
+      <style>{`
+        .fynn-scroll::-webkit-scrollbar { display: none; }
+      `}</style>
+
       {/* Backdrop — click to close */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -113,6 +162,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
 
       {/* Card — FLIP from list item origin to expanded position */}
       <motion.div
+        className="fynn-scroll"
         initial={{
           top: originRect.top,
           left: originRect.left,
@@ -137,10 +187,12 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
           display: "flex",
           flexDirection: "column",
           fontFamily: "var(--font-geist-sans), sans-serif",
-          // Transparent — no background
-          overflow: "visible",
+          bottom: 0,
+          overflowX: "hidden",
+          overflowY: "auto",
           padding: 24,
           position: "fixed",
+          scrollbarWidth: "none",
           zIndex: 11,
         }}
       >
@@ -150,6 +202,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
         >
           {/* ── Header: tilted logo + close ── */}
           <div
+            ref={headerRef}
             style={{
               alignItems: "center",
               display: "flex",
@@ -157,34 +210,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
               paddingInline: 16,
             }}
           >
-            {/* Fynn.io logo card */}
-            <div style={{ transform: "rotate(-9.5deg)", transformOrigin: "center" }}>
-              <div
-                style={{
-                  backgroundColor: "#cdebff",
-                  border: "1.3px solid rgba(255,255,255,0.4)",
-                  borderRadius: 13,
-                  boxShadow:
-                    "0px 1.33px 1.33px rgba(35,79,107,0.20), 0px 4px 4px rgba(35,79,107,0.17), 0px 8px 4px rgba(35,79,107,0.10), 0px 13.33px 5.33px rgba(35,79,107,0.03)",
-                  display: "flex",
-                  flexDirection: "column",
-                  padding: "18px 5px",
-                }}
-              >
-                <div
-                  style={{
-                    alignItems: "center",
-                    display: "flex",
-                    fontSize: 12.4,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <span style={{ color: "#0d3752", fontWeight: 700 }}>Fynn</span>
-                  <span style={{ color: "#1272df", fontWeight: 500 }}>.</span>
-                  <span style={{ color: "#0d3752", fontWeight: 700 }}>io</span>
-                </div>
-              </div>
-            </div>
+            <FynnLogo />
 
             {/* Close button */}
             <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
@@ -249,7 +275,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
               </p>
             </motion.div>
 
-            {/* Bento grid — overflows viewport naturally, no clipping */}
+            {/* Bento grid */}
             <motion.div
               variants={fadeUp}
               style={{
@@ -284,6 +310,39 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
             </motion.div>
           </motion.div>
         </motion.div>
+      </motion.div>
+
+      {/* ── Sticky floating header — appears when original header scrolls out of view ── */}
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{
+          opacity: showStickyHeader && !isClosing ? 1 : 0,
+          y: showStickyHeader && !isClosing ? 0 : -12,
+        }}
+        transition={stickySpring}
+        style={{
+          alignItems: "center",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderRadius: 9999,
+          display: "flex",
+          justifyContent: "space-between",
+          left: targetLeft,
+          paddingBottom: 20,
+          paddingLeft: 20,
+          paddingRight: 16,
+          paddingTop: 20,
+          pointerEvents: showStickyHeader && !isClosing ? "auto" : "none",
+          position: "fixed",
+          top: 32,
+          width: cardWidth,
+          zIndex: 12,
+        }}
+      >
+        <FynnLogo />
+        <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+          ×
+        </GlassButton>
       </motion.div>
     </>
   );
