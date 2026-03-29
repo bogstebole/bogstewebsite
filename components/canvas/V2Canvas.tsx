@@ -11,6 +11,7 @@ import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
 import { ZounDetail } from "@/components/ui/zoun-detail";
 import { WearDetail } from "@/components/ui/wear-detail";
 import { PauschalDetail } from "@/components/ui/pauschal-detail";
+import { FynnDetail } from "@/components/ui/fynn-detail";
 import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
 
 function getBuildVersion(): string {
@@ -403,9 +404,18 @@ export function V2Canvas() {
         />
       )}
 
+      {/* ── Fynn.io detail overlay ── */}
+      {activeProject === "fynn" && !!originRect && (
+        <FynnDetail
+          originRect={originRect}
+          onCloseStart={handleCloseStart}
+          onClose={handleClose}
+        />
+      )}
+
       {/* ── Project floating card — all projects except Vorli, Zoun, WeatherWear, and PauschalTracker ── */}
       <AnimatePresence>
-        {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear" && activeProject !== "pauschalTracker"
+        {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear" && activeProject !== "pauschalTracker" && activeProject !== "fynn"
           && !!originRect && (
             <ProjectFloatingCard
               key={activeProject}
