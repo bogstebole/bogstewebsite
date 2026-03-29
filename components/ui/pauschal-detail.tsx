@@ -19,7 +19,7 @@ const SCREENSHOTS = [
   { src: "/assets/Pauschal tracker/5.png", alt: "Pauschal Tracker — settings" },
 ];
 
-const TAGS = ["SaaS", "Business Finance Tracker", "Personal"];
+const TAGS = ["Web", "Earning limit tracker", "Personal Usage"];
 
 export function PauschalDetail({ onCloseStart, onClose }: PauschalDetailProps) {
   const [isClosing, setIsClosing] = useState(false);
@@ -87,10 +87,37 @@ export function PauschalDetail({ onCloseStart, onClose }: PauschalDetailProps) {
             gap: 0,
             padding: 16,
             pointerEvents: "auto",
+            position: "relative",
             width: "60vw",
             height: "80vh",
           }}
         >
+          {/* Close button */}
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isClosing ? 0 : 1, transition: { delay: isClosing ? 0 : 0.3 } }}
+            onClick={initiateClose}
+            style={{
+              alignItems: "center",
+              background: "rgba(255,255,255,0.1)",
+              border: "none",
+              borderRadius: 14,
+              color: "rgba(255,255,255,0.6)",
+              cursor: "pointer",
+              display: "flex",
+              flexShrink: 0,
+              fontSize: 13,
+              height: 28,
+              justifyContent: "center",
+              position: "absolute",
+              right: 16,
+              top: 16,
+              width: 28,
+            }}
+          >
+            ✕
+          </motion.button>
+
           {/* ── Header: icon + title + description + tags ── */}
           <motion.div
             {...child(0.06)}
@@ -147,7 +174,7 @@ export function PauschalDetail({ onCloseStart, onClose }: PauschalDetailProps) {
             </p>
 
             {/* Tags */}
-            <div style={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
+            <div style={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 16 }}>
               {TAGS.map((tag) => (
                 <ProjectTag key={tag} label={tag} variant="dark" />
               ))}
