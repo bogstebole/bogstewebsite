@@ -71,7 +71,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
   const closingRef = useRef(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  const cardWidth = typeof window !== "undefined" ? window.innerWidth * 0.8 : 1152;
+  const cardWidth = typeof window !== "undefined" ? window.innerWidth * 0.6 : 1152;
   const targetLeft =
     (typeof window !== "undefined" ? window.innerWidth : 1440) / 2 - cardWidth / 2;
   const targetTop =
@@ -123,11 +123,11 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
           isClosing
             ? { opacity: 0 }
             : {
-                top: targetTop,
-                left: targetLeft,
-                width: cardWidth,
-                opacity: 1,
-              }
+              top: targetTop,
+              left: targetLeft,
+              width: cardWidth,
+              opacity: 1,
+            }
         }
         transition={expandSpring}
         onAnimationComplete={handleExpandComplete}
@@ -154,6 +154,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
               alignItems: "center",
               display: "flex",
               justifyContent: "space-between",
+              paddingInline: 16,
             }}
           >
             {/* Fynn.io logo card */}
@@ -201,7 +202,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
             {/* Two columns: headline + tags | description */}
             <motion.div
               variants={fadeUp}
-              style={{ alignItems: "flex-start", display: "flex", gap: 32 }}
+              style={{ alignItems: "flex-start", display: "flex", gap: 32, paddingInline: 16 }}
             >
               {/* Left */}
               <div
@@ -223,7 +224,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
                 >
                   <span style={{ color: "#141414" }}>Fynn.io</span>
                   <span style={{ color: "rgba(20,20,20,0.4)" }}>
-                    {" — Task completion time cut in half. Development speed doubled...This is how we transformed Fynn's senior living management system."}
+                    {" — Task completion time cut in half. Development speed doubled, this is how we transformed Fynn's senior living management system."}
                   </span>
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -244,7 +245,7 @@ export function FynnDetail({ originRect, onCloseStart, onClose }: FynnDetailProp
                   minWidth: 0,
                 }}
               >
-                {`Fynn is a U.S.-based senior living care management platform that came to us with a fragmented system built on Ionic, Angular, and Bootstrap — all mixing in ways they shouldn't. The goal was to redesign the core "Activities of Daily Living" feature, build a scalable design system, and set the product up for future growth. We built a custom Ionic UI kit from scratch, establishing root-level tokens for color, typography, and spacing. Discovery moved from lo-fi wireframes through hi-fi prototypes, validated through in-person user testing. The Bulk ADL feature launch cut task completion time by 50%, and the design system accelerated development speed across all ongoing projects.`}
+                {`Fynn is a U.S.-based senior living care management platform that came to us with a fragmented system built on Ionic, Angular, and Bootstrap — all mixing in ways they shouldn't. The goal was to redesign the core "Activities of Daily Living" feature, build a scalable design system, and set the product up for future growth. With no existing Ionic UI kit in Figma, we built one from scratch, establishing root-level tokens for color, typography, and spacing that matched Ionic's structure and made sense to developers immediately. Discovery started with lo-fi wireframes, moved through hi-fi prototypes, and was validated through in-person user testing — which revealed how users physically interacted with devices, directly shaping final decisions. We established a clear workflow from Jira stories through design, refinement, visual QA, and release, with a custom annotation system in Figma that made handoffs clean and reduced back-and-forth. The design system was organized into three layers — foundations, native Ionic components, and custom components — keeping the Figma file navigable as the project scaled. A pattern rulebook covering navigation, filters, drawers, and grid behavior reduced dev meetings and increased team efficiency by 13%. For the resident profile redesign, we moved from a single overloaded page to a tabbed layout with a drawer pattern for complex forms, keeping resident context visible throughout interactions. The drawer approach was a pragmatic call — not perfect, but fast to implement with existing components, and initial user feedback confirmed it worked. The Bulk ADL feature launch cut task completion time by 50%, and the design system accelerated development speed across all ongoing projects. The main lesson: lock in the technical stack before touching the design system — the Ionic vs. Angular split created avoidable complexity throughout. Moving forward, the priority is consolidating to a single framework, deepening design-dev collaboration, and expanding the system for new features.`}
               </p>
             </motion.div>
 
