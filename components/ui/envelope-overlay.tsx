@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { NotesToSelf } from "@/components/elements/notes-to-self";
 
 interface EnvelopeOverlayProps {
   originRect: DOMRect;
@@ -10,12 +11,14 @@ interface EnvelopeOverlayProps {
 }
 
 const ENVELOPE_ASPECT = 24 / 34; // height / width ratio of the envelope
+const PAPER_ASPECT = 264 / 435;  // height / width ratio of the paper
 
 const spring = { type: "spring" as const, stiffness: 380, damping: 38 };
 
 export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeOverlayProps) {
   const [isClosing, setIsClosing] = useState(false);
   const [flapOpen, setFlapOpen] = useState(false);
+  const [paperReady, setPaperReady] = useState(false);
 
   const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
   const vh = typeof window !== "undefined" ? window.innerHeight : 900;
@@ -25,9 +28,18 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
   const targetTop = (vh - targetHeight) / 2;
   const targetLeft = (vw - targetWidth) / 2;
 
+  // Paper dimensions and centered position within the envelope
+  const paperHeight = targetWidth * PAPER_ASPECT;
+  const paperTop = (targetHeight - paperHeight) / 2;
+
+  // Peak: paper bottom must clear the envelope top (left/right folds are full envelope height)
+  // Add 20% of envelope height as extra clearance above
+  const peakY = -(paperTop + paperHeight + targetHeight * 0.2);
+
   const initiateClose = () => {
     if (isClosing) return;
     setFlapOpen(false);
+    setPaperReady(false);
     setIsClosing(true);
     onCloseStart();
   };
@@ -51,7 +63,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
         style={{ position: "fixed", inset: 0, zIndex: 10 }}
       />
 
-      {/* Envelope body — FLIP from footer to top */}
+      {/* Envelope body — FLIP from footer to center */}
       <motion.div
         initial={{
           top: originRect.top,
@@ -91,6 +103,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           borderRadius: 3,
           boxShadow:
             "42px 25px 14px 0px rgba(0,0,0,0), 27px 16px 12px 0px rgba(0,0,0,0.02), 15px 9px 11px 0px rgba(0,0,0,0.08), 7px 4px 8px 0px rgba(0,0,0,0.14), 2px 1px 4px 0px rgba(0,0,0,0.16)",
+          overflow: "visible",
           perspective: "600px",
           position: "fixed",
           zIndex: 11,
@@ -111,11 +124,60 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt="" src="/images/envelope-bottom.svg" style={{ display: "block", height: "100%", maxWidth: "none", width: "100%" }} />
         </div>
-        {/* Top fold — z 2, rotates open around top edge */}
+
+        {/* Notes to self paper
+            Phase 1 (inside envelope): z -1 — behind all folds
+            Phase 2 (above envelope, falling back): z 3 — on top of all folds
+            z flips at the peak of the arc (times[1]) */}
+        <motion.div
+          initial={{ y: 0, zIndex: -1 }}
+          animate={
+            paperReady
+              ? {
+                  y: [0, peakY, 0],
+                  zIndex: [-1, 3, 3],
+                }
+              : { y: 0, zIndex: -1 }
+          }
+          transition={
+            paperReady
+              ? {
+                  duration: 0.85,
+                  ease: [0.22, 1, 0.36, 1],
+                  times: [0, 0.45, 1],
+                }
+              : { duration: 0 }
+          }
+          style={{
+            left: 0,
+            marginLeft: "auto",
+            marginRight: "auto",
+            position: "absolute",
+            right: 0,
+            top: paperTop,
+            width: "fit-content",
+          }}
+        >
+          <NotesToSelf envelopeWidth={targetWidth} />
+        </motion.div>
+
+        {/* Top fold — z 2 while closing, drops to z 0 once fully open so paper can pass over it */}
         <motion.div
           animate={{ rotateX: flapOpen ? -180 : 0 }}
           transition={{ type: "spring", stiffness: 180, damping: 28 }}
-          style={{ height: "69.6%", left: 0, position: "absolute", top: 0, transformOrigin: "top center", transformStyle: "preserve-3d", width: "100%", zIndex: 2 }}
+          onAnimationComplete={() => {
+            if (flapOpen && !paperReady) setPaperReady(true);
+          }}
+          style={{
+            height: "69.6%",
+            left: 0,
+            position: "absolute",
+            top: 0,
+            transformOrigin: "top center",
+            transformStyle: "preserve-3d",
+            width: "100%",
+            zIndex: flapOpen ? 0 : 2,
+          }}
         >
           {/* Front face — visible when closed */}
           <div style={{ backfaceVisibility: "hidden", bottom: 0, left: 0, position: "absolute", right: 0, top: 0 }}>
