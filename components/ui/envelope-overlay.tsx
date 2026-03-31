@@ -13,7 +13,17 @@ interface EnvelopeOverlayProps {
 const ENVELOPE_ASPECT = 24 / 34; // height / width ratio of the envelope
 const PAPER_ASPECT = 264 / 435;  // height / width ratio of the paper
 
-const spring = { type: "spring" as const, stiffness: 380, damping: 38 };
+const spring = { 
+  type: "spring" as const, 
+  stiffness: 380, 
+  damping: 38,
+};
+
+const returnTransition = {
+  type: "tween" as const,
+  duration: 0.35,
+  ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
+};
 
 type AnimationPhase =
   | "move-to-center"
@@ -80,6 +90,12 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
     phase === "open" ||
     phase === "return-paper";
 
+  // Retract the flap ONLY when paper is going to slide over it, to prevent visual jank when opening
+  const isFlapRetracted =
+    phase === "pull-paper" ||
+    phase === "open" ||
+    phase === "return-paper";
+
   return (
     <>
       {/* Backdrop — click to close */}
@@ -117,7 +133,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
                 height: targetHeight,
               }
         }
-        transition={spring}
+        transition={phase === "move-to-origin" ? returnTransition : spring}
         onAnimationComplete={() => {
           if (phase === "move-to-center") {
             setPhase("open-flap");
@@ -161,9 +177,9 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           initial={{ y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }}
           animate={
             phase === "pull-paper"
-              ? { y: [0, peakY, 0], rotate: [0, 0, 5], zIndex: [-1, 3, 3], scale: 1 }
+              ? { y: [0, peakY, peakY, 0], rotate: [0, 0, 0, 5], zIndex: [-1, -1, 3, 3], scale: 1 }
               : phase === "return-paper"
-              ? { y: [0, peakY, 0], rotate: [5, 0, 0], zIndex: [3, -1, -1], scale: 1 }
+              ? { y: [0, peakY, peakY, 0], rotate: [5, 0, 0, 0], zIndex: [3, 3, -1, -1], scale: 1 }
               : phase === "open"
               ? { y: 0, rotate: 5, zIndex: 3, scale: 1 }
               : phase === "move-to-origin"
@@ -173,11 +189,13 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           transition={
             phase === "pull-paper" || phase === "return-paper"
               ? {
-                  duration: 0.85,
+                  duration: 1.3,
                   ease: [0.22, 1, 0.36, 1],
-                  times: [0, 0.45, 1],
+                  times: [0, 0.44, 0.45, 1],
                 }
-              : phase === "move-to-center" || phase === "move-to-origin"
+              : phase === "move-to-origin"
+              ? returnTransition
+              : phase === "move-to-center"
               ? spring
               : { duration: 0 }
           }
@@ -219,7 +237,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
             transformOrigin: "top center",
             transformStyle: "preserve-3d",
             width: "100%",
-            zIndex: isFlapOpenState ? -2 : 2,
+            zIndex: isFlapRetracted ? -2 : 2,
           }}
         >
           {/* Front face — visible when closed */}
