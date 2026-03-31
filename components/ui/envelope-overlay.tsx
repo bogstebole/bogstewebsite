@@ -15,10 +15,17 @@ const PAPER_ASPECT = 264 / 435;  // height / width ratio of the paper
 
 const spring = { type: "spring" as const, stiffness: 380, damping: 38 };
 
+type AnimationPhase =
+  | "move-to-center"
+  | "open-flap"
+  | "pull-paper"
+  | "open"
+  | "return-paper"
+  | "close-flap"
+  | "move-to-origin";
+
 export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeOverlayProps) {
-  const [isClosing, setIsClosing] = useState(false);
-  const [flapOpen, setFlapOpen] = useState(false);
-  const [paperReady, setPaperReady] = useState(false);
+  const [phase, setPhase] = useState<AnimationPhase>("move-to-center");
 
   const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
   const vh = typeof window !== "undefined" ? window.innerHeight : 900;
@@ -37,11 +44,23 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
   const peakY = -(paperTop + paperHeight + targetHeight * 0.2);
 
   const initiateClose = () => {
-    if (isClosing) return;
-    setFlapOpen(false);
-    setPaperReady(false);
-    setIsClosing(true);
+    if (
+      phase === "return-paper" ||
+      phase === "close-flap" ||
+      phase === "move-to-origin"
+    )
+      return;
+
     onCloseStart();
+
+    // Revert animation exactly from wherever user is
+    if (phase === "open" || phase === "pull-paper") {
+      setPhase("return-paper");
+    } else if (phase === "open-flap") {
+      setPhase("close-flap");
+    } else {
+      setPhase("move-to-origin");
+    }
   };
 
   useEffect(() => {
@@ -50,14 +69,20 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [isClosing]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const isFlapOpenState =
+    phase === "open-flap" ||
+    phase === "pull-paper" ||
+    phase === "open" ||
+    phase === "return-paper";
 
   return (
     <>
       {/* Backdrop — click to close */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: isClosing ? 0 : 1 }}
+        animate={{ opacity: phase === "move-to-origin" ? 0 : 1 }}
         transition={{ duration: 0.2 }}
         onClick={initiateClose}
         style={{ position: "fixed", inset: 0, zIndex: 10 }}
@@ -74,7 +99,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           opacity: 0,
         }}
         animate={
-          isClosing
+          phase === "move-to-origin"
             ? {
                 top: originRect.top,
                 left: originRect.left,
@@ -94,8 +119,11 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
         }
         transition={spring}
         onAnimationComplete={() => {
-          if (isClosing) onClose();
-          else setFlapOpen(true);
+          if (phase === "move-to-center") {
+            setPhase("open-flap");
+          } else if (phase === "move-to-origin") {
+            onClose();
+          }
         }}
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -132,15 +160,16 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
         <motion.div
           initial={{ y: 0, zIndex: -1 }}
           animate={
-            paperReady
-              ? {
-                  y: [0, peakY, 0],
-                  zIndex: [-1, 3, 3],
-                }
+            phase === "pull-paper"
+              ? { y: [0, peakY, 0], zIndex: [-1, 3, 3] }
+              : phase === "return-paper"
+              ? { y: [0, peakY, 0], zIndex: [3, 3, -1] }
+              : phase === "open"
+              ? { y: 0, zIndex: 3 }
               : { y: 0, zIndex: -1 }
           }
           transition={
-            paperReady
+            phase === "pull-paper" || phase === "return-paper"
               ? {
                   duration: 0.85,
                   ease: [0.22, 1, 0.36, 1],
@@ -148,6 +177,10 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
                 }
               : { duration: 0 }
           }
+          onAnimationComplete={() => {
+            if (phase === "pull-paper") setPhase("open");
+            if (phase === "return-paper") setPhase("close-flap");
+          }}
           style={{
             left: 0,
             marginLeft: "auto",
@@ -163,10 +196,11 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
 
         {/* Top fold — z 2 while closing, drops to z 0 once fully open so paper can pass over it */}
         <motion.div
-          animate={{ rotateX: flapOpen ? -180 : 0 }}
+          animate={{ rotateX: isFlapOpenState ? -180 : 0 }}
           transition={{ type: "spring", stiffness: 180, damping: 28 }}
           onAnimationComplete={() => {
-            if (flapOpen && !paperReady) setPaperReady(true);
+            if (phase === "open-flap") setPhase("pull-paper");
+            if (phase === "close-flap") setPhase("move-to-origin");
           }}
           style={{
             height: "69.6%",
@@ -176,7 +210,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
             transformOrigin: "top center",
             transformStyle: "preserve-3d",
             width: "100%",
-            zIndex: flapOpen ? 0 : 2,
+            zIndex: isFlapOpenState ? 0 : 2,
           }}
         >
           {/* Front face — visible when closed */}
