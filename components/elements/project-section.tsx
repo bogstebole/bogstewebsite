@@ -206,7 +206,7 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
           </div>
 
           {/* Envelope widget — interactive, FLIP-animates from footer to overlay */}
-          <div style={{ opacity: isEnvelopeOpen ? 0 : 1, transition: "opacity 0.15s" }}>
+          <div style={{ opacity: isEnvelopeOpen ? 0 : 1 }}>
             <EnvelopeWidget ref={envelopeRef} onClick={onEnvelopeClick} />
           </div>
 
