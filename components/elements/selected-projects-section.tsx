@@ -6,7 +6,15 @@ import { useRippleWave } from "@/useRippleWave";
 import type { MotionProps } from "framer-motion";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { UselessNotesDetail } from "@/components/ui/useless-notes-detail";
+import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { ProjectTag } from "@/components/ui/project-tag";
+import {
+  ProjectCard,
+  CARD_STYLE,
+  CARD_SPRING,
+  BADGE_CONTAINER_VARIANTS,
+  BADGE_ITEM_VARIANTS,
+} from "@/components/ui/project-card";
 
 interface SelectedProjectsSectionProps {
   /** blurAnim object from V2Canvas — passed straight to motion.div */
@@ -23,47 +31,6 @@ interface SelectedProjectsSectionProps {
   onVorliClick?: () => void;
 }
 
-// 5-layer depth shadow matching Figma spec
-const CARD_SHADOW = [
-  "0px 5px 11px 0px rgba(0,0,0,0.10)",
-  "0px 21px 21px 0px rgba(0,0,0,0.09)",
-  "0px 47px 28px 0px rgba(0,0,0,0.05)",
-  "0px 83px 33px 0px rgba(0,0,0,0.01)",
-  "0px 130px 36px 0px rgba(0,0,0,0)",
-].join(", ");
-
-const CARD_STYLE: React.CSSProperties = {
-  width: 160,
-  height: 220,
-  borderRadius: 30,
-  background: "linear-gradient(to bottom, #ffffff, #f4f4f4)",
-  border: "2.948px solid white",
-  boxShadow: CARD_SHADOW,
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  padding: "16px",
-  boxSizing: "border-box",
-  position: "relative",
-  overflow: "hidden",
-  userSelect: "none",
-};
-
-const CARD_SPRING = { type: "spring" as const, stiffness: 300, damping: 20, mass: 0.3 };
-
-const BADGE_CONTAINER_VARIANTS = {
-  visible: { transition: { staggerChildren: 0.07 } },
-  hidden: { transition: { staggerChildren: 0.05 } },
-  exit: { transition: { staggerChildren: 0.05 } },
-};
-
-const BADGE_ITEM_VARIANTS = {
-  visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 400, damping: 30 } },
-  hidden: { opacity: 0, y: 6 },
-  exit: { opacity: 0, y: -6, transition: { duration: 0.12 } },
-};
-
-
 export function SelectedProjectsSection({
   animate,
   transition,
@@ -73,8 +40,6 @@ export function SelectedProjectsSection({
   onVorliClick,
 }: SelectedProjectsSectionProps) {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
-  const [isNotesHovered, setIsNotesHovered] = useState(false);
-  const [isVorliHovered, setIsVorliHovered] = useState(false);
   const contentControls = useAnimation();
   const badgeControls = useAnimation();
   const miniTagControls = useAnimation();
@@ -87,7 +52,6 @@ export function SelectedProjectsSection({
 
   const handleExpand = useCallback(async () => {
     if (isNotesExpanded || closingRef.current) return;
-    setIsNotesHovered(false);
     setIsNotesExpanded(true);
     onNotesExpand?.();
     await miniTagControls.start("exit");
@@ -132,152 +96,63 @@ export function SelectedProjectsSection({
           justifyContent: "center",
           transformOrigin: "50% 50%",
           flexShrink: 0,
+          background: "#F0F0F0",
+          padding: 64,
+          borderRadius: 24,
         }}
       >
         {/* ── Notes card — always mounted, invisible when expanded (stable FLIP target) ── */}
-        <motion.div
-          ref={notesRippleRef}
+        <ProjectCard
+          image="/images/notes.png"
+          alt="Useless Notes"
+          title="Notes"
+          tags={["iOS", "Canvas"]}
+          extraBadge={<AppStoreBadge active={false} />}
           layoutId="notes-card"
+          cardRef={notesRippleRef}
           // Rotation never changes — keeping it stable prevents FLIP from capturing
           // a mid-animation state. The expanded card handles rotate 5→0 via FLIP.
-          animate={{ opacity: isNotesExpanded ? 0 : 1 }}
-          transition={{ opacity: { duration: 0.15 } }}
-          onMouseEnter={() => !isNotesExpanded && setIsNotesHovered(true)}
-          onMouseLeave={() => setIsNotesHovered(false)}
+          animate={isNotesExpanded ? { opacity: 0, y: 0 } : { opacity: 1 }}
+          whileHover={isNotesExpanded ? undefined : { y: -16 }}
+          transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
           onLayoutAnimationComplete={() => {
             if (returningRef.current) {
               returningRef.current = false;
               void miniTagControls.start("visible");
             }
           }}
-          style={{
-            ...CARD_STYLE,
-            marginRight: -21,
-            zIndex: 3,
-            cursor: isNotesExpanded ? "default" : "pointer",
-            pointerEvents: isNotesExpanded ? "none" : "auto",
-          }}
+          marginRight={-21}
+          zIndex={3}
+          cursor={isNotesExpanded ? "default" : "pointer"}
+          pointerEvents={isNotesExpanded ? "none" : "auto"}
           onClick={!isNotesExpanded ? () => void handleExpand() : undefined}
-        >
-          {/* Icon + title — no layout="position" needed; mini card is invisible during FLIP */}
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/notes.png"
-              alt="Useless Notes"
-              style={{
-                width: 40,
-                height: 40,
-                objectFit: "cover",
-                borderRadius: 8,
-                flexShrink: 0,
-              }}
-            />
-            <span
-              style={{
-                fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                fontSize: 16.8,
-                letterSpacing: "-0.04em",
-                color: "#434343",
-                whiteSpace: "nowrap",
-                lineHeight: 1.3,
-              }}
-            >
-              Notes
-            </span>
-          </div>
-          {/* Tags — stagger out before FLIP, stagger in after return FLIP */}
-          <motion.div
-            animate={miniTagControls}
-            initial="visible"
-            variants={BADGE_CONTAINER_VARIANTS}
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 8,
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-            }}
-          >
-            <motion.div variants={BADGE_ITEM_VARIANTS}><ProjectTag label="iOS" variant="glass" active={isNotesHovered} /></motion.div>
-            <motion.div variants={BADGE_ITEM_VARIANTS}><ProjectTag label="Canvas" variant="glass" active={isNotesHovered} /></motion.div>
-            <motion.div variants={BADGE_ITEM_VARIANTS}><AppStoreBadge active={false} isGlass={isNotesHovered} /></motion.div>
-          </motion.div>
-        </motion.div>
+          tagControls={miniTagControls}
+          tagInitial="visible"
+        />
 
         {/* ── Vorli card ── */}
-        <div
-          ref={vorliRippleRef}
-          onMouseEnter={() => setIsVorliHovered(true)}
-          onMouseLeave={() => setIsVorliHovered(false)}
-          style={{
-            ...CARD_STYLE,
-            rotate: "-5deg",
-            zIndex: 2,
-            cursor: onVorliClick ? "pointer" : "default",
-          }}
+        <ProjectCard
+          image="/images/receipt.png"
+          alt="Vorli"
+          title="Vorli"
+          tags={["iOS", "AI Financial Assistant"]}
+          cardRef={vorliRippleRef}
+          rotate={-5}
+          zIndex={2}
           onClick={onVorliClick}
-        >
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/receipt.png"
-              alt="Vorli"
-              style={{
-                width: 40,
-                height: 40,
-                objectFit: "cover",
-                borderRadius: 8,
-                flexShrink: 0,
-                rotate: "359.41deg",
-                transformOrigin: "50% 50%",
-              }}
-            />
-            <span
-              style={{
-                fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                fontSize: 16.8,
-                letterSpacing: "-0.04em",
-                color: "#434343",
-                whiteSpace: "nowrap",
-                lineHeight: 1.3,
-              }}
-            >
-              Vorli
-            </span>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 8,
-              alignItems: "center",
-              width: "100%",
-            }}
-          >
-            <ProjectTag label="iOS" variant="glass" active={isVorliHovered} />
-            <ProjectTag label="AI Financial Assistant" variant="glass" active={isVorliHovered} />
-          </div>
-        </div>
+          imageStyle={{ rotate: "359.41deg", transformOrigin: "50% 50%" }}
+        />
+
+        {/* ── Sticky card ── */}
+        <ProjectCard
+          image="/images/sticky.png"
+          alt="Sticky"
+          title="Sticky"
+          tags={["iOS", "Productivity", "To Do App"]}
+          rotate={5}
+          marginLeft={-21}
+          zIndex={1}
+        />
       </motion.div>
 
       {/* ── Backdrop — blurs everything behind ── */}
@@ -337,31 +212,18 @@ export function SelectedProjectsSection({
             }}
           >
             {/* Close button — fades in after card settles */}
-            <motion.button
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.3 } }}
               exit={{ opacity: 0, transition: { duration: 0.1 } }}
-              onClick={() => void handleClose()}
-              style={{
-                position: "absolute",
-                top: 16,
-                right: 16,
-                width: 28,
-                height: 28,
-                borderRadius: 14,
-                background: "rgba(0,0,0,0.06)",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 13,
-                color: "#666",
-                flexShrink: 0,
-              }}
+              style={{ position: "absolute", top: 16, right: 16 }}
             >
-              ✕
-            </motion.button>
+              <GlassButton size="s" onClick={() => void handleClose()} aria-label="Close">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+                </svg>
+              </GlassButton>
+            </motion.div>
 
             {/* Card shell: icon + title */}
             <div
@@ -410,9 +272,14 @@ export function SelectedProjectsSection({
                 flexShrink: 0,
               }}
             >
-              <motion.div variants={BADGE_ITEM_VARIANTS}><ProjectTag label="iOS" variant="glass" /></motion.div>
-              <motion.div variants={BADGE_ITEM_VARIANTS}><ProjectTag label="Canvas" variant="glass" /></motion.div>
-              <motion.div variants={BADGE_ITEM_VARIANTS}><AppStoreBadge active={false} /></motion.div>
+              {["iOS", "Canvas"].map((label) => (
+                <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
+                  <ProjectTag label={label} variant="glass" />
+                </motion.div>
+              ))}
+              <motion.div variants={BADGE_ITEM_VARIANTS}>
+                <AppStoreBadge active={false} />
+              </motion.div>
             </motion.div>
 
             {/* Detail content — fades in after card settles via contentControls */}

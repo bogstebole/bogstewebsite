@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ProjectTag } from "@/components/ui/project-tag";
+import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 
 interface PauschalDetailProps {
   onCloseStart: () => void;
@@ -93,30 +94,17 @@ export function PauschalDetail({ onCloseStart, onClose }: PauschalDetailProps) {
           }}
         >
           {/* Close button */}
-          <motion.button
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: isClosing ? 0 : 1, transition: { delay: isClosing ? 0 : 0.3 } }}
-            onClick={initiateClose}
-            style={{
-              alignItems: "center",
-              background: "rgba(255,255,255,0.1)",
-              border: "none",
-              borderRadius: 14,
-              color: "rgba(255,255,255,0.6)",
-              cursor: "pointer",
-              display: "flex",
-              flexShrink: 0,
-              fontSize: 13,
-              height: 28,
-              justifyContent: "center",
-              position: "absolute",
-              right: 16,
-              top: 16,
-              width: 28,
-            }}
+            style={{ position: "absolute", right: 16, top: 16 }}
           >
-            ✕
-          </motion.button>
+            <GlassButton size="s" dark onClick={initiateClose} aria-label="Close">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+              </svg>
+            </GlassButton>
+          </motion.div>
 
           {/* ── Header: icon + title + description + tags ── */}
           <motion.div

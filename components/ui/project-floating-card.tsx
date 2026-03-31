@@ -5,6 +5,7 @@ import { motion, useAnimation, type Variants } from "framer-motion";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { ProjectTag } from "@/components/ui/project-tag";
 import { UselessNotesDetail } from "./useless-notes-detail";
+import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 
 interface ProjectFloatingCardProps {
   projectKey: string;
@@ -164,46 +165,54 @@ export function ProjectFloatingCard({
               style={{
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "space-between",
                 gap: 6,
                 paddingBlock: 8,
                 flexShrink: 0,
               }}
             >
-              {iconInfo && (
-                <motion.div
-                  initial={{ width: 12, height: 12 }}
-                  animate={{ width: 24, height: 24 }}
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {iconInfo && (
+                  <motion.div
+                    initial={{ width: 12, height: 12 }}
+                    animate={{ width: 24, height: 24 }}
+                    transition={spring}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={iconInfo.src}
+                      alt={label}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        flexShrink: 0,
+                        rotate: iconInfo.rotate,
+                        transformOrigin: "50% 50%",
+                      }}
+                    />
+                  </motion.div>
+                )}
+                <motion.span
+                  initial={{ fontSize: 12 }}
+                  animate={{ fontSize: 20 }}
                   transition={spring}
+                  style={{
+                    color: primaryColor,
+                    fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+                    letterSpacing: "-0.01em",
+                    lineHeight: 1,
+                    whiteSpace: "nowrap",
+                  }}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={iconInfo.src}
-                    alt={label}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      flexShrink: 0,
-                      rotate: iconInfo.rotate,
-                      transformOrigin: "50% 50%",
-                    }}
-                  />
-                </motion.div>
-              )}
-              <motion.span
-                initial={{ fontSize: 12 }}
-                animate={{ fontSize: 20 }}
-                transition={spring}
-                style={{
-                  color: primaryColor,
-                  fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                  letterSpacing: "-0.01em",
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {label}
-              </motion.span>
+                  {label}
+                </motion.span>
+              </div>
+              <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+                </svg>
+              </GlassButton>
             </div>
           </motion.div>
 

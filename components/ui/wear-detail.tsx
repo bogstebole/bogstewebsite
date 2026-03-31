@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
 import { ProjectTag } from "@/components/ui/project-tag";
+import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 
 interface WearDetailProps {
   originRect: DOMRect;
@@ -102,12 +102,11 @@ export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProp
                 <h2 style={{ color: "#ebebeb", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 17, margin: 0, fontWeight: 500 }}>
                   Wear
                 </h2>
-                <button 
-                  onClick={handleClose}
-                  style={{ background: "none", border: "none", padding: 4, cursor: "pointer", color: "#8a8a8a", display: "flex" }}
-                >
-                  <X size={16} />
-                </button>
+                <GlassButton size="s" dark onClick={handleClose} aria-label="Close">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                    <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+                  </svg>
+                </GlassButton>
               </div>
 
               <p style={{ 
