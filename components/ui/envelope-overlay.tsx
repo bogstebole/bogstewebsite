@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { NotesToSelf } from "@/components/elements/notes-to-self";
+import { AboutMeStack } from "@/components/elements/about-me-stack";
 
 interface EnvelopeOverlayProps {
   originRect: DOMRect;
@@ -11,7 +12,8 @@ interface EnvelopeOverlayProps {
 }
 
 const ENVELOPE_ASPECT = 24 / 34; // height / width ratio of the envelope
-const PAPER_ASPECT = 264 / 435;  // height / width ratio of the paper
+const NOTES_PAPER_ASPECT = 264 / 435;  // height / width ratio of the notes paper
+const ABOUT_PAPER_ASPECT = 480 / 340;  // height / width ratio of the about me stack
 
 const spring = { 
   type: "spring" as const, 
@@ -47,17 +49,23 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
   const targetTop = (vh - targetHeight) / 2;
   const targetLeft = (vw - targetWidth) / 2;
 
-  // Paper dimensions and centered position within the envelope
-  const paperWidth = targetWidth * 0.8;
-  const paperHeight = paperWidth * PAPER_ASPECT;
-  const paperTopRatio = (targetHeight - paperHeight) / 2 / targetHeight;
+  // We position both items relative to a maximum container height
+  const aboutWidth = targetWidth * 0.45;
+  const aboutHeight = aboutWidth * ABOUT_PAPER_ASPECT;
+  
+  const notesWidth = targetWidth * 0.8;
+  const notesHeight = notesWidth * NOTES_PAPER_ASPECT;
+
+  const maxPaperHeight = Math.max(aboutHeight, notesHeight);
+  // Center the tallest content in the envelope initially
+  const paperTopRatio = (targetHeight - maxPaperHeight) / 2 / targetHeight;
 
   // Scale ratio so paper fits correctly inside envelope during transit
   const scaleRatio = originRect.width / targetWidth;
 
   // Peak: paper bottom must clear the envelope top (left/right folds are full envelope height)
   // Add 20% of envelope height as extra clearance above
-  const peakY = -((paperTopRatio * targetHeight) + paperHeight + targetHeight * 0.2);
+  const peakY = -((paperTopRatio * targetHeight) + maxPaperHeight + targetHeight * 0.2);
 
   const initiateClose = () => {
     if (
@@ -211,17 +219,23 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           }}
           style={{
             left: 0,
-            marginLeft: "auto",
-            marginRight: "auto",
             opacity: phase === "move-to-origin" || phase === "move-to-center" ? 0 : 1,
             position: "absolute",
             right: 0,
             top: `${paperTopRatio * 100}%`,
-            width: "fit-content",
-            transformOrigin: "top center",
+            height: maxPaperHeight,
+            transformOrigin: "bottom center",
           }}
         >
-          <NotesToSelf envelopeWidth={paperWidth} />
+          {/* Notes to self placed slightly rotated behind the About Me stack */}
+          <div style={{ position: "absolute", bottom: "5%", left: "50%", transform: "translateX(-50%) rotate(-3deg)", zIndex: 1 }}>
+            <NotesToSelf envelopeWidth={notesWidth} />
+          </div>
+          
+          {/* About Me portrait stack in the front */}
+          <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", zIndex: 2 }}>
+            <AboutMeStack paperWidth={aboutWidth} />
+          </div>
         </motion.div>
 
         {/* Top fold — z 2 while closing, drops to z 0 once fully open so paper can pass over it */}
