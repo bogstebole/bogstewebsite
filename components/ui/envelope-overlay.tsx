@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useAnimate } from "framer-motion";
 import { NotesToSelf } from "@/components/elements/notes-to-self";
 import { AboutMeStack } from "@/components/elements/about-me-stack";
 
@@ -36,10 +36,14 @@ type AnimationPhase =
   | "return-paper-up"
   | "return-paper-down"
   | "close-flap"
-  | "move-to-origin";
+  | "move-to-origin"
+  | "focus-about"
+  | "expand-about";
 
 export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeOverlayProps) {
   const [phase, setPhase] = useState<AnimationPhase>("move-to-center");
+  const dragX = useMotionValue(0);
+  const [scope, animate] = useAnimate();
 
   const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
   const vh = typeof window !== "undefined" ? window.innerHeight : 900;
@@ -57,6 +61,13 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
   const notesHeight = notesWidth * NOTES_PAPER_ASPECT;
 
   const maxPaperHeight = Math.max(aboutHeight, notesHeight);
+  // Scale up more — 1.3x the native size, constrained to 88vh
+  const zoomScale = Math.min((340 / aboutWidth) * 1.3, (vh * 0.88) / aboutHeight);
+
+  // Center target calculations
+  const paperAbsBottom = targetTop + (targetHeight * 0.96); // the anchor point is 96% of target height
+  const paperCenterY = paperAbsBottom - (aboutHeight / 2);
+  const deltaYtoCenter = (vh / 2) - paperCenterY;
   // Offset the anchor higher since envelope SVG carries a bottom drop-shadow. 
   // A 96% height bound ensures it stays visually tucked into the physical envelope, 
   // keeping the paper top under the folded closed hinge.
@@ -100,23 +111,39 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
     phase === "open-flap" ||
     phase.includes("pull-paper") ||
     phase === "open" ||
+    phase === "focus-about" ||
+    phase === "expand-about" ||
     phase.includes("return-paper");
 
   // Retract the flap ONLY when paper is going to slide over it, to prevent visual jank when opening
   const isFlapRetracted =
     phase.includes("pull-paper") ||
-    phase === "open" ||
+    phase.includes("open") ||
+    phase.includes("focus-about") ||
+    phase.includes("expand-about") ||
     phase.includes("return-paper");
 
   return (
-    <>
-      {/* Backdrop — click to close */}
+    <div style={{ position: "fixed", inset: 0, zIndex: 10, overflowX: "hidden", overflowY: "hidden" }}>
+      {/* Scrollable layout wrapper removed in favor of direct framer motion drag interaction */}
+      
+      {/* Backdrop — click to close/revert focus */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: phase === "move-to-origin" ? 0 : 1 }}
         transition={{ duration: 0.2 }}
-        onClick={initiateClose}
-        style={{ position: "fixed", inset: 0, zIndex: 10 }}
+        onClick={() => {
+          if (phase === "expand-about") {
+            // Smoothly snap pages back to center before collapsing stack
+            animate(scope.current, { x: "-50%" }, { duration: 0.35, ease: [0.42, 0, 0.58, 1] })
+              .then(() => setPhase("focus-about"));
+          } else if (phase === "focus-about") {
+            setPhase("open");
+          } else {
+            initiateClose();
+          }
+        }}
+        style={{ position: "fixed", top: 0, left: 0, right: 0, height: "100vh", zIndex: 0 }}
       />
 
       {/* Envelope body — FLIP from footer to center */}
@@ -161,7 +188,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
             "42px 25px 14px 0px rgba(0,0,0,0), 27px 16px 12px 0px rgba(0,0,0,0.02), 15px 9px 11px 0px rgba(0,0,0,0.08), 7px 4px 8px 0px rgba(0,0,0,0.14), 2px 1px 4px 0px rgba(0,0,0,0.16)",
           overflow: "visible",
           perspective: "600px",
-          position: "fixed",
+          position: "absolute",
           zIndex: 11,
         }}
       >
@@ -198,6 +225,8 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
                ? { y: 0, rotate: 0, zIndex: -1, scale: 1 }
                : phase === "open"
                ? { y: 0, rotate: 0, zIndex: 1, scale: 1 }
+               : phase === "focus-about" || phase === "expand-about"
+               ? { y: 0, rotate: 0, zIndex: 1, scale: 1 } // stay put, don't go back into envelope
                : phase === "move-to-origin"
                ? { y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }
                : { y: 0, rotate: 0, zIndex: -1, scale: 1 }
@@ -265,6 +294,8 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
                ? { y: 0, rotate: 0, zIndex: -1, scale: 1 }
                : phase === "open"
                ? { y: 0, rotate: 5, zIndex: 4, scale: 1 }
+               : phase === "focus-about" || phase === "expand-about"
+               ? { y: deltaYtoCenter / zoomScale, rotate: 0, zIndex: 40, scale: zoomScale }
                : phase === "move-to-origin"
                ? { y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }
                : { y: 0, rotate: 0, zIndex: -1, scale: 1 }
@@ -274,6 +305,10 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
                ? { duration: 0.45, ease: "easeOut" }
                : phase === "pull-paper-down" || phase === "return-paper-down"
                ? { duration: 0.45, ease: "easeInOut" }
+               : phase === "focus-about" || phase === "expand-about"
+               ? { duration: 0.25, ease: [0.42, 0, 0.58, 1] } // cubic-bezier easeInOut
+               : phase === "open"
+               ? { duration: 0.25, ease: [0.42, 0, 0.58, 1] } // smooth collapse back
                : phase === "move-to-origin"
                ? returnTransition
                : phase === "move-to-center"
@@ -293,19 +328,29 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
            }}
         >
           <motion.div 
+            ref={scope}
             style={{ 
               position: "absolute", 
               bottom: 0, 
               left: "50%", 
-              x: "-50%", 
+              x: dragX, 
               zIndex: 2, 
-              pointerEvents: phase === "open" ? "auto" : "none", // Prevent hover intercepts during transit
+              pointerEvents: (phase === "open" || phase === "focus-about" || phase === "expand-about") ? "auto" : "none",
               transformOrigin: "bottom center"
             }}
+            initial={{ x: "-50%" }}
             whileHover={phase === "open" ? { scale: 1.04 } : {}}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            onClick={() => { if (phase === "open") setPhase("focus-about") }}
+            drag={phase === "expand-about" ? "x" : false}
+            dragConstraints={{ right: 0, left: -vw * 2 }}
+            dragElastic={0.08}
+            transition={{ type: "spring", stiffness: 120, damping: 22 }}
           >
-            <AboutMeStack paperWidth={aboutWidth} />
+            <AboutMeStack 
+               paperWidth={aboutWidth} 
+               isExpanded={phase === "expand-about"} 
+               onReadMoreClick={() => { if (phase === "focus-about") setPhase("expand-about") }}
+            />
           </motion.div>
         </motion.div>
 
@@ -349,6 +394,6 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           </div>
         </motion.div>
       </motion.div>
-    </>
+    </div>
   );
 }

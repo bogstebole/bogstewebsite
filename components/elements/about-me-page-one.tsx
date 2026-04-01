@@ -5,9 +5,10 @@ import { PaperTexture } from "@paper-design/shaders-react";
 interface AboutMePageOneProps {
   /** Width of the envelope in px — paper scales to match */
   envelopeWidth: number;
+  onReadMoreClick?: () => void;
 }
 
-export function AboutMePageOne({ envelopeWidth }: AboutMePageOneProps) {
+export function AboutMePageOne({ envelopeWidth, onReadMoreClick }: AboutMePageOneProps) {
   // Original design: 340 × 480px
   const scale = envelopeWidth / 340;
   const w = envelopeWidth;
@@ -138,6 +139,7 @@ export function AboutMePageOne({ envelopeWidth }: AboutMePageOneProps) {
             Childhood fascination with drawing dark circles alarmed my parents but led me to explore conceptual art, product design and eventually AI.{"  "}AI gave me opportunity to bring to life concepts that were just an idea a while ago. Through the process I learned to harness a child's innate curiosity. Now as a father, my son's wonder helps me rediscover that questioning spirit I sometimes lose touch with.
           </div>
           <div
+            onClick={onReadMoreClick}
             style={{
               alignItems: "center",
               justifyContent: "center",
