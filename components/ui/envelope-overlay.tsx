@@ -57,8 +57,10 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
   const notesHeight = notesWidth * NOTES_PAPER_ASPECT;
 
   const maxPaperHeight = Math.max(aboutHeight, notesHeight);
-  // Center the tallest content in the envelope initially
-  const paperTopRatio = (targetHeight - maxPaperHeight) / 2 / targetHeight;
+  // Offset the anchor higher since envelope SVG carries a bottom drop-shadow. 
+  // A 96% height bound ensures it stays visually tucked into the physical envelope, 
+  // keeping the paper top under the folded closed hinge.
+  const paperTopRatio = (targetHeight * 0.96 - maxPaperHeight) / targetHeight;
 
   // Scale ratio so paper fits correctly inside envelope during transit
   const scaleRatio = originRect.width / targetWidth;
@@ -179,64 +181,111 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
           <img alt="" src="/images/envelope-bottom.svg" style={{ display: "block", height: "100%", maxWidth: "none", width: "100%" }} />
         </div>
 
-        {/* Notes to self paper
-            Phase 1 (inside envelope): z -1 — behind all folds
-            Phase 2 (above envelope, falling back): z 3 — on top of all folds
-            z flips at the peak of the arc (times[1]) */}
+        {/* Notes to Self - SLIDES SECOND (delayed)
+            zIndex logic:
+            Phase 1: z -1
+            Phase 2: z 1 (behind AboutMeStack) */}
         <motion.div
-          initial={{ y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }}
-          animate={
-            phase === "pull-paper-up"
-              ? { y: peakY, rotate: 0, zIndex: -1, scale: 1 }
-              : phase === "pull-paper-down"
-              ? { y: 0, rotate: 5, zIndex: 3, scale: 1 }
-              : phase === "return-paper-up"
-              ? { y: peakY, rotate: 0, zIndex: 3, scale: 1 }
-              : phase === "return-paper-down"
-              ? { y: 0, rotate: 0, zIndex: -1, scale: 1 }
-              : phase === "open"
-              ? { y: 0, rotate: 5, zIndex: 3, scale: 1 }
-              : phase === "move-to-origin"
-              ? { y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }
-              : { y: 0, rotate: 0, zIndex: -1, scale: 1 }
-          }
-          transition={
-            phase === "pull-paper-up" || phase === "return-paper-up"
-              ? { duration: 0.65, ease: "easeOut" }
-              : phase === "pull-paper-down" || phase === "return-paper-down"
-              ? { duration: 0.65, ease: "easeInOut" }
-              : phase === "move-to-origin"
-              ? returnTransition
-              : phase === "move-to-center"
-              ? spring
-              : { duration: 0 }
-          }
-          onAnimationComplete={() => {
-            if (phase === "pull-paper-up") setPhase("pull-paper-down");
-            if (phase === "pull-paper-down") setPhase("open");
-            if (phase === "return-paper-up") setPhase("return-paper-down");
-            if (phase === "return-paper-down") setPhase("close-flap");
-          }}
-          style={{
-            left: 0,
-            opacity: phase === "move-to-origin" || phase === "move-to-center" ? 0 : 1,
-            position: "absolute",
-            right: 0,
-            top: `${paperTopRatio * 100}%`,
-            height: maxPaperHeight,
-            transformOrigin: "bottom center",
-          }}
+           initial={{ y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }}
+           animate={
+             phase === "pull-paper-up"
+               ? { y: peakY, rotate: 0, zIndex: -1, scale: 1 }
+               : phase === "pull-paper-down"
+               ? { y: 0, rotate: 0, zIndex: 1, scale: 1 }
+               : phase === "return-paper-up"
+               ? { y: peakY, rotate: 0, zIndex: 1, scale: 1 }
+               : phase === "return-paper-down"
+               ? { y: 0, rotate: 0, zIndex: -1, scale: 1 }
+               : phase === "open"
+               ? { y: 0, rotate: 0, zIndex: 1, scale: 1 }
+               : phase === "move-to-origin"
+               ? { y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }
+               : { y: 0, rotate: 0, zIndex: -1, scale: 1 }
+           }
+           transition={
+             phase === "pull-paper-up" || phase === "return-paper-up"
+               ? { duration: 0.45, ease: "easeOut", delay: 0.1, zIndex: { duration: 0, delay: 0 } }
+               : phase === "pull-paper-down" || phase === "return-paper-down"
+               ? { duration: 0.45, ease: "easeInOut", delay: 0.1, zIndex: { duration: 0, delay: 0 } }
+               : phase === "move-to-origin"
+               ? { ...returnTransition, delay: 0.05 }
+               : phase === "move-to-center"
+               ? spring
+               : { duration: 0 }
+           }
+           // NotesToSelf is delayed by 0.1s, meaning it finishes LAST.
+           // It controls the phase state machine.
+           onAnimationComplete={() => {
+             if (phase === "pull-paper-up") setPhase("pull-paper-down");
+             if (phase === "pull-paper-down") setPhase("open");
+             if (phase === "return-paper-up") setPhase("return-paper-down");
+             if (phase === "return-paper-down") setPhase("close-flap");
+           }}
+           style={{
+             left: 0,
+             opacity: phase === "move-to-origin" || phase === "move-to-center" ? 0 : 1,
+             position: "absolute",
+             right: 0,
+             top: `${paperTopRatio * 100}%`,
+             height: maxPaperHeight,
+             transformOrigin: "bottom center",
+             pointerEvents: "none",
+           }}
         >
-          {/* Notes to self placed slightly rotated behind the About Me stack */}
-          <div style={{ position: "absolute", bottom: "5%", left: "50%", transform: "translateX(-50%) rotate(-3deg)", zIndex: 1 }}>
+          <div style={{ position: "absolute", bottom: "5%", left: "50%", transform: "translateX(-50%) rotate(-3deg)", zIndex: 1, pointerEvents: "auto" }}>
             <NotesToSelf envelopeWidth={notesWidth} />
           </div>
-          
-          {/* About Me portrait stack in the front */}
-          <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", zIndex: 2 }}>
+        </motion.div>
+
+        {/* About Me Stack - SLIDES FIRST (no delay)
+            z-index logic:
+            Inside: z -1, Outside: z 4 */}
+        <motion.div
+           initial={{ y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }}
+           animate={
+             phase === "pull-paper-up"
+               ? { y: peakY, rotate: 0, zIndex: -1, scale: 1 }
+               : phase === "pull-paper-down"
+               ? { y: 0, rotate: 5, zIndex: 4, scale: 1 }
+               : phase === "return-paper-up"
+               ? { y: peakY, rotate: 0, zIndex: 4, scale: 1 }
+               : phase === "return-paper-down"
+               ? { y: 0, rotate: 0, zIndex: -1, scale: 1 }
+               : phase === "open"
+               ? { y: 0, rotate: 5, zIndex: 4, scale: 1 }
+               : phase === "move-to-origin"
+               ? { y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }
+               : { y: 0, rotate: 0, zIndex: -1, scale: 1 }
+           }
+           transition={
+             phase === "pull-paper-up" || phase === "return-paper-up"
+               ? { duration: 0.45, ease: "easeOut" }
+               : phase === "pull-paper-down" || phase === "return-paper-down"
+               ? { duration: 0.45, ease: "easeInOut" }
+               : phase === "move-to-origin"
+               ? returnTransition
+               : phase === "move-to-center"
+               ? spring
+               : { duration: 0 }
+           }
+           // AboutMeStack moves faster so NO onAnimationComplete here, to prevent state double-fire
+           style={{
+             left: 0,
+             opacity: phase === "move-to-origin" || phase === "move-to-center" ? 0 : 1,
+             position: "absolute",
+             right: 0,
+             top: `${paperTopRatio * 100}%`,
+             height: maxPaperHeight,
+             transformOrigin: "bottom center",
+             pointerEvents: "none", // let interactions pass through if needed
+           }}
+        >
+          <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", zIndex: 2, pointerEvents: "auto" }}>
             <AboutMeStack paperWidth={aboutWidth} />
           </div>
         </motion.div>
+
+
 
         {/* Top fold — z 2 while closing, drops to z 0 once fully open so paper can pass over it */}
         <motion.div
@@ -257,7 +306,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
             transformOrigin: "top center",
             transformStyle: "preserve-3d",
             width: "100%",
-            zIndex: isFlapRetracted ? -2 : 2,
+            zIndex: isFlapRetracted ? -3 : 2,
           }}
         >
           {/* Front face — visible when closed */}

@@ -168,20 +168,21 @@ export function AboutMePageOne({ envelopeWidth }: AboutMePageOneProps) {
           </div>
         </div>
         
-        {/* Replace SVG with the image that user provided */}
-        <div style={{ position: "relative", width: "100%", display: "flex", justifyContent: "flex-start", marginTop: `${gap24}px` }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/me-and-son.png"
-            alt="Me and my son illustration"
-            style={{ 
-              width: `${Math.round(305 * scale)}px`, 
-              height: "auto",
-              display: "block",
-              flexShrink: 0
-            }}
-          />
-        </div>
+        {/* Replaced SVG with image, matched to flow using flex container bounding box */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/me-and-son.png"
+          alt="Me and my son illustration"
+          style={{ 
+            width: "100%",
+            flex: 1, 
+            minHeight: 0, 
+            objectFit: "contain",
+            objectPosition: "bottom center",
+            display: "block",
+            marginTop: "auto"
+          }}
+        />
       </div>
     </div>
   );
