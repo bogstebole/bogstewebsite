@@ -315,7 +315,10 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
                ? spring
                : { duration: 0 }
            }
-           // AboutMeStack moves faster so NO onAnimationComplete here, to prevent state double-fire
+           // Auto-expand when the scale-up animation settles
+           onAnimationComplete={() => {
+             if (phase === "focus-about") setPhase("expand-about");
+           }}
            style={{
              left: 0,
              opacity: phase === "move-to-origin" || phase === "move-to-center" ? 0 : 1,
@@ -349,7 +352,6 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
             <AboutMeStack 
                paperWidth={aboutWidth} 
                isExpanded={phase === "expand-about"} 
-               onReadMoreClick={() => { if (phase === "focus-about") setPhase("expand-about") }}
             />
           </motion.div>
         </motion.div>

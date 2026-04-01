@@ -5,10 +5,9 @@ import { PaperTexture } from "@paper-design/shaders-react";
 interface AboutMePageOneProps {
   /** Width of the envelope in px — paper scales to match */
   envelopeWidth: number;
-  onReadMoreClick?: () => void;
 }
 
-export function AboutMePageOne({ envelopeWidth, onReadMoreClick }: AboutMePageOneProps) {
+export function AboutMePageOne({ envelopeWidth }: AboutMePageOneProps) {
   // Original design: 340 × 480px
   const scale = envelopeWidth / 340;
   const w = envelopeWidth;
@@ -20,9 +19,6 @@ export function AboutMePageOne({ envelopeWidth, onReadMoreClick }: AboutMePageOn
   const titleSize = Math.max(10, Math.round(12 * scale));
   const textSize = Math.max(8, Math.round(8 * scale));
   const lineHeight16 = Math.round(16 * scale);
-  const readMoreW = Math.round(65 * scale);
-  const readMorePBlock = Math.round(4 * scale);
-  const readMorePInline = Math.round(8 * scale);
 
   return (
     <div
@@ -137,36 +133,6 @@ export function AboutMePageOne({ envelopeWidth, onReadMoreClick }: AboutMePageOn
             }}
           >
             Childhood fascination with drawing dark circles alarmed my parents but led me to explore conceptual art, product design and eventually AI.{"  "}AI gave me opportunity to bring to life concepts that were just an idea a while ago. Through the process I learned to harness a child's innate curiosity. Now as a father, my son's wonder helps me rediscover that questioning spirit I sometimes lose touch with.
-          </div>
-          <div
-            onClick={onReadMoreClick}
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#434343",
-              borderRadius: "9999px",
-              boxSizing: "border-box",
-              display: "flex",
-              cursor: "pointer",
-              paddingBlock: `${readMorePBlock}px`,
-              paddingInline: `${readMorePInline}px`,
-              marginTop: "auto"
-            }}
-          >
-            <div
-              style={{
-                boxSizing: "border-box",
-                color: "#FFFFFF",
-                fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                fontSize: `${textSize}px`,
-                fontWeight: 300,
-                lineHeight: `${Math.round(10 * scale)}px`,
-                width: `${readMoreW}px`,
-                textAlign: "center"
-              }}
-            >
-              Read more
-            </div>
           </div>
         </div>
         
