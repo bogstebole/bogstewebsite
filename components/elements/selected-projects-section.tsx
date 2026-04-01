@@ -57,6 +57,24 @@ export function SelectedProjectsSection({
   const miniTagControls = useAnimation();
   const closingRef = useRef(false);
   const returningRef = useRef(false);
+  
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+
+  useEffect(() => {
+    if (!isNotesExpanded) {
+      setShowStickyHeader(false);
+      return;
+    }
+    const el = headerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyHeader(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isNotesExpanded]);
 
   const RIPPLE_CONFIG = { speed: 270, ringWidth: 42, duration: 1000, textStrength: 7, imageStrength: 5 };
   const notesRippleRef = useRippleWave(RIPPLE_CONFIG) as unknown as React.RefObject<HTMLDivElement>;
@@ -224,15 +242,58 @@ export function SelectedProjectsSection({
               position: "fixed",
               bottom: 0,
               left: "50%",
-              marginLeft: -438.5, // exact half of 877px
+              marginLeft: -438.5,
               width: 877,
-              height: "70vh",
+              height: "95vh",
               overflowY: "auto",
               overflowX: "hidden",
               zIndex: 51,
               cursor: "default",
             }}
           >
+            {/* ── Sticky floating header ── */}
+            <motion.div
+              initial={{ opacity: 0, y: -12 }}
+              animate={{
+                opacity: showStickyHeader && !closingRef.current ? 1 : 0,
+                y: showStickyHeader && !closingRef.current ? 0 : -12,
+              }}
+              transition={{ type: "spring", stiffness: 400, damping: 36 }}
+              style={{
+                alignItems: "center",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                borderRadius: 9999,
+                boxSizing: "border-box",
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "20px 24px",
+                pointerEvents: showStickyHeader && !closingRef.current ? "auto" : "none",
+                position: "fixed",
+                top: "calc(5vh + 16px)",
+                left: "50%",
+                marginLeft: -438.5,
+                width: 877,
+                zIndex: 52,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <img
+                  src="/images/notes.png"
+                  alt="Notes Icon"
+                  style={{ width: "24px", height: "24px", objectFit: "cover", borderRadius: 4, transform: 'rotate(-17.2deg)' }}
+                />
+                <span style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "16px", letterSpacing: "-0.01em", lineHeight: "1" }}>
+                  Notes
+                </span>
+              </div>
+              <GlassButton size="s" onClick={() => void handleClose()} aria-label="Close">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+                </svg>
+              </GlassButton>
+            </motion.div>
+
             {/* Close button — absolute positioned */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -248,7 +309,7 @@ export function SelectedProjectsSection({
             </motion.div>
 
             {/* Header section (Icon, Title, Tags) - exactly mimicking mini-card visual column */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '480px', flexShrink: 0 }}>
+            <div ref={headerRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '480px', flexShrink: 0 }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}>
                 
                 {/* Icon & Title */}
@@ -320,7 +381,7 @@ export function SelectedProjectsSection({
                     cursor: 'progress'
                   }}
                 >
-                  <span style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '10px', letterSpacing: '0.03em', lineHeight: '1' }}>
+                  <span style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '14px', letterSpacing: '0.03em', lineHeight: '1' }}>
                     Download the app
                   </span>
                 </motion.div>
