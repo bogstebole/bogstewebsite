@@ -303,7 +303,9 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
               x: "-50%", 
               rotate: -3, 
               zIndex: 1, 
-              pointerEvents: (phase === "open" || phase === "focus-notes") ? "auto" : "none" 
+              pointerEvents: (phase === "open" || phase === "focus-notes") ? "auto" : "none",
+              cursor: phase === "open" ? "pointer" : "default",
+              userSelect: "none",
             }}
             whileHover={phase === "open" ? { x: "-60%", rotate: -6 } : {}}
             onClick={() => { if (phase === "open") setPhase("slide-notes-out"); }}
@@ -376,7 +378,9 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
               x: dragX, 
               zIndex: 2, 
               pointerEvents: (phase === "open" || phase === "focus-about" || phase === "expand-about") ? "auto" : "none",
-              transformOrigin: "bottom center"
+              transformOrigin: "bottom center",
+              cursor: phase === "open" ? "pointer" : phase === "expand-about" ? "grab" : "default",
+              userSelect: "none",
             }}
             initial={{ x: "-50%" }}
             whileHover={phase === "open" ? { scale: 1.04 } : {}}
