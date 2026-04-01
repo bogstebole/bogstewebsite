@@ -134,9 +134,9 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
         transition={{ duration: 0.2 }}
         onClick={() => {
           if (phase === "expand-about") {
-            // Smoothly snap pages back to center before collapsing stack
+            // Reset drag position, then scale straight back down to resting open position
             animate(scope.current, { x: "-50%" }, { duration: 0.35, ease: [0.42, 0, 0.58, 1] })
-              .then(() => setPhase("focus-about"));
+              .then(() => setPhase("open"));
           } else if (phase === "focus-about") {
             setPhase("open");
           } else {
