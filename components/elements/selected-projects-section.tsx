@@ -272,8 +272,8 @@ export function SelectedProjectsSection({
                 position: "fixed",
                 top: "calc(5vh + 16px)",
                 left: "50%",
-                marginLeft: -438.5,
-                width: 877,
+                marginLeft: -422.5, // half of 845 (16px inset from both sides)
+                width: 845, // 877 - 32
                 zIndex: 52,
               }}
             >
