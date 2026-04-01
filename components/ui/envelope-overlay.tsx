@@ -38,7 +38,10 @@ type AnimationPhase =
   | "close-flap"
   | "move-to-origin"
   | "focus-about"
-  | "expand-about";
+  | "expand-about"
+  | "slide-notes-out"
+  | "slide-notes-back"
+  | "focus-notes";
 
 export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeOverlayProps) {
   const [phase, setPhase] = useState<AnimationPhase>("move-to-center");
@@ -61,8 +64,12 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
   const notesHeight = notesWidth * NOTES_PAPER_ASPECT;
 
   const maxPaperHeight = Math.max(aboutHeight, notesHeight);
-  // Scale up more — 1.3x the native size, constrained to 88vh
+  // About Me zoom: 1.3x native, constrained to 88vh
   const zoomScale = Math.min((340 / aboutWidth) * 1.3, (vh * 0.88) / aboutHeight);
+  // Notes zoom: scale up to fill ~75vh nicely
+  const notesZoomScale = Math.min(1.6, (vh * 0.75) / notesHeight);
+  const notesAbsCenterY = targetTop + (targetHeight * 0.96) - (notesHeight / 2);
+  const notesYtoCenter = (vh / 2 - notesAbsCenterY) / notesZoomScale;
 
   // Center target calculations
   const paperAbsBottom = targetTop + (targetHeight * 0.96); // the anchor point is 96% of target height
@@ -113,14 +120,20 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
     phase === "open" ||
     phase === "focus-about" ||
     phase === "expand-about" ||
+    phase === "slide-notes-out" ||
+    phase === "slide-notes-back" ||
+    phase === "focus-notes" ||
     phase.includes("return-paper");
 
-  // Retract the flap ONLY when paper is going to slide over it, to prevent visual jank when opening
+  // Retract the flap ONLY when paper is going to slide over it, to prevent visual jank
   const isFlapRetracted =
     phase.includes("pull-paper") ||
     phase.includes("open") ||
     phase.includes("focus-about") ||
     phase.includes("expand-about") ||
+    phase === "slide-notes-out" ||
+    phase === "slide-notes-back" ||
+    phase === "focus-notes" ||
     phase.includes("return-paper");
 
   return (
@@ -138,6 +151,10 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
             animate(scope.current, { x: "-50%" }, { duration: 0.35, ease: [0.42, 0, 0.58, 1] })
               .then(() => setPhase("open"));
           } else if (phase === "focus-about") {
+            setPhase("open");
+          } else if (phase === "focus-notes") {
+            setPhase("slide-notes-back");
+          } else if (phase === "slide-notes-out" || phase === "slide-notes-back") {
             setPhase("open");
           } else {
             initiateClose();
@@ -216,39 +233,56 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
            initial={{ y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }}
            animate={
              phase === "pull-paper-up"
-               ? { y: peakY, rotate: 0, zIndex: -1, scale: 1 }
+               ? { y: peakY, rotate: 0, x: 0, zIndex: -1, scale: 1 }
                : phase === "pull-paper-down"
-               ? { y: 0, rotate: 0, zIndex: 1, scale: 1 }
+               ? { y: 0, rotate: 0, x: 0, zIndex: 1, scale: 1 }
                : phase === "return-paper-up"
-               ? { y: peakY, rotate: 0, zIndex: 1, scale: 1 }
+               ? { y: peakY, rotate: 0, x: 0, zIndex: 1, scale: 1 }
                : phase === "return-paper-down"
-               ? { y: 0, rotate: 0, zIndex: -1, scale: 1 }
+               ? { y: 0, rotate: 0, x: 0, zIndex: -1, scale: 1 }
                : phase === "open"
-               ? { y: 0, rotate: 0, zIndex: 1, scale: 1 }
+               ? { y: 0, rotate: 0, x: 0, zIndex: 1, scale: 1 }
                : phase === "focus-about" || phase === "expand-about"
-               ? { y: 0, rotate: 0, zIndex: 1, scale: 1 } // stay put, don't go back into envelope
+               ? { y: 0, rotate: 0, x: 0, zIndex: 1, scale: 1 } // stay put behind About Me
+               : phase === "slide-notes-out"
+               ? { y: 0, rotate: 0, x: -targetWidth * 1.4, zIndex: 1, scale: 1 } // slide left, z stays BELOW About Me
+               : phase === "focus-notes"
+               ? { y: notesYtoCenter, rotate: 0, x: 0, zIndex: 50, scale: notesZoomScale } // z jumps to top instantly
+               : phase === "slide-notes-back"
+               ? { y: 0, rotate: 0, x: -targetWidth * 1.4, zIndex: 50, scale: 1 } // slide back to peak, z stays high
                : phase === "move-to-origin"
-               ? { y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }
-               : { y: 0, rotate: 0, zIndex: -1, scale: 1 }
+               ? { y: 0, rotate: 0, x: 0, zIndex: -1, scale: scaleRatio }
+               : { y: 0, rotate: 0, x: 0, zIndex: -1, scale: 1 }
            }
            transition={
              phase === "pull-paper-up" || phase === "return-paper-up"
                ? { duration: 0.45, ease: "easeOut", delay: 0.1, zIndex: { duration: 0, delay: 0 } }
                : phase === "pull-paper-down" || phase === "return-paper-down"
                ? { duration: 0.45, ease: "easeInOut", delay: 0.1, zIndex: { duration: 0, delay: 0 } }
+               : phase === "slide-notes-out"
+               ? { duration: 0.4, ease: "easeInOut" }
+               : phase === "slide-notes-back"
+               ? { duration: 0.4, ease: "easeInOut" }
+               : phase === "focus-notes"
+               ? { duration: 0.25, ease: [0.42, 0, 0.58, 1] as [number,number,number,number], zIndex: { duration: 0, delay: 0 } }
+               : phase === "open"
+               ? { duration: 0.25, ease: [0.42, 0, 0.58, 1] as [number,number,number,number], zIndex: { duration: 0, delay: 0 } }
                : phase === "move-to-origin"
                ? { ...returnTransition, delay: 0.05 }
                : phase === "move-to-center"
                ? spring
                : { duration: 0 }
            }
-           // NotesToSelf is delayed by 0.1s, meaning it finishes LAST.
-           // It controls the phase state machine.
+           // NotesToSelf controls the envelope state machine via onAnimationComplete.
            onAnimationComplete={() => {
              if (phase === "pull-paper-up") setPhase("pull-paper-down");
              if (phase === "pull-paper-down") setPhase("open");
              if (phase === "return-paper-up") setPhase("return-paper-down");
              if (phase === "return-paper-down") setPhase("close-flap");
+             // Auto-scale up once notes have fully slid out from behind About Me
+             if (phase === "slide-notes-out") setPhase("focus-notes");
+             // After reverse slide completes, drop back to open (z drops instantly via transition)
+             if (phase === "slide-notes-back") setPhase("open");
            }}
            style={{
              left: 0,
@@ -269,9 +303,10 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
               x: "-50%", 
               rotate: -3, 
               zIndex: 1, 
-              pointerEvents: phase === "open" ? "auto" : "none" 
+              pointerEvents: (phase === "open" || phase === "focus-notes") ? "auto" : "none" 
             }}
             whileHover={phase === "open" ? { x: "-60%", rotate: -6 } : {}}
+            onClick={() => { if (phase === "open") setPhase("slide-notes-out"); }}
             transition={{ type: "spring", stiffness: 350, damping: 25 }}
           >
             <NotesToSelf envelopeWidth={notesWidth} />
@@ -296,6 +331,8 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
                ? { y: 0, rotate: 5, zIndex: 4, scale: 1 }
                : phase === "focus-about" || phase === "expand-about"
                ? { y: deltaYtoCenter / zoomScale, rotate: 0, zIndex: 40, scale: zoomScale }
+               : phase === "slide-notes-out" || phase === "focus-notes" || phase === "slide-notes-back"
+               ? { y: 0, rotate: 5, zIndex: 4, scale: 1 }
                : phase === "move-to-origin"
                ? { y: 0, rotate: 0, zIndex: -1, scale: scaleRatio }
                : { y: 0, rotate: 0, zIndex: -1, scale: 1 }
