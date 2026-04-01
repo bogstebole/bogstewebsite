@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { AnimationControls } from "framer-motion";
+import type { TargetAndTransition, VariantLabels } from "framer-motion";
 import { ProjectTag } from "@/components/ui/project-tag";
 
 // 5-layer depth shadow matching Figma spec
@@ -16,7 +16,7 @@ const CARD_SHADOW = [
 export const CARD_STYLE: React.CSSProperties = {
   width: 160,
   height: 220,
-  borderRadius: 30,
+  borderRadius: 24,
   background: "linear-gradient(to bottom, #ffffff, #f4f4f4)",
   border: "2.948px solid white",
   boxShadow: CARD_SHADOW,
@@ -70,12 +70,12 @@ interface ProjectCardProps {
   // Motion overrides (used by Notes card for FLIP and opacity animations)
   layoutId?: string;
   cardRef?: React.RefObject<HTMLDivElement>;
-  animate?: object;
-  whileHover?: object;
-  transition?: object;
+  animate?: any;
+  whileHover?: any;
+  transition?: any;
   onLayoutAnimationComplete?: () => void;
   // Animated tag controls (Notes card)
-  tagControls?: AnimationControls;
+  tagControls?: any;
   tagInitial?: string;
   // Extra slot after tags (e.g. AppStoreBadge)
   extraBadge?: React.ReactNode;
