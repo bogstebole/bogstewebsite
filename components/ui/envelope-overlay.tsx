@@ -232,9 +232,21 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
              pointerEvents: "none",
            }}
         >
-          <div style={{ position: "absolute", bottom: "5%", left: "50%", transform: "translateX(-50%) rotate(-3deg)", zIndex: 1, pointerEvents: "auto" }}>
+          <motion.div 
+            style={{ 
+              position: "absolute", 
+              bottom: "5%", 
+              left: "50%", 
+              x: "-50%", 
+              rotate: -3, 
+              zIndex: 1, 
+              pointerEvents: phase === "open" ? "auto" : "none" 
+            }}
+            whileHover={phase === "open" ? { x: "-60%", rotate: -6 } : {}}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+          >
             <NotesToSelf envelopeWidth={notesWidth} />
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* About Me Stack - SLIDES FIRST (no delay)
@@ -280,9 +292,21 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
              pointerEvents: "none", // let interactions pass through if needed
            }}
         >
-          <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", zIndex: 2, pointerEvents: "auto" }}>
+          <motion.div 
+            style={{ 
+              position: "absolute", 
+              bottom: 0, 
+              left: "50%", 
+              x: "-50%", 
+              zIndex: 2, 
+              pointerEvents: phase === "open" ? "auto" : "none", // Prevent hover intercepts during transit
+              transformOrigin: "bottom center"
+            }}
+            whileHover={phase === "open" ? { scale: 1.04 } : {}}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          >
             <AboutMeStack paperWidth={aboutWidth} />
-          </div>
+          </motion.div>
         </motion.div>
 
 
