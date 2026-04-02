@@ -440,3 +440,147 @@
   border-color: rgba(255, 255, 255, 0.15);
   border-top-color: rgba(255, 255, 255, 0.6);
 }
+
+/* ═══════════════════════════════════════════
+   SOCIAL ICON BUTTON
+   Transparent at rest → full glass on hover.
+   Fixed 24px wide, 26px tall, 6px padding.
+   ═══════════════════════════════════════════ */
+
+.socialIconBtn {
+  /* ── Tokens ── */
+  --glass-border-width: 1px;
+  --glass-radius: 6.25rem;
+  --glass-blur: 2.5px;
+  --glass-transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* ── Reset ── */
+  all: unset;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+
+  /* ── Layout ── */
+  display: inline-flex;
+  width: 44px;
+  height: 26px;
+  padding: 6px;
+  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  text-decoration: none;
+
+  /* ── Shape ── */
+  border-radius: var(--glass-radius);
+
+  /* ── Invisible at rest ── */
+  background: transparent;
+  box-shadow: none;
+
+  /* ── Transition ── */
+  transition:
+    background var(--glass-transition),
+    box-shadow var(--glass-transition),
+    transform var(--glass-transition),
+    color var(--glass-transition),
+    filter var(--glass-transition);
+
+  /* ── Pseudo elements ── */
+  overflow: visible;
+}
+
+/* gradient border — hidden at rest */
+.socialIconBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--glass-border-width);
+  background: transparent;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  transition: background var(--glass-transition);
+}
+
+/* top rim — hidden at rest */
+.socialIconBtn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: var(--glass-border-width);
+  background: transparent;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--glass-transition), background var(--glass-transition);
+}
+
+/* ── Hover: full glass ── */
+.socialIconBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow:
+    -2px 2px 2px 1px #fff inset,
+    -1px -3px 3px -2px rgba(0, 0, 0, 0.41) inset,
+    2px 1px 4px -4px rgba(0, 0, 0, 0.84) inset,
+    0 0 7px 4px #fff inset,
+    0 -9px 14px 4px rgba(0, 0, 0, 0.25) inset,
+    -2px -3px 5px 3px rgba(0, 0, 0, 0.10) inset,
+    0 20px 8px -9px #fff inset,
+    0 34px 10px -9px rgba(0, 0, 0, 0.10) inset,
+    0 27px 8px rgba(0, 0, 0, 0.01),
+    0 17px 6px rgba(0, 0, 0, 0.01),
+    0 10px 6px rgba(0, 0, 0, 0.05),
+    0 4px 4px rgba(0, 0, 0, 0.10),
+    0 1px 3px rgba(0, 0, 0, 0.10);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.socialIconBtn:hover::before {
+  background: linear-gradient(145deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(0, 0, 0, 0.12) 40%,
+      rgba(0, 0, 0, 0.22) 70%,
+      rgba(0, 0, 0, 0.15) 100%);
+}
+
+.socialIconBtn:hover::after {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.7) 30%,
+      rgba(255, 255, 255, 0.9) 50%,
+      rgba(255, 255, 255, 0.7) 70%,
+      transparent 100%);
+  opacity: 0.6;
+}
+
+/* ── Active ── */
+.socialIconBtn:active {
+  transform: translateY(1px) scale(0.97);
+  transition-duration: 0.08s;
+  background: rgba(0, 0, 0, 0.02);
+  box-shadow:
+    2px -1px 1px 0 rgba(255, 255, 255, 0.6) inset,
+    -1px -2px 3px -2px rgba(0, 0, 0, 0.5) inset,
+    2px 1px 5px -5px rgba(0, 0, 0, 0.9) inset,
+    0 0 5px 4px rgba(255, 255, 255, 0.45) inset,
+    0 -12px 18px -4px rgba(0, 0, 0, 0.32) inset,
+    0 4px 8px 2px rgba(0, 0, 0, 0.5) inset,
+    0 20px 10px 0 rgba(255, 255, 255, 0.6) inset,
+    0 40px 42px -10px rgba(0, 0, 0, 0.22) inset,
+    0 8px 4px -1px rgba(0, 0, 0, 0.01),
+    0 4px 4px 0 rgba(0, 0, 0, 0.04),
+    0 2px 3px 0 rgba(0, 0, 0, 0.06),
+    0 0 2px 0 rgba(0, 0, 0, 0.07);
+}

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { ProjectEntry } from "@/components/elements/project-entry";
 import { EnvelopeWidget } from "@/components/elements/EnvelopeWidget";
+import glassStyles from "@/components/ui/GlassButton.module.css";
 
 interface ProjectSectionProps {
   primaryColor: string;
@@ -55,6 +56,52 @@ function ProjectIcon({
   );
 }
 
+function SocialIconButton({
+  href,
+  label,
+  hoverColor,
+  filterOverride,
+  children,
+}: {
+  href: string;
+  label: string;
+  /** Brand color applied to the icon on hover */
+  hoverColor: string;
+  /** CSS filter to colorize img-based icons (e.g. LinkedIn) on hover */
+  filterOverride?: string;
+  children: React.ReactNode;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  const iconFilter = hovered
+    ? (filterOverride ?? "none")
+    : "grayscale(100%) opacity(0.45)";
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      className={glassStyles.socialIconBtn}
+      style={{ color: hovered ? hoverColor : "#8A8A8A" } as React.CSSProperties}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span
+        style={{
+          alignItems: "center",
+          display: "flex",
+          filter: iconFilter,
+          transition: "filter 0.4s cubic-bezier(0.25, 1, 0.5, 1)",
+        }}
+      >
+        {children}
+      </span>
+    </a>
+  );
+}
+
 export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, envelopeRef, onEnvelopeClick, isEnvelopeOpen, style }: ProjectSectionProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
@@ -83,26 +130,6 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
     textTransform: "uppercase",
   };
 
-  const iconBtnStyle: React.CSSProperties = {
-    alignItems: "center",
-    backgroundImage: "linear-gradient(in oklab 180deg, oklab(100% 0 0) 0%, oklab(96.6% 0 0) 100%)",
-    backgroundOrigin: "border-box",
-    borderColor: "#FFFFFF",
-    borderRadius: "4px",
-    borderStyle: "solid",
-    borderWidth: "0.5px",
-    boxShadow: "#00000033 0px 2px 3px",
-    boxSizing: "border-box",
-    display: "flex",
-    flexShrink: 0,
-    height: "32px",
-    justifyContent: "center",
-    paddingBottom: 0,
-    paddingLeft: "6px",
-    paddingRight: "6px",
-    paddingTop: 0,
-    width: "fit-content",
-  };
 
   return (
     <div style={style}>
@@ -178,31 +205,45 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         <div style={{ alignItems: "center", display: "flex", padding: "0 16px", gap: 24, justifyContent: "space-between", width: "100%" }}>
 
           {/* Social icon buttons */}
-          <div style={{ alignItems: "start", display: "flex" }}>
-            {/* Logo */}
-            <div style={iconBtnStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://workers.paper.design/file-assets/01KM2PRGZVJ24AH6QP30SA1ZFC/01KMEAFFJ2SCJ3870JDSYVBYY3.png"
-                alt="Logo"
-                style={{ filter: "grayscale(100%)", flexShrink: 0, height: 14, width: 14 }}
-              />
-            </div>
+          <div style={{ alignItems: "center", display: "flex", gap: 0 }}>
+
+            {/* Twitter / X */}
+            <SocialIconButton
+              href="https://x.com/bgstdsgn"
+              label="Twitter / X"
+              hoverColor="#000000"
+            >
+              <svg width="14" height="14" viewBox="0 0 1200 1227" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, transition: "fill 0.2s ease" }}>
+                <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.694H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="currentColor" />
+              </svg>
+            </SocialIconButton>
+
             {/* LinkedIn */}
-            <div style={{ ...iconBtnStyle, rotate: "355.39deg", transformOrigin: "50% 50%" }}>
+            <SocialIconButton
+              href="https://linkedin.com/in/bogdan-stefanovic"
+              label="LinkedIn"
+              hoverColor="#2867B2"
+              filterOverride="invert(27%) sepia(89%) saturate(502%) hue-rotate(190deg) brightness(92%) contrast(91%)"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://workers.paper.design/file-assets/01KM2PRGZVJ24AH6QP30SA1ZFC/01KMEAR89PJZFZMEPT1FJH06NQ.png"
                 alt="LinkedIn"
-                style={{ filter: "grayscale(100%)", flexShrink: 0, height: 12, transformOrigin: "50% 50%", width: 14 }}
+                style={{ flexShrink: 0, height: 14, width: 14 }}
               />
-            </div>
-            {/* X / Twitter */}
-            <div style={{ ...iconBtnStyle, rotate: "4.94deg", transformOrigin: "50% 50%", width: 26 }}>
-              <svg width="10" height="10" viewBox="0 0 1200 1227" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-                <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.694H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="#8A8A8A" />
+            </SocialIconButton>
+
+            {/* Substack */}
+            <SocialIconButton
+              href="https://substack.com/@bogste?utm_campaign=profile&utm_medium=profile-page"
+              label="Substack"
+              hoverColor="#FF6719"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+                <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z" fill="currentColor" />
               </svg>
-            </div>
+            </SocialIconButton>
+
           </div>
 
           {/* Envelope widget — interactive, FLIP-animates from footer to overlay */}
