@@ -190,7 +190,10 @@ export function V2Canvas() {
   const blurTransition = { type: "tween" as const, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] };
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 1.04, filter: "blur(12px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
       style={{
         width: "100%",
         display: "flex",
@@ -455,6 +458,6 @@ export function V2Canvas() {
           onClose={handleEnvelopeClose}
         />
       )}
-    </div>
+    </motion.div>
   );
 }
