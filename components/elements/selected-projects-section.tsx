@@ -30,6 +30,10 @@ interface SelectedProjectsSectionProps {
   onNotesClose?: () => void;
   /** Called when Vorli hero card is clicked */
   onVorliClick?: () => void;
+  /** Called when Sticky card is clicked — receives the card's DOMRect as origin */
+  onStickyClick?: (rect: DOMRect) => void;
+  /** Whether the sticky overlay is currently open */
+  isStickyOpen?: boolean;
 }
 
 const USELESS_NOTES_ASSETS = [
@@ -51,8 +55,11 @@ export function SelectedProjectsSection({
   onNotesCloseStart,
   onNotesClose,
   onVorliClick,
+  onStickyClick,
+  isStickyOpen,
 }: SelectedProjectsSectionProps) {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
+  const stickyCardRef = useRef<HTMLDivElement>(null);
   const contentControls = useAnimation();
   const badgeControls = useAnimation();
   const miniTagControls = useAnimation();
@@ -182,7 +189,14 @@ export function SelectedProjectsSection({
           rotate={5}
           marginLeft={-21}
           zIndex={1}
-          imageNode={<StickyNotesIcon />}
+          imageNode={<StickyNotesIcon layoutId="sticky-stack" opacity={isStickyOpen ? 0 : 1} />}
+          overflow="visible"
+          cardRef={stickyCardRef}
+          cursor="pointer"
+          onClick={() => {
+            const el = stickyCardRef.current;
+            if (el) onStickyClick?.(el.getBoundingClientRect());
+          }}
         />
       </motion.div>
 

@@ -14,6 +14,7 @@ import { PauschalDetail } from "@/components/ui/pauschal-detail";
 import { FynnDetail } from "@/components/ui/fynn-detail";
 import { ContentSnareDetail } from "@/components/ui/content-snare-detail";
 import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
+import { StickyOverlay } from "@/components/ui/sticky-overlay";
 
 function getBuildVersion(): string {
   const now = new Date();
@@ -109,6 +110,8 @@ export function V2Canvas() {
   const envelopeRef = useRef<HTMLDivElement>(null);
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const [isNotesClosing, setIsNotesClosing] = useState(false);
+  const [isStickyOpen, setIsStickyOpen] = useState(false);
+  const [isStickyClosing, setIsStickyClosing] = useState(false);
   const handleProjectClick = (key: string) => {
     const el = entryRefs.current[key];
     if (el) {
@@ -168,11 +171,23 @@ export function V2Canvas() {
     setIsClosing(false);
   };
 
+  const handleStickyClick = (_rect: DOMRect) => {
+    setIsStickyOpen(true);
+    setIsStickyClosing(false);
+  };
+
+  const handleStickyCloseStart = () => setIsStickyClosing(true);
+
+  const handleStickyClose = () => {
+    setIsStickyOpen(false);
+    setIsStickyClosing(false);
+  };
+
   // Lock body scroll when detail is open
   useEffect(() => {
-    document.body.style.overflow = activeProject || envelopeOpen || isNotesExpanded ? "hidden" : "";
+    document.body.style.overflow = activeProject || envelopeOpen || isNotesExpanded || isStickyOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [activeProject, envelopeOpen, isNotesExpanded]);
+  }, [activeProject, envelopeOpen, isNotesExpanded, isStickyOpen]);
 
   // Light mode only for V2
   const primaryColor = "#000000";
@@ -183,7 +198,8 @@ export function V2Canvas() {
   // Un-blur background as soon as close begins
   const shouldBlur =
     (activeProject !== null && !isClosing) ||
-    (envelopeOpen && !isEnvelopeClosing);
+    (envelopeOpen && !isEnvelopeClosing) ||
+    (isStickyOpen && !isStickyClosing);
   const blurAnim = shouldBlur
     ? { scale: 0.93, filter: "blur(10px)", pointerEvents: "none" as const }
     : { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const };
@@ -320,6 +336,8 @@ export function V2Canvas() {
         onNotesCloseStart={handleNotesCloseStart}
         onNotesClose={handleNotesClose}
         onVorliClick={handleVorliHeroClick}
+        onStickyClick={handleStickyClick}
+        isStickyOpen={isStickyOpen || isStickyClosing}
       />
 
       {/* ── Projects divider ── */}
@@ -456,6 +474,13 @@ export function V2Canvas() {
           originRect={envelopeOriginRect}
           onCloseStart={handleEnvelopeCloseStart}
           onClose={handleEnvelopeClose}
+        />
+      )}
+      {/* ── Sticky overlay ── */}
+      {isStickyOpen && (
+        <StickyOverlay
+          onCloseStart={handleStickyCloseStart}
+          onClose={handleStickyClose}
         />
       )}
     </motion.div>

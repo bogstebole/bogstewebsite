@@ -66,12 +66,13 @@ interface ProjectCardProps {
   onClick?: () => void;
   cursor?: React.CSSProperties["cursor"];
   pointerEvents?: React.CSSProperties["pointerEvents"];
+  overflow?: React.CSSProperties["overflow"];
   imageStyle?: React.CSSProperties;
   /** Optional custom icon node — replaces the <img> when provided */
   imageNode?: React.ReactNode;
   // Motion overrides (used by Notes card for FLIP and opacity animations)
   layoutId?: string;
-  cardRef?: React.RefObject<HTMLDivElement>;
+  cardRef?: React.RefObject<HTMLDivElement | null>;
   animate?: any;
   whileHover?: any;
   transition?: any;
@@ -95,6 +96,7 @@ export function ProjectCard({
   onClick,
   cursor,
   pointerEvents,
+  overflow,
   imageStyle,
   imageNode,
   layoutId,
@@ -126,6 +128,7 @@ export function ProjectCard({
         ...(marginRight !== undefined && { marginRight }),
         cursor: cursor ?? (onClick ? "pointer" : "default"),
         ...(pointerEvents !== undefined && { pointerEvents }),
+        ...(overflow !== undefined && { overflow }),
       }}
       onClick={onClick}
     >
