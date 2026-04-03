@@ -112,6 +112,7 @@ export function V2Canvas() {
   const [isNotesClosing, setIsNotesClosing] = useState(false);
   const [isStickyOpen, setIsStickyOpen] = useState(false);
   const [isStickyClosing, setIsStickyClosing] = useState(false);
+  const [stickyOriginRect, setStickyOriginRect] = useState<DOMRect | null>(null);
   const handleProjectClick = (key: string) => {
     const el = entryRefs.current[key];
     if (el) {
@@ -171,7 +172,8 @@ export function V2Canvas() {
     setIsClosing(false);
   };
 
-  const handleStickyClick = (_rect: DOMRect) => {
+  const handleStickyClick = (rect: DOMRect) => {
+    setStickyOriginRect(rect);
     setIsStickyOpen(true);
     setIsStickyClosing(false);
   };
@@ -180,6 +182,7 @@ export function V2Canvas() {
 
   const handleStickyClose = () => {
     setIsStickyOpen(false);
+    setStickyOriginRect(null);
     setIsStickyClosing(false);
   };
 
@@ -199,7 +202,7 @@ export function V2Canvas() {
   const shouldBlur =
     (activeProject !== null && !isClosing) ||
     (envelopeOpen && !isEnvelopeClosing) ||
-    (isStickyOpen && !isStickyClosing);
+    (isStickyOpen && !isStickyClosing && !!stickyOriginRect);
   const blurAnim = shouldBlur
     ? { scale: 0.93, filter: "blur(10px)", pointerEvents: "none" as const }
     : { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const };
@@ -477,8 +480,9 @@ export function V2Canvas() {
         />
       )}
       {/* ── Sticky overlay ── */}
-      {isStickyOpen && (
+      {isStickyOpen && stickyOriginRect && (
         <StickyOverlay
+          originRect={stickyOriginRect}
           onCloseStart={handleStickyCloseStart}
           onClose={handleStickyClose}
         />

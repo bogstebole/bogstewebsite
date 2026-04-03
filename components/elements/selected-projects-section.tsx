@@ -60,6 +60,7 @@ export function SelectedProjectsSection({
 }: SelectedProjectsSectionProps) {
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const stickyCardRef = useRef<HTMLDivElement>(null);
+  const stickyIconRef = useRef<HTMLDivElement>(null);
   const contentControls = useAnimation();
   const badgeControls = useAnimation();
   const miniTagControls = useAnimation();
@@ -189,12 +190,16 @@ export function SelectedProjectsSection({
           rotate={5}
           marginLeft={-21}
           zIndex={1}
-          imageNode={<StickyNotesIcon layoutId="sticky-stack" opacity={isStickyOpen ? 0 : 1} />}
+          imageNode={
+            <div ref={stickyIconRef}>
+              <StickyNotesIcon opacity={isStickyOpen ? 0 : 1} />
+            </div>
+          }
           overflow="visible"
           cardRef={stickyCardRef}
           cursor="pointer"
           onClick={() => {
-            const el = stickyCardRef.current;
+            const el = stickyIconRef.current;
             if (el) onStickyClick?.(el.getBoundingClientRect());
           }}
         />

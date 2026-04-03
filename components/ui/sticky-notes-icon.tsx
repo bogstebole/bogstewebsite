@@ -1,27 +1,20 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { PaperTexture } from "@paper-design/shaders-react";
 
 interface StickyNotesIconProps {
   isExpanded?: boolean;
-  layoutId?: string;
   opacity?: number;
 }
 
 /**
- * Sticky-notes stack component — supports both mini (48x48) and 
- * expanded (large) states with layoutId for smooth FLIP.
+ * Sticky-notes stack component — static version for manual FLIP.
  */
-export function StickyNotesIcon({ isExpanded, layoutId, opacity = 1 }: StickyNotesIconProps) {
-  // The full design is ~486×491. 
+export function StickyNotesIcon({ isExpanded, opacity = 1 }: StickyNotesIconProps) {
   const FULLW = 486;
   const FULLH = 491;
   const SCALE = 48 / FULLW;
 
   return (
-    <motion.div
-      layoutId={layoutId}
+    <div
       style={{
         width: isExpanded ? FULLW : 48,
         height: isExpanded ? FULLH : 48,
@@ -31,11 +24,6 @@ export function StickyNotesIcon({ isExpanded, layoutId, opacity = 1 }: StickyNot
         opacity,
       }}
     >
-      {/* 
-          Scale the full-size design down when mini. 
-          When expanded, we use scale 1.
-          Framer Motion will interpolate the scale/position.
-      */}
       <div
         style={{
           transform: isExpanded ? "scale(1)" : `scale(${SCALE})`,
@@ -57,8 +45,6 @@ export function StickyNotesIcon({ isExpanded, layoutId, opacity = 1 }: StickyNot
             flexDirection: "column",
             gap: 0,
             left: 2,
-            paddingBlock: 0,
-            paddingInline: 0,
             position: "absolute",
             top: 15,
           }}
@@ -92,8 +78,6 @@ export function StickyNotesIcon({ isExpanded, layoutId, opacity = 1 }: StickyNot
             flexDirection: "column",
             gap: 0,
             left: 1,
-            paddingBlock: 0,
-            paddingInline: 0,
             position: "absolute",
             top: 8,
           }}
@@ -127,8 +111,6 @@ export function StickyNotesIcon({ isExpanded, layoutId, opacity = 1 }: StickyNot
             flexDirection: "column",
             gap: 0,
             left: 0,
-            paddingBlock: 0,
-            paddingInline: 0,
             position: "absolute",
             top: 0,
           }}
@@ -152,6 +134,6 @@ export function StickyNotesIcon({ isExpanded, layoutId, opacity = 1 }: StickyNot
           />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
