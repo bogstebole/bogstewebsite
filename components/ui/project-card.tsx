@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { TargetAndTransition, VariantLabels } from "framer-motion";
+import type { MotionProps, useAnimation } from "framer-motion";
 import { ProjectTag } from "@/components/ui/project-tag";
 
 // 5-layer depth shadow matching Figma spec
 const CARD_SHADOW = [
+  "inset 0 0 0 2.948px white",
   "0px 5px 11px 0px rgba(0,0,0,0.10)",
   "0px 21px 21px 0px rgba(0,0,0,0.09)",
   "0px 47px 28px 0px rgba(0,0,0,0.05)",
@@ -18,7 +19,6 @@ export const CARD_STYLE: React.CSSProperties = {
   height: 220,
   borderRadius: 24,
   background: "linear-gradient(to bottom, #ffffff, #f4f4f4)",
-  border: "2.948px solid white",
   boxShadow: CARD_SHADOW,
   display: "flex",
   flexDirection: "column",
@@ -67,18 +67,19 @@ interface ProjectCardProps {
   cursor?: React.CSSProperties["cursor"];
   pointerEvents?: React.CSSProperties["pointerEvents"];
   overflow?: React.CSSProperties["overflow"];
+  visibility?: React.CSSProperties["visibility"];
   imageStyle?: React.CSSProperties;
   /** Optional custom icon node — replaces the <img> when provided */
   imageNode?: React.ReactNode;
   // Motion overrides (used by Notes card for FLIP and opacity animations)
   layoutId?: string;
   cardRef?: React.RefObject<HTMLDivElement | null>;
-  animate?: any;
-  whileHover?: any;
-  transition?: any;
+  animate?: MotionProps["animate"];
+  whileHover?: MotionProps["whileHover"];
+  transition?: MotionProps["transition"];
   onLayoutAnimationComplete?: () => void;
   // Animated tag controls (Notes card)
-  tagControls?: any;
+  tagControls?: ReturnType<typeof useAnimation>;
   tagInitial?: string;
   // Extra slot after tags (e.g. AppStoreBadge)
   extraBadge?: React.ReactNode;
@@ -97,6 +98,7 @@ export function ProjectCard({
   cursor,
   pointerEvents,
   overflow,
+  visibility,
   imageStyle,
   imageNode,
   layoutId,
@@ -129,6 +131,7 @@ export function ProjectCard({
         cursor: cursor ?? (onClick ? "pointer" : "default"),
         ...(pointerEvents !== undefined && { pointerEvents }),
         ...(overflow !== undefined && { overflow }),
+        ...(visibility !== undefined && { visibility }),
       }}
       onClick={onClick}
     >

@@ -62,9 +62,12 @@ export function SelectedProjectsSection({
   const stickyCardRef = useRef<HTMLDivElement>(null);
   const stickyIconRef = useRef<HTMLDivElement>(null);
   const contentControls = useAnimation();
+  const gridControls = useAnimation();
   const badgeControls = useAnimation();
   const miniTagControls = useAnimation();
   const closingRef = useRef(false);
+  const expandingRef = useRef(false);
+  const [isNotesClosing, setIsNotesClosing] = useState(false);
   const returningRef = useRef(false);
   
   const headerRef = useRef<HTMLDivElement>(null);
@@ -90,18 +93,22 @@ export function SelectedProjectsSection({
   const vorliRippleRef = useRippleWave(RIPPLE_CONFIG) as unknown as React.RefObject<HTMLDivElement>;
 
   const handleExpand = useCallback(async () => {
-    if (isNotesExpanded || closingRef.current) return;
+    if (isNotesExpanded || closingRef.current || expandingRef.current) return;
+    expandingRef.current = true;
     setIsNotesExpanded(true);
     onNotesExpand?.();
     await miniTagControls.start("exit");
+    expandingRef.current = false;
   }, [isNotesExpanded, miniTagControls, onNotesExpand]);
 
   const handleClose = useCallback(async () => {
-    if (closingRef.current) return;
+    if (closingRef.current || expandingRef.current) return;
     closingRef.current = true;
+    setIsNotesClosing(true);
     onNotesCloseStart?.();
     await Promise.all([
       contentControls.start("exit"),
+      gridControls.start("exit"),
       badgeControls.start("exit"),
     ]);
     // Mark returning so mini card's onLayoutAnimationComplete staggers badges back in
@@ -109,7 +116,8 @@ export function SelectedProjectsSection({
     setIsNotesExpanded(false);
     onNotesClose?.();
     closingRef.current = false;
-  }, [contentControls, badgeControls, onNotesCloseStart, onNotesClose]);
+    setIsNotesClosing(false);
+  }, [contentControls, gridControls, badgeControls, onNotesCloseStart, onNotesClose]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -122,10 +130,8 @@ export function SelectedProjectsSection({
   return (
     <LayoutGroup id="selected-projects">
       <motion.div
-        animate={isNotesExpanded
-          ? { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const }
-          : animate}
-        transition={isNotesExpanded ? { duration: 0 } : transition}
+        animate={animate}
+        transition={transition}
         style={{
           marginTop: 60,
           width: "100%",
@@ -150,7 +156,9 @@ export function SelectedProjectsSection({
           layoutId="notes-card"
           cardRef={notesRippleRef}
           // The mini card stays structurally mounted, passing its layoutId to the bottom-sheet
-          animate={isNotesExpanded ? { opacity: 0, y: 0 } : { opacity: 1 }}
+          overflow={isNotesExpanded ? "visible" : undefined}
+          visibility={isNotesExpanded ? "hidden" : undefined}
+          animate={isNotesExpanded ? undefined : { opacity: 1 }}
           whileHover={isNotesExpanded ? undefined : { y: -16 }}
           transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
           onLayoutAnimationComplete={() => {
@@ -232,26 +240,32 @@ export function SelectedProjectsSection({
           <motion.div
             key="notes-expanded"
             layoutId="notes-card"
+            layoutScroll
             animate={{ rotate: 0 }}
-            transition={CARD_SPRING}
+            transition={{
+              layout: CARD_SPRING,
+              rotate: { type: "spring", stiffness: 400, damping: 30 },
+            }}
             onLayoutAnimationComplete={() => {
               if (!closingRef.current) {
                 void badgeControls.start("visible");
                 void contentControls.start("visible");
+                setTimeout(() => {
+                  if (!closingRef.current) void gridControls.start("visible");
+                }, 350);
               }
             }}
             onClick={(e) => e.stopPropagation()}
             style={{
               // Explicit Paper layout
               alignItems: 'center',
-              backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #EEEEEE 100%)', // simplified safe hex gradient
-              backgroundOrigin: 'border-box',
-              borderColor: '#FFFFFF',
-              borderStyle: 'solid',
+              backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #EEEEEE 100%)',
+              backgroundOrigin: 'padding-box',
               borderTopLeftRadius: '40px',
               borderTopRightRadius: '40px',
-              borderWidth: '4px',
-              boxShadow: '#00000003 0px 400px 165px, #0000000D 0px 105px 140px, #0000001A 0px 105px 105px, #0000001A 0px 25px 55px',
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+              boxShadow: 'inset 0 0 0 4px #FFFFFF, #00000003 0px 400px 165px, #0000000D 0px 105px 140px, #0000001A 0px 105px 105px, #0000001A 0px 25px 55px',
               boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
@@ -276,8 +290,8 @@ export function SelectedProjectsSection({
             <motion.div
               initial={{ opacity: 0, y: -12 }}
               animate={{
-                opacity: showStickyHeader && !closingRef.current ? 1 : 0,
-                y: showStickyHeader && !closingRef.current ? 0 : -12,
+                opacity: showStickyHeader && !isNotesClosing ? 1 : 0,
+                y: showStickyHeader && !isNotesClosing ? 0 : -12,
               }}
               transition={{ type: "spring", stiffness: 400, damping: 36 }}
               style={{
@@ -289,7 +303,7 @@ export function SelectedProjectsSection({
                 display: "flex",
                 justifyContent: "space-between",
                 padding: "20px 24px",
-                pointerEvents: showStickyHeader && !closingRef.current ? "auto" : "none",
+                pointerEvents: showStickyHeader && !isNotesClosing ? "auto" : "none",
                 position: "fixed",
                 top: "calc(5vh + 16px)",
                 left: "50%",
@@ -412,7 +426,7 @@ export function SelectedProjectsSection({
 
             {/* Staggered Grid Container */}
             <motion.div
-              animate={contentControls}
+              animate={gridControls}
               initial="hidden"
               variants={{
                 visible: { transition: { staggerChildren: 0.1 } },
