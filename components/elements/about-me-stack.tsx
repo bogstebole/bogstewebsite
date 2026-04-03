@@ -23,6 +23,9 @@ export function AboutMeStack({ paperWidth, isExpanded, onReadMoreClick }: AboutM
   const spreadGap = paperWidth * 0.05;
   const springConfig = { type: "spring" as const, stiffness: 130, damping: 18 };
 
+  const step = paperWidth + spreadGap;
+  const startX = -1.5 * step - paperWidth / 2;
+
   return (
     <div
       style={{ position: "relative", width: paperWidth, height: h }}
@@ -33,7 +36,7 @@ export function AboutMeStack({ paperWidth, isExpanded, onReadMoreClick }: AboutM
       <motion.div
         animate={
           isExpanded
-            ? { x: (paperWidth + spreadGap) * 3, y: 0, rotate: 0 }
+            ? { x: startX + 3 * step, y: 0, rotate: 0 }
             : isHovered
             ? { x: "-7%", y: 0, rotate: -12 }
             : { x: "-2%", y: 0, rotate: -8 }
@@ -43,12 +46,12 @@ export function AboutMeStack({ paperWidth, isExpanded, onReadMoreClick }: AboutM
       >
         <AboutMePageFour envelopeWidth={paperWidth} />
       </motion.div>
-
+ 
       {/* Page 3 */}
       <motion.div
         animate={
           isExpanded
-            ? { x: (paperWidth + spreadGap) * 2, y: 0, rotate: 0 }
+            ? { x: startX + 2 * step, y: 0, rotate: 0 }
             : isHovered
             ? { x: "4%", y: "-1%", rotate: 7 }
             : { x: "1%", y: "-1%", rotate: 4 }
@@ -58,12 +61,12 @@ export function AboutMeStack({ paperWidth, isExpanded, onReadMoreClick }: AboutM
       >
         <AboutMePageThree envelopeWidth={paperWidth} />
       </motion.div>
-
+ 
       {/* Page 2 */}
       <motion.div
         animate={
           isExpanded
-            ? { x: (paperWidth + spreadGap) * 1, y: 0, rotate: 0 }
+            ? { x: startX + 1 * step, y: 0, rotate: 0 }
             : isHovered
             ? { x: "-4%", y: "-2%", rotate: -7 }
             : { x: "-1%", y: "-2%", rotate: -4 }
@@ -73,12 +76,12 @@ export function AboutMeStack({ paperWidth, isExpanded, onReadMoreClick }: AboutM
       >
         <AboutMePageTwo envelopeWidth={paperWidth} />
       </motion.div>
-
+ 
       {/* Page 1 — front */}
       <motion.div
         animate={
           isExpanded
-            ? { x: 0, y: 0, rotate: 0 }
+            ? { x: startX + 0 * step, y: 0, rotate: 0 }
             : isHovered
             ? { x: "5%", y: "-1%", rotate: 8 }
             : { x: "3%", y: "-1%", rotate: 6 }

@@ -52,12 +52,13 @@ export function StickyOverlay({ originRect, onCloseStart, onClose }: StickyOverl
   const originCX = originRect.left + originRect.width / 2;
   // Account for the fact that the card un-hovers (moves down 16px)
   // because V2Canvas sets pointerEvents: none on the background when open.
-  const originCY = (phase === "move-to-origin" ? originRect.top + 16 : originRect.top) + (originRect.height / 2);
+  // We define the RESTING position as the default for initialY.
+  const restingCY = originRect.top + 16 + originRect.height / 2;
   
   const targetCX = targetLeft + targetW / 2;
   const targetCY = targetTop + targetH / 2;
   const initialX = originCX - targetCX;
-  const initialY = originCY - targetCY;
+  const initialY = restingCY - targetCY;
 
   const initiateClose = () => {
     if (phase === "move-to-origin") return;
@@ -73,6 +74,9 @@ export function StickyOverlay({ originRect, onCloseStart, onClose }: StickyOverl
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isClosing = phase === "move-to-origin";
+
+  const SHADOW_MINI = "0 4px 12px rgba(0,0,0,0.1)";
+  const SHADOW_MAX = "0 30px 60px rgba(0,0,0,0.12), 0 10px 20px rgba(0,0,0,0.08)";
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 100, overflow: "hidden" }}>
@@ -109,23 +113,26 @@ export function StickyOverlay({ originRect, onCloseStart, onClose }: StickyOverl
         <motion.div
           initial={{
             x: initialX,
-            y: initialY,
+            y: initialY - 16, // Start at absolute hovered position
             scale: originScale,
             rotate: 5,
+            boxShadow: SHADOW_MINI,
           }}
           animate={
             isClosing
               ? {
                   x: initialX,
-                  y: initialY,
+                  y: initialY, // Return to resting position
                   scale: originScale,
                   rotate: 5,
+                  boxShadow: SHADOW_MINI,
                 }
               : {
                   x: 0,
                   y: 0,
                   scale: targetScale,
                   rotate: 0,
+                  boxShadow: SHADOW_MAX,
                 }
           }
           transition={isClosing ? returnTransition : spring}
@@ -140,11 +147,8 @@ export function StickyOverlay({ originRect, onCloseStart, onClose }: StickyOverl
             zIndex: 1,
             pointerEvents: "auto",
             transformOrigin: "center center",
-            boxShadow: isClosing 
-              ? "none" 
-              : "0 20px 50px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.05)",
             borderRadius: 8, // match mini icon roundedness
-            overflow: "hidden",
+            willChange: "transform, box-shadow",
           }}
         >
           {/* Inner content - now visible from frame 1 for smooth growth */}

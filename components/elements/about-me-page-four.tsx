@@ -32,13 +32,13 @@ export function AboutMePageFour({ envelopeWidth }: AboutMePageFourProps) {
   const w = envelopeWidth;
   const h = 480 * scale;
 
-  const padding16 = Math.round(16 * scale);
-  const gap16 = Math.round(16 * scale);
-  const gap8 = Math.round(8 * scale);
+  const padding16 = 16 * scale;
+  const gap16 = 16 * scale;
+  const gap8 = 8 * scale;
   
-  const titleSize = Math.max(8, Math.round(10 * scale));
-  const titleLineHeight = Math.round(12 * scale);
-  const textSize = Math.max(6, Math.round(8 * scale));
+  const titleSize = 10 * scale;
+  const titleLineHeight = 12 * scale;
+  const textSize = 8 * scale;
 
   return (
     <div

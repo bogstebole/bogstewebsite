@@ -5,20 +5,21 @@ import { PaperTexture } from "@paper-design/shaders-react";
 interface AboutMePageOneProps {
   /** Width of the envelope in px — paper scales to match */
   envelopeWidth: number;
+  onReadMoreClick?: () => void;
 }
 
-export function AboutMePageOne({ envelopeWidth }: AboutMePageOneProps) {
+export function AboutMePageOne({ envelopeWidth, onReadMoreClick }: AboutMePageOneProps) {
   // Original design: 340 × 480px
   const scale = envelopeWidth / 340;
   const w = envelopeWidth;
   const h = 480 * scale;
 
-  const gap24 = Math.round(24 * scale);
-  const gap12 = Math.round(12 * scale);
-  const padding16 = Math.round(16 * scale);
-  const titleSize = Math.max(10, Math.round(12 * scale));
-  const textSize = Math.max(8, Math.round(8 * scale));
-  const lineHeight16 = Math.round(16 * scale);
+  const gap24 = 24 * scale;
+  const gap12 = 12 * scale;
+  const padding16 = 16 * scale;
+  const titleSize = 12 * scale;
+  const textSize = 8 * scale;
+  const lineHeight16 = 16 * scale;
 
   return (
     <div
