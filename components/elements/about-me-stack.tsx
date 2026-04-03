@@ -24,7 +24,6 @@ export function AboutMeStack({ paperWidth, isExpanded, onReadMoreClick }: AboutM
   const springConfig = { type: "spring" as const, stiffness: 130, damping: 18 };
 
   const step = paperWidth + spreadGap;
-  const startX = -1.5 * step - paperWidth / 2;
 
   return (
     <div
@@ -36,7 +35,7 @@ export function AboutMeStack({ paperWidth, isExpanded, onReadMoreClick }: AboutM
       <motion.div
         animate={
           isExpanded
-            ? { x: startX + 3 * step, y: 0, rotate: 0 }
+            ? { x: 3 * step, y: 0, rotate: 0 }
             : isHovered
             ? { x: "-7%", y: 0, rotate: -12 }
             : { x: "-2%", y: 0, rotate: -8 }
@@ -51,7 +50,7 @@ export function AboutMeStack({ paperWidth, isExpanded, onReadMoreClick }: AboutM
       <motion.div
         animate={
           isExpanded
-            ? { x: startX + 2 * step, y: 0, rotate: 0 }
+            ? { x: 2 * step, y: 0, rotate: 0 }
             : isHovered
             ? { x: "4%", y: "-1%", rotate: 7 }
             : { x: "1%", y: "-1%", rotate: 4 }
@@ -66,7 +65,7 @@ export function AboutMeStack({ paperWidth, isExpanded, onReadMoreClick }: AboutM
       <motion.div
         animate={
           isExpanded
-            ? { x: startX + 1 * step, y: 0, rotate: 0 }
+            ? { x: 1 * step, y: 0, rotate: 0 }
             : isHovered
             ? { x: "-4%", y: "-2%", rotate: -7 }
             : { x: "-1%", y: "-2%", rotate: -4 }
@@ -81,7 +80,7 @@ export function AboutMeStack({ paperWidth, isExpanded, onReadMoreClick }: AboutM
       <motion.div
         animate={
           isExpanded
-            ? { x: startX + 0 * step, y: 0, rotate: 0 }
+            ? { x: 0, y: 0, rotate: 0 }
             : isHovered
             ? { x: "5%", y: "-1%", rotate: 8 }
             : { x: "3%", y: "-1%", rotate: 6 }

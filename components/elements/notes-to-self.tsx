@@ -123,12 +123,12 @@ export function NotesToSelf({ envelopeWidth }: NotesToSelfProps) {
   const w = envelopeWidth;
   const h = 264 * scale;
 
-  const logoSize = Math.round(21 * scale);
-  const labelSize = Math.max(8, Math.round(12 * scale));
-  const noteSize = Math.max(6, Math.round(8 * scale));
-  const gap = Math.round(16 * scale);
-  const padding = Math.round(16 * scale);
-  const labelLineHeight = Math.round(16 * scale);
+  const logoSize = 21 * scale;
+  const labelSize = 12 * scale;
+  const noteSize = 8 * scale;
+  const gap = 16 * scale;
+  const padding = 16 * scale;
+  const labelLineHeight = 16 * scale;
 
   return (
     <div
