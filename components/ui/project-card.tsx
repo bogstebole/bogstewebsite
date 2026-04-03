@@ -67,6 +67,8 @@ interface ProjectCardProps {
   cursor?: React.CSSProperties["cursor"];
   pointerEvents?: React.CSSProperties["pointerEvents"];
   imageStyle?: React.CSSProperties;
+  /** Optional custom icon node — replaces the <img> when provided */
+  imageNode?: React.ReactNode;
   // Motion overrides (used by Notes card for FLIP and opacity animations)
   layoutId?: string;
   cardRef?: React.RefObject<HTMLDivElement>;
@@ -94,6 +96,7 @@ export function ProjectCard({
   cursor,
   pointerEvents,
   imageStyle,
+  imageNode,
   layoutId,
   cardRef,
   animate,
@@ -137,19 +140,21 @@ export function ProjectCard({
           gap: 12,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={image}
-          alt={alt}
-          style={{
-            width: 40,
-            height: 40,
-            objectFit: "cover",
-            borderRadius: 8,
-            flexShrink: 0,
-            ...imageStyle,
-          }}
-        />
+        {imageNode ?? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={image}
+            alt={alt}
+            style={{
+              width: 48,
+              height: 48,
+              objectFit: "cover",
+              borderRadius: 8,
+              flexShrink: 0,
+              ...imageStyle,
+            }}
+          />
+        )}
         <span
           style={{
             fontFamily: '"JetBrains Mono", system-ui, sans-serif',

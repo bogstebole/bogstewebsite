@@ -15,6 +15,7 @@ import {
   BADGE_CONTAINER_VARIANTS,
   BADGE_ITEM_VARIANTS,
 } from "@/components/ui/project-card";
+import { StickyNotesIcon } from "@/components/ui/sticky-notes-icon";
 
 interface SelectedProjectsSectionProps {
   /** blurAnim object from V2Canvas — passed straight to motion.div */
@@ -181,6 +182,7 @@ export function SelectedProjectsSection({
           rotate={5}
           marginLeft={-21}
           zIndex={1}
+          imageNode={<StickyNotesIcon />}
         />
       </motion.div>
 
