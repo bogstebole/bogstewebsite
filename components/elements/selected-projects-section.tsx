@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence, LayoutGroup, useAnimation } from "framer-motion";
 import { useRippleWave } from "@/useRippleWave";
-import type { MotionProps } from "framer-motion";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { UselessNotesDetail } from "@/components/ui/useless-notes-detail";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
@@ -18,10 +17,6 @@ import {
 import { StickyNotesIcon } from "@/components/ui/sticky-notes-icon";
 
 interface SelectedProjectsSectionProps {
-  /** blurAnim object from V2Canvas — passed straight to motion.div */
-  animate: MotionProps["animate"];
-  /** blurTransition from V2Canvas */
-  transition: MotionProps["transition"];
   /** Called when Notes card starts expanding */
   onNotesExpand?: () => void;
   /** Called the moment Notes close sequence begins (un-blur immediately) */
@@ -49,8 +44,6 @@ const USELESS_NOTES_ASSETS = [
 ];
 
 export function SelectedProjectsSection({
-  animate,
-  transition,
   onNotesExpand,
   onNotesCloseStart,
   onNotesClose,
@@ -129,9 +122,7 @@ export function SelectedProjectsSection({
 
   return (
     <LayoutGroup id="selected-projects">
-      <motion.div
-        animate={animate}
-        transition={transition}
+      <div
         style={{
           marginTop: 60,
           width: "100%",
@@ -139,7 +130,6 @@ export function SelectedProjectsSection({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transformOrigin: "50% 50%",
           flexShrink: 0,
           background: "#F0F0F0",
           padding: 64,
@@ -211,7 +201,7 @@ export function SelectedProjectsSection({
             if (el) onStickyClick?.(el.getBoundingClientRect());
           }}
         />
-      </motion.div>
+      </div>
 
       {/* ── Backdrop — blurs everything behind ── */}
       <AnimatePresence>

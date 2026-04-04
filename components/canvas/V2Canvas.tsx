@@ -228,180 +228,181 @@ export function V2Canvas() {
         }
       `}</style>
 
-      {/* ── Intro text block ── */}
+      {/* ── Blurred background group (intro + divider + projects) ── */}
       <motion.div
         animate={blurAnim}
         transition={blurTransition}
         style={{
-          paddingTop: 80,
           width: "100%",
-          maxWidth: 600,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           transformOrigin: "50% 50%",
         }}
       >
-        <Logo />
-
-        {/* Name block */}
-        <div style={{ marginTop: 16, textAlign: "center" }}>
-          <div
-            style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontWeight: 400,
-              fontSize: 15,
-              lineHeight: "18px",
-              letterSpacing: "-0.02em",
-              color: primaryColor,
-            }}
-          >
-            Hey You
-          </div>
-          <div
-            style={{
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontWeight: 500,
-              fontSize: 20,
-              lineHeight: "24px",
-              letterSpacing: "-0.02em",
-              color: primaryColor,
-            }}
-          >
-            I&apos;m Bogdan
-          </div>
-          <div
-            style={{
-              marginTop: 4,
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              fontWeight: 400,
-              fontSize: 12,
-              lineHeight: "16px",
-              letterSpacing: "-0.02em",
-              color: primary70,
-            }}
-          >
-            {getBuildVersion()}
-          </div>
-        </div>
-
-        {/* Role row */}
+        {/* ── Intro text block ── */}
         <div
           style={{
-            marginTop: 16,
+            paddingTop: 80,
+            width: "100%",
+            maxWidth: 600,
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
-            gap: 8,
-            fontFamily: "var(--font-geist-sans), sans-serif",
-            fontWeight: 400,
-            fontSize: 14,
-            lineHeight: "18px",
           }}
         >
-          <span style={{ color: primary40 }}>
-            {displayText}
-            <span
+          <Logo />
+
+          {/* Name block */}
+          <div style={{ marginTop: 16, textAlign: "center" }}>
+            <div
               style={{
-                color: primary80,
-                animation: isIdle ? "blink 1s step-end infinite" : "none",
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontWeight: 400,
+                fontSize: 15,
+                lineHeight: "18px",
+                letterSpacing: "-0.02em",
+                color: primaryColor,
               }}
             >
-              |
+              Hey You
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontWeight: 500,
+                fontSize: 20,
+                lineHeight: "24px",
+                letterSpacing: "-0.02em",
+                color: primaryColor,
+              }}
+            >
+              I&apos;m Bogdan
+            </div>
+            <div
+              style={{
+                marginTop: 4,
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                fontWeight: 400,
+                fontSize: 12,
+                lineHeight: "16px",
+                letterSpacing: "-0.02em",
+                color: primary70,
+              }}
+            >
+              {getBuildVersion()}
+            </div>
+          </div>
+
+          {/* Role row */}
+          <div
+            style={{
+              marginTop: 16,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontFamily: "var(--font-geist-sans), sans-serif",
+              fontWeight: 400,
+              fontSize: 14,
+              lineHeight: "18px",
+            }}
+          >
+            <span style={{ color: primary40 }}>
+              {displayText}
+              <span
+                style={{
+                  color: primary80,
+                  animation: isIdle ? "blink 1s step-end infinite" : "none",
+                }}
+              >
+                |
+              </span>
             </span>
-          </span>
+          </div>
+
+          {/* Body text */}
+          <p
+            style={{
+              marginTop: 12,
+              fontFamily: "var(--font-geist-sans), sans-serif",
+              fontWeight: 400,
+              fontSize: 14,
+              lineHeight: "18px",
+              color: primary80,
+              textAlign: "center",
+              whiteSpace: "pre-wrap",
+              width: "60%",
+            }}
+          >
+            I build things that feel considered — from iOS apps to interactive
+            web experiences. This site is a deliberate rejection of one-style
+            portfolio design.
+          </p>
         </div>
 
-        {/* Body text */}
-        <p
-          style={{
-            marginTop: 12,
-            fontFamily: "var(--font-geist-sans), sans-serif",
-            fontWeight: 400,
-            fontSize: 14,
-            lineHeight: "18px",
-            color: primary80,
-            textAlign: "center",
-            whiteSpace: "pre-wrap",
-            width: "60%",
-          }}
-        >
-          I build things that feel considered — from iOS apps to interactive
-          web experiences. This site is a deliberate rejection of one-style
-          portfolio design.
-        </p>
-      </motion.div>
-
-      {/* ── Selected projects ── */}
-      <SelectedProjectsSection
-        animate={blurAnim}
-        transition={blurTransition}
-        onNotesExpand={handleNotesExpand}
-        onNotesCloseStart={handleNotesCloseStart}
-        onNotesClose={handleNotesClose}
-        onVorliClick={handleVorliHeroClick}
-        onStickyClick={handleStickyClick}
-        isStickyOpen={isStickyOpen || isStickyClosing}
-      />
-
-      {/* ── Projects divider ── */}
-      <motion.div
-        animate={blurAnim}
-        transition={blurTransition}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-          width: "100%",
-          maxWidth: 600,
-          marginTop: 60,
-          alignSelf: "center",
-          transformOrigin: "50% 50%",
-        }}
-      >
-        <div style={{ display: "flex", gap: 2, width: 11, flexShrink: 0, opacity: 0.2 }}>
-          {Array.from({ length: 1 }).map((_, i) => (
-            <div key={i} style={{ backgroundColor: "#585858", flex: 1, height: "1px" }} />
-          ))}
-        </div>
-        <span
-          style={{
-            fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-            fontSize: 10,
-            letterSpacing: "-0.04em",
-            color: "rgba(0,0,0,0.3)",
-            textTransform: "uppercase",
-            lineHeight: 1.3,
-            flexShrink: 0,
-          }}
-        >
-          Projects
-        </span>
-        <div style={{ display: "flex", gap: 2, flex: 1, opacity: 0.2 }}>
-          {Array.from({ length: 53 }).map((_, i) => (
-            <div key={i} style={{ backgroundColor: "#585858", flex: 1, height: "1px" }} />
-          ))}
-        </div>
-      </motion.div>
-
-      {/* ── Project section ── */}
-      <motion.div
-        animate={blurAnim}
-        transition={blurTransition}
-        style={{ transformOrigin: "50% 50%", width: "100%", maxWidth: 600 }}
-      >
-        <ProjectSection
-          primaryColor={primaryColor}
-          primary40={primary40}
-          isDark={false}
-          activeProject={activeProject}
-          returningProject={returningProject}
-          onProjectClick={handleProjectClick}
-          entryRefs={entryRefs}
-          envelopeRef={envelopeRef}
-          onEnvelopeClick={handleEnvelopeClick}
-          isEnvelopeOpen={envelopeOpen || isEnvelopeClosing}
-          style={{ marginTop: 32, marginBottom: 120 }}
+        {/* ── Selected projects ── */}
+        <SelectedProjectsSection
+          onNotesExpand={handleNotesExpand}
+          onNotesCloseStart={handleNotesCloseStart}
+          onNotesClose={handleNotesClose}
+          onVorliClick={handleVorliHeroClick}
+          onStickyClick={handleStickyClick}
+          isStickyOpen={isStickyOpen || isStickyClosing}
         />
+
+        {/* ── Projects divider ── */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            width: "100%",
+            maxWidth: 600,
+            marginTop: 60,
+            alignSelf: "center",
+          }}
+        >
+          <div style={{ display: "flex", gap: 2, width: 11, flexShrink: 0, opacity: 0.2 }}>
+            {Array.from({ length: 1 }).map((_, i) => (
+              <div key={i} style={{ backgroundColor: "#585858", flex: 1, height: "1px" }} />
+            ))}
+          </div>
+          <span
+            style={{
+              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+              fontSize: 10,
+              letterSpacing: "-0.04em",
+              color: "rgba(0,0,0,0.3)",
+              textTransform: "uppercase",
+              lineHeight: 1.3,
+              flexShrink: 0,
+            }}
+          >
+            Projects
+          </span>
+          <div style={{ display: "flex", gap: 2, flex: 1, opacity: 0.2 }}>
+            {Array.from({ length: 53 }).map((_, i) => (
+              <div key={i} style={{ backgroundColor: "#585858", flex: 1, height: "1px" }} />
+            ))}
+          </div>
+        </div>
+
+        {/* ── Project section ── */}
+        <div style={{ width: "100%", maxWidth: 600 }}>
+          <ProjectSection
+            primaryColor={primaryColor}
+            primary40={primary40}
+            isDark={false}
+            activeProject={activeProject}
+            returningProject={returningProject}
+            onProjectClick={handleProjectClick}
+            entryRefs={entryRefs}
+            envelopeRef={envelopeRef}
+            onEnvelopeClick={handleEnvelopeClick}
+            isEnvelopeOpen={envelopeOpen || isEnvelopeClosing}
+            style={{ marginTop: 32, marginBottom: 120 }}
+          />
+        </div>
       </motion.div>
 
       {/* ── Zoun detail overlay ── */}
