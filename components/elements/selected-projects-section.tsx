@@ -36,24 +36,25 @@ interface SelectedProjectsSectionProps {
 // ── Mobile card deck ──────────────────────────────────────────────────────────
 
 const DECK_CARDS = [
-  { key: "notes",    image: "/images/notes.png",           title: "Notes",    tags: ["iOS", "Canvas"] },
-  { key: "vorli",    image: "/images/receipt.png",         title: "Vorli",    tags: ["iOS", "AI Financial"] },
-  { key: "sticky",   image: "/images/sticky.png",          title: "Sticky",   tags: ["iOS", "Productivity"] },
-  { key: "fynn",     image: "/images/fynn.png",            title: "Fynn.io",  tags: ["Design System"] },
-  { key: "pauschal", image: "/images/pauschal-tracker.png",title: "Pauschal", tags: ["iOS", "Finance"] },
+  { key: "notes",  image: "/images/notes.png",   title: "Notes",  tags: ["iOS", "Canvas"] },
+  { key: "vorli",  image: "/images/receipt.png", title: "Vorli",  tags: ["iOS", "AI Financial"] },
+  { key: "sticky", image: "/images/sticky.png",  title: "Sticky", tags: ["iOS", "Productivity"] },
 ] as const;
 
 const SWIPE_THRESHOLD = 80;
 const SWIPE_VELOCITY  = 400;
 
+// Random-looking fan offsets for each stack position (pos 0 = front)
+// Front card is always neutral; cards behind get organic spread
+const FAN: Record<number, { x: number; y: number; rotate: number; scale: number }> = {
+  0: { x: 0,   y: 0,   rotate: 0,    scale: 1 },
+  1: { x: 10,  y: 6,   rotate: 6,    scale: 0.95 },
+  2: { x: -6,  y: 10,  rotate: -9,   scale: 0.90 },
+};
+
 function stackTransform(pos: number) {
-  return {
-    x:      pos * 6,
-    y:      pos * 6,
-    scale:  1 - pos * 0.05,
-    rotate: pos * 2.5,
-    opacity: 1,
-  };
+  const f = FAN[pos] ?? FAN[2];
+  return { ...f, opacity: 1 };
 }
 
 interface MobileDeckProps {
@@ -79,7 +80,7 @@ function MobileDeck({
   miniTagControls,
   returningRef,
 }: MobileDeckProps) {
-  const [order, setOrder] = useState([0, 1, 2, 3, 4]);
+  const [order, setOrder] = useState([0, 1, 2]);
   const [exitDir, setExitDir] = useState<number | null>(null);
   const animatingRef = useRef(false);
 
@@ -95,7 +96,7 @@ function MobileDeck({
       setOrder(prev => [...prev.slice(1), prev[0]]);
       setExitDir(null);
       animatingRef.current = false;
-    }, 320);
+    }, 200);
   };
 
   // Render back-to-front so front card sits on top
@@ -120,7 +121,7 @@ function MobileDeck({
 
         const animateTarget =
           isFront && exitDir !== null
-            ? { x: exitDir * 500, y: stackPos * 6, scale: 1, rotate: exitDir * 15, opacity: 0 }
+            ? { x: exitDir * 280, y: stackPos * 6, scale: 0.9, rotate: exitDir * 10, opacity: 0 }
             : stackTransform(stackPos);
 
         const handleClick = () => {
@@ -141,7 +142,7 @@ function MobileDeck({
             animate={animateTarget}
             transition={
               isFront && exitDir !== null
-                ? { type: "tween", duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }
+                ? { type: "tween", duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }
                 : { type: "spring", stiffness: 340, damping: 28 }
             }
             drag={isFront && !isNotesExpanded && exitDir === null ? "x" : false}
