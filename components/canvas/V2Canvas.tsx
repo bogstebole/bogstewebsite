@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { motion, AnimatePresence } from "framer-motion";
 // import { Water } from "@paper-design/shaders-react"; // POOL_HIDDEN
 import { Logo } from "@/components/ui/logo";
@@ -99,6 +100,7 @@ function useTypewriter() {
 
 export function V2Canvas() {
   const { displayText, isIdle } = useTypewriter();
+  const { isMobile, isTablet } = useBreakpoint();
   const [activeProject, setActiveProject] = useState<string | null>(null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -243,7 +245,9 @@ export function V2Canvas() {
         {/* ── Intro text block ── */}
         <div
           style={{
-            paddingTop: 80,
+            paddingTop: isMobile ? 32 : isTablet ? 56 : 80,
+            paddingLeft: isMobile ? 24 : 0,
+            paddingRight: isMobile ? 24 : 0,
             width: "100%",
             maxWidth: 600,
             display: "flex",
@@ -271,8 +275,8 @@ export function V2Canvas() {
               style={{
                 fontFamily: "var(--font-jetbrains-mono), monospace",
                 fontWeight: 500,
-                fontSize: 20,
-                lineHeight: "24px",
+                fontSize: isMobile ? 18 : 20,
+                lineHeight: isMobile ? "22px" : "24px",
                 letterSpacing: "-0.02em",
                 color: primaryColor,
               }}
@@ -331,7 +335,7 @@ export function V2Canvas() {
               color: primary80,
               textAlign: "center",
               whiteSpace: "pre-wrap",
-              width: "60%",
+              width: isMobile ? "100%" : "60%",
             }}
           >
             I build things that feel considered — from iOS apps to interactive
@@ -358,8 +362,10 @@ export function V2Canvas() {
             gap: 4,
             width: "100%",
             maxWidth: 600,
-            marginTop: 60,
+            marginTop: isMobile ? 32 : 60,
             alignSelf: "center",
+            paddingLeft: isMobile ? 24 : 0,
+            paddingRight: isMobile ? 24 : 0,
           }}
         >
           <div style={{ display: "flex", gap: 2, width: 11, flexShrink: 0, opacity: 0.2 }}>
@@ -388,7 +394,7 @@ export function V2Canvas() {
         </div>
 
         {/* ── Project section ── */}
-        <div style={{ width: "100%", maxWidth: 600 }}>
+        <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0 }}>
           <ProjectSection
             primaryColor={primaryColor}
             primary40={primary40}
@@ -400,7 +406,7 @@ export function V2Canvas() {
             envelopeRef={envelopeRef}
             onEnvelopeClick={handleEnvelopeClick}
             isEnvelopeOpen={envelopeOpen || isEnvelopeClosing}
-            style={{ marginTop: 32, marginBottom: 120 }}
+            style={{ marginTop: isMobile ? 20 : 32, marginBottom: isMobile ? 60 : 120 }}
           />
         </div>
       </motion.div>

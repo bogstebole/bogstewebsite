@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence, LayoutGroup, useAnimation } from "framer-motion";
+import type { PanInfo } from "framer-motion";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useRippleWave } from "@/useRippleWave";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { UselessNotesDetail } from "@/components/ui/useless-notes-detail";
@@ -31,6 +33,217 @@ interface SelectedProjectsSectionProps {
   isStickyOpen?: boolean;
 }
 
+// ── Mobile card deck ──────────────────────────────────────────────────────────
+
+const DECK_CARDS = [
+  { key: "notes",    image: "/images/notes.png",           title: "Notes",    tags: ["iOS", "Canvas"] },
+  { key: "vorli",    image: "/images/receipt.png",         title: "Vorli",    tags: ["iOS", "AI Financial"] },
+  { key: "sticky",   image: "/images/sticky.png",          title: "Sticky",   tags: ["iOS", "Productivity"] },
+  { key: "fynn",     image: "/images/fynn.png",            title: "Fynn.io",  tags: ["Design System"] },
+  { key: "pauschal", image: "/images/pauschal-tracker.png",title: "Pauschal", tags: ["iOS", "Finance"] },
+] as const;
+
+const SWIPE_THRESHOLD = 80;
+const SWIPE_VELOCITY  = 400;
+
+function stackTransform(pos: number) {
+  return {
+    x:      pos * 6,
+    y:      pos * 6,
+    scale:  1 - pos * 0.05,
+    rotate: pos * 2.5,
+    opacity: 1,
+  };
+}
+
+interface MobileDeckProps {
+  isNotesExpanded: boolean;
+  onNotesClick: () => void;
+  onVorliClick?: () => void;
+  onStickyClick?: (rect: DOMRect) => void;
+  isStickyOpen?: boolean;
+  stickyIconRef: React.RefObject<HTMLDivElement | null>;
+  notesRippleRef: React.RefObject<HTMLDivElement | null>;
+  miniTagControls: ReturnType<typeof useAnimation>;
+  returningRef: React.RefObject<boolean>;
+}
+
+function MobileDeck({
+  isNotesExpanded,
+  onNotesClick,
+  onVorliClick,
+  onStickyClick,
+  isStickyOpen,
+  stickyIconRef,
+  notesRippleRef,
+  miniTagControls,
+  returningRef,
+}: MobileDeckProps) {
+  const [order, setOrder] = useState([0, 1, 2, 3, 4]);
+  const [exitDir, setExitDir] = useState<number | null>(null);
+  const animatingRef = useRef(false);
+
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
+    if (animatingRef.current) return;
+    const { offset, velocity } = info;
+    if (Math.abs(offset.x) < SWIPE_THRESHOLD && Math.abs(velocity.x) < SWIPE_VELOCITY) return;
+
+    animatingRef.current = true;
+    setExitDir(offset.x > 0 ? 1 : -1);
+
+    setTimeout(() => {
+      setOrder(prev => [...prev.slice(1), prev[0]]);
+      setExitDir(null);
+      animatingRef.current = false;
+    }, 320);
+  };
+
+  // Render back-to-front so front card sits on top
+  const reversed = [...order].reverse();
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        // 160px card + 24px max stack offset; 220px card + 24px stack offset
+        width: 184,
+        height: 244,
+        margin: "0 auto",
+      }}
+    >
+      {reversed.map((cardIdx) => {
+        const stackPos = order.indexOf(cardIdx);
+        const isFront = stackPos === 0;
+        const card = DECK_CARDS[cardIdx];
+        const isNotesCard = card.key === "notes";
+        const isStickyCard = card.key === "sticky";
+
+        const animateTarget =
+          isFront && exitDir !== null
+            ? { x: exitDir * 500, y: stackPos * 6, scale: 1, rotate: exitDir * 15, opacity: 0 }
+            : stackTransform(stackPos);
+
+        const handleClick = () => {
+          if (!isFront || exitDir !== null) return;
+          if (isNotesCard) { onNotesClick(); return; }
+          if (card.key === "vorli") { onVorliClick?.(); return; }
+          if (isStickyCard) {
+            const el = stickyIconRef.current;
+            if (el) onStickyClick?.(el.getBoundingClientRect());
+          }
+        };
+
+        return (
+          <motion.div
+            key={cardIdx}
+            ref={isNotesCard ? notesRippleRef : undefined}
+            layoutId={isNotesCard ? "notes-card" : undefined}
+            animate={animateTarget}
+            transition={
+              isFront && exitDir !== null
+                ? { type: "tween", duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }
+                : { type: "spring", stiffness: 340, damping: 28 }
+            }
+            drag={isFront && !isNotesExpanded && exitDir === null ? "x" : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={1}
+            onDragEnd={isFront ? handleDragEnd : undefined}
+            onLayoutAnimationComplete={
+              isNotesCard
+                ? () => {
+                    if (returningRef.current) {
+                      returningRef.current = false;
+                      void miniTagControls.start("visible");
+                    }
+                  }
+                : undefined
+            }
+            onClick={handleClick}
+            style={{
+              ...CARD_STYLE,
+              position: "absolute",
+              top: 0,
+              left: 0,
+              zIndex: order.length - stackPos,
+              cursor: isFront && !isNotesExpanded ? (isNotesCard ? "pointer" : "grab") : "default",
+              pointerEvents: isFront ? "auto" : "none",
+              overflow: isNotesCard && isNotesExpanded ? "visible" : "hidden",
+              visibility: isNotesCard && isNotesExpanded ? "hidden" : "visible",
+              userSelect: "none",
+              WebkitUserSelect: "none",
+            }}
+            whileDrag={isFront && !isNotesCard ? { cursor: "grabbing" } : undefined}
+          >
+            {/* Icon area */}
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 12,
+              }}
+            >
+              {isStickyCard ? (
+                <div ref={stickyIconRef}>
+                  <StickyNotesIcon opacity={isStickyOpen ? 0 : 1} />
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8, flexShrink: 0 }}
+                />
+              )}
+              <span
+                style={{
+                  fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+                  fontSize: 16.8,
+                  letterSpacing: "-0.04em",
+                  color: "#434343",
+                  whiteSpace: "nowrap",
+                  lineHeight: 1.3,
+                }}
+              >
+                {card.title}
+              </span>
+            </div>
+
+            {/* Tags */}
+            {isNotesCard ? (
+              <motion.div
+                animate={miniTagControls}
+                initial="visible"
+                variants={BADGE_CONTAINER_VARIANTS}
+                style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", justifyContent: "center", width: "100%" }}
+              >
+                {card.tags.map((label) => (
+                  <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
+                    <ProjectTag label={label} variant="glass" />
+                  </motion.div>
+                ))}
+                <motion.div variants={BADGE_ITEM_VARIANTS}>
+                  <AppStoreBadge active={false} />
+                </motion.div>
+              </motion.div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center", width: "100%" }}>
+                {card.tags.map((label) => (
+                  <ProjectTag key={label} label={label} variant="glass" />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Useless Notes assets ───────────────────────────────────────────────────────
+
 const USELESS_NOTES_ASSETS = [
   { type: "video" as const, src: "/assets/Useless Notes/Onboarding.mp4" },
   { type: "video" as const, src: "/assets/Useless Notes/Da bomb.MP4" },
@@ -51,6 +264,7 @@ export function SelectedProjectsSection({
   onStickyClick,
   isStickyOpen,
 }: SelectedProjectsSectionProps) {
+  const { isMobile } = useBreakpoint();
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const stickyCardRef = useRef<HTMLDivElement>(null);
   const stickyIconRef = useRef<HTMLDivElement>(null);
@@ -132,75 +346,92 @@ export function SelectedProjectsSection({
           justifyContent: "center",
           flexShrink: 0,
           background: "#F0F0F0",
-          padding: 64,
+          padding: isMobile ? 40 : 64,
           borderRadius: 40,
         }}
       >
-        {/* ── Notes card ── */}
-        <ProjectCard
-          image="/images/notes.png"
-          alt="Useless Notes"
-          title="Notes"
-          tags={["iOS", "Canvas"]}
-          extraBadge={<AppStoreBadge active={false} />}
-          layoutId="notes-card"
-          cardRef={notesRippleRef}
-          // The mini card stays structurally mounted, passing its layoutId to the bottom-sheet
-          overflow={isNotesExpanded ? "visible" : undefined}
-          visibility={isNotesExpanded ? "hidden" : undefined}
-          animate={isNotesExpanded ? undefined : { opacity: 1 }}
-          whileHover={isNotesExpanded ? undefined : { y: -16 }}
-          transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
-          onLayoutAnimationComplete={() => {
-            if (returningRef.current) {
-              returningRef.current = false;
-              void miniTagControls.start("visible");
-            }
-          }}
-          marginRight={-21}
-          zIndex={3}
-          cursor={isNotesExpanded ? "default" : "pointer"}
-          pointerEvents={isNotesExpanded ? "none" : "auto"}
-          onClick={!isNotesExpanded ? () => void handleExpand() : undefined}
-          tagControls={miniTagControls}
-          tagInitial="visible"
-        />
+        {isMobile ? (
+          /* ── Mobile: swipeable card deck ── */
+          <MobileDeck
+            isNotesExpanded={isNotesExpanded}
+            onNotesClick={() => void handleExpand()}
+            onVorliClick={onVorliClick}
+            onStickyClick={onStickyClick}
+            isStickyOpen={isStickyOpen}
+            stickyIconRef={stickyIconRef}
+            notesRippleRef={notesRippleRef}
+            miniTagControls={miniTagControls}
+            returningRef={returningRef}
+          />
+        ) : (
+          /* ── Desktop: three fanned cards side by side ── */
+          <>
+            {/* ── Notes card ── */}
+            <ProjectCard
+              image="/images/notes.png"
+              alt="Useless Notes"
+              title="Notes"
+              tags={["iOS", "Canvas"]}
+              extraBadge={<AppStoreBadge active={false} />}
+              layoutId="notes-card"
+              cardRef={notesRippleRef}
+              overflow={isNotesExpanded ? "visible" : undefined}
+              visibility={isNotesExpanded ? "hidden" : undefined}
+              animate={isNotesExpanded ? undefined : { opacity: 1 }}
+              whileHover={isNotesExpanded ? undefined : { y: -16 }}
+              transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
+              onLayoutAnimationComplete={() => {
+                if (returningRef.current) {
+                  returningRef.current = false;
+                  void miniTagControls.start("visible");
+                }
+              }}
+              marginRight={-21}
+              zIndex={3}
+              cursor={isNotesExpanded ? "default" : "pointer"}
+              pointerEvents={isNotesExpanded ? "none" : "auto"}
+              onClick={!isNotesExpanded ? () => void handleExpand() : undefined}
+              tagControls={miniTagControls}
+              tagInitial="visible"
+            />
 
-        {/* ── Vorli card ── */}
-        <ProjectCard
-          image="/images/receipt.png"
-          alt="Vorli"
-          title="Vorli"
-          tags={["iOS", "AI Financial Assistant"]}
-          cardRef={vorliRippleRef}
-          rotate={-5}
-          zIndex={2}
-          onClick={onVorliClick}
-          imageStyle={{ rotate: "359.41deg", transformOrigin: "50% 50%" }}
-        />
+            {/* ── Vorli card ── */}
+            <ProjectCard
+              image="/images/receipt.png"
+              alt="Vorli"
+              title="Vorli"
+              tags={["iOS", "AI Financial Assistant"]}
+              cardRef={vorliRippleRef}
+              rotate={-5}
+              zIndex={2}
+              onClick={onVorliClick}
+              imageStyle={{ rotate: "359.41deg", transformOrigin: "50% 50%" }}
+            />
 
-        {/* ── Sticky card ── */}
-        <ProjectCard
-          image="/images/sticky.png"
-          alt="Sticky"
-          title="Sticky"
-          tags={["iOS", "Productivity", "To Do App"]}
-          rotate={5}
-          marginLeft={-21}
-          zIndex={1}
-          imageNode={
-            <div ref={stickyIconRef}>
-              <StickyNotesIcon opacity={isStickyOpen ? 0 : 1} />
-            </div>
-          }
-          overflow="visible"
-          cardRef={stickyCardRef}
-          cursor="pointer"
-          onClick={() => {
-            const el = stickyIconRef.current;
-            if (el) onStickyClick?.(el.getBoundingClientRect());
-          }}
-        />
+            {/* ── Sticky card ── */}
+            <ProjectCard
+              image="/images/sticky.png"
+              alt="Sticky"
+              title="Sticky"
+              tags={["iOS", "Productivity", "To Do App"]}
+              rotate={5}
+              marginLeft={-21}
+              zIndex={1}
+              imageNode={
+                <div ref={stickyIconRef}>
+                  <StickyNotesIcon opacity={isStickyOpen ? 0 : 1} />
+                </div>
+              }
+              overflow="visible"
+              cardRef={stickyCardRef}
+              cursor="pointer"
+              onClick={() => {
+                const el = stickyIconRef.current;
+                if (el) onStickyClick?.(el.getBoundingClientRect());
+              }}
+            />
+          </>
+        )}
       </div>
 
       {/* ── Backdrop — blurs everything behind ── */}

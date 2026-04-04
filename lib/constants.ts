@@ -1,3 +1,8 @@
+export const BREAKPOINTS = {
+  mobile: 640,
+  tablet: 1024,
+} as const;
+
 export const SITE_METADATA = {
   title: "Boule's Portfolio",
   description:
