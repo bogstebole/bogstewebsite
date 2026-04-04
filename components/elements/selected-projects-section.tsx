@@ -349,6 +349,7 @@ export function SelectedProjectsSection({
           background: "#F0F0F0",
           padding: isMobile ? 40 : 64,
           borderRadius: 40,
+          ...(isMobile && { marginLeft: 16, marginRight: 16, width: "calc(100% - 32px)", boxSizing: "border-box" }),
         }}
       >
         {isMobile ? (
