@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence, LayoutGroup, useAnimation } from "framer-motion";
 import type { PanInfo } from "framer-motion";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -59,6 +60,7 @@ function stackTransform(pos: number) {
 
 interface MobileDeckProps {
   isNotesExpanded: boolean;
+  isDesktop: boolean;
   onNotesClick: () => void;
   onVorliClick?: () => void;
   onStickyClick?: (rect: DOMRect) => void;
@@ -71,6 +73,7 @@ interface MobileDeckProps {
 
 function MobileDeck({
   isNotesExpanded,
+  isDesktop,
   onNotesClick,
   onVorliClick,
   onStickyClick,
@@ -138,7 +141,7 @@ function MobileDeck({
           <motion.div
             key={cardIdx}
             ref={isNotesCard ? notesRippleRef : undefined}
-            layoutId={isNotesCard ? "notes-card" : undefined}
+            layoutId={isNotesCard && isDesktop ? "notes-card" : undefined}
             animate={animateTarget}
             transition={
               isFront && exitDir !== null
@@ -265,7 +268,7 @@ export function SelectedProjectsSection({
   onStickyClick,
   isStickyOpen,
 }: SelectedProjectsSectionProps) {
-  const { isMobile } = useBreakpoint();
+  const { isMobile, isDesktop } = useBreakpoint();
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const stickyCardRef = useRef<HTMLDivElement>(null);
   const stickyIconRef = useRef<HTMLDivElement>(null);
@@ -277,6 +280,8 @@ export function SelectedProjectsSection({
   const expandingRef = useRef(false);
   const [isNotesClosing, setIsNotesClosing] = useState(false);
   const returningRef = useRef(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   
   const headerRef = useRef<HTMLDivElement>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
@@ -356,6 +361,7 @@ export function SelectedProjectsSection({
           /* ── Mobile: swipeable card deck ── */
           <MobileDeck
             isNotesExpanded={isNotesExpanded}
+            isDesktop={isDesktop}
             onNotesClick={() => void handleExpand()}
             onVorliClick={onVorliClick}
             onStickyClick={onStickyClick}
@@ -436,6 +442,9 @@ export function SelectedProjectsSection({
         )}
       </div>
 
+      {/* ── Backdrop + Expanded sheet — portalled to body to escape filter stacking context ── */}
+      {mounted && createPortal(
+        <>
       {/* ── Backdrop — blurs everything behind ── */}
       <AnimatePresence>
         {isNotesExpanded && (
@@ -462,14 +471,17 @@ export function SelectedProjectsSection({
         {isNotesExpanded && (
           <motion.div
             key="notes-expanded"
-            layoutId="notes-card"
-            layoutScroll
-            animate={{ rotate: 0 }}
+            layoutId={isDesktop ? "notes-card" : undefined}
+            layoutScroll={isDesktop}
+            animate={{ y: 0, rotate: 0 }}
+            initial={isDesktop ? undefined : { y: "100%" }}
+            exit={isDesktop ? undefined : { y: "100%" }}
             transition={{
               layout: CARD_SPRING,
+              y: { type: "spring", stiffness: 340, damping: 34 },
               rotate: { type: "spring", stiffness: 400, damping: 30 },
             }}
-            onLayoutAnimationComplete={() => {
+            onAnimationComplete={() => {
               if (!closingRef.current) {
                 void badgeControls.start("visible");
                 void contentControls.start("visible");
@@ -492,16 +504,16 @@ export function SelectedProjectsSection({
               boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
-              gap: '48px',
+              gap: isMobile ? '24px' : '48px',
               paddingTop: 48,
               paddingInline: 16,
               
               // Structural positioning (Bottom Sheet, 70% height)
               position: "fixed",
               bottom: 0,
-              left: "50%",
-              marginLeft: -438.5,
-              width: 877,
+              left: isMobile ? 0 : "50%",
+              marginLeft: isMobile ? 0 : -438.5,
+              width: isMobile ? "100%" : 877,
               height: "95vh",
               overflowY: "auto",
               overflowX: "hidden",
@@ -529,9 +541,9 @@ export function SelectedProjectsSection({
                 pointerEvents: showStickyHeader && !isNotesClosing ? "auto" : "none",
                 position: "fixed",
                 top: "calc(5vh + 16px)",
-                left: "50%",
-                marginLeft: -422.5, // half of 845 (16px inset from both sides)
-                width: 845, // 877 - 32
+                left: isMobile ? 16 : "50%",
+                marginLeft: isMobile ? 0 : -422.5,
+                width: isMobile ? "calc(100% - 32px)" : 845,
                 zIndex: 52,
               }}
             >
@@ -567,7 +579,7 @@ export function SelectedProjectsSection({
             </motion.div>
 
             {/* Header section (Icon, Title, Tags) - exactly mimicking mini-card visual column */}
-            <div ref={headerRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '480px', flexShrink: 0 }}>
+            <div ref={headerRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: isMobile ? '100%' : '480px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}>
                 
                 {/* Icon & Title */}
@@ -656,7 +668,7 @@ export function SelectedProjectsSection({
                 hidden: { transition: { staggerChildren: 0.05 } },
                 exit: { transition: { staggerChildren: 0.05 } }
               }}
-              style={{ columns: 3, columnGap: 16, width: '100%', paddingBottom: 48, boxSizing: "border-box" }}
+              style={{ columns: isMobile ? 1 : 3, columnGap: 16, width: '100%', paddingBottom: 48, boxSizing: "border-box" }}
             >
               {USELESS_NOTES_ASSETS.map((asset, i) => (
                 <motion.div
@@ -697,6 +709,9 @@ export function SelectedProjectsSection({
           </motion.div>
         )}
       </AnimatePresence>
+        </>,
+        document.body
+      )}
     </LayoutGroup>
   );
 }
