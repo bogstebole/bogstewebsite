@@ -172,7 +172,8 @@ function MobileDeck({
               cursor: isFront && !isNotesExpanded ? (isNotesCard ? "pointer" : "grab") : "default",
               pointerEvents: isFront ? "auto" : "none",
               overflow: isNotesCard && isNotesExpanded ? "visible" : "hidden",
-              visibility: isNotesCard && isNotesExpanded ? "hidden" : "visible",
+              // On desktop the FLIP source must disappear; on mobile the sheet slides over the deck
+              visibility: isNotesCard && isNotesExpanded && isDesktop ? "hidden" : "visible",
               userSelect: "none",
               WebkitUserSelect: "none",
             }}
@@ -282,16 +283,21 @@ export function SelectedProjectsSection({
   const returningRef = useRef(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  // Ensure mini-card tags start visible (animation controls don't auto-propagate initial variant)
+  useEffect(() => { void miniTagControls.start("visible"); }, [miniTagControls]);
   
   const headerRef = useRef<HTMLDivElement>(null);
+  const badgesRef = useRef<HTMLDivElement>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  // Only start observing after the sheet has fully animated in
+  const [isSheetReady, setIsSheetReady] = useState(false);
 
   useEffect(() => {
-    if (!isNotesExpanded) {
+    if (!isNotesExpanded || !isSheetReady) {
       setShowStickyHeader(false);
       return;
     }
-    const el = headerRef.current;
+    const el = badgesRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => setShowStickyHeader(!entry.isIntersecting),
@@ -299,7 +305,7 @@ export function SelectedProjectsSection({
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [isNotesExpanded]);
+  }, [isNotesExpanded, isSheetReady]);
 
   const RIPPLE_CONFIG = { speed: 270, ringWidth: 42, duration: 1000, textStrength: 7, imageStrength: 5 };
   const notesRippleRef = useRippleWave(RIPPLE_CONFIG) as unknown as React.RefObject<HTMLDivElement>;
@@ -324,13 +330,19 @@ export function SelectedProjectsSection({
       gridControls.start("exit"),
       badgeControls.start("exit"),
     ]);
-    // Mark returning so mini card's onLayoutAnimationComplete staggers badges back in
-    returningRef.current = true;
+    if (isDesktop) {
+      // On desktop: FLIP animates the card back; onLayoutAnimationComplete staggers badges in
+      returningRef.current = true;
+    } else {
+      // On mobile: no FLIP, no layoutId — restore badges directly
+      void miniTagControls.start("visible");
+    }
     setIsNotesExpanded(false);
     onNotesClose?.();
+    setIsSheetReady(false);
     closingRef.current = false;
     setIsNotesClosing(false);
-  }, [contentControls, gridControls, badgeControls, onNotesCloseStart, onNotesClose]);
+  }, [contentControls, gridControls, badgeControls, onNotesCloseStart, onNotesClose, isDesktop, miniTagControls]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -483,6 +495,7 @@ export function SelectedProjectsSection({
             }}
             onAnimationComplete={() => {
               if (!closingRef.current) {
+                setIsSheetReady(true);
                 void badgeControls.start("visible");
                 void contentControls.start("visible");
                 setTimeout(() => {
@@ -596,6 +609,7 @@ export function SelectedProjectsSection({
 
                 {/* Animated Tags replacing the raw Paper tags to maintain orchestration */}
                 <motion.div
+                  ref={badgesRef}
                   animate={badgeControls}
                   initial="hidden"
                   variants={BADGE_CONTAINER_VARIANTS}
