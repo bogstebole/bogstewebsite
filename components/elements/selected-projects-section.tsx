@@ -683,7 +683,10 @@ export function SelectedProjectsSection({
                 hidden: { transition: { staggerChildren: 0.05 } },
                 exit: { transition: { staggerChildren: 0.05 } }
               }}
-              style={{ columns: isMobile ? 1 : 3, columnGap: 16, width: '100%', paddingBottom: 48, boxSizing: "border-box" }}
+              style={isMobile
+                ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
+                : { columns: 3, columnGap: 16, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
+              }
             >
               {USELESS_NOTES_ASSETS.map((asset, i) => (
                 <motion.div
@@ -694,9 +697,9 @@ export function SelectedProjectsSection({
                     exit: { opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.15 } }
                   }}
                   style={{
-                    breakInside: "avoid",
-                    marginBottom: 16,
-                    borderRadius: 32,
+                    breakInside: isMobile ? undefined : "avoid",
+                    marginBottom: isMobile ? 0 : 16,
+                    borderRadius: isMobile ? 12 : 32,
                     overflow: "hidden",
                     backgroundColor: '#DDDDDD',
                   }}
