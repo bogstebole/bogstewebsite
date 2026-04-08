@@ -99,8 +99,8 @@ function StickyContent({ onClose }: { onClose: () => void }) {
         {DESCRIPTION}
       </div>
 
-      {/* Media grid — 2 columns */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, width: "100%" }}>
+      {/* Media grid — 3 columns */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, width: "100%" }}>
         {STICKY_ASSETS.map((asset) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img
