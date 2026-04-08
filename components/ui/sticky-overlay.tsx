@@ -1,38 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import { StickyNotesIcon } from "@/components/ui/sticky-notes-icon";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { ProjectTag } from "@/components/ui/project-tag";
+import {
+  BADGE_CONTAINER_VARIANTS,
+  BADGE_ITEM_VARIANTS,
+} from "@/components/ui/project-card";
 
 interface StickyOverlayProps {
-  /** DOMRect of the mini sticky icon — FLIP origin */
+  /** Kept for call-site compatibility — no longer used for FLIP */
   originRect: DOMRect;
   onCloseStart: () => void;
   onClose: () => void;
 }
 
-const FULLW = 486;
-const FULLH = 680;
-
-const spring = {
-  type: "spring" as const,
-  stiffness: 380,
-  damping: 38,
-};
-
-const returnTransition = {
-  type: "tween" as const,
-  duration: 0.35,
-  ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
-};
-
-const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-
-type AnimationPhase = "move-to-center" | "open" | "move-to-origin";
+const SHEET_WIDTH = 877;
 
 const STICKY_ASSETS = [
   { src: "/assets/Sticky/Home screen.png", alt: "Sticky home screen" },
@@ -44,343 +31,333 @@ const STICKY_ASSETS = [
 const DESCRIPTION =
   "Most task apps organize your work into lists that feel like chores. Sticky treats your tasks as a living canvas — notes float, stack, and drift, making the act of planning feel more like thinking than filing. Built for people who want their tools to have personality.";
 
-function StickyContent({ onClose }: { onClose: () => void }) {
-  return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        overflowY: "auto",
-        overscrollBehavior: "contain",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 24,
-        padding: "24px 24px 32px",
-        boxSizing: "border-box",
-      }}
-    >
-      {/* Close button */}
-      <div style={{ position: "absolute", top: 16, right: 16, zIndex: 2 }}>
-        <GlassButton size="s" onClick={onClose} aria-label="Close">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-          </svg>
-        </GlassButton>
-      </div>
+const slideSpring = { type: "spring" as const, stiffness: 340, damping: 34 };
+const returnTween = { type: "tween" as const, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] };
 
-      {/* Thumbnail */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, paddingTop: 8, width: "100%" }}>
-        <StickyNotesIcon />
-
-        <div style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: 20, letterSpacing: "-0.01em", lineHeight: 1 }}>
-          Sticky
-        </div>
-
-        {/* Tags */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center" }}>
-          {["iOS", "Productivity"].map((label) => (
-            <ProjectTag key={label} label={label} variant="glass" />
-          ))}
-        </div>
-      </div>
-
-      {/* Description */}
-      <div
-        style={{
-          color: "#000000CC",
-          fontFamily: '"Geist", system-ui, sans-serif',
-          fontSize: 14,
-          lineHeight: "18px",
-          textAlign: "center",
-          width: "100%",
-        }}
-      >
-        {DESCRIPTION}
-      </div>
-
-      {/* Media grid — 3 columns */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, width: "100%" }}>
-        {STICKY_ASSETS.map((asset) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={asset.src}
-            src={encodeURI(asset.src)}
-            alt={asset.alt}
-            style={{ width: "100%", height: "auto", display: "block", borderRadius: 12, border: "1px solid rgba(0,0,0,0.08)" }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MobileStickyContent({ onClose }: { onClose: () => void }) {
-  return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        overflowY: "auto",
-        overscrollBehavior: "contain",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 24,
-        paddingTop: "calc(48px + env(safe-area-inset-top))",
-        paddingBottom: "calc(32px + env(safe-area-inset-bottom))",
-        paddingInline: 24,
-        boxSizing: "border-box",
-      }}
-    >
-      {/* Close button */}
-      <div style={{ position: "absolute", top: "calc(env(safe-area-inset-top) + 16px)", right: 16, zIndex: 2 }}>
-        <GlassButton size="s" onClick={onClose} aria-label="Close">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-          </svg>
-        </GlassButton>
-      </div>
-
-      {/* Thumbnail */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, width: "100%" }}>
-        <StickyNotesIcon />
-
-        <div style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: 20, letterSpacing: "-0.01em", lineHeight: 1 }}>
-          Sticky
-        </div>
-
-        {/* Tags */}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center" }}>
-          {["iOS", "Productivity"].map((label) => (
-            <ProjectTag key={label} label={label} variant="glass" />
-          ))}
-        </div>
-      </div>
-
-      {/* Description */}
-      <div
-        style={{
-          color: "#000000CC",
-          fontFamily: '"Geist", system-ui, sans-serif',
-          fontSize: 14,
-          lineHeight: "18px",
-          textAlign: "center",
-          width: "100%",
-        }}
-      >
-        {DESCRIPTION}
-      </div>
-
-      {/* Media grid — 2 columns */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, width: "100%" }}>
-        {STICKY_ASSETS.map((asset) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={asset.src}
-            src={encodeURI(asset.src)}
-            alt={asset.alt}
-            style={{ width: "100%", height: "auto", display: "block", borderRadius: 12, border: "1px solid rgba(0,0,0,0.08)" }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function StickyOverlay({ originRect, onCloseStart, onClose }: StickyOverlayProps) {
-  const [phase, setPhase] = useState<AnimationPhase>("move-to-center");
-  const [mounted, setMounted] = useState(false);
-  const [mobileClosing, setMobileClosing] = useState(false);
+export function StickyOverlay({ onCloseStart, onClose }: StickyOverlayProps) {
   const { isMobile } = useBreakpoint();
+  const [mounted, setMounted] = useState(false);
+  const [panelClosing, setPanelClosing] = useState(false);
+  const [isSheetReady, setIsSheetReady] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [showFloatingHeader, setShowFloatingHeader] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  const contentControls = useAnimation();
+  const gridControls = useAnimation();
+  const badgeControls = useAnimation();
+  const closingRef = useRef(false);
+  const badgesRef = useRef<HTMLDivElement>(null);
 
-  if (!originRect) return null;
+  useEffect(() => setMounted(true), []);
 
-  const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
-  const vh = typeof window !== "undefined" ? window.innerHeight : 900;
+  // Sticky floating header — appears when the badges/title row scrolls out of view
+  useEffect(() => {
+    if (!isSheetReady) {
+      setShowFloatingHeader(false);
+      return;
+    }
+    const el = badgesRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowFloatingHeader(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isSheetReady]);
 
-  // Target: centered
-  const targetW = FULLW;
-  const targetH = FULLH;
-  const maxH = vh * 0.85;
-  const maxW = vw * 0.45;
-  const targetScale = Math.min(maxH / targetH, maxW / targetW);
-  const targetTop = (vh - targetH) / 2;
-  const targetLeft = (vw - targetW) / 2;
+  const handleContentOpen = useCallback(async () => {
+    if (closingRef.current) return;
+    setIsSheetReady(true);
+    void badgeControls.start("visible");
+    void contentControls.start("visible");
+    setTimeout(() => {
+      if (!closingRef.current) void gridControls.start("visible");
+    }, 350);
+  }, [badgeControls, contentControls, gridControls]);
 
-  // Origin calculations
-  const originScale = originRect.width / FULLW;
-
-  // Center-to-Center math for x/y
-  const originCX = originRect.left + originRect.width / 2;
-  const restingCY = originRect.top + 16 + originRect.height / 2;
-
-  const targetCX = targetLeft + targetW / 2;
-  const targetCY = targetTop + targetH / 2;
-  const initialX = originCX - targetCX;
-  const initialY = restingCY - targetCY;
-
-  const initiateDesktopClose = () => {
-    if (phase === "move-to-origin") return;
+  const initiateClose = useCallback(async () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setIsClosing(true);
     onCloseStart();
-    setPhase("move-to-origin");
-  };
-
-  const initiateMobileClose = async () => {
-    if (mobileClosing) return;
-    onCloseStart();
-    setMobileClosing(true);
-    await wait(360);
-    onClose();
-  };
+    await Promise.all([
+      contentControls.start("exit"),
+      gridControls.start("exit"),
+      badgeControls.start("exit"),
+    ]);
+    setPanelClosing(true);
+  }, [contentControls, gridControls, badgeControls, onCloseStart]);
 
   // Keyboard close
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (isMobile) void initiateMobileClose();
-        else initiateDesktopClose();
-      }
+      if (e.key === "Escape") void initiateClose();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [phase, isMobile, mobileClosing]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const isDesktopClosing = phase === "move-to-origin";
-
-  const SHADOW_MINI = "0 4px 12px rgba(0,0,0,0.1)";
-  const SHADOW_MAX = "0 30px 60px rgba(0,0,0,0.12), 0 10px 20px rgba(0,0,0,0.08)";
+  }, [initiateClose]);
 
   if (!mounted) return null;
 
-  // ── Mobile: bottom sheet ──────────────────────────────────────────────────
-  if (isMobile) {
-    return createPortal(
-      <div style={{ position: "fixed", inset: 0, zIndex: 100 }}>
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: mobileClosing ? 0 : 1 }}
-          transition={{ duration: 0.2 }}
-          onClick={() => void initiateMobileClose()}
-          style={{
-            position: "fixed",
-            inset: 0,
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            backgroundColor: "rgba(255,255,255,0.4)",
-          }}
-        />
+  const floatingHeaderVisible = showFloatingHeader && !isClosing;
 
-        {/* Sheet */}
-        <motion.div
-          initial={{ y: "100%" }}
-          animate={{ y: mobileClosing ? "100%" : 0 }}
-          transition={mobileClosing ? returnTransition : spring}
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "100dvh",
-            background: "#FFFBF0",
-            overflowY: "auto",
-            overscrollBehavior: "contain",
-            boxSizing: "border-box",
-            zIndex: 1,
-            boxShadow: SHADOW_MAX,
-          }}
-        >
-          <MobileStickyContent onClose={() => void initiateMobileClose()} />
-        </motion.div>
-      </div>,
-      document.body
-    );
-  }
-
-  // ── Desktop: FLIP animation ───────────────────────────────────────────────
   return createPortal(
-    <div style={{ position: "fixed", inset: 0, zIndex: 100, overflow: "hidden" }}>
+    <>
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: isDesktopClosing ? 0 : 1 }}
+        animate={{ opacity: panelClosing ? 0 : 1 }}
         transition={{ duration: 0.2 }}
-        onClick={initiateDesktopClose}
+        onClick={() => void initiateClose()}
         style={{
           position: "fixed",
           inset: 0,
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          backgroundColor: "rgba(255,255,255,0.4)",
-          zIndex: 0,
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          zIndex: 50,
         }}
       />
 
-      {/* Panel — FLIP */}
-      <div
+      {/* Floating sticky header — appears when title scrolls out of view */}
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{
+          opacity: floatingHeaderVisible ? 1 : 0,
+          y: floatingHeaderVisible ? 0 : -12,
+        }}
+        transition={{ type: "spring", stiffness: 400, damping: 36 }}
         style={{
-          position: "absolute",
-          top: targetTop,
-          left: targetLeft,
-          width: targetW,
-          height: targetH,
-          display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          pointerEvents: "none",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderRadius: 9999,
+          boxSizing: "border-box",
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "20px 24px",
+          pointerEvents: floatingHeaderVisible ? "auto" : "none",
+          position: "fixed",
+          top: "calc(5vh + 16px)",
+          left: isMobile ? 16 : "50%",
+          marginLeft: isMobile ? 0 : -(SHEET_WIDTH / 2 - 16),
+          width: isMobile ? "calc(100% - 32px)" : SHEET_WIDTH - 32,
+          zIndex: 52,
         }}
       >
-        <motion.div
-          initial={{
-            x: initialX,
-            y: initialY - 16,
-            scale: originScale,
-            rotate: 5,
-            boxShadow: SHADOW_MINI,
-          }}
-          animate={
-            isDesktopClosing
-              ? {
-                  x: initialX,
-                  y: initialY,
-                  scale: originScale,
-                  rotate: 5,
-                  boxShadow: SHADOW_MINI,
-                }
-              : {
-                  x: 0,
-                  y: 0,
-                  scale: targetScale,
-                  rotate: 0,
-                  boxShadow: SHADOW_MAX,
-                }
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/sticky.png"
+            alt="Sticky Icon"
+            style={{ width: "24px", height: "24px", objectFit: "cover", borderRadius: 4 }}
+          />
+          <span style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "16px", letterSpacing: "-0.01em", lineHeight: "1" }}>
+            Sticky
+          </span>
+        </div>
+        <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+          </svg>
+        </GlassButton>
+      </motion.div>
+
+      {/* Bottom sheet panel */}
+      <motion.div
+        initial={{ y: "100%" }}
+        animate={{ y: panelClosing ? "100%" : 0 }}
+        transition={panelClosing ? returnTween : slideSpring}
+        onAnimationComplete={() => {
+          if (closingRef.current) {
+            onClose();
+          } else {
+            void handleContentOpen();
           }
-          transition={isDesktopClosing ? returnTransition : spring}
-          onAnimationComplete={() => {
-            if (phase === "move-to-center") setPhase("open");
-            if (phase === "move-to-origin") onClose();
-          }}
+        }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          alignItems: "center",
+          backgroundImage: "linear-gradient(180deg, #FFFFFF 0%, #EEEEEE 100%)",
+          backgroundOrigin: "padding-box",
+          borderTopLeftRadius: isMobile ? 0 : "40px",
+          borderTopRightRadius: isMobile ? 0 : "40px",
+          borderBottomLeftRadius: 0,
+          borderBottomRightRadius: 0,
+          boxShadow: "inset 0 0 0 4px #FFFFFF, #00000003 0px 400px 165px, #0000000D 0px 105px 140px, #0000001A 0px 105px 105px, #0000001A 0px 25px 55px",
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+          gap: isMobile ? "24px" : "48px",
+          paddingTop: isMobile ? "calc(48px + env(safe-area-inset-top))" : 48,
+          paddingBottom: isMobile ? "calc(32px + env(safe-area-inset-bottom))" : 32,
+          paddingInline: 16,
+          position: "fixed",
+          bottom: 0,
+          left: isMobile ? 0 : "50%",
+          marginLeft: isMobile ? 0 : -(SHEET_WIDTH / 2),
+          width: isMobile ? "100%" : SHEET_WIDTH,
+          height: isMobile ? "100dvh" : "95vh",
+          overflowY: "auto",
+          overflowX: "hidden",
+          zIndex: 51,
+          cursor: "default",
+        }}
+      >
+        {/* Close button — always visible in top-right corner */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: 0.3 } }}
           style={{
-            width: FULLW,
-            height: FULLH,
-            position: "relative",
-            zIndex: 1,
-            pointerEvents: "auto",
-            transformOrigin: "center center",
-            borderRadius: 16,
-            background: "#FFFBF0",
-            willChange: "transform, box-shadow",
-            overflow: "hidden",
+            position: "absolute",
+            top: isMobile ? "calc(env(safe-area-inset-top) + 16px)" : 24,
+            right: 24,
           }}
         >
-          <StickyContent onClose={initiateDesktopClose} />
+          <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+            </svg>
+          </GlassButton>
         </motion.div>
-      </div>
-    </div>,
+
+        {/* Header: Icon, Title, Tags */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "24px",
+            width: isMobile ? "100%" : "480px",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", width: "100%" }}>
+            {/* Icon & Title */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "15px" }}>
+              <StickyNotesIcon />
+              <div style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "20px", letterSpacing: "-0.01em", lineHeight: "1" }}>
+                Sticky
+              </div>
+            </div>
+
+            {/* Animated tags */}
+            <motion.div
+              ref={badgesRef}
+              animate={badgeControls}
+              initial="hidden"
+              variants={BADGE_CONTAINER_VARIANTS}
+              style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center" }}
+            >
+              {["iOS", "Productivity"].map((label) => (
+                <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
+                  <ProjectTag label={label} variant="glass" />
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Staggered description + button */}
+          <motion.div
+            animate={contentControls}
+            initial="hidden"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1 } },
+              hidden: { transition: { staggerChildren: 0.05 } },
+              exit: { transition: { staggerChildren: 0.05 } },
+            }}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", width: "100%" }}
+          >
+            {/* Description */}
+            <motion.div
+              variants={{
+                visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
+                hidden: { opacity: 0, y: 15 },
+                exit: { opacity: 0, y: 10, transition: { duration: 0.15 } },
+              }}
+              style={{
+                color: "#000000CC",
+                fontFamily: '"Geist", system-ui, sans-serif',
+                fontSize: "14px",
+                lineHeight: "18px",
+                textAlign: "center",
+                width: "100%",
+              }}
+            >
+              {DESCRIPTION}
+            </motion.div>
+
+            {/* Download button */}
+            <motion.div
+              variants={{
+                visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
+                hidden: { opacity: 0, y: 15 },
+                exit: { opacity: 0, y: 10, transition: { duration: 0.15 } },
+              }}
+              style={{
+                alignItems: "center",
+                backdropFilter: "blur(1px)",
+                borderRadius: "9999px",
+                boxShadow: "#FFFFFF -2px 2px 2px 1px inset, #00000069 -1px -3px 3px -2px inset, #000000D6 2px 1px 4px -4px inset, #FFFFFF 0px 0px 7px 4px inset, #00000040 0px -9px 14px 4px inset, #0000001A -2px -3px 5px 3px inset, #FFFFFF 0px 20px 8px -9px inset, #0000001A 0px 34px 10px -9px inset, #00000003 0px 27px 8px, #00000003 0px 17px 6px, #0000000D 0px 10px 6px, #0000001A 0px 4px 4px, #0000001A 0px 1px 3px",
+                display: "flex",
+                gap: "4px",
+                height: "32px",
+                justifyContent: "center",
+                paddingBottom: "9px",
+                paddingLeft: "16px",
+                paddingRight: "16px",
+                paddingTop: "9px",
+                cursor: "progress",
+              }}
+            >
+              <span style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "14px", letterSpacing: "0.03em", lineHeight: "1" }}>
+                Download the app
+              </span>
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Staggered media grid */}
+        <motion.div
+          animate={gridControls}
+          initial="hidden"
+          variants={{
+            visible: { transition: { staggerChildren: 0.1 } },
+            hidden: { transition: { staggerChildren: 0.05 } },
+            exit: { transition: { staggerChildren: 0.05 } },
+          }}
+          style={
+            isMobile
+              ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
+              : { columns: 3, columnGap: 16, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
+          }
+        >
+          {STICKY_ASSETS.map((asset, i) => (
+            <motion.div
+              key={i}
+              variants={{
+                visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 200, damping: 20 } },
+                hidden: { opacity: 0, y: 40, scale: 0.95 },
+                exit: { opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.15 } },
+              }}
+              style={{
+                breakInside: isMobile ? undefined : "avoid",
+                marginBottom: isMobile ? 0 : 16,
+                borderRadius: isMobile ? 12 : 32,
+                overflow: "hidden",
+                backgroundColor: "#DDDDDD",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={encodeURI(asset.src)}
+                alt={asset.alt}
+                style={{ width: "100%", height: "auto", display: "block" }}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </motion.div>
+    </>,
     document.body
   );
 }
