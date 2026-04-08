@@ -509,8 +509,8 @@ export function SelectedProjectsSection({
               alignItems: 'center',
               backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #EEEEEE 100%)',
               backgroundOrigin: 'padding-box',
-              borderTopLeftRadius: '40px',
-              borderTopRightRadius: '40px',
+              borderTopLeftRadius: isMobile ? 0 : '40px',
+              borderTopRightRadius: isMobile ? 0 : '40px',
               borderBottomLeftRadius: 0,
               borderBottomRightRadius: 0,
               boxShadow: 'inset 0 0 0 4px #FFFFFF, #00000003 0px 400px 165px, #0000000D 0px 105px 140px, #0000001A 0px 105px 105px, #0000001A 0px 25px 55px',
@@ -518,16 +518,17 @@ export function SelectedProjectsSection({
               display: 'flex',
               flexDirection: 'column',
               gap: isMobile ? '24px' : '48px',
-              paddingTop: 48,
+              paddingTop: isMobile ? 'calc(48px + env(safe-area-inset-top))' : 48,
+              paddingBottom: isMobile ? 'calc(32px + env(safe-area-inset-bottom))' : 32,
               paddingInline: 16,
-              
+
               // Structural positioning (Bottom Sheet, 70% height)
               position: "fixed",
               bottom: 0,
               left: isMobile ? 0 : "50%",
               marginLeft: isMobile ? 0 : -438.5,
               width: isMobile ? "100%" : 877,
-              height: "95vh",
+              height: isMobile ? "100dvh" : "95vh",
               overflowY: "auto",
               overflowX: "hidden",
               zIndex: 51,
@@ -582,7 +583,7 @@ export function SelectedProjectsSection({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.3 } }}
               exit={{ opacity: 0, transition: { duration: 0.1 } }}
-              style={{ position: "absolute", top: 24, right: 24 }}
+              style={{ position: "absolute", top: isMobile ? "calc(env(safe-area-inset-top) + 16px)" : 24, right: 24 }}
             >
               <GlassButton size="s" onClick={() => void handleClose()} aria-label="Close">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">

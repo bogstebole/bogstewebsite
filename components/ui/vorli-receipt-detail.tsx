@@ -1,8 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { PaperTexture } from "@paper-design/shaders-react";
+import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 
 interface VorliReceiptDetailProps {
   onCloseStart: () => void;
@@ -64,6 +67,31 @@ function MetaRow({ label, value }: { label: string; value: string }) {
 export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetailProps) {
   const closingRef = useRef(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [isSheetReady, setIsSheetReady] = useState(false);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const { isMobile } = useBreakpoint();
+
+  useEffect(() => { setMounted(true); }, []);
+
+  // Gate observer until sheet has animated in
+  useEffect(() => {
+    const t = setTimeout(() => setIsSheetReady(true), 450);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (!isSheetReady) return;
+    const el = titleRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyHeader(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isSheetReady]);
 
   const initiateClose = useCallback(async () => {
     if (closingRef.current) return;
@@ -83,7 +111,9 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
     return () => window.removeEventListener("keydown", handler);
   }, [initiateClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       {/* Backdrop — transparent, click-outside-to-close only */}
       <div
@@ -94,6 +124,58 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
           zIndex: 10,
         }}
       />
+
+      {/* Sticky header — appears when title scrolls out of view */}
+      <div
+        style={{
+          position: "fixed",
+          top: "calc(5vh + 16px)",
+          left: 0,
+          right: 0,
+          display: "flex",
+          justifyContent: "center",
+          zIndex: 20,
+          pointerEvents: "none",
+        }}
+      >
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{
+          opacity: showStickyHeader && !isClosing ? 1 : 0,
+          y: showStickyHeader && !isClosing ? 0 : -12,
+        }}
+        transition={{ type: "spring", stiffness: 400, damping: 36 }}
+        style={{
+          alignItems: "center",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderRadius: 9999,
+          boxSizing: "border-box",
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "12px 16px",
+          pointerEvents: showStickyHeader && !isClosing ? "auto" : "none",
+          width: "min(448px, calc(100% - 32px))",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/receipt.png"
+            alt="Vorli"
+            style={{ width: 24, height: 24, objectFit: "cover", borderRadius: 2, rotate: "359.41deg" }}
+          />
+          <span style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: 16, letterSpacing: "-0.01em", lineHeight: 1, textTransform: "uppercase" }}>
+            Vorli
+          </span>
+        </div>
+        <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+          </svg>
+        </GlassButton>
+      </motion.div>
+      </div>
 
       {/* Sheet container — full width, anchored to bottom */}
       <div
@@ -116,11 +198,11 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
           onClick={(e) => e.stopPropagation()}
           style={{
             width: "100%",
-            maxWidth: 480,
-            height: "85vh",
+            maxWidth: isMobile ? "100%" : 480,
+            height: isMobile ? "100dvh" : "95vh",
             overflowY: "auto",
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
+            borderTopLeftRadius: isMobile ? 0 : 16,
+            borderTopRightRadius: isMobile ? 0 : 16,
             filter: "drop-shadow(rgba(0,0,0,0.2) 0px 2px 20px)",
             position: "relative",
             pointerEvents: "auto",
@@ -170,12 +252,22 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
-                paddingBlock: 16,
+                paddingTop: isMobile ? "calc(48px + env(safe-area-inset-top))" : 16,
+                paddingBottom: isMobile ? "calc(32px + env(safe-area-inset-bottom))" : 16,
                 paddingInline: 16,
                 boxSizing: "border-box",
                 flex: 1,
               }}
             >
+              {/* Close button */}
+              <div style={{ position: "absolute", top: isMobile ? "calc(env(safe-area-inset-top) + 16px)" : 16, right: 16, zIndex: 2 }}>
+                <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                    <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+                  </svg>
+                </GlassButton>
+              </div>
+
               {/* ── Header section ── */}
               <div
                 style={{
@@ -202,6 +294,7 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
                 />
 
                 <div
+                  ref={titleRef}
                   style={{
                     color: "#111111",
                     fontFamily: '"JetBrains Mono", system-ui, sans-serif',
@@ -356,6 +449,7 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
           </div>
         </motion.div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
