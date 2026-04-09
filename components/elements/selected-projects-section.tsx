@@ -1049,7 +1049,7 @@ export function SelectedProjectsSection({
               }}
               style={isMobile
                 ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
-                : { columns: 3, columnGap: 16, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
+                : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
               }
             >
               {STICKY_ASSETS.map((asset, i) => (
@@ -1061,7 +1061,7 @@ export function SelectedProjectsSection({
                     exit: { opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.15 } }
                   }}
                   style={{
-                    breakInside: isMobile ? undefined : "avoid", marginBottom: isMobile ? 0 : 16, borderRadius: isMobile ? 12 : 32,
+                    breakInside: isMobile ? undefined : "avoid", marginBottom: 0, borderRadius: isMobile ? 12 : 32,
                     overflow: "hidden",
                     backgroundColor: '#DDDDDD',
                   }}
