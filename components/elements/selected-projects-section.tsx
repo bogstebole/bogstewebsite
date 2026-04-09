@@ -28,10 +28,10 @@ interface SelectedProjectsSectionProps {
   onNotesClose?: () => void;
   /** Called when Vorli hero card is clicked */
   onVorliClick?: () => void;
-  /** Called when Sticky card is clicked — receives the card's DOMRect as origin */
-  onStickyClick?: (rect: DOMRect) => void;
-  /** Whether the sticky overlay is currently open */
-  isStickyOpen?: boolean;
+  onStickyExpand?: () => void;
+  onStickyCloseStart?: () => void;
+  onStickyClose?: () => void;
+  isStickyExpanded?: boolean;
 }
 
 // ── Mobile card deck ──────────────────────────────────────────────────────────
@@ -60,28 +60,32 @@ function stackTransform(pos: number) {
 
 interface MobileDeckProps {
   isNotesExpanded: boolean;
+  isStickyExpanded: boolean;
   isDesktop: boolean;
   onNotesClick: () => void;
   onVorliClick?: () => void;
-  onStickyClick?: (rect: DOMRect) => void;
-  isStickyOpen?: boolean;
+  onStickyClick: () => void;
   stickyIconRef: React.RefObject<HTMLDivElement | null>;
   notesRippleRef: React.RefObject<HTMLDivElement | null>;
   miniTagControls: ReturnType<typeof useAnimation>;
+  stickyMiniTagControls: ReturnType<typeof useAnimation>;
   returningRef: React.RefObject<boolean>;
+  stickyReturningRef: React.RefObject<boolean>;
 }
 
 function MobileDeck({
   isNotesExpanded,
+  isStickyExpanded,
   isDesktop,
   onNotesClick,
   onVorliClick,
   onStickyClick,
-  isStickyOpen,
   stickyIconRef,
   notesRippleRef,
   miniTagControls,
+  stickyMiniTagControls,
   returningRef,
+  stickyReturningRef,
 }: MobileDeckProps) {
   const [order, setOrder] = useState([0, 1, 2]);
   const [exitDir, setExitDir] = useState<number | null>(null);
@@ -131,24 +135,21 @@ function MobileDeck({
           if (!isFront || exitDir !== null) return;
           if (isNotesCard) { onNotesClick(); return; }
           if (card.key === "vorli") { onVorliClick?.(); return; }
-          if (isStickyCard) {
-            const el = stickyIconRef.current;
-            if (el) onStickyClick?.(el.getBoundingClientRect());
-          }
+          if (isStickyCard) { onStickyClick(); return; }
         };
 
         return (
           <motion.div
             key={cardIdx}
             ref={isNotesCard ? notesRippleRef : undefined}
-            layoutId={isNotesCard && isDesktop ? "notes-card" : undefined}
+            layoutId={isDesktop ? (isNotesCard ? "notes-card" : isStickyCard ? "sticky-card" : undefined) : undefined}
             animate={animateTarget}
             transition={
               isFront && exitDir !== null
                 ? { type: "tween", duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }
                 : { type: "spring", stiffness: 340, damping: 28 }
             }
-            drag={isFront && !isNotesExpanded && exitDir === null ? "x" : false}
+            drag={isFront && !isNotesExpanded && !isStickyExpanded && exitDir === null ? "x" : false}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={1}
             onDragEnd={isFront ? handleDragEnd : undefined}
@@ -160,6 +161,13 @@ function MobileDeck({
                       void miniTagControls.start("visible");
                     }
                   }
+                : isStickyCard
+                ? () => {
+                    if (stickyReturningRef.current) {
+                      stickyReturningRef.current = false;
+                      void stickyMiniTagControls.start("visible");
+                    }
+                  }
                 : undefined
             }
             onClick={handleClick}
@@ -169,15 +177,14 @@ function MobileDeck({
               top: 0,
               left: 0,
               zIndex: order.length - stackPos,
-              cursor: isFront && !isNotesExpanded ? (isNotesCard ? "pointer" : "grab") : "default",
+              cursor: isFront && !isNotesExpanded && !isStickyExpanded ? (isNotesCard || isStickyCard ? "pointer" : "grab") : "default",
               pointerEvents: isFront ? "auto" : "none",
-              overflow: isNotesCard && isNotesExpanded ? "visible" : "hidden",
-              // On desktop the FLIP source must disappear; on mobile the sheet slides over the deck
-              visibility: isNotesCard && isNotesExpanded && isDesktop ? "hidden" : "visible",
+              overflow: (isNotesCard && isNotesExpanded) || (isStickyCard && isStickyExpanded) ? "visible" : "hidden",
+              visibility: ((isNotesCard && isNotesExpanded) || (isStickyCard && isStickyExpanded)) && isDesktop ? "hidden" : "visible",
               userSelect: "none",
               WebkitUserSelect: "none",
             }}
-            whileDrag={isFront && !isNotesCard ? { cursor: "grabbing" } : undefined}
+            whileDrag={isFront && !isNotesCard && !isStickyCard ? { cursor: "grabbing" } : undefined}
           >
             {/* Icon area */}
             <div
@@ -192,7 +199,7 @@ function MobileDeck({
             >
               {isStickyCard ? (
                 <div ref={stickyIconRef}>
-                  <StickyNotesIcon opacity={isStickyOpen ? 0 : 1} />
+                  <StickyNotesIcon opacity={isStickyExpanded ? 0 : 1} />
                 </div>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -233,6 +240,19 @@ function MobileDeck({
                   <AppStoreBadge active={false} />
                 </motion.div>
               </motion.div>
+            ) : isStickyCard ? (
+              <motion.div
+                animate={stickyMiniTagControls}
+                initial="visible"
+                variants={BADGE_CONTAINER_VARIANTS}
+                style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center", width: "100%" }}
+              >
+                {card.tags.map((label) => (
+                  <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
+                    <ProjectTag label={label} variant="glass" />
+                  </motion.div>
+                ))}
+              </motion.div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center", width: "100%" }}>
                 {card.tags.map((label) => (
@@ -248,6 +268,16 @@ function MobileDeck({
 }
 
 // ── Useless Notes assets ───────────────────────────────────────────────────────
+
+const STICKY_ASSETS = [
+  { src: "/assets/Sticky/Home screen.png", alt: "Sticky home screen" },
+  { src: "/assets/Sticky/Add task.png",    alt: "Add task" },
+  { src: "/assets/Sticky/Expand.png",      alt: "Expand view" },
+  { src: "/assets/Sticky/Reorder.png",     alt: "Reorder tasks" },
+];
+
+const STICKY_DESCRIPTION =
+  "Most task apps organize your work into lists that feel like chores. Sticky treats your tasks as a living canvas — notes float, stack, and drift, making the act of planning feel more like thinking than filing. Built for people who want their tools to have personality.";
 
 const USELESS_NOTES_ASSETS = [
   { type: "video" as const, src: "/assets/Useless Notes/Onboarding.mp4" },
@@ -265,9 +295,11 @@ export function SelectedProjectsSection({
   onNotesExpand,
   onNotesCloseStart,
   onNotesClose,
+  onStickyExpand,
+  onStickyCloseStart,
+  onStickyClose,
   onVorliClick,
-  onStickyClick,
-  isStickyOpen,
+  isStickyExpanded,
 }: SelectedProjectsSectionProps) {
   const { isMobile, isDesktop } = useBreakpoint();
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
@@ -281,19 +313,35 @@ export function SelectedProjectsSection({
   const expandingRef = useRef(false);
   const [isNotesClosing, setIsNotesClosing] = useState(false);
   const returningRef = useRef(false);
+  
+  // Sticky state local
+  const [internalStickyExpanded, setInternalStickyExpanded] = useState(false);
+  const stickyContentControls = useAnimation();
+  const stickyGridControls = useAnimation();
+  const stickyBadgeControls = useAnimation();
+  const stickyMiniTagControls = useAnimation();
+  const stickyClosingRef = useRef(false);
+  const stickyExpandingRef = useRef(false);
+  const [isStickyClosing, setIsStickyClosing] = useState(false);
+  const stickyReturningRef = useRef(false);
+  const stickyBadgesRef = useRef<HTMLDivElement>(null);
+  const [showStickyFloatingHeader, setShowStickyFloatingHeader] = useState(false);
+  const [isStickySheetReady, setIsStickySheetReady] = useState(false);
+
   const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
-  // Ensure mini-card tags start visible (animation controls don't auto-propagate initial variant)
   useEffect(() => { void miniTagControls.start("visible"); }, [miniTagControls]);
+  useEffect(() => { void stickyMiniTagControls.start("visible"); }, [stickyMiniTagControls]);
   
   const headerRef = useRef<HTMLDivElement>(null);
   const badgesRef = useRef<HTMLDivElement>(null);
-  const [showStickyHeader, setShowStickyHeader] = useState(false);
-  // Only start observing after the sheet has fully animated in
+  const [showStickyHeader, setShowStickyHeader] = useState(false); // Notes floating header
   const [isSheetReady, setIsSheetReady] = useState(false);
 
   useEffect(() => {
     if (!isNotesExpanded || !isSheetReady) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowStickyHeader(false);
       return;
     }
@@ -306,6 +354,23 @@ export function SelectedProjectsSection({
     observer.observe(el);
     return () => observer.disconnect();
   }, [isNotesExpanded, isSheetReady]);
+
+  // Sticky header observer
+  useEffect(() => {
+    if (!internalStickyExpanded || !isStickySheetReady) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShowStickyFloatingHeader(false);
+      return;
+    }
+    const el = stickyBadgesRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyFloatingHeader(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [internalStickyExpanded, isStickySheetReady]);
 
   const RIPPLE_CONFIG = { speed: 270, ringWidth: 42, duration: 1000, textStrength: 7, imageStrength: 5 };
   const notesRippleRef = useRippleWave(RIPPLE_CONFIG) as unknown as React.RefObject<HTMLDivElement>;
@@ -344,13 +409,48 @@ export function SelectedProjectsSection({
     setIsNotesClosing(false);
   }, [contentControls, gridControls, badgeControls, onNotesCloseStart, onNotesClose, isDesktop, miniTagControls]);
 
+  // Sticky Expand/Close Handlers
+  const handleStickyExpandAction = useCallback(async () => {
+    if (internalStickyExpanded || stickyClosingRef.current || stickyExpandingRef.current) return;
+    stickyExpandingRef.current = true;
+    setInternalStickyExpanded(true);
+    onStickyExpand?.();
+    await stickyMiniTagControls.start("exit");
+    stickyExpandingRef.current = false;
+  }, [internalStickyExpanded, stickyMiniTagControls, onStickyExpand]);
+
+  const handleStickyCloseAction = useCallback(async () => {
+    if (stickyClosingRef.current || stickyExpandingRef.current) return;
+    stickyClosingRef.current = true;
+    setIsStickyClosing(true);
+    onStickyCloseStart?.();
+    await Promise.all([
+      stickyContentControls.start("exit"),
+      stickyGridControls.start("exit"),
+      stickyBadgeControls.start("exit"),
+    ]);
+    if (isDesktop) {
+      stickyReturningRef.current = true;
+    } else {
+      void stickyMiniTagControls.start("visible");
+    }
+    setInternalStickyExpanded(false);
+    onStickyClose?.();
+    setIsStickySheetReady(false);
+    stickyClosingRef.current = false;
+    setIsStickyClosing(false);
+  }, [stickyContentControls, stickyGridControls, stickyBadgeControls, onStickyCloseStart, onStickyClose, isDesktop, stickyMiniTagControls]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isNotesExpanded) void handleClose();
+      if (e.key === "Escape") {
+         if (isNotesExpanded) void handleClose();
+         if (internalStickyExpanded) void handleStickyCloseAction();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [handleClose, isNotesExpanded]);
+  }, [handleClose, isNotesExpanded, internalStickyExpanded, handleStickyCloseAction]);
 
   return (
     <LayoutGroup id="selected-projects">
@@ -373,15 +473,17 @@ export function SelectedProjectsSection({
           /* ── Mobile: swipeable card deck ── */
           <MobileDeck
             isNotesExpanded={isNotesExpanded}
+            isStickyExpanded={internalStickyExpanded}
             isDesktop={isDesktop}
             onNotesClick={() => void handleExpand()}
             onVorliClick={onVorliClick}
-            onStickyClick={onStickyClick}
-            isStickyOpen={isStickyOpen}
+            onStickyClick={() => void handleStickyExpandAction()}
             stickyIconRef={stickyIconRef}
             notesRippleRef={notesRippleRef}
             miniTagControls={miniTagControls}
+            stickyMiniTagControls={stickyMiniTagControls}
             returningRef={returningRef}
+            stickyReturningRef={stickyReturningRef}
           />
         ) : (
           /* ── Desktop: three fanned cards side by side ── */
@@ -437,18 +539,24 @@ export function SelectedProjectsSection({
               rotate={5}
               marginLeft={-21}
               zIndex={1}
-              imageNode={
-                <div ref={stickyIconRef}>
-                  <StickyNotesIcon opacity={isStickyOpen ? 0 : 1} />
-                </div>
-              }
-              overflow="visible"
-              cardRef={stickyCardRef}
-              cursor="pointer"
-              onClick={() => {
-                const el = stickyIconRef.current;
-                if (el) onStickyClick?.(el.getBoundingClientRect());
+              layoutId="sticky-project-modal"
+              overflow={internalStickyExpanded ? "visible" : undefined}
+              visibility={internalStickyExpanded ? "hidden" : undefined}
+              animate={internalStickyExpanded ? undefined : { opacity: 1 }}
+              whileHover={internalStickyExpanded ? undefined : { y: -16 }}
+              transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
+              onLayoutAnimationComplete={() => {
+                if (stickyReturningRef.current) {
+                  stickyReturningRef.current = false;
+                  void stickyMiniTagControls.start("visible");
+                }
               }}
+              cardRef={stickyCardRef}
+              cursor={internalStickyExpanded ? "default" : "pointer"}
+              pointerEvents={internalStickyExpanded ? "none" : "auto"}
+              onClick={!internalStickyExpanded ? () => void handleStickyExpandAction() : undefined}
+              tagControls={stickyMiniTagControls}
+              tagInitial="visible"
             />
           </>
         )}
@@ -484,7 +592,6 @@ export function SelectedProjectsSection({
           <motion.div
             key="notes-expanded"
             layoutId={isDesktop ? "notes-card" : undefined}
-            layoutScroll={isDesktop}
             animate={{ y: 0, rotate: 0 }}
             initial={isDesktop ? undefined : { y: "100%" }}
             exit={isDesktop ? undefined : { y: "100%" }}
@@ -525,11 +632,11 @@ export function SelectedProjectsSection({
               // Structural positioning (Bottom Sheet, 70% height)
               position: "fixed",
               bottom: 0,
-              left: isMobile ? 0 : "50%",
-              marginLeft: isMobile ? 0 : -438.5,
+              left: 0,
+              right: 0, margin: "0 auto",
               width: isMobile ? "100%" : 877,
               height: isMobile ? "100dvh" : "95vh",
-              overflowY: "auto",
+              overflowY: "scroll",
               overflowX: "hidden",
               zIndex: 51,
               cursor: "default",
@@ -647,8 +754,8 @@ export function SelectedProjectsSection({
                   }}
                   style={{ color: '#000000CC', fontFamily: '"Geist", system-ui, sans-serif', fontSize: '14px', lineHeight: '18px', textAlign: 'center', whiteSpace: 'pre-wrap', width: '100%' }}
                 >
-                  It's a conceptual work that visually shows how we clutter our mental space.
-                  <br />The main "canvas" gets more "useless" over time, totally packed with notes and links, and the "find" mode is kind of the opposite, showing how we can only find things when we really need them. It's a reflection on the whole concept of how we deal with information overload today.
+                  It&apos;s a conceptual work that visually shows how we clutter our mental space.
+                  <br />The main &quot;canvas&quot; gets more &quot;useless&quot; over time, totally packed with notes and links, and the &quot;find&quot; mode is kind of the opposite, showing how we can only find things when we really need them. It&apos;s a reflection on the whole concept of how we deal with information overload today.
                 </motion.div>
 
                 {/* Styled Download Button from Paper */}
@@ -721,6 +828,250 @@ export function SelectedProjectsSection({
                       style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
                     />
                   )}
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Sticky Backdrop ── */}
+      <AnimatePresence>
+        {internalStickyExpanded && (
+          <motion.div
+            key="sticky-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => void handleStickyCloseAction()}
+            style={{
+              position: "fixed",
+              inset: 0,
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              zIndex: 50,
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── Sticky Expanded Card ── */}
+      <AnimatePresence>
+        {internalStickyExpanded && (
+          <motion.div
+            key="sticky-expanded"
+            layoutId={isDesktop ? "sticky-project-modal" : undefined}
+            animate={{ y: 0, rotate: 0 }}
+            initial={isDesktop ? undefined : { y: "100%" }}
+            exit={isDesktop ? undefined : { y: "100%" }}
+            transition={{
+              layout: CARD_SPRING,
+              y: { type: "spring", stiffness: 340, damping: 34 },
+              rotate: { type: "spring", stiffness: 400, damping: 30 },
+            }}
+            onAnimationComplete={() => {
+              if (!stickyClosingRef.current) {
+                setIsStickySheetReady(true);
+                void stickyBadgeControls.start("visible");
+                void stickyContentControls.start("visible");
+                setTimeout(() => {
+                  if (!stickyClosingRef.current) void stickyGridControls.start("visible");
+                }, 350);
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              alignItems: 'center',
+              backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #EEEEEE 100%)',
+              backgroundOrigin: 'padding-box',
+              borderTopLeftRadius: isMobile ? 0 : '40px',
+              borderTopRightRadius: isMobile ? 0 : '40px',
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+              boxShadow: 'inset 0 0 0 4px #FFFFFF, #00000003 0px 400px 165px, #0000000D 0px 105px 140px, #0000001A 0px 105px 105px, #0000001A 0px 25px 55px',
+              boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: isMobile ? '24px' : '48px',
+              paddingTop: isMobile ? 'calc(48px + env(safe-area-inset-top))' : 48,
+              paddingBottom: isMobile ? 'calc(32px + env(safe-area-inset-bottom))' : 32,
+              paddingInline: 16,
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0, margin: "0 auto",
+              width: isMobile ? "100%" : 877,
+              height: isMobile ? "100dvh" : "95vh",
+              overflowY: "scroll",
+              overflowX: "hidden",
+              zIndex: 51,
+              cursor: "default",
+            }}
+          >
+            {/* Sticky Floating Header */}
+            <motion.div
+              initial={{ opacity: 0, y: -12 }}
+              animate={{
+                opacity: showStickyFloatingHeader && !isStickyClosing ? 1 : 0,
+                y: showStickyFloatingHeader && !isStickyClosing ? 0 : -12,
+              }}
+              transition={{ type: "spring", stiffness: 400, damping: 36 }}
+              style={{
+                alignItems: "center",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                borderRadius: 9999,
+                boxSizing: "border-box",
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "20px 24px",
+                pointerEvents: showStickyFloatingHeader && !isStickyClosing ? "auto" : "none",
+                position: "fixed",
+                top: "calc(5vh + 16px)",
+                left: isMobile ? 16 : "50%",
+                marginLeft: isMobile ? 0 : -422.5,
+                width: isMobile ? "calc(100% - 32px)" : 845,
+                zIndex: 52,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <img
+                  src="/images/sticky.png"
+                  alt="Sticky Icon"
+                  style={{ width: "24px", height: "24px", objectFit: "cover", borderRadius: 4 }}
+                />
+                <span style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "16px", letterSpacing: "-0.01em", lineHeight: "1" }}>
+                  Sticky
+                </span>
+              </div>
+              <GlassButton size="s" onClick={() => void handleStickyCloseAction()} aria-label="Close">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+                </svg>
+              </GlassButton>
+            </motion.div>
+
+            {/* Sticky Close button */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { delay: 0.3 } }}
+              exit={{ opacity: 0, transition: { duration: 0.1 } }}
+              style={{ position: "absolute", top: isMobile ? "calc(env(safe-area-inset-top) + 16px)" : 24, right: 24 }}
+            >
+              <GlassButton size="s" onClick={() => void handleStickyCloseAction()} aria-label="Close">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                  <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+                </svg>
+              </GlassButton>
+            </motion.div>
+
+            {/* Header section */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: isMobile ? '100%' : '480px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                  <img
+                    src="/images/sticky.png"
+                    alt="Sticky Icon"
+                    style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
+                  />
+                  <div style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '20px', letterSpacing: '-0.01em', lineHeight: '1' }}>
+                    Sticky
+                  </div>
+                </div>
+
+                <motion.div
+                  ref={stickyBadgesRef}
+                  animate={stickyBadgeControls}
+                  initial="hidden"
+                  variants={BADGE_CONTAINER_VARIANTS}
+                  style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center" }}
+                >
+                  {["iOS", "Productivity"].map((label) => (
+                    <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
+                      <ProjectTag label={label} variant="glass" />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+
+              {/* Lower Details */}
+              <motion.div
+                animate={stickyContentControls}
+                initial="hidden"
+                variants={{
+                  visible: { transition: { staggerChildren: 0.1 } },
+                  hidden: { transition: { staggerChildren: 0.05 } },
+                  exit: { transition: { staggerChildren: 0.05 } }
+                }}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%' }}
+              >
+                <motion.div
+                  variants={{
+                    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
+                    hidden: { opacity: 0, y: 15 },
+                    exit: { opacity: 0, y: 10, transition: { duration: 0.15 } }
+                  }}
+                  style={{ color: '#000000CC', fontFamily: '"Geist", system-ui, sans-serif', fontSize: '14px', lineHeight: '18px', textAlign: 'center', width: '100%' }}
+                >
+                  {STICKY_DESCRIPTION}
+                </motion.div>
+
+                <motion.div
+                  variants={{
+                    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
+                    hidden: { opacity: 0, y: 15 },
+                    exit: { opacity: 0, y: 10, transition: { duration: 0.15 } }
+                  }}
+                  style={{
+                    alignItems: 'center', backdropFilter: 'blur(1px)', borderRadius: '9999px',
+                    boxShadow: '#FFFFFF -2px 2px 2px 1px inset, #00000069 -1px -3px 3px -2px inset, #000000D6 2px 1px 4px -4px inset, #FFFFFF 0px 0px 7px 4px inset, #00000040 0px -9px 14px 4px inset, #0000001A -2px -3px 5px 3px inset, #FFFFFF 0px 20px 8px -9px inset, #0000001A 0px 34px 10px -9px inset, #00000003 0px 27px 8px, #00000003 0px 17px 6px, #0000000D 0px 10px 6px, #0000001A 0px 4px 4px, #0000001A 0px 1px 3px',
+                    display: 'flex', gap: '4px', height: '32px', justifyContent: 'center',
+                    paddingBottom: '9px', paddingLeft: '16px', paddingRight: '16px', paddingTop: '9px',
+                    cursor: 'progress'
+                  }}
+                >
+                  <span style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '14px', letterSpacing: '0.03em', lineHeight: '1' }}>
+                    Download the app
+                  </span>
+                </motion.div>
+              </motion.div>
+            </div>
+
+            {/* Grid */}
+            <motion.div
+              animate={stickyGridControls}
+              initial="hidden"
+              variants={{
+                visible: { transition: { staggerChildren: 0.1 } },
+                hidden: { transition: { staggerChildren: 0.05 } },
+                exit: { transition: { staggerChildren: 0.05 } }
+              }}
+              style={isMobile
+                ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
+                : { columns: 3, columnGap: 16, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
+              }
+            >
+              {STICKY_ASSETS.map((asset, i) => (
+                <motion.div
+                  key={i}
+                  variants={{
+                    visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 200, damping: 20 } },
+                    hidden: { opacity: 0, y: 40, scale: 0.95 },
+                    exit: { opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.15 } }
+                  }}
+                  style={{
+                    breakInside: isMobile ? undefined : "avoid", marginBottom: isMobile ? 0 : 16, borderRadius: isMobile ? 12 : 32,
+                    overflow: "hidden",
+                    backgroundColor: '#DDDDDD',
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={encodeURI(asset.src)}
+                    alt={asset.alt}
+                    style={{ width: "100%", height: "auto", display: "block" }}
+                  />
                 </motion.div>
               ))}
             </motion.div>

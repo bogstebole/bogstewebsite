@@ -15,7 +15,7 @@ import { PauschalDetail } from "@/components/ui/pauschal-detail";
 import { FynnDetail } from "@/components/ui/fynn-detail";
 import { ContentSnareDetail } from "@/components/ui/content-snare-detail";
 import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
-import { StickyOverlay } from "@/components/ui/sticky-overlay";
+
 
 function getBuildVersion(): string {
   const now = new Date();
@@ -112,9 +112,8 @@ export function V2Canvas() {
   const envelopeRef = useRef<HTMLDivElement>(null);
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const [isNotesClosing, setIsNotesClosing] = useState(false);
-  const [isStickyOpen, setIsStickyOpen] = useState(false);
+  const [isStickyExpanded, setIsStickyExpanded] = useState(false);
   const [isStickyClosing, setIsStickyClosing] = useState(false);
-  const [stickyOriginRect, setStickyOriginRect] = useState<DOMRect | null>(null);
   const handleProjectClick = (key: string) => {
     const el = entryRefs.current[key];
     if (el) {
@@ -174,25 +173,23 @@ export function V2Canvas() {
     setIsClosing(false);
   };
 
-  const handleStickyClick = (rect: DOMRect) => {
-    setStickyOriginRect(rect);
-    setIsStickyOpen(true);
+  const handleStickyExpand = () => {
+    setIsStickyExpanded(true);
     setIsStickyClosing(false);
   };
 
   const handleStickyCloseStart = () => setIsStickyClosing(true);
 
   const handleStickyClose = () => {
-    setIsStickyOpen(false);
-    setStickyOriginRect(null);
+    setIsStickyExpanded(false);
     setIsStickyClosing(false);
   };
 
   // Lock body scroll when detail is open
   useEffect(() => {
-    document.body.style.overflow = activeProject || envelopeOpen || isNotesExpanded || isStickyOpen ? "hidden" : "";
+    document.body.style.overflow = activeProject || envelopeOpen || isNotesExpanded || isStickyExpanded ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [activeProject, envelopeOpen, isNotesExpanded, isStickyOpen]);
+  }, [activeProject, envelopeOpen, isNotesExpanded, isStickyExpanded]);
 
   // Light mode only for V2
   const primaryColor = "#000000";
@@ -201,10 +198,12 @@ export function V2Canvas() {
   const primary40 = "rgba(0,0,0,0.40)";
 
   // Un-blur background as soon as close begins
+  // NOTE: isStickyExpanded is intentionally excluded — scaling the container while
+  // the sticky FLIP animation runs shifts the source card mid-flight and causes
+  // Framer Motion to loop recalculate, producing the "pulsating" effect.
   const shouldBlur =
     (activeProject !== null && !isClosing) ||
-    (envelopeOpen && !isEnvelopeClosing) ||
-    (isStickyOpen && !isStickyClosing);
+    (envelopeOpen && !isEnvelopeClosing);
   const blurAnim = shouldBlur
     ? { scale: 0.93, filter: "blur(10px)", pointerEvents: "none" as const }
     : { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const };
@@ -349,9 +348,11 @@ export function V2Canvas() {
           onNotesExpand={handleNotesExpand}
           onNotesCloseStart={handleNotesCloseStart}
           onNotesClose={handleNotesClose}
+          onStickyExpand={handleStickyExpand}
+          onStickyCloseStart={handleStickyCloseStart}
+          onStickyClose={handleStickyClose}
           onVorliClick={handleVorliHeroClick}
-          onStickyClick={handleStickyClick}
-          isStickyOpen={isStickyOpen || isStickyClosing}
+          isStickyExpanded={isStickyExpanded || isStickyClosing}
         />
 
         {/* ── Projects divider ── */}
@@ -486,14 +487,7 @@ export function V2Canvas() {
           onClose={handleEnvelopeClose}
         />
       )}
-      {/* ── Sticky overlay ── */}
-      {isStickyOpen && stickyOriginRect && (
-        <StickyOverlay
-          originRect={stickyOriginRect!}
-          onCloseStart={handleStickyCloseStart}
-          onClose={handleStickyClose}
-        />
-      )}
+
     </motion.div>
   );
 }
