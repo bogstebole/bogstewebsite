@@ -327,6 +327,8 @@ export function V2Canvas() {
           <p
             style={{
               marginTop: 12,
+              paddingLeft: isMobile ? 16 : 0,
+              paddingRight: isMobile ? 16 : 0,
               fontFamily: "var(--font-geist-sans), sans-serif",
               fontWeight: 400,
               fontSize: 14,
@@ -355,44 +357,7 @@ export function V2Canvas() {
           isStickyExpanded={isStickyExpanded || isStickyClosing}
         />
 
-        {/* ── Projects divider ── */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            width: "100%",
-            maxWidth: 600,
-            marginTop: isMobile ? 32 : 60,
-            alignSelf: "center",
-            paddingLeft: isMobile ? 24 : 0,
-            paddingRight: isMobile ? 24 : 0,
-          }}
-        >
-          <div style={{ display: "flex", gap: 2, width: 11, flexShrink: 0, opacity: 0.2 }}>
-            {Array.from({ length: 1 }).map((_, i) => (
-              <div key={i} style={{ backgroundColor: "#585858", flex: 1, height: "1px" }} />
-            ))}
-          </div>
-          <span
-            style={{
-              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-              fontSize: 10,
-              letterSpacing: "-0.04em",
-              color: "rgba(0,0,0,0.3)",
-              textTransform: "uppercase",
-              lineHeight: 1.3,
-              flexShrink: 0,
-            }}
-          >
-            Projects
-          </span>
-          <div style={{ display: "flex", gap: 2, flex: 1, opacity: 0.2 }}>
-            {Array.from({ length: 53 }).map((_, i) => (
-              <div key={i} style={{ backgroundColor: "#585858", flex: 1, height: "1px" }} />
-            ))}
-          </div>
-        </div>
+        {/* ── Projects divider (hidden) ── */}
 
         {/* ── Project section ── */}
         <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0 }}>

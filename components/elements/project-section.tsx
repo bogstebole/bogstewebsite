@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ProjectEntry } from "@/components/elements/project-entry";
 import { EnvelopeWidget } from "@/components/elements/EnvelopeWidget";
 import glassStyles from "@/components/ui/GlassButton.module.css";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 interface ProjectSectionProps {
   primaryColor: string;
@@ -104,6 +105,7 @@ function SocialIconButton({
 
 export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, envelopeRef, onEnvelopeClick, isEnvelopeOpen, style }: ProjectSectionProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const { isMobile } = useBreakpoint();
 
   const entryProps = (key: string) => ({
     entryKey: key,
@@ -137,32 +139,14 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         style={{
           alignItems: "start",
           display: "flex",
-          gap: 8,
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 24 : 8,
           padding: "0 16px",
           width: "100%",
         }}
       >
-        {/* ── Client_ column ── */}
-        <div style={{ flexShrink: 0, width: "50%" }}>
-          <div style={labelStyle}>Client_</div>
-
-          <ProjectEntry
-            {...entryProps("fynn")}
-            icon={<ProjectIcon src="/images/fynn.png" alt="Fynn.io" rotate="13.1deg" width={12} height={12} />}
-            label="Fynn.io"
-            tags={["Web", "HealthTech", "B2B"]}
-          />
-
-          <ProjectEntry
-            {...entryProps("contentSnare")}
-            icon={<ProjectIcon src="/images/content-snare.png" alt="Content Snare" rotate="3.34deg" width={12} height={12} />}
-            label="Content Snare"
-            tags={["Web", "Productivity", "B2B, B2C"]}
-          />
-        </div>
-
         {/* ── Personal_ column ── */}
-        <div style={{ flexShrink: 0, width: "50%" }}>
+        <div style={{ flexShrink: 0, width: isMobile ? "100%" : "50%" }}>
           <div style={labelStyle}>Personal_</div>
 
           <ProjectEntry
@@ -181,12 +165,30 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             clickable
           />
 
-
           <ProjectEntry
             {...entryProps("pauschalTracker")}
             icon={<ProjectIcon src="/images/pauschal-tracker.png" alt="Pauschal Tracker" rotate="7.68deg" />}
             label="Pauschal Tracker"
             tags={["Web", "Earning limit tracker", "Personal Usage"]}
+          />
+        </div>
+
+        {/* ── Client_ column ── */}
+        <div style={{ flexShrink: 0, width: isMobile ? "100%" : "50%" }}>
+          <div style={labelStyle}>Client_</div>
+
+          <ProjectEntry
+            {...entryProps("fynn")}
+            icon={<ProjectIcon src="/images/fynn.png" alt="Fynn.io" rotate="13.1deg" width={12} height={12} />}
+            label="Fynn.io"
+            tags={["Web", "HealthTech", "B2B"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("contentSnare")}
+            icon={<ProjectIcon src="/images/content-snare.png" alt="Content Snare" rotate="3.34deg" width={12} height={12} />}
+            label="Content Snare"
+            tags={["Web", "Productivity", "B2B, B2C"]}
           />
         </div>
       </div>
