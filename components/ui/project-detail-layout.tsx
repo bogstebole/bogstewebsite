@@ -268,7 +268,7 @@ export function ProjectDetailLayout({
             display: "flex",
             justifyContent: "space-between",
             left: 0,
-            marginTop: 56,
+            marginTop: "calc(5dvh + 8px)",
             marginLeft: 8,
             marginRight: 8,
             padding: 16,
