@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, useAnimation, type Variants } from "framer-motion";
 import { ProjectTag } from "@/components/ui/project-tag";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 interface ContentSnareDetailProps {
   originRect: DOMRect;
@@ -39,7 +41,11 @@ export function ContentSnareDetail({ originRect, onCloseStart, onClose }: Conten
   const closingRef = useRef(false);
   const [isClosing, setIsClosing] = useState(false);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
+  const { isMobile } = useBreakpoint();
+
+  useEffect(() => setMounted(true), []);
 
   const cardWidth = typeof window !== "undefined" ? window.innerWidth * 0.6 : 1152;
   const targetLeft =
@@ -99,6 +105,137 @@ export function ContentSnareDetail({ originRect, onCloseStart, onClose }: Conten
     />
   );
 
+  // ── Mobile: bottom sheet ──────────────────────────────────────────────────
+  if (isMobile) {
+    if (!mounted) return null;
+
+    const child = (delay: number) => ({
+      initial: { opacity: 0, y: 10 },
+      animate: isClosing ? { opacity: 0, y: 4 } : { opacity: 1, y: 0 },
+      transition: { type: "spring" as const, stiffness: 340, damping: 36, delay: isClosing ? 0 : delay },
+    });
+
+    const ALL_ASSETS = [
+      { src: encodeURI("/assets/Content snare/Form layout.png"), alt: "Form layout" },
+      { src: encodeURI("/assets/Content snare/sidebar.png"), alt: "Sidebar" },
+      { src: encodeURI("/assets/Content snare/comments.png"), alt: "Comments" },
+      { src: encodeURI("/assets/Content snare/Input section.png"), alt: "Input section" },
+      { src: encodeURI("/assets/Content snare/success.png"), alt: "Success" },
+    ];
+
+    return createPortal(
+      <>
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isClosing ? 0 : 1 }}
+          transition={{ duration: 0.25 }}
+          onClick={() => void initiateClose()}
+          style={{
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            backgroundColor: "rgba(0,0,0,0.15)",
+            inset: 0,
+            position: "fixed",
+            zIndex: 10,
+          }}
+        />
+
+        {/* Bottom sheet */}
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={{ y: isClosing ? "100%" : 0 }}
+          transition={{ type: "spring", stiffness: 340, damping: 34 }}
+          onAnimationComplete={() => { if (isClosing) onClose(); }}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            backdropFilter: "blur(3px) hue-rotate(180deg)",
+            WebkitBackdropFilter: "blur(3px) hue-rotate(180deg)",
+            backgroundImage: "linear-gradient(in oklab 122.24deg, oklab(20.9% 0.0005 -0.002) 7.63%, oklab(45.5% 0 -0.0001 / 60%) 102.21%)",
+            backgroundOrigin: "border-box",
+            border: "1px solid #FFFFFF4A",
+            outline: "1px solid #565656",
+            bottom: 0,
+            boxSizing: "border-box",
+            display: "flex",
+            flexDirection: "column",
+            fontFamily: "var(--font-geist-sans), sans-serif",
+            gap: 24,
+            height: "100dvh",
+            left: 0,
+            overflowX: "hidden",
+            overflowY: "scroll",
+            paddingBottom: "calc(32px + env(safe-area-inset-bottom))",
+            paddingInline: 16,
+            paddingTop: "calc(56px + env(safe-area-inset-top))",
+            position: "fixed",
+            right: 0,
+            width: "100%",
+            zIndex: 11,
+          }}
+        >
+          {/* Close button */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isClosing ? 0 : 1 }}
+            transition={{ delay: isClosing ? 0 : 0.3 }}
+            style={{ position: "absolute", top: "calc(env(safe-area-inset-top) + 16px)", right: 16 }}
+          >
+            <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+              </svg>
+            </GlassButton>
+          </motion.div>
+
+          {/* Header: logo */}
+          <motion.div {...child(0.06)}>
+            <ContentSnareLogo />
+          </motion.div>
+
+          {/* Title + short description */}
+          <motion.div {...child(0.12)}>
+            <p style={{ color: "#FFFFFF", fontSize: 22, fontWeight: 500, lineHeight: 1.3, margin: 0 }}>
+              <span>Content Snare</span>
+              <span style={{ color: "rgba(255,255,255,0.45)" }}>
+                {" — Enhanced system led to faster request completion and reduced support tickets through clearer navigation and simplified user experience."}
+              </span>
+            </p>
+          </motion.div>
+
+          {/* Tags */}
+          <motion.div {...child(0.18)} style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {TAGS.map((tag) => (
+              <ProjectTag key={tag} label={tag} variant="dark" />
+            ))}
+          </motion.div>
+
+          {/* Description */}
+          <motion.div {...child(0.24)}>
+            <p style={{ color: "#FFFFFFCC", fontSize: 14, lineHeight: "21px", margin: 0 }}>
+              {`ContentSnare is an Australian productivity platform that helps businesses collect content and information from clients through structured request forms. They came to us needing a full redesign of their end-user request experience — not a blank-slate redesign, but one built directly on top of existing user feedback they had already collected. Discovery started with a planned workshop that went off-script, but the unstructured conversation turned out to surface exactly the insights we needed. The core friction points were clear: users missed submit buttons, got confused by terminology like "reject" and "submit for review," struggled with rigid section structures, and couldn't easily navigate or understand their progress through a form. We restructured field information hierarchically so critical details stood out, and replaced text-heavy status indicators with visual cues — cleaning up the interface without breaking familiar patterns. The sidebar was rebuilt to separate progress tracking from navigation, with color coding and icons that communicate field states without adding visual noise. The comment system got a straightforward but effective fix: alignment and background color now instantly distinguish who said what and in what context. On the creator side, we improved the dashboard layout, filter organization, and tackled the recurring request feature — a deceptively simple concept that required multiple steps to implement properly. Collaboration was fast and direct, coming straight from an owner-developer, which kept decisions quick even if it occasionally meant realigning after missed updates. The main lesson: rigid process isn't a prerequisite for good outcomes — the quality came from collaboration and adaptability, not structure. Results are still being measured as the features roll out, with future iterations tied to actual usage patterns rather than assumptions.`}
+            </p>
+          </motion.div>
+
+          {/* Assets — single column */}
+          <motion.div {...child(0.30)} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {ALL_ASSETS.map((asset) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={asset.src}
+                src={asset.src}
+                alt={asset.alt}
+                style={{ borderRadius: 8, display: "block", height: "auto", width: "100%" }}
+              />
+            ))}
+          </motion.div>
+        </motion.div>
+      </>,
+      document.body
+    );
+  }
+
+  // ── Desktop ───────────────────────────────────────────────────────────────
   return (
     <>
       <style>{`

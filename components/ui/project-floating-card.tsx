@@ -51,7 +51,7 @@ const PROJECT_TAGS: Record<string, { tags: string[]; appStore?: boolean }> = {
 };
 
 /* ── Detail card target position ── */
-const CARD_WIDTH = 600;
+const CARD_WIDTH = 1100;
 const CARD_PADDING = 16;
 const CARD_TOP_VH = 8;
 
