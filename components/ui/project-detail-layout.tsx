@@ -194,8 +194,9 @@ export function ProjectDetailLayout({
             zIndex: 101,
           }}
         >
+
           {/* Main Content */}
-          <motion.div style={{ display: "flex", flexDirection: "column", gap: 32, paddingBottom: 32, flex: 1 }}>
+          <motion.div style={{ display: "flex", flexDirection: "column", gap: 32, paddingBottom: 32, flex: 1, position: "relative", zIndex: 1 }}>
 
             {/* Header: icon (left) + close (right) */}
             <div ref={headerRef} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
@@ -343,7 +344,7 @@ export function ProjectDetailLayout({
             boxSizing: "border-box",
             borderTopLeftRadius: 40,
             borderTopRightRadius: 40,
-            backgroundColor: "rgba(252, 252, 252, 0.95)", // High opacity slightly frosted
+            backgroundColor: "rgba(252, 252, 252, 0.95)",
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
             boxShadow: "0px -8px 32px rgba(0,0,0,0.08)",
@@ -353,12 +354,13 @@ export function ProjectDetailLayout({
             position: "relative",
           }}
         >
+
           {/* Main Content */}
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={isClosing ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
             transition={{ delay: 0.2, ...desktopSpring }}
-            style={{ display: "flex", flexDirection: "column", gap: 48, paddingBottom: 32 }}
+            style={{ display: "flex", flexDirection: "column", gap: 48, paddingBottom: 32, position: "relative", zIndex: 1 }}
           >
             {/* Header: icon (left) + close (right) */}
             <div ref={headerRef} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingInline: 16, paddingBlock: 8, flexShrink: 0 }}>
