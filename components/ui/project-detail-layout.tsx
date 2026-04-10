@@ -50,6 +50,7 @@ export function ProjectDetailLayout({
 
   const headerRef = useRef<HTMLDivElement>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [cardAnimationComplete, setCardAnimationComplete] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -74,8 +75,10 @@ export function ProjectDetailLayout({
   }, [initiateClose]);
 
 
-  // Intersection Observer for Sticky Header
+  // Intersection Observer for Sticky Header — only start after card animation completes
+  // to avoid the header being reported as off-screen while the card is still sliding in
   useEffect(() => {
+    if (!cardAnimationComplete) return;
     const el = headerRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
@@ -84,7 +87,7 @@ export function ProjectDetailLayout({
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [mounted]);
+  }, [cardAnimationComplete]);
 
 
   if (!mounted) return null;
@@ -165,6 +168,7 @@ export function ProjectDetailLayout({
           initial={{ y: "100%" }}
           animate={{ y: isClosing ? "100%" : 0 }}
           transition={sheetSpring}
+          onAnimationComplete={() => { if (!isClosing) setCardAnimationComplete(true); }}
           style={{
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
@@ -326,6 +330,7 @@ export function ProjectDetailLayout({
           initial={{ opacity: 0, y: "100%" }}
           animate={isClosing ? { opacity: 0, y: "100%" } : { opacity: 1, y: 0 }}
           transition={desktopSpring}
+          onAnimationComplete={() => { if (!isClosing) setCardAnimationComplete(true); }}
           onClick={(e) => e.stopPropagation()}
           style={{
             width: "100%",
