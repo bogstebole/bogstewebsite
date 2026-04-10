@@ -168,7 +168,7 @@ export function ProjectDetailLayout({
           style={{
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
-            backgroundColor: "rgba(252, 252, 252, 0.9)", 
+            backgroundColor: "rgba(252, 252, 252, 0.9)",
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
             borderTop: "1px solid rgba(0,0,0,0.05)",
@@ -213,9 +213,9 @@ export function ProjectDetailLayout({
 
             {/* Standardized 2-Column Description + Tags */}
             {(shortDescription || longDescription) && (
-              <div style={{ 
-                display: "flex", 
-                flexDirection: "column", 
+              <div style={{
+                display: "flex",
+                flexDirection: "column",
                 gap: 24,
                 alignItems: "flex-start"
               }}>
@@ -226,7 +226,7 @@ export function ProjectDetailLayout({
                         {shortDescription}
                       </div>
                     )}
-                    
+
                     {/* Tags below short description */}
                     {tags && tags.length > 0 && (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -238,7 +238,7 @@ export function ProjectDetailLayout({
                     )}
                   </div>
                 )}
-                
+
                 {longDescription && (
                   <div style={{ flex: 1.2, minWidth: 0, color: "rgba(0,0,0,0.7)", fontSize: 14, lineHeight: "21px", fontFamily: "var(--font-geist-sans), sans-serif" }}>
                     {longDescription}
@@ -255,41 +255,41 @@ export function ProjectDetailLayout({
 
         {/* Mobile Sticky Header */}
         <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{
-              opacity: showStickyHeader && !isClosing ? 1 : 0,
-              y: showStickyHeader && !isClosing ? 0 : -12,
-            }}
-            transition={stickySpring}
-            style={{
-              alignItems: "center",
-              backdropFilter: "blur(24px)",
-              WebkitBackdropFilter: "blur(24px)",
-              borderBottomLeftRadius: 24,
-              borderBottomRightRadius: 24,
-              display: "flex",
-              justifyContent: "space-between",
-              left: 0,
-              paddingBottom: 16,
-              paddingLeft: 16,
-              paddingRight: 16,
-              paddingTop: "calc(16px + env(safe-area-inset-top))",
-              pointerEvents: showStickyHeader && !isClosing ? "auto" : "none",
-              position: "fixed",
-              top: 0,
-              width: "100%",
-              zIndex: 102,
-              backgroundColor: "rgba(252, 252, 252, 0.7)",
-              borderBottom: "1px solid rgba(0,0,0,0.05)",
-              boxSizing: 'border-box'
-            }}
-          >
-            {renderHeaderContent('sticky')}
-            <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-              </svg>
-            </GlassButton>
+          initial={{ opacity: 0, y: -12 }}
+          animate={{
+            opacity: showStickyHeader && !isClosing ? 1 : 0,
+            y: showStickyHeader && !isClosing ? 0 : -12,
+          }}
+          transition={stickySpring}
+          style={{
+            alignItems: "center",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            borderBottomLeftRadius: 24,
+            borderBottomRightRadius: 24,
+            display: "flex",
+            justifyContent: "space-between",
+            left: 0,
+            paddingBottom: 16,
+            paddingLeft: 16,
+            paddingRight: 16,
+            paddingTop: "calc(16px + env(safe-area-inset-top))",
+            pointerEvents: showStickyHeader && !isClosing ? "auto" : "none",
+            position: "fixed",
+            top: 0,
+            width: "100%",
+            zIndex: 102,
+            backgroundColor: "rgba(252, 252, 252, 0.7)",
+            borderBottom: "1px solid rgba(0,0,0,0.05)",
+            boxSizing: 'border-box'
+          }}
+        >
+          {renderHeaderContent('sticky')}
+          <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+            </svg>
+          </GlassButton>
         </motion.div>
 
       </>,
@@ -306,7 +306,7 @@ export function ProjectDetailLayout({
         .layout-scroll::-webkit-scrollbar { display: none; }
         .layout-scroll { scrollbar-width: none; }
       `}</style>
-      
+
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -316,7 +316,7 @@ export function ProjectDetailLayout({
         style={{
           position: "fixed",
           inset: 0,
-          zIndex: 100, 
+          zIndex: 100,
           display: "flex",
           justifyContent: "center",
           alignItems: "flex-end" // Align to bottom
@@ -338,8 +338,8 @@ export function ProjectDetailLayout({
             gap: 16,
             padding: 24,
             boxSizing: "border-box",
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
+            borderTopLeftRadius: 40,
+            borderTopRightRadius: 40,
             backgroundColor: "rgba(252, 252, 252, 0.95)", // High opacity slightly frosted
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
@@ -352,10 +352,10 @@ export function ProjectDetailLayout({
         >
           {/* Main Content */}
           <motion.div
-             initial={{ opacity: 0, y: 14 }}
-             animate={isClosing ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
-             transition={{ delay: 0.2, ...desktopSpring }}
-             style={{ display: "flex", flexDirection: "column", gap: 48, paddingBottom: 32 }}
+            initial={{ opacity: 0, y: 14 }}
+            animate={isClosing ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, ...desktopSpring }}
+            style={{ display: "flex", flexDirection: "column", gap: 48, paddingBottom: 32 }}
           >
             {/* Header: icon (left) + close (right) */}
             <div ref={headerRef} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingInline: 16, paddingBlock: 8, flexShrink: 0 }}>
@@ -390,7 +390,7 @@ export function ProjectDetailLayout({
                         {shortDescription}
                       </div>
                     )}
-                    
+
                     {/* Tags below short description */}
                     {tags && tags.length > 0 && (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -402,7 +402,7 @@ export function ProjectDetailLayout({
                     )}
                   </div>
                 )}
-                
+
                 {longDescription && (
                   <div style={{ flex: 1.2, minWidth: 0, color: "rgba(0,0,0,0.7)", fontSize: 14, lineHeight: "21px", fontFamily: "var(--font-geist-sans), sans-serif" }}>
                     {longDescription}
@@ -420,44 +420,43 @@ export function ProjectDetailLayout({
 
       {/* Desktop Sticky Header */}
       <motion.div
-          initial={{ opacity: 0, y: -12 }}
-          animate={{
-            opacity: showStickyHeader && !isClosing ? 1 : 0,
-            y: showStickyHeader && !isClosing ? 0 : -12,
-          }}
-          transition={stickySpring}
-          style={{
-            alignItems: "center",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            borderRadius: 9999,
-            display: "flex",
-            justifyContent: "space-between",
-            paddingBottom: 16,
-            paddingLeft: 16,
-            paddingRight: 16,
-            paddingTop: 16,
-            pointerEvents: showStickyHeader && !isClosing ? "auto" : "none",
-            position: "fixed",
-            top: "calc(5vh + 16px)",
-            left: 0,
-            right: 0,
-            margin: "0 auto",
-            width: "calc(100% - 48px)",
-            maxWidth: cardWidth - 48,
-            zIndex: 102,
-            border: "1px solid rgba(0,0,0,0.05)",
-            boxShadow: "0px 8px 32px rgba(0,0,0,0.06)",
-            backgroundColor: "rgba(252, 252, 252, 0.7)",
-            boxSizing: "border-box"
-          }}
-        >
-          {renderHeaderContent('sticky')}
-          <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-            </svg>
-          </GlassButton>
+        initial={{ opacity: 0, y: -12 }}
+        animate={{
+          opacity: showStickyHeader && !isClosing ? 1 : 0,
+          y: showStickyHeader && !isClosing ? 0 : -12,
+        }}
+        transition={stickySpring}
+        style={{
+          alignItems: "center",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderRadius: 24,
+          display: "flex",
+          justifyContent: "space-between",
+          paddingBottom: 16,
+          paddingLeft: 16,
+          paddingRight: 16,
+          paddingTop: 16,
+          pointerEvents: showStickyHeader && !isClosing ? "auto" : "none",
+          position: "fixed",
+          top: "calc(5vh + 16px)",
+          left: 0,
+          right: 0,
+          margin: "0 auto",
+          width: "calc(100% - 32px)",
+          maxWidth: cardWidth - 32,
+          zIndex: 102,
+          boxShadow: "0px 8px 32px rgba(0,0,0,0.06)",
+          backgroundColor: "rgba(252, 252, 252, 0.7)",
+          boxSizing: "border-box"
+        }}
+      >
+        {renderHeaderContent('sticky')}
+        <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+          </svg>
+        </GlassButton>
       </motion.div>
     </>
   );
