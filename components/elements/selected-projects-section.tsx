@@ -711,7 +711,7 @@ export function SelectedProjectsSection({
                 showFloatingHeader={showStickyHeader}
                 gridStyle={isMobile
                   ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
-                  : { columns: 3, columnGap: 16 }
+                  : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
                 }
                 onAnimationComplete={() => {
                   if (!closingRef.current) {
@@ -730,8 +730,6 @@ export function SelectedProjectsSection({
                     key={i}
                     variants={GRID_ITEM_VARIANTS}
                     style={{
-                      breakInside: isMobile ? undefined : "avoid",
-                      marginBottom: isMobile ? 0 : 16,
                       borderRadius: isMobile ? 12 : 32,
                       overflow: "hidden",
                       backgroundColor: '#DDDDDD',
@@ -806,36 +804,32 @@ export function SelectedProjectsSection({
                   }
                 }}
                 onClose={() => void handleVorliClose()}
+                gridStyle={isMobile
+                  ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
+                  : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
+                }
               >
-                <motion.div variants={GRID_ITEM_VARIANTS} style={{ backgroundColor: "#F2F2F2", borderRadius: 24, padding: 16 }}>
-                  {isMobile ? (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      <video
-                        src={encodeURI("/assets/Vorli/vorli video.MP4")}
-                        autoPlay loop muted playsInline
-                        style={{ width: "100%", height: "auto", borderRadius: 8 }}
-                      />
-                      {VORLI_SCREENSHOTS.map((s) => (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img key={s.src} src={encodeURI(s.src)} alt={s.alt}
-                          style={{ width: "100%", height: "auto", borderRadius: 8 }} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                      <video
-                        src={encodeURI("/assets/Vorli/vorli video.MP4")}
-                        autoPlay loop muted playsInline
-                        style={{ width: "100%", height: "auto", borderRadius: 8 }}
-                      />
-                      {VORLI_SCREENSHOTS.map((s) => (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img key={s.src} src={encodeURI(s.src)} alt={s.alt}
-                          style={{ width: "100%", height: "auto", borderRadius: 8 }} />
-                      ))}
-                    </div>
-                  )}
+                <motion.div
+                  variants={GRID_ITEM_VARIANTS}
+                  style={{ borderRadius: isMobile ? 12 : 32, overflow: "hidden", backgroundColor: "#F2F2F2" }}
+                >
+                  <video
+                    src={encodeURI("/assets/Vorli/vorli video.MP4")}
+                    autoPlay loop muted playsInline
+                    style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
+                  />
                 </motion.div>
+                {VORLI_SCREENSHOTS.map((s) => (
+                  <motion.div
+                    key={s.src}
+                    variants={GRID_ITEM_VARIANTS}
+                    style={{ borderRadius: isMobile ? 12 : 32, overflow: "hidden", backgroundColor: "#F2F2F2" }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={encodeURI(s.src)} alt={s.alt}
+                      style={{ width: "100%", height: "auto", display: "block" }} />
+                  </motion.div>
+                ))}
               </SelectedProjectLayout>
             )}
           </AnimatePresence>
