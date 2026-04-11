@@ -168,10 +168,6 @@ export function V2Canvas() {
     setIsNotesClosing(false);
   };
 
-  const handleVorliHeroClick = () => {
-    setActiveProject("vorli");
-    setIsClosing(false);
-  };
 
   const handleStickyExpand = () => {
     setIsStickyExpanded(true);
@@ -353,7 +349,6 @@ export function V2Canvas() {
           onStickyExpand={handleStickyExpand}
           onStickyCloseStart={handleStickyCloseStart}
           onStickyClose={handleStickyClose}
-          onVorliClick={handleVorliHeroClick}
           isStickyExpanded={isStickyExpanded || isStickyClosing}
         />
 

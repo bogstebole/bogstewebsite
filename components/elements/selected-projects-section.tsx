@@ -7,8 +7,7 @@ import type { PanInfo } from "framer-motion";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useRippleWave } from "@/useRippleWave";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
-import { UselessNotesDetail } from "@/components/ui/useless-notes-detail";
-import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
+import { SelectedProjectLayout, GRID_ITEM_VARIANTS } from "@/components/ui/selected-project-layout";
 import { ProjectTag } from "@/components/ui/project-tag";
 import {
   ProjectCard,
@@ -26,8 +25,6 @@ interface SelectedProjectsSectionProps {
   onNotesCloseStart?: () => void;
   /** Called after Notes card has fully returned to mini state */
   onNotesClose?: () => void;
-  /** Called when Vorli hero card is clicked */
-  onVorliClick?: () => void;
   onStickyExpand?: () => void;
   onStickyCloseStart?: () => void;
   onStickyClose?: () => void;
@@ -37,20 +34,20 @@ interface SelectedProjectsSectionProps {
 // ── Mobile card deck ──────────────────────────────────────────────────────────
 
 const DECK_CARDS = [
-  { key: "notes",  image: "/images/notes.png",   title: "Notes",  tags: ["iOS", "Canvas"] },
-  { key: "vorli",  image: "/images/receipt.png", title: "Vorli",  tags: ["iOS", "AI Financial"] },
-  { key: "sticky", image: "/images/sticky.png",  title: "Sticky", tags: ["iOS", "Productivity"] },
+  { key: "notes", image: "/images/notes.png", title: "Notes", tags: ["iOS", "Canvas"] },
+  { key: "vorli", image: "/images/receipt.png", title: "Vorli", tags: ["iOS", "AI Financial"] },
+  { key: "sticky", image: "/images/sticky.png", title: "Sticky", tags: ["iOS", "Productivity"] },
 ] as const;
 
 const SWIPE_THRESHOLD = 80;
-const SWIPE_VELOCITY  = 400;
+const SWIPE_VELOCITY = 400;
 
 // Random-looking fan offsets for each stack position (pos 0 = front)
 // Front card is always neutral; cards behind get organic spread
 const FAN: Record<number, { x: number; y: number; rotate: number; scale: number }> = {
-  0: { x: 0,   y: 0,   rotate: 0,    scale: 1 },
-  1: { x: 10,  y: 6,   rotate: 6,    scale: 0.95 },
-  2: { x: -6,  y: 10,  rotate: -9,   scale: 0.90 },
+  0: { x: 0, y: 0, rotate: 0, scale: 1 },
+  1: { x: 10, y: 6, rotate: 6, scale: 0.95 },
+  2: { x: -6, y: 10, rotate: -9, scale: 0.90 },
 };
 
 function stackTransform(pos: number) {
@@ -61,21 +58,25 @@ function stackTransform(pos: number) {
 interface MobileDeckProps {
   isNotesExpanded: boolean;
   isStickyExpanded: boolean;
+  isVorliExpanded: boolean;
   isDesktop: boolean;
   onNotesClick: () => void;
-  onVorliClick?: () => void;
+  onVorliClick: () => void;
   onStickyClick: () => void;
   stickyIconRef: React.RefObject<HTMLDivElement | null>;
   notesRippleRef: React.RefObject<HTMLDivElement | null>;
   miniTagControls: ReturnType<typeof useAnimation>;
   stickyMiniTagControls: ReturnType<typeof useAnimation>;
+  vorliMiniTagControls: ReturnType<typeof useAnimation>;
   returningRef: React.RefObject<boolean>;
   stickyReturningRef: React.RefObject<boolean>;
+  vorliReturningRef: React.RefObject<boolean>;
 }
 
 function MobileDeck({
   isNotesExpanded,
   isStickyExpanded,
+  isVorliExpanded,
   isDesktop,
   onNotesClick,
   onVorliClick,
@@ -84,8 +85,10 @@ function MobileDeck({
   notesRippleRef,
   miniTagControls,
   stickyMiniTagControls,
+  vorliMiniTagControls,
   returningRef,
   stickyReturningRef,
+  vorliReturningRef,
 }: MobileDeckProps) {
   const [order, setOrder] = useState([0, 1, 2]);
   const [exitDir, setExitDir] = useState<number | null>(null);
@@ -125,6 +128,7 @@ function MobileDeck({
         const card = DECK_CARDS[cardIdx];
         const isNotesCard = card.key === "notes";
         const isStickyCard = card.key === "sticky";
+        const isVorliCard = card.key === "vorli";
 
         const animateTarget =
           isFront && exitDir !== null
@@ -142,33 +146,40 @@ function MobileDeck({
           <motion.div
             key={cardIdx}
             ref={isNotesCard ? notesRippleRef : undefined}
-            layoutId={isDesktop ? (isNotesCard ? "notes-card" : isStickyCard ? "sticky-card" : undefined) : undefined}
+            layoutId={isDesktop ? (isNotesCard ? "notes-card" : isStickyCard ? "sticky-card" : isVorliCard ? "vorli-card" : undefined) : undefined}
             animate={animateTarget}
             transition={
               isFront && exitDir !== null
                 ? { type: "tween", duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }
                 : { type: "spring", stiffness: 340, damping: 28 }
             }
-            drag={isFront && !isNotesExpanded && !isStickyExpanded && exitDir === null ? "x" : false}
+            drag={isFront && !isNotesExpanded && !isStickyExpanded && !isVorliExpanded && exitDir === null ? "x" : false}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={1}
             onDragEnd={isFront ? handleDragEnd : undefined}
             onLayoutAnimationComplete={
               isNotesCard
                 ? () => {
-                    if (returningRef.current) {
-                      returningRef.current = false;
-                      void miniTagControls.start("visible");
-                    }
+                  if (returningRef.current) {
+                    returningRef.current = false;
+                    void miniTagControls.start("visible");
                   }
+                }
                 : isStickyCard
-                ? () => {
+                  ? () => {
                     if (stickyReturningRef.current) {
                       stickyReturningRef.current = false;
                       void stickyMiniTagControls.start("visible");
                     }
                   }
-                : undefined
+                  : isVorliCard
+                    ? () => {
+                      if (vorliReturningRef.current) {
+                        vorliReturningRef.current = false;
+                        void vorliMiniTagControls.start("visible");
+                      }
+                    }
+                    : undefined
             }
             onClick={handleClick}
             style={{
@@ -177,14 +188,14 @@ function MobileDeck({
               top: 0,
               left: 0,
               zIndex: order.length - stackPos,
-              cursor: isFront && !isNotesExpanded && !isStickyExpanded ? (isNotesCard || isStickyCard ? "pointer" : "grab") : "default",
+              cursor: isFront && !isNotesExpanded && !isStickyExpanded && !isVorliExpanded ? (isNotesCard || isStickyCard || isVorliCard ? "pointer" : "grab") : "default",
               pointerEvents: isFront ? "auto" : "none",
-              overflow: (isNotesCard && isNotesExpanded) || (isStickyCard && isStickyExpanded) ? "visible" : "hidden",
-              visibility: ((isNotesCard && isNotesExpanded) || (isStickyCard && isStickyExpanded)) && isDesktop ? "hidden" : "visible",
+              overflow: (isNotesCard && isNotesExpanded) || (isStickyCard && isStickyExpanded) || (isVorliCard && isVorliExpanded) ? "visible" : "hidden",
+              visibility: ((isNotesCard && isNotesExpanded) || (isStickyCard && isStickyExpanded) || (isVorliCard && isVorliExpanded)) && isDesktop ? "hidden" : "visible",
               userSelect: "none",
               WebkitUserSelect: "none",
             }}
-            whileDrag={isFront && !isNotesCard && !isStickyCard ? { cursor: "grabbing" } : undefined}
+            whileDrag={isFront && !isNotesCard && !isStickyCard && !isVorliCard ? { cursor: "grabbing" } : undefined}
           >
             {/* Icon area */}
             <div
@@ -253,13 +264,20 @@ function MobileDeck({
                   </motion.div>
                 ))}
               </motion.div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center", width: "100%" }}>
+            ) : isVorliCard ? (
+              <motion.div
+                animate={vorliMiniTagControls}
+                initial="visible"
+                variants={BADGE_CONTAINER_VARIANTS}
+                style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center", width: "100%" }}
+              >
                 {card.tags.map((label) => (
-                  <ProjectTag key={label} label={label} variant="glass" />
+                  <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
+                    <ProjectTag label={label} variant="glass" />
+                  </motion.div>
                 ))}
-              </div>
-            )}
+              </motion.div>
+            ) : null}
           </motion.div>
         );
       })}
@@ -271,13 +289,24 @@ function MobileDeck({
 
 const STICKY_ASSETS = [
   { src: "/assets/Sticky/Home screen.png", alt: "Sticky home screen" },
-  { src: "/assets/Sticky/Add task.png",    alt: "Add task" },
-  { src: "/assets/Sticky/Expand.png",      alt: "Expand view" },
-  { src: "/assets/Sticky/Reorder.png",     alt: "Reorder tasks" },
+  { src: "/assets/Sticky/Add task.png", alt: "Add task" },
+  { src: "/assets/Sticky/Expand.png", alt: "Expand view" },
+  { src: "/assets/Sticky/Reorder.png", alt: "Reorder tasks" },
 ];
 
 const STICKY_DESCRIPTION =
   "Most task apps organize your work into lists that feel like chores. Sticky treats your tasks as a living canvas — notes float, stack, and drift, making the act of planning feel more like thinking than filing. Built for people who want their tools to have personality.";
+
+const VORLI_SCREENSHOTS = [
+  { src: "/assets/Vorli/vorli 1.PNG", alt: "Vorli screenshot 1" },
+  { src: "/assets/Vorli/vorli 2.PNG", alt: "Vorli screenshot 2" },
+  { src: "/assets/Vorli/vorli 3.PNG", alt: "Vorli screenshot 3" },
+  { src: "/assets/Vorli/vorli 4.PNG", alt: "Vorli screenshot 4" },
+  { src: "/assets/Vorli/vorli 5.PNG", alt: "Vorli screenshot 5" },
+];
+
+const VORLI_DESCRIPTION =
+  "Most financial apps share the same assumption: if you can see your data, you'll change your behavior. I built Vorli because that assumption never worked for me. Existing tools asked me to think about money the way they were designed — not the way I actually do. Vorli puts AI at the center: it auto-categorizes spending, scans receipts, and reads your financial picture so you can just ask what matters. Not 'show me a chart' — more like 'should I be worried about this month?'";
 
 const USELESS_NOTES_ASSETS = [
   { type: "video" as const, src: "/assets/Useless Notes/Onboarding.mp4" },
@@ -298,7 +327,6 @@ export function SelectedProjectsSection({
   onStickyExpand,
   onStickyCloseStart,
   onStickyClose,
-  onVorliClick,
   isStickyExpanded,
 }: SelectedProjectsSectionProps) {
   const { isMobile, isDesktop } = useBreakpoint();
@@ -313,7 +341,7 @@ export function SelectedProjectsSection({
   const expandingRef = useRef(false);
   const [isNotesClosing, setIsNotesClosing] = useState(false);
   const returningRef = useRef(false);
-  
+
   // Sticky state local
   const [internalStickyExpanded, setInternalStickyExpanded] = useState(false);
   const stickyContentControls = useAnimation();
@@ -328,13 +356,28 @@ export function SelectedProjectsSection({
   const [showStickyFloatingHeader, setShowStickyFloatingHeader] = useState(false);
   const [isStickySheetReady, setIsStickySheetReady] = useState(false);
 
+  // Vorli state
+  const [isVorliExpanded, setIsVorliExpanded] = useState(false);
+  const [isVorliClosing, setIsVorliClosing] = useState(false);
+  const [isVorliSheetReady, setIsVorliSheetReady] = useState(false);
+  const [showVorliFloatingHeader, setShowVorliFloatingHeader] = useState(false);
+  const vorliContentControls = useAnimation();
+  const vorliGridControls = useAnimation();
+  const vorliBadgeControls = useAnimation();
+  const vorliMiniTagControls = useAnimation();
+  const vorliClosingRef = useRef(false);
+  const vorliExpandingRef = useRef(false);
+  const vorliReturningRef = useRef(false);
+  const vorliBadgesRef = useRef<HTMLDivElement>(null);
+
   const [mounted, setMounted] = useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
   useEffect(() => { void miniTagControls.start("visible"); }, [miniTagControls]);
   useEffect(() => { void stickyMiniTagControls.start("visible"); }, [stickyMiniTagControls]);
-  
-  const headerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { void vorliMiniTagControls.start("visible"); }, [vorliMiniTagControls]);
+
+
   const badgesRef = useRef<HTMLDivElement>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false); // Notes floating header
   const [isSheetReady, setIsSheetReady] = useState(false);
@@ -371,6 +414,23 @@ export function SelectedProjectsSection({
     observer.observe(el);
     return () => observer.disconnect();
   }, [internalStickyExpanded, isStickySheetReady]);
+
+  // Vorli header observer
+  useEffect(() => {
+    if (!isVorliExpanded || !isVorliSheetReady) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShowVorliFloatingHeader(false);
+      return;
+    }
+    const el = vorliBadgesRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowVorliFloatingHeader(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isVorliExpanded, isVorliSheetReady]);
 
   const RIPPLE_CONFIG = { speed: 270, ringWidth: 42, duration: 1000, textStrength: 7, imageStrength: 5 };
   const notesRippleRef = useRippleWave(RIPPLE_CONFIG) as unknown as React.RefObject<HTMLDivElement>;
@@ -409,6 +469,35 @@ export function SelectedProjectsSection({
     setIsNotesClosing(false);
   }, [contentControls, gridControls, badgeControls, onNotesCloseStart, onNotesClose, isDesktop, miniTagControls]);
 
+  // Vorli Expand/Close Handlers
+  const handleVorliExpand = useCallback(async () => {
+    if (isVorliExpanded || vorliClosingRef.current || vorliExpandingRef.current) return;
+    vorliExpandingRef.current = true;
+    setIsVorliExpanded(true);
+    await vorliMiniTagControls.start("exit");
+    vorliExpandingRef.current = false;
+  }, [isVorliExpanded, vorliMiniTagControls]);
+
+  const handleVorliClose = useCallback(async () => {
+    if (vorliClosingRef.current || vorliExpandingRef.current) return;
+    vorliClosingRef.current = true;
+    setIsVorliClosing(true);
+    await Promise.all([
+      vorliContentControls.start("exit"),
+      vorliGridControls.start("exit"),
+      vorliBadgeControls.start("exit"),
+    ]);
+    if (isDesktop) {
+      vorliReturningRef.current = true;
+    } else {
+      void vorliMiniTagControls.start("visible");
+    }
+    setIsVorliExpanded(false);
+    setIsVorliSheetReady(false);
+    vorliClosingRef.current = false;
+    setIsVorliClosing(false);
+  }, [vorliContentControls, vorliGridControls, vorliBadgeControls, isDesktop, vorliMiniTagControls]);
+
   // Sticky Expand/Close Handlers
   const handleStickyExpandAction = useCallback(async () => {
     if (internalStickyExpanded || stickyClosingRef.current || stickyExpandingRef.current) return;
@@ -444,13 +533,14 @@ export function SelectedProjectsSection({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-         if (isNotesExpanded) void handleClose();
-         if (internalStickyExpanded) void handleStickyCloseAction();
+        if (isNotesExpanded) void handleClose();
+        if (internalStickyExpanded) void handleStickyCloseAction();
+        if (isVorliExpanded) void handleVorliClose();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [handleClose, isNotesExpanded, internalStickyExpanded, handleStickyCloseAction]);
+  }, [handleClose, isNotesExpanded, internalStickyExpanded, handleStickyCloseAction, isVorliExpanded, handleVorliClose]);
 
   return (
     <LayoutGroup id="selected-projects">
@@ -474,16 +564,19 @@ export function SelectedProjectsSection({
           <MobileDeck
             isNotesExpanded={isNotesExpanded}
             isStickyExpanded={internalStickyExpanded}
+            isVorliExpanded={isVorliExpanded}
             isDesktop={isDesktop}
             onNotesClick={() => void handleExpand()}
-            onVorliClick={onVorliClick}
+            onVorliClick={() => void handleVorliExpand()}
             onStickyClick={() => void handleStickyExpandAction()}
             stickyIconRef={stickyIconRef}
             notesRippleRef={notesRippleRef}
             miniTagControls={miniTagControls}
             stickyMiniTagControls={stickyMiniTagControls}
+            vorliMiniTagControls={vorliMiniTagControls}
             returningRef={returningRef}
             stickyReturningRef={stickyReturningRef}
+            vorliReturningRef={vorliReturningRef}
           />
         ) : (
           /* ── Desktop: three fanned cards side by side ── */
@@ -524,10 +617,26 @@ export function SelectedProjectsSection({
               title="Vorli"
               tags={["iOS", "AI Financial Assistant"]}
               cardRef={vorliRippleRef}
+              layoutId="vorli-card"
               rotate={-5}
               zIndex={2}
-              onClick={onVorliClick}
+              overflow={isVorliExpanded ? "visible" : undefined}
+              visibility={isVorliExpanded ? "hidden" : undefined}
+              animate={isVorliExpanded ? undefined : { opacity: 1 }}
+              whileHover={isVorliExpanded ? undefined : { y: -16 }}
+              transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
+              onLayoutAnimationComplete={() => {
+                if (vorliReturningRef.current) {
+                  vorliReturningRef.current = false;
+                  void vorliMiniTagControls.start("visible");
+                }
+              }}
+              cursor={isVorliExpanded ? "default" : "pointer"}
+              pointerEvents={isVorliExpanded ? "none" : "auto"}
+              onClick={!isVorliExpanded ? () => void handleVorliExpand() : undefined}
               imageStyle={{ rotate: "359.41deg", transformOrigin: "50% 50%" }}
+              tagControls={vorliMiniTagControls}
+              tagInitial="visible"
             />
 
             {/* ── Sticky card ── */}
@@ -565,519 +674,259 @@ export function SelectedProjectsSection({
       {/* ── Backdrop + Expanded sheet — portalled to body to escape filter stacking context ── */}
       {mounted && createPortal(
         <>
-      {/* ── Backdrop — blurs everything behind ── */}
-      <AnimatePresence>
-        {isNotesExpanded && (
-          <motion.div
-            key="notes-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => void handleClose()}
-            style={{
-              position: "fixed",
-              inset: 0,
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-              zIndex: 50,
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ── Expanded card — Bottom Sheet Anchored ── */}
-      <AnimatePresence>
-        {isNotesExpanded && (
-          <motion.div
-            key="notes-expanded"
-            layoutId={isDesktop ? "notes-card" : undefined}
-            animate={{ y: 0, rotate: 0 }}
-            initial={isDesktop ? undefined : { y: "100%" }}
-            exit={isDesktop ? undefined : { y: "100%" }}
-            transition={{
-              layout: CARD_SPRING,
-              y: { type: "spring", stiffness: 340, damping: 34 },
-              rotate: { type: "spring", stiffness: 400, damping: 30 },
-            }}
-            onAnimationComplete={() => {
-              if (!closingRef.current) {
-                setIsSheetReady(true);
-                void badgeControls.start("visible");
-                void contentControls.start("visible");
-                setTimeout(() => {
-                  if (!closingRef.current) void gridControls.start("visible");
-                }, 350);
-              }
-            }}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              // Explicit Paper layout
-              alignItems: 'center',
-              backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #EEEEEE 100%)',
-              backgroundOrigin: 'padding-box',
-              borderTopLeftRadius: isMobile ? 0 : '40px',
-              borderTopRightRadius: isMobile ? 0 : '40px',
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              boxShadow: 'inset 0 0 0 4px #FFFFFF, #00000003 0px 400px 165px, #0000000D 0px 105px 140px, #0000001A 0px 105px 105px, #0000001A 0px 25px 55px',
-              boxSizing: 'border-box',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: isMobile ? '24px' : '48px',
-              paddingTop: isMobile ? 'calc(48px + env(safe-area-inset-top))' : 48,
-              paddingBottom: isMobile ? 'calc(32px + env(safe-area-inset-bottom))' : 32,
-              paddingInline: 16,
-
-              // Structural positioning (Bottom Sheet, 70% height)
-              position: "fixed",
-              bottom: 0,
-              left: 0,
-              right: 0, margin: "0 auto",
-              width: isMobile ? "100%" : 877,
-              height: isMobile ? "100dvh" : "95vh",
-              overflowY: "scroll",
-              overflowX: "hidden",
-              zIndex: 51,
-              cursor: "default",
-            }}
-          >
-            {/* ── Sticky floating header ── */}
-            <motion.div
-              initial={{ opacity: 0, y: -12 }}
-              animate={{
-                opacity: showStickyHeader && !isNotesClosing ? 1 : 0,
-                y: showStickyHeader && !isNotesClosing ? 0 : -12,
-              }}
-              transition={{ type: "spring", stiffness: 400, damping: 36 }}
-              style={{
-                alignItems: "center",
-                backdropFilter: "blur(24px)",
-                WebkitBackdropFilter: "blur(24px)",
-                borderRadius: 9999,
-                boxSizing: "border-box",
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "20px 24px",
-                pointerEvents: showStickyHeader && !isNotesClosing ? "auto" : "none",
-                position: "fixed",
-                top: "calc(5vh + 16px)",
-                left: isMobile ? 16 : "50%",
-                marginLeft: isMobile ? 0 : -422.5,
-                width: isMobile ? "calc(100% - 32px)" : 845,
-                zIndex: 52,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <img
-                  src="/images/notes.png"
-                  alt="Notes Icon"
-                  style={{ width: "24px", height: "24px", objectFit: "cover", borderRadius: 4, transform: 'rotate(-17.2deg)' }}
-                />
-                <span style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "16px", letterSpacing: "-0.01em", lineHeight: "1" }}>
-                  Notes
-                </span>
-              </div>
-              <GlassButton size="s" onClick={() => void handleClose()} aria-label="Close">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-                </svg>
-              </GlassButton>
-            </motion.div>
-
-            {/* Close button — absolute positioned */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.3 } }}
-              exit={{ opacity: 0, transition: { duration: 0.1 } }}
-              style={{ position: "absolute", top: isMobile ? "calc(env(safe-area-inset-top) + 16px)" : 24, right: 24 }}
-            >
-              <GlassButton size="s" onClick={() => void handleClose()} aria-label="Close">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-                </svg>
-              </GlassButton>
-            </motion.div>
-
-            {/* Header section (Icon, Title, Tags) - exactly mimicking mini-card visual column */}
-            <div ref={headerRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: isMobile ? '100%' : '480px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}>
-                
-                {/* Icon & Title */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-                  <img
-                    src="/images/notes.png"
-                    alt="Notes Icon"
-                    style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: 8, flexShrink: 0, transform: 'rotate(-17.2deg)' }}
-                  />
-                  <div style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '20px', letterSpacing: '-0.01em', lineHeight: '1' }}>
-                    Notes
-                  </div>
-                </div>
-
-                {/* Animated Tags replacing the raw Paper tags to maintain orchestration */}
-                <motion.div
-                  ref={badgesRef}
-                  animate={badgeControls}
-                  initial="hidden"
-                  variants={BADGE_CONTAINER_VARIANTS}
-                  style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center" }}
-                >
-                  {["iOS", "Canvas"].map((label) => (
-                    <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
-                      <ProjectTag label={label} variant="glass" />
-                    </motion.div>
-                  ))}
-                  <motion.div variants={BADGE_ITEM_VARIANTS}>
-                    <AppStoreBadge active={false} />
-                  </motion.div>
-                </motion.div>
-              </div>
-
-              {/* Staggered Lower Details (Description, Button, Grid) */}
+          {/* ── Backdrop — blurs everything behind ── */}
+          <AnimatePresence>
+            {isNotesExpanded && (
               <motion.div
-                animate={contentControls}
-                initial="hidden"
-                variants={{
-                  visible: { transition: { staggerChildren: 0.1 } },
-                  hidden: { transition: { staggerChildren: 0.05 } },
-                  exit: { transition: { staggerChildren: 0.05 } }
+                key="notes-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => void handleClose()}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  backdropFilter: "blur(8px)",
+                  WebkitBackdropFilter: "blur(8px)",
+                  zIndex: 50,
                 }}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%' }}
+              />
+            )}
+          </AnimatePresence>
+
+          {/* ── Expanded card — Bottom Sheet Anchored ── */}
+          <AnimatePresence>
+            {isNotesExpanded && (
+              <SelectedProjectLayout
+                key="notes-expanded"
+                layoutId={isDesktop ? "notes-card" : undefined}
+                icon="/images/notes.png"
+                iconStyle={{ transform: 'rotate(-17.2deg)' }}
+                title="Notes"
+                tags={["iOS", "Canvas"]}
+                extraBadge={<AppStoreBadge active={false} />}
+                description={
+                  <>
+                    It&apos;s a conceptual work that visually shows how we clutter our mental space.
+                    <br />The main &quot;canvas&quot; gets more &quot;useless&quot; over time, totally packed with notes and links, and the &quot;find&quot; mode is kind of the opposite, showing how we can only find things when we really need them. It&apos;s a reflection on the whole concept of how we deal with information overload today.
+                  </>
+                }
+                showDownloadButton
+                badgeControls={badgeControls}
+                contentControls={contentControls}
+                gridControls={gridControls}
+                badgesRef={badgesRef}
+                isClosing={isNotesClosing}
+                showFloatingHeader={showStickyHeader}
+                gridStyle={isMobile
+                  ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
+                  : { columns: 3, columnGap: 16 }
+                }
+                onAnimationComplete={() => {
+                  if (!closingRef.current) {
+                    setIsSheetReady(true);
+                    void badgeControls.start("visible");
+                    void contentControls.start("visible");
+                    setTimeout(() => {
+                      if (!closingRef.current) void gridControls.start("visible");
+                    }, 350);
+                  }
+                }}
+                onClose={() => void handleClose()}
               >
-                {/* Description */}
-                <motion.div
-                  variants={{
-                    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
-                    hidden: { opacity: 0, y: 15 },
-                    exit: { opacity: 0, y: 10, transition: { duration: 0.15 } }
-                  }}
-                  style={{ color: '#000000CC', fontFamily: '"Geist", system-ui, sans-serif', fontSize: '14px', lineHeight: '18px', textAlign: 'center', whiteSpace: 'pre-wrap', width: '100%' }}
-                >
-                  It&apos;s a conceptual work that visually shows how we clutter our mental space.
-                  <br />The main &quot;canvas&quot; gets more &quot;useless&quot; over time, totally packed with notes and links, and the &quot;find&quot; mode is kind of the opposite, showing how we can only find things when we really need them. It&apos;s a reflection on the whole concept of how we deal with information overload today.
-                </motion.div>
+                {USELESS_NOTES_ASSETS.map((asset, i) => (
+                  <motion.div
+                    key={i}
+                    variants={GRID_ITEM_VARIANTS}
+                    style={{
+                      breakInside: isMobile ? undefined : "avoid",
+                      marginBottom: isMobile ? 0 : 16,
+                      borderRadius: isMobile ? 12 : 32,
+                      overflow: "hidden",
+                      backgroundColor: '#DDDDDD',
+                    }}
+                  >
+                    {asset.type === "image" ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={encodeURI(asset.src)}
+                        alt={`Useless Notes screenshot ${i + 1}`}
+                        style={{ width: "100%", height: "auto", display: "block" }}
+                      />
+                    ) : (
+                      <video
+                        src={encodeURI(asset.src)}
+                        autoPlay loop muted playsInline
+                        style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
+                      />
+                    )}
+                  </motion.div>
+                ))}
+              </SelectedProjectLayout>
+            )}
+          </AnimatePresence>
 
-                {/* Styled Download Button from Paper */}
-                <motion.div
-                  variants={{
-                    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
-                    hidden: { opacity: 0, y: 15 },
-                    exit: { opacity: 0, y: 10, transition: { duration: 0.15 } }
-                  }}
-                  style={{
-                    alignItems: 'center', backdropFilter: 'blur(1px)', borderRadius: '9999px',
-                    boxShadow: '#FFFFFF -2px 2px 2px 1px inset, #00000069 -1px -3px 3px -2px inset, #000000D6 2px 1px 4px -4px inset, #FFFFFF 0px 0px 7px 4px inset, #00000040 0px -9px 14px 4px inset, #0000001A -2px -3px 5px 3px inset, #FFFFFF 0px 20px 8px -9px inset, #0000001A 0px 34px 10px -9px inset, #00000003 0px 27px 8px, #00000003 0px 17px 6px, #0000000D 0px 10px 6px, #0000001A 0px 4px 4px, #0000001A 0px 1px 3px',
-                    display: 'flex', gap: '4px', height: '32px', justifyContent: 'center',
-                    paddingBottom: '9px', paddingLeft: '16px', paddingRight: '16px', paddingTop: '9px',
-                    cursor: 'progress'
-                  }}
-                >
-                  <span style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '14px', letterSpacing: '0.03em', lineHeight: '1' }}>
-                    Download the app
-                  </span>
-                </motion.div>
+          {/* ── Vorli Backdrop ── */}
+          <AnimatePresence>
+            {isVorliExpanded && (
+              <motion.div
+                key="vorli-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => void handleVorliClose()}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  backdropFilter: "blur(8px)",
+                  WebkitBackdropFilter: "blur(8px)",
+                  zIndex: 50,
+                }}
+              />
+            )}
+          </AnimatePresence>
 
-              </motion.div>
-            </div>
-
-            {/* Staggered Grid Container */}
-            <motion.div
-              animate={gridControls}
-              initial="hidden"
-              variants={{
-                visible: { transition: { staggerChildren: 0.1 } },
-                hidden: { transition: { staggerChildren: 0.05 } },
-                exit: { transition: { staggerChildren: 0.05 } }
-              }}
-              style={isMobile
-                ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
-                : { columns: 3, columnGap: 16, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
-              }
-            >
-              {USELESS_NOTES_ASSETS.map((asset, i) => (
-                <motion.div
-                  key={i}
-                  variants={{
-                    visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 200, damping: 20 } },
-                    hidden: { opacity: 0, y: 40, scale: 0.95 },
-                    exit: { opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.15 } }
-                  }}
-                  style={{
-                    breakInside: isMobile ? undefined : "avoid",
-                    marginBottom: isMobile ? 0 : 16,
-                    borderRadius: isMobile ? 12 : 32,
-                    overflow: "hidden",
-                    backgroundColor: '#DDDDDD',
-                  }}
-                >
-                  {asset.type === "image" ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={encodeURI(asset.src)}
-                      alt={`Useless Notes screenshot ${i + 1}`}
-                      style={{ width: "100%", height: "auto", display: "block" }}
-                    />
+          {/* ── Vorli Expanded Card ── */}
+          <AnimatePresence>
+            {isVorliExpanded && (
+              <SelectedProjectLayout
+                key="vorli-expanded"
+                layoutId={isDesktop ? "vorli-card" : undefined}
+                icon="/images/receipt.png"
+                iconStyle={{ rotate: "359.41deg", transformOrigin: "50% 50%" }}
+                title="Vorli"
+                tags={["iOS", "AI Financial Assistant", "In testing"]}
+                description={VORLI_DESCRIPTION}
+                badgeControls={vorliBadgeControls}
+                contentControls={vorliContentControls}
+                gridControls={vorliGridControls}
+                badgesRef={vorliBadgesRef}
+                isClosing={isVorliClosing}
+                showFloatingHeader={showVorliFloatingHeader}
+                onAnimationComplete={() => {
+                  if (!vorliClosingRef.current) {
+                    setIsVorliSheetReady(true);
+                    void vorliBadgeControls.start("visible");
+                    void vorliContentControls.start("visible");
+                    setTimeout(() => {
+                      if (!vorliClosingRef.current) void vorliGridControls.start("visible");
+                    }, 350);
+                  }
+                }}
+                onClose={() => void handleVorliClose()}
+              >
+                <motion.div variants={GRID_ITEM_VARIANTS} style={{ backgroundColor: "#F2F2F2", borderRadius: 24, padding: 16 }}>
+                  {isMobile ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <video
+                        src={encodeURI("/assets/Vorli/vorli video.MP4")}
+                        autoPlay loop muted playsInline
+                        style={{ width: "100%", height: "auto", borderRadius: 8 }}
+                      />
+                      {VORLI_SCREENSHOTS.map((s) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={s.src} src={encodeURI(s.src)} alt={s.alt}
+                          style={{ width: "100%", height: "auto", borderRadius: 8 }} />
+                      ))}
+                    </div>
                   ) : (
-                    <video
-                      src={encodeURI(asset.src)}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
-                    />
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                      <video
+                        src={encodeURI("/assets/Vorli/vorli video.MP4")}
+                        autoPlay loop muted playsInline
+                        style={{ width: "100%", height: "auto", borderRadius: 8 }}
+                      />
+                      {VORLI_SCREENSHOTS.map((s) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={s.src} src={encodeURI(s.src)} alt={s.alt}
+                          style={{ width: "100%", height: "auto", borderRadius: 8 }} />
+                      ))}
+                    </div>
                   )}
                 </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </SelectedProjectLayout>
+            )}
+          </AnimatePresence>
 
-      {/* ── Sticky Backdrop ── */}
-      <AnimatePresence>
-        {internalStickyExpanded && (
-          <motion.div
-            key="sticky-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => void handleStickyCloseAction()}
-            style={{
-              position: "fixed",
-              inset: 0,
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-              zIndex: 50,
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ── Sticky Expanded Card ── */}
-      <AnimatePresence>
-        {internalStickyExpanded && (
-          <motion.div
-            key="sticky-expanded"
-            layoutId={isDesktop ? "sticky-project-modal" : undefined}
-            animate={{ y: 0, rotate: 0 }}
-            initial={isDesktop ? undefined : { y: "100%" }}
-            exit={isDesktop ? undefined : { y: "100%" }}
-            transition={{
-              layout: CARD_SPRING,
-              y: { type: "spring", stiffness: 340, damping: 34 },
-              rotate: { type: "spring", stiffness: 400, damping: 30 },
-            }}
-            onAnimationComplete={() => {
-              if (!stickyClosingRef.current) {
-                setIsStickySheetReady(true);
-                void stickyBadgeControls.start("visible");
-                void stickyContentControls.start("visible");
-                setTimeout(() => {
-                  if (!stickyClosingRef.current) void stickyGridControls.start("visible");
-                }, 350);
-              }
-            }}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              alignItems: 'center',
-              backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #EEEEEE 100%)',
-              backgroundOrigin: 'padding-box',
-              borderTopLeftRadius: isMobile ? 0 : '40px',
-              borderTopRightRadius: isMobile ? 0 : '40px',
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              boxShadow: 'inset 0 0 0 4px #FFFFFF, #00000003 0px 400px 165px, #0000000D 0px 105px 140px, #0000001A 0px 105px 105px, #0000001A 0px 25px 55px',
-              boxSizing: 'border-box',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: isMobile ? '24px' : '48px',
-              paddingTop: isMobile ? 'calc(48px + env(safe-area-inset-top))' : 48,
-              paddingBottom: isMobile ? 'calc(32px + env(safe-area-inset-bottom))' : 32,
-              paddingInline: 16,
-              position: "fixed",
-              bottom: 0,
-              left: 0,
-              right: 0, margin: "0 auto",
-              width: isMobile ? "100%" : 877,
-              height: isMobile ? "100dvh" : "95vh",
-              overflowY: "scroll",
-              overflowX: "hidden",
-              zIndex: 51,
-              cursor: "default",
-            }}
-          >
-            {/* Sticky Floating Header */}
-            <motion.div
-              initial={{ opacity: 0, y: -12 }}
-              animate={{
-                opacity: showStickyFloatingHeader && !isStickyClosing ? 1 : 0,
-                y: showStickyFloatingHeader && !isStickyClosing ? 0 : -12,
-              }}
-              transition={{ type: "spring", stiffness: 400, damping: 36 }}
-              style={{
-                alignItems: "center",
-                backdropFilter: "blur(24px)",
-                WebkitBackdropFilter: "blur(24px)",
-                borderRadius: 9999,
-                boxSizing: "border-box",
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "20px 24px",
-                pointerEvents: showStickyFloatingHeader && !isStickyClosing ? "auto" : "none",
-                position: "fixed",
-                top: "calc(5vh + 16px)",
-                left: isMobile ? 16 : "50%",
-                marginLeft: isMobile ? 0 : -422.5,
-                width: isMobile ? "calc(100% - 32px)" : 845,
-                zIndex: 52,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <img
-                  src="/images/sticky.png"
-                  alt="Sticky Icon"
-                  style={{ width: "24px", height: "24px", objectFit: "cover", borderRadius: 4 }}
-                />
-                <span style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "16px", letterSpacing: "-0.01em", lineHeight: "1" }}>
-                  Sticky
-                </span>
-              </div>
-              <GlassButton size="s" onClick={() => void handleStickyCloseAction()} aria-label="Close">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-                </svg>
-              </GlassButton>
-            </motion.div>
-
-            {/* Sticky Close button */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.3 } }}
-              exit={{ opacity: 0, transition: { duration: 0.1 } }}
-              style={{ position: "absolute", top: isMobile ? "calc(env(safe-area-inset-top) + 16px)" : 24, right: 24 }}
-            >
-              <GlassButton size="s" onClick={() => void handleStickyCloseAction()} aria-label="Close">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-                </svg>
-              </GlassButton>
-            </motion.div>
-
-            {/* Header section */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: isMobile ? '100%' : '480px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-                  <img
-                    src="/images/sticky.png"
-                    alt="Sticky Icon"
-                    style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
-                  />
-                  <div style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '20px', letterSpacing: '-0.01em', lineHeight: '1' }}>
-                    Sticky
-                  </div>
-                </div>
-
-                <motion.div
-                  ref={stickyBadgesRef}
-                  animate={stickyBadgeControls}
-                  initial="hidden"
-                  variants={BADGE_CONTAINER_VARIANTS}
-                  style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center" }}
-                >
-                  {["iOS", "Productivity"].map((label) => (
-                    <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
-                      <ProjectTag label={label} variant="glass" />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-
-              {/* Lower Details */}
+          {/* ── Sticky Backdrop ── */}
+          <AnimatePresence>
+            {internalStickyExpanded && (
               <motion.div
-                animate={stickyContentControls}
-                initial="hidden"
-                variants={{
-                  visible: { transition: { staggerChildren: 0.1 } },
-                  hidden: { transition: { staggerChildren: 0.05 } },
-                  exit: { transition: { staggerChildren: 0.05 } }
+                key="sticky-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => void handleStickyCloseAction()}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  backdropFilter: "blur(8px)",
+                  WebkitBackdropFilter: "blur(8px)",
+                  zIndex: 50,
                 }}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%' }}
+              />
+            )}
+          </AnimatePresence>
+
+          {/* ── Sticky Expanded Card ── */}
+          <AnimatePresence>
+            {internalStickyExpanded && (
+              <SelectedProjectLayout
+                key="sticky-expanded"
+                layoutId={isDesktop ? "sticky-project-modal" : undefined}
+                icon="/images/sticky.png"
+                title="Sticky"
+                tags={["iOS", "Productivity"]}
+                description={STICKY_DESCRIPTION}
+                showDownloadButton
+                badgeControls={stickyBadgeControls}
+                contentControls={stickyContentControls}
+                gridControls={stickyGridControls}
+                badgesRef={stickyBadgesRef}
+                isClosing={isStickyClosing}
+                showFloatingHeader={showStickyFloatingHeader}
+                gridStyle={isMobile
+                  ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
+                  : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
+                }
+                onAnimationComplete={() => {
+                  if (!stickyClosingRef.current) {
+                    setIsStickySheetReady(true);
+                    void stickyBadgeControls.start("visible");
+                    void stickyContentControls.start("visible");
+                    setTimeout(() => {
+                      if (!stickyClosingRef.current) void stickyGridControls.start("visible");
+                    }, 350);
+                  }
+                }}
+                onClose={() => void handleStickyCloseAction()}
               >
-                <motion.div
-                  variants={{
-                    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
-                    hidden: { opacity: 0, y: 15 },
-                    exit: { opacity: 0, y: 10, transition: { duration: 0.15 } }
-                  }}
-                  style={{ color: '#000000CC', fontFamily: '"Geist", system-ui, sans-serif', fontSize: '14px', lineHeight: '18px', textAlign: 'center', width: '100%' }}
-                >
-                  {STICKY_DESCRIPTION}
-                </motion.div>
-
-                <motion.div
-                  variants={{
-                    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
-                    hidden: { opacity: 0, y: 15 },
-                    exit: { opacity: 0, y: 10, transition: { duration: 0.15 } }
-                  }}
-                  style={{
-                    alignItems: 'center', backdropFilter: 'blur(1px)', borderRadius: '9999px',
-                    boxShadow: '#FFFFFF -2px 2px 2px 1px inset, #00000069 -1px -3px 3px -2px inset, #000000D6 2px 1px 4px -4px inset, #FFFFFF 0px 0px 7px 4px inset, #00000040 0px -9px 14px 4px inset, #0000001A -2px -3px 5px 3px inset, #FFFFFF 0px 20px 8px -9px inset, #0000001A 0px 34px 10px -9px inset, #00000003 0px 27px 8px, #00000003 0px 17px 6px, #0000000D 0px 10px 6px, #0000001A 0px 4px 4px, #0000001A 0px 1px 3px',
-                    display: 'flex', gap: '4px', height: '32px', justifyContent: 'center',
-                    paddingBottom: '9px', paddingLeft: '16px', paddingRight: '16px', paddingTop: '9px',
-                    cursor: 'progress'
-                  }}
-                >
-                  <span style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '14px', letterSpacing: '0.03em', lineHeight: '1' }}>
-                    Download the app
-                  </span>
-                </motion.div>
-              </motion.div>
-            </div>
-
-            {/* Grid */}
-            <motion.div
-              animate={stickyGridControls}
-              initial="hidden"
-              variants={{
-                visible: { transition: { staggerChildren: 0.1 } },
-                hidden: { transition: { staggerChildren: 0.05 } },
-                exit: { transition: { staggerChildren: 0.05 } }
-              }}
-              style={isMobile
-                ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
-                : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, width: "100%", paddingBottom: 48, boxSizing: "border-box" }
-              }
-            >
-              {STICKY_ASSETS.map((asset, i) => (
-                <motion.div
-                  key={i}
-                  variants={{
-                    visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 200, damping: 20 } },
-                    hidden: { opacity: 0, y: 40, scale: 0.95 },
-                    exit: { opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.15 } }
-                  }}
-                  style={{
-                    breakInside: isMobile ? undefined : "avoid", marginBottom: 0, borderRadius: isMobile ? 12 : 32,
-                    overflow: "hidden",
-                    backgroundColor: '#DDDDDD',
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={encodeURI(asset.src)}
-                    alt={asset.alt}
-                    style={{ width: "100%", height: "auto", display: "block" }}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                {STICKY_ASSETS.map((asset, i) => (
+                  <motion.div
+                    key={i}
+                    variants={GRID_ITEM_VARIANTS}
+                    style={{
+                      breakInside: isMobile ? undefined : "avoid",
+                      marginBottom: 0,
+                      borderRadius: isMobile ? 12 : 32,
+                      overflow: "hidden",
+                      backgroundColor: '#DDDDDD',
+                    }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={encodeURI(asset.src)}
+                      alt={asset.alt}
+                      style={{ width: "100%", height: "auto", display: "block" }}
+                    />
+                  </motion.div>
+                ))}
+              </SelectedProjectLayout>
+            )}
+          </AnimatePresence>
         </>,
         document.body
       )}
