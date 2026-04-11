@@ -28,8 +28,6 @@ const STAGGER_VARIANTS = {
   exit: { transition: { staggerChildren: 0.05 } },
 };
 
-const DOWNLOAD_SHADOW =
-  '#FFFFFF -2px 2px 2px 1px inset, #00000069 -1px -3px 3px -2px inset, #000000D6 2px 1px 4px -4px inset, #FFFFFF 0px 0px 7px 4px inset, #00000040 0px -9px 14px 4px inset, #0000001A -2px -3px 5px 3px inset, #FFFFFF 0px 20px 8px -9px inset, #0000001A 0px 34px 10px -9px inset, #00000003 0px 27px 8px, #00000003 0px 17px 6px, #0000000D 0px 10px 6px, #0000001A 0px 4px 4px, #0000001A 0px 1px 3px';
 
 const X_ICON = (
   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -228,34 +226,19 @@ export function SelectedProjectLayout({
 
           {showDownloadButton && (
             <>
-              <motion.div
-                variants={CONTENT_ITEM_VARIANTS}
-                onClick={() => {
-                  if (isMobile) {
-                    window.open(NOTES_APP_STORE_URL, "_blank");
-                  } else {
-                    setShowQR(true);
-                  }
-                }}
-                style={{
-                  alignItems: 'center',
-                  backdropFilter: 'blur(1px)',
-                  borderRadius: '9999px',
-                  boxShadow: DOWNLOAD_SHADOW,
-                  display: 'flex',
-                  gap: '4px',
-                  height: '32px',
-                  justifyContent: 'center',
-                  paddingBottom: '9px',
-                  paddingLeft: '16px',
-                  paddingRight: '16px',
-                  paddingTop: '9px',
-                  cursor: 'pointer',
-                }}
-              >
-                <span style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '14px', letterSpacing: '0.03em', lineHeight: '1' }}>
+              <motion.div variants={CONTENT_ITEM_VARIANTS}>
+                <GlassButton
+                  size="s"
+                  onClick={() => {
+                    if (isMobile) {
+                      window.open(NOTES_APP_STORE_URL, "_blank");
+                    } else {
+                      setShowQR(true);
+                    }
+                  }}
+                >
                   Download the app
-                </span>
+                </GlassButton>
               </motion.div>
 
               {/* QR modal — desktop only */}

@@ -205,7 +205,12 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         </div>
 
         {/* Footer row */}
-        <div style={{ alignItems: "center", display: "flex", padding: "0 16px", gap: 24, justifyContent: "space-between", width: "100%" }}>
+        <div style={{ alignItems: "center", display: "flex", padding: "0 24px", gap: 24, justifyContent: "space-between", width: "100%" }}>
+
+          {/* Envelope widget — interactive, FLIP-animates from footer to overlay */}
+          <div style={{ opacity: isEnvelopeOpen ? 0 : 1 }}>
+            <EnvelopeWidget ref={envelopeRef} onClick={onEnvelopeClick} />
+          </div>
 
           {/* Social icon buttons */}
           <div style={{ alignItems: "center", display: "flex", gap: 0 }}>
@@ -247,11 +252,6 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
               </svg>
             </SocialIconButton>
 
-          </div>
-
-          {/* Envelope widget — interactive, FLIP-animates from footer to overlay */}
-          <div style={{ opacity: isEnvelopeOpen ? 0 : 1 }}>
-            <EnvelopeWidget ref={envelopeRef} onClick={onEnvelopeClick} />
           </div>
 
         </div>
