@@ -381,9 +381,8 @@ export function V2Canvas() {
       )}
 
       {/* ── Wear detail overlay ── */}
-      {activeProject === "weatherWear" && originRect && (
+      {activeProject === "weatherWear" && (
         <WearDetail
-          originRect={originRect}
           onCloseStart={handleCloseStart}
           onClose={handleClose}
         />

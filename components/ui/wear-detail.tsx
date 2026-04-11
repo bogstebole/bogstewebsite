@@ -1,194 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ProjectTag } from "@/components/ui/project-tag";
-import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
+import { ProjectDetailLayout } from "./project-detail-layout";
 
 interface WearDetailProps {
-  originRect: DOMRect;
   onCloseStart: () => void;
   onClose: () => void;
 }
 
-export function WearDetail({ originRect, onCloseStart, onClose }: WearDetailProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
+const TAGS = ["iOS", "Weather", "In progress.."];
 
-  useEffect(() => {
-    // slight delay to start entrance animation cleanly
-    const t = setTimeout(() => setIsOpen(true), 10);
-    return () => clearTimeout(t);
-  }, []);
-
-  const handleClose = () => {
-    setIsClosing(true);
-    onCloseStart();
-    setIsOpen(false);
-    setTimeout(() => {
-      onClose();
-    }, 400); // Wait for exit animation
-  };
-
-  const CARD_W = 361;
-  const gap = 32;
-
-  // Position relative to the clicked item
-  let leftPos = originRect.right + 60;
-  
-  // Guard against overflow on the right side
-  if (typeof window !== "undefined") {
-    if (leftPos + CARD_W > window.innerWidth - 24) {
-      leftPos = window.innerWidth - CARD_W - 24;
-    }
-  }
-  
-
-
+export function WearDetail({ onCloseStart, onClose }: WearDetailProps) {
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        pointerEvents: isClosing ? "none" : "auto",
-        display: "flex",
-      }}
+    <ProjectDetailLayout
+      onCloseStart={onCloseStart}
+      onClose={onClose}
+      title="Wear"
+      icon="/images/puffer.png"
+      tags={TAGS}
+      shortDescription={
+        <>
+          <span style={{ color: "#141414" }}>Wear</span>
+          <span style={{ color: "rgba(20,20,20,0.5)" }}>
+            {" — A weather app that shows what to wear instead of temperatures."}
+          </span>
+        </>
+      }
+      longDescription="Wear reimagines the weather app as a styling tool, showing an invisible figure dressed for the current conditions. The design language is 3D cartoon figures with a matte vinyl aesthetic, rendered per weather state alongside a hand-drawn environment and a body language cue — three expressive layers per condition rather than a simple outfit swap. Mapping outfits to the full iOS weather condition set turned out to be the core design challenge: 30+ states across sky, rain, winter, wind, and severe categories, each requiring a distinct combination of environment illustration, figure pose, and attire. The project is still in production with the 3D asset pipeline as the main bottleneck."
     >
-      {/* Transparent Click-away Backdrop Layer */}
-      <div 
-        onClick={handleClose}
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundColor: "transparent",
-        }}
-      />
-      
-      {/* Content Layer */}
-      <AnimatePresence>
-        {!isClosing && isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: "-50%" }}
-            animate={{ opacity: 1, y: "-50%" }}
-            exit={{ opacity: 0, y: "-48%", transition: { duration: 0.25, ease: "easeIn" } }}
-            style={{
-              position: "absolute",
-              left: leftPos,
-              top: "50%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: gap,
-            }}
-          >
-            {/* 1. Info Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.85, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ type: "spring", damping: 20, stiffness: 350, delay: 0.08 }}
-              style={{
-                width: CARD_W,
-                backgroundColor: "#2c2c2c",
-                borderRadius: 18,
-                padding: 12,
-                boxShadow: "0 20px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <h2 style={{ color: "#ebebeb", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 17, margin: 0, fontWeight: 500 }}>
-                  Wear
-                </h2>
-                <GlassButton size="s" dark onClick={handleClose} aria-label="Close">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                    <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-                  </svg>
-                </GlassButton>
-              </div>
-
-              <p style={{ 
-                color: "#ebebeb", 
-                fontFamily: "var(--font-geist-sans), sans-serif", 
-                fontSize: 12,
-                lineHeight: "18px",
-                margin: 0,
-                marginBottom: 16,
-                opacity: 0.8
-              }}>
-                Wear is a simple app that gives you an idea what to wear outside based on the weather
-              </p>
-
-              <div style={{ display: "flex", gap: 8 }}>
-                {["iOS", "Weather", "In progress.."].map((tag) => (
-                  <ProjectTag key={tag} label={tag} variant="dark" />
-                ))}
-              </div>
-            </motion.div>
-
-            {/* 2. Phone Mockup */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 25 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ type: "spring", damping: 18, stiffness: 300 }}
-              style={{
-                width: 247,
-                height: 534,
-                backgroundColor: "#fff",
-                borderRadius: 30,
-                border: "4.4px solid #000",
-                overflow: "hidden",
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-                boxShadow: "0 24px 48px rgba(0,0,0,0.15)",
-              }}
-            >
-              {/* Top part: Video Loop */}
-              <div style={{ 
-                width: "100%", 
-                flex: 1, 
-                backgroundColor: "#fff",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                paddingBottom: 16
-              }}>
-                <video 
-                  src="/assets/Wear/wear.mp4" 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline
-                  style={{ width: "60%", height: "auto", display: "block" }}
-                />
-              </div>
-
-              {/* Bottom part: Footer Weather Information UI */}
-              <div style={{
-                height: 140,
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#fff",
-                paddingBottom: 24
-              }}>
-                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, color: "#666", opacity: 0.7, marginBottom: 6 }}>
-                  Belgrade
-                </div>
-                <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, color: "#666" }}>
-                  Light, noticeable wind.
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+        <div
+          style={{
+            width: 247,
+            height: 534,
+            backgroundColor: "#fff",
+            borderRadius: 30,
+            border: "4.4px solid #000",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            boxShadow: "0 24px 48px rgba(0,0,0,0.15)",
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ width: "100%", flex: 1, backgroundColor: "#fff", display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", paddingBottom: 16 }}>
+            <video src="/assets/Wear/wear.mp4" autoPlay loop muted playsInline style={{ width: "60%", height: "auto", display: "block" }} />
+          </div>
+          <div style={{ height: 140, width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#fff", paddingBottom: 24 }}>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 9, color: "#666", opacity: 0.7, marginBottom: 6 }}>Belgrade</div>
+            <div style={{ fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: 11, color: "#666" }}>Light, noticeable wind.</div>
+          </div>
+        </div>
+      </div>
+    </ProjectDetailLayout>
   );
 }
