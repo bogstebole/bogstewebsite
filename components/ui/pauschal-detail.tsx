@@ -34,7 +34,7 @@ export function PauschalDetail({ onCloseStart, onClose }: PauschalDetailProps) {
           </span>
         </>
       }
-      longDescription="My personal SaaS for tracking the pauschal limit for my design agency and tracking invoices as well as generating invoices. I have my mail connected to pull each XML file from the bank which then gets parsed and categorised."
+      longDescription="Pauschal Tracker is a personal finance web app built in React and shadcn/ui to solve a specific problem with Serbia's pauschal tax system. Cross the annual income limit and you pay higher taxes the following year, with no native tooling to help you stay aware of where you stand. Before building it, tracking simply wasn't happening. The app covers invoice creation, income logging, and a dashboard that gives a clear picture of cumulative earnings relative to the limit at any point in the year. The stack was chosen for speed, as React and shadcn/ui meant functional, clean UI without fighting the tooling. Invoice generation took the most time to implement, though not because it was technically complex, just detail-heavy work that required getting the output right. The app is live and used daily as a single source of truth for the agency's finances. The main value isn't any single feature but having one place where the limit is always visible, removing the risk of an expensive surprise at year end."
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 4, width: "100%" }}>
         {SCREENSHOTS.map((s) => (

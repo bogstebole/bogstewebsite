@@ -332,12 +332,10 @@ export function V2Canvas() {
               color: primary80,
               textAlign: "center",
               whiteSpace: "pre-wrap",
-              width: isMobile ? "100%" : "60%",
+              width: isMobile ? "100%" : "80%",
             }}
           >
-            I build things that feel considered — from iOS apps to interactive
-            web experiences. This site is a deliberate rejection of one-style
-            portfolio design.
+            I build things that feel considered, from iOS apps to interactive web experiences. My work lives in the overlap between design and engineering, where spacing decisions and code decisions are the same decision. Based in Belgrade, I spend most of my time on the parts that are easy to overlook: transitions, tap states, the moment a layout stops feeling like one. I&apos;m most interested in products where craft is treated as a requirement, not an afterthought. The goal is always the same, something that feels right before anyone can explain why.
           </p>
         </div>
 

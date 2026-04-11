@@ -141,7 +141,8 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
           gap: isMobile ? 24 : 8,
-          padding: "0 16px",
+          padding: "0 24px",
+          marginTop: 32,
           width: "100%",
         }}
       >

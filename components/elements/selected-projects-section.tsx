@@ -865,7 +865,6 @@ export function SelectedProjectsSection({
                 title="Sticky"
                 tags={["iOS", "Productivity"]}
                 description={STICKY_DESCRIPTION}
-                showDownloadButton
                 badgeControls={stickyBadgeControls}
                 contentControls={stickyContentControls}
                 gridControls={stickyGridControls}
