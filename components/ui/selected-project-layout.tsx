@@ -1,10 +1,14 @@
 "use client";
 
-import { motion, useAnimation } from "framer-motion";
+import { useState } from "react";
+import { motion, useAnimation, AnimatePresence } from "framer-motion";
+import { QRCodeSVG } from "qrcode.react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { ProjectTag } from "@/components/ui/project-tag";
 import { CARD_SPRING, BADGE_CONTAINER_VARIANTS, BADGE_ITEM_VARIANTS } from "@/components/ui/project-card";
+
+const NOTES_APP_STORE_URL = "https://apps.apple.com/us/app/useless-notes/id6757185511";
 
 export const GRID_ITEM_VARIANTS = {
   visible: { opacity: 1, y: 0, scale: 1 as const, transition: { type: "spring" as const, stiffness: 200, damping: 20 } },
@@ -75,6 +79,7 @@ export function SelectedProjectLayout({
   children,
 }: SelectedProjectLayoutProps) {
   const { isMobile, isDesktop } = useBreakpoint();
+  const [showQR, setShowQR] = useState(false);
 
   return (
     <motion.div
@@ -222,28 +227,108 @@ export function SelectedProjectLayout({
           </motion.div>
 
           {showDownloadButton && (
-            <motion.div
-              variants={CONTENT_ITEM_VARIANTS}
-              style={{
-                alignItems: 'center',
-                backdropFilter: 'blur(1px)',
-                borderRadius: '9999px',
-                boxShadow: DOWNLOAD_SHADOW,
-                display: 'flex',
-                gap: '4px',
-                height: '32px',
-                justifyContent: 'center',
-                paddingBottom: '9px',
-                paddingLeft: '16px',
-                paddingRight: '16px',
-                paddingTop: '9px',
-                cursor: 'progress',
-              }}
-            >
-              <span style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '14px', letterSpacing: '0.03em', lineHeight: '1' }}>
-                Download the app
-              </span>
-            </motion.div>
+            <>
+              <motion.div
+                variants={CONTENT_ITEM_VARIANTS}
+                onClick={() => {
+                  if (isMobile) {
+                    window.open(NOTES_APP_STORE_URL, "_blank");
+                  } else {
+                    setShowQR(true);
+                  }
+                }}
+                style={{
+                  alignItems: 'center',
+                  backdropFilter: 'blur(1px)',
+                  borderRadius: '9999px',
+                  boxShadow: DOWNLOAD_SHADOW,
+                  display: 'flex',
+                  gap: '4px',
+                  height: '32px',
+                  justifyContent: 'center',
+                  paddingBottom: '9px',
+                  paddingLeft: '16px',
+                  paddingRight: '16px',
+                  paddingTop: '9px',
+                  cursor: 'pointer',
+                }}
+              >
+                <span style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '14px', letterSpacing: '0.03em', lineHeight: '1' }}>
+                  Download the app
+                </span>
+              </motion.div>
+
+              {/* QR modal — desktop only */}
+              <AnimatePresence>
+                {showQR && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={() => setShowQR(false)}
+                    style={{
+                      position: "fixed",
+                      inset: 0,
+                      zIndex: 200,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backdropFilter: "blur(8px)",
+                      WebkitBackdropFilter: "blur(8px)",
+                    }}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, y: 12 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 8 }}
+                      transition={{ type: "spring", stiffness: 360, damping: 28 }}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        background: "#F5F5F5",
+                        borderRadius: 24,
+                        padding: 64,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 20,
+                        position: "relative",
+                        boxShadow: "0 237px 66px 0 rgba(0, 0, 0, 0.00), 0 152px 61px 0 rgba(0, 0, 0, 0.01), 0 85px 51px 0 rgba(0, 0, 0, 0.05), 0 38px 38px 0 rgba(0, 0, 0, 0.09), 0 9px 21px 0 rgba(0, 0, 0, 0.10)",
+                      }}
+                    >
+                      <div style={{ position: "absolute", top: 16, right: 16 }}>
+                        <GlassButton size="s" onClick={() => setShowQR(false)} aria-label="Close">
+                          {X_ICON}
+                        </GlassButton>
+                      </div>
+                      <QRCodeSVG
+                        value={NOTES_APP_STORE_URL}
+                        size={220}
+                        bgColor="#F5F5F5"
+                        fgColor="#111111"
+                        level="M"
+                        imageSettings={{
+                          src: "/images/notes.png",
+                          width: 40,
+                          height: 40,
+                          excavate: true,
+                        }}
+                      />
+                      <span style={{
+                        color: "#555",
+                        fontFamily: '"Geist", system-ui, sans-serif',
+                        fontSize: 14,
+                        lineHeight: "20px",
+                        textAlign: "center",
+                        maxWidth: 200,
+                      }}>
+                        Scan with your camera to download Notes from the App Store
+                      </span>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
           )}
         </motion.div>
       </div>
