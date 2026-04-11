@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 
 export function useBreakpoint() {
-  const [width, setWidth] = useState<number>(() =>
-    typeof window !== "undefined" ? window.innerWidth : 1440
-  );
+  const [width, setWidth] = useState<number>(1440);
 
   useEffect(() => {
+    setWidth(window.innerWidth);
     const handler = () => setWidth(window.innerWidth);
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
