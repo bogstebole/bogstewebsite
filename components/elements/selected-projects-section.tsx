@@ -16,7 +16,6 @@ import {
   BADGE_CONTAINER_VARIANTS,
   BADGE_ITEM_VARIANTS,
 } from "@/components/ui/project-card";
-import { StickyNotesIcon } from "@/components/ui/sticky-notes-icon";
 
 interface SelectedProjectsSectionProps {
   /** Called when Notes card starts expanding */
@@ -63,7 +62,6 @@ interface MobileDeckProps {
   onNotesClick: () => void;
   onVorliClick: () => void;
   onStickyClick: () => void;
-  stickyIconRef: React.RefObject<HTMLDivElement | null>;
   notesRippleRef: React.RefObject<HTMLDivElement | null>;
   miniTagControls: ReturnType<typeof useAnimation>;
   stickyMiniTagControls: ReturnType<typeof useAnimation>;
@@ -81,7 +79,6 @@ function MobileDeck({
   onNotesClick,
   onVorliClick,
   onStickyClick,
-  stickyIconRef,
   notesRippleRef,
   miniTagControls,
   stickyMiniTagControls,
@@ -208,18 +205,12 @@ function MobileDeck({
                 gap: 12,
               }}
             >
-              {isStickyCard ? (
-                <div ref={stickyIconRef}>
-                  <StickyNotesIcon opacity={isStickyExpanded ? 0 : 1} />
-                </div>
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8, flexShrink: 0 }}
-                />
-              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={card.image}
+                alt={card.title}
+                style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8, flexShrink: 0 }}
+              />
               <span
                 style={{
                   fontFamily: '"JetBrains Mono", system-ui, sans-serif',
@@ -332,7 +323,6 @@ export function SelectedProjectsSection({
   const { isMobile, isDesktop } = useBreakpoint();
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const stickyCardRef = useRef<HTMLDivElement>(null);
-  const stickyIconRef = useRef<HTMLDivElement>(null);
   const contentControls = useAnimation();
   const gridControls = useAnimation();
   const badgeControls = useAnimation();
@@ -569,7 +559,6 @@ export function SelectedProjectsSection({
             onNotesClick={() => void handleExpand()}
             onVorliClick={() => void handleVorliExpand()}
             onStickyClick={() => void handleStickyExpandAction()}
-            stickyIconRef={stickyIconRef}
             notesRippleRef={notesRippleRef}
             miniTagControls={miniTagControls}
             stickyMiniTagControls={stickyMiniTagControls}
