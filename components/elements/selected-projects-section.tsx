@@ -590,10 +590,11 @@ export function SelectedProjectsSection({
               extraBadge={<AppStoreBadge active={false} />}
               layoutId="notes-card"
               cardRef={notesRippleRef}
+              rotate={5}
               overflow={isNotesExpanded ? "visible" : undefined}
               visibility={isNotesExpanded ? "hidden" : undefined}
-              animate={isNotesExpanded ? undefined : { opacity: 1 }}
-              whileHover={isNotesExpanded ? undefined : { y: -16 }}
+              animate={isNotesExpanded ? undefined : { rotate: 5, opacity: 1 }}
+              whileHover={isNotesExpanded ? undefined : { y: -16, rotate: 0 }}
               transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
               onLayoutAnimationComplete={() => {
                 if (returningRef.current) {
@@ -622,8 +623,8 @@ export function SelectedProjectsSection({
               zIndex={2}
               overflow={isVorliExpanded ? "visible" : undefined}
               visibility={isVorliExpanded ? "hidden" : undefined}
-              animate={isVorliExpanded ? undefined : { opacity: 1 }}
-              whileHover={isVorliExpanded ? undefined : { y: -16 }}
+              animate={isVorliExpanded ? undefined : { rotate: -5, opacity: 1 }}
+              whileHover={isVorliExpanded ? undefined : { y: -16, rotate: 0 }}
               transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
               onLayoutAnimationComplete={() => {
                 if (vorliReturningRef.current) {
@@ -645,14 +646,14 @@ export function SelectedProjectsSection({
               alt="Sticky"
               title="Sticky"
               tags={["iOS", "Productivity", "To Do App"]}
-              rotate={5}
+              rotate={3}
               marginLeft={-21}
               zIndex={1}
               layoutId="sticky-project-modal"
               overflow={internalStickyExpanded ? "visible" : undefined}
               visibility={internalStickyExpanded ? "hidden" : undefined}
-              animate={internalStickyExpanded ? undefined : { opacity: 1 }}
-              whileHover={internalStickyExpanded ? undefined : { y: -16 }}
+              animate={internalStickyExpanded ? undefined : { rotate: 3, opacity: 1 }}
+              whileHover={internalStickyExpanded ? undefined : { y: -16, rotate: 0 }}
               transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
               onLayoutAnimationComplete={() => {
                 if (stickyReturningRef.current) {
