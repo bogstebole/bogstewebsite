@@ -6,7 +6,7 @@ import { ProjectTag } from "@/components/ui/project-tag";
 
 // 5-layer depth shadow matching Figma spec
 const CARD_SHADOW = [
-  "inset 0 0 0 2.948px white",
+  "inset 0 0 0 1px var(--color-card-rim)",
   "0px 5px 11px 0px rgba(0,0,0,0.10)",
   "0px 21px 21px 0px rgba(0,0,0,0.09)",
   "0px 47px 28px 0px rgba(0,0,0,0.05)",
@@ -18,7 +18,7 @@ export const CARD_STYLE: React.CSSProperties = {
   width: 160,
   height: 220,
   borderRadius: 24,
-  background: "linear-gradient(to bottom, #ffffff, #f4f4f4)",
+  background: "var(--color-bg-card)",
   boxShadow: CARD_SHADOW,
   display: "flex",
   flexDirection: "column",
@@ -166,7 +166,7 @@ export function ProjectCard({
             fontFamily: '"JetBrains Mono", system-ui, sans-serif',
             fontSize: 16.8,
             letterSpacing: "-0.04em",
-            color: "#434343",
+            color: "var(--color-text-card)",
             whiteSpace: "nowrap",
             lineHeight: 1.3,
           }}

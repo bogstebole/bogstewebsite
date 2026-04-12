@@ -44,8 +44,8 @@ export function FynnDetail({ onCloseStart, onClose }: FynnDetailProps) {
       tags={TAGS}
       shortDescription={
         <>
-          <span style={{ color: "#141414" }}>Fynn.io</span>
-          <span style={{ color: "rgba(20,20,20,0.5)" }}>
+          <span style={{ color: "var(--color-text-heading)" }}>Fynn.io</span>
+          <span style={{ color: "var(--color-text-subdued)" }}>
             {" — Task completion time cut in half. Development speed doubled, this is how we transformed Fynn's senior living management system."}
           </span>
         </>

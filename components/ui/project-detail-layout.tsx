@@ -156,7 +156,7 @@ export function ProjectDetailLayout({
           style={{
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
-            backgroundColor: "rgba(0,0,0,0.15)",
+            backgroundColor: "var(--color-bg-backdrop)",
             inset: 0,
             position: "fixed",
             zIndex: 100,
@@ -172,7 +172,7 @@ export function ProjectDetailLayout({
           style={{
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
-            backgroundColor: "rgba(252, 252, 252, 0.9)",
+            backgroundColor: "var(--color-bg-sheet-mobile)",
             borderTopLeftRadius: 32,
             borderTopRightRadius: 32,
             boxShadow: "0px -8px 24px rgba(0,0,0,0.05)",
@@ -226,7 +226,7 @@ export function ProjectDetailLayout({
                 {(shortDescription || tags) && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minWidth: 0 }}>
                     {shortDescription && (
-                      <div style={{ fontSize: 20, fontWeight: 500, lineHeight: 1.3, margin: 0, fontFamily: "var(--font-geist-sans), sans-serif", color: "#141414" }}>
+                      <div style={{ fontSize: 20, fontWeight: 500, lineHeight: 1.3, margin: 0, fontFamily: "var(--font-geist-sans), sans-serif", color: "var(--color-text-heading)" }}>
                         {shortDescription}
                       </div>
                     )}
@@ -244,7 +244,7 @@ export function ProjectDetailLayout({
                 )}
 
                 {longDescription && (
-                  <div style={{ flex: 1.2, minWidth: 0, color: "rgba(0,0,0,0.7)", fontSize: 14, lineHeight: "21px", fontFamily: "var(--font-geist-sans), sans-serif" }}>
+                  <div style={{ flex: 1.2, minWidth: 0, color: "var(--color-text-tertiary)", fontSize: 14, lineHeight: "21px", fontFamily: "var(--font-geist-sans), sans-serif" }}>
                     {longDescription}
                   </div>
                 )}
@@ -282,7 +282,7 @@ export function ProjectDetailLayout({
             top: 0,
             width: "calc(100% - 16px)",
             zIndex: 102,
-            backgroundColor: "rgba(252, 252, 252, 0.7)",
+            backgroundColor: "var(--color-bg-sheet-header)",
             borderBottom: "1px solid rgba(0,0,0,0.05)",
             boxSizing: 'border-box'
           }}
@@ -344,7 +344,7 @@ export function ProjectDetailLayout({
             boxSizing: "border-box",
             borderTopLeftRadius: 40,
             borderTopRightRadius: 40,
-            backgroundColor: "rgba(252, 252, 252, 0.95)",
+            backgroundColor: "var(--color-bg-sheet)",
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
             boxShadow: "0px -8px 32px rgba(0,0,0,0.08)",
@@ -391,7 +391,7 @@ export function ProjectDetailLayout({
                 {(shortDescription || tags) && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minWidth: 0 }}>
                     {shortDescription && (
-                      <div style={{ fontSize: 20, fontWeight: 500, lineHeight: 1.3, margin: 0, fontFamily: "var(--font-geist-sans), sans-serif", color: "#141414" }}>
+                      <div style={{ fontSize: 20, fontWeight: 500, lineHeight: 1.3, margin: 0, fontFamily: "var(--font-geist-sans), sans-serif", color: "var(--color-text-heading)" }}>
                         {shortDescription}
                       </div>
                     )}
@@ -409,7 +409,7 @@ export function ProjectDetailLayout({
                 )}
 
                 {longDescription && (
-                  <div style={{ flex: 1.2, minWidth: 0, color: "rgba(0,0,0,0.7)", fontSize: 14, lineHeight: "21px", fontFamily: "var(--font-geist-sans), sans-serif" }}>
+                  <div style={{ flex: 1.2, minWidth: 0, color: "var(--color-text-tertiary)", fontSize: 14, lineHeight: "21px", fontFamily: "var(--font-geist-sans), sans-serif" }}>
                     {longDescription}
                   </div>
                 )}
@@ -452,7 +452,7 @@ export function ProjectDetailLayout({
           maxWidth: cardWidth - 32,
           zIndex: 102,
           boxShadow: "0px 8px 32px rgba(0,0,0,0.06)",
-          backgroundColor: "rgba(252, 252, 252, 0.7)",
+          backgroundColor: "var(--color-bg-sheet-header)",
           boxSizing: "border-box"
         }}
       >

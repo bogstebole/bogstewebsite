@@ -32,8 +32,8 @@ export function ContentSnareDetail({ onCloseStart, onClose }: ContentSnareDetail
       tags={TAGS}
       shortDescription={
         <>
-          <span style={{ color: "#141414" }}>Content Snare</span>
-          <span style={{ color: "rgba(20,20,20,0.5)" }}>
+          <span style={{ color: "var(--color-text-heading)" }}>Content Snare</span>
+          <span style={{ color: "var(--color-text-subdued)" }}>
             {" — Enhanced system led to faster request completion and reduced support tickets through clearer navigation and simplified user experience."}
           </span>
         </>

@@ -14,7 +14,7 @@
   --glass-radius: 6.25rem;
   --glass-blur: 2.5px;
   --glass-fill: rgba(255, 255, 255, 0.2);
-  --glass-text: rgba(0, 0, 0, 0.62);
+  --glass-text: var(--color-text-glass, rgba(0, 0, 0, 0.62));
   --glass-transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 
   /* ── Reset ── */
@@ -315,10 +315,11 @@
 
 /* ═══════════════════════════════════════════
    DARK MODE
-   Inverted glass — light rims on dark surface
+   Responds to .dark class on <html> (theme toggle).
+   Inverted glass — light rims on dark surface.
    ═══════════════════════════════════════════ */
 
-.dark {
+:global(.dark) .glassBtn {
   --glass-fill: rgba(255, 255, 255, 0.04);
   --glass-text: rgba(255, 255, 255, 0.72);
 
@@ -339,7 +340,7 @@
     0 1px 3px 0 rgba(0, 0, 0, 0.22);
 }
 
-.dark::before {
+:global(.dark) .glassBtn::before {
   background: linear-gradient(145deg,
       rgba(255, 255, 255, 0.15) 0%,
       rgba(255, 255, 255, 0.04) 40%,
@@ -347,7 +348,7 @@
       rgba(0, 0, 0, 0.2) 100%);
 }
 
-.dark::after {
+:global(.dark) .glassBtn::after {
   background: linear-gradient(90deg,
       transparent 0%,
       rgba(255, 255, 255, 0.2) 30%,
@@ -358,7 +359,7 @@
 }
 
 /* ── Dark hover ── */
-.dark:hover:not(:disabled) {
+:global(.dark) .glassBtn:hover:not(:disabled) {
   --glass-fill: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.85);
   box-shadow:
@@ -376,7 +377,7 @@
     0 2px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
-.dark:hover:not(:disabled)::before {
+:global(.dark) .glassBtn:hover:not(:disabled)::before {
   background: linear-gradient(145deg,
       rgba(255, 255, 255, 0.2) 0%,
       rgba(255, 255, 255, 0.06) 40%,
@@ -384,12 +385,12 @@
       rgba(0, 0, 0, 0.16) 100%);
 }
 
-.dark:hover:not(:disabled)::after {
+:global(.dark) .glassBtn:hover:not(:disabled)::after {
   opacity: 0.55;
 }
 
 /* ── Dark active ── */
-.dark:active:not(:disabled) {
+:global(.dark) .glassBtn:active:not(:disabled) {
   --glass-fill: rgba(0, 0, 0, 0.1);
   color: rgba(255, 255, 255, 0.6);
   box-shadow:
@@ -407,7 +408,7 @@
     0 0 2px 0 rgba(0, 0, 0, 0.18);
 }
 
-.dark:active:not(:disabled)::before {
+:global(.dark) .glassBtn:active:not(:disabled)::before {
   background: linear-gradient(145deg,
       rgba(255, 255, 255, 0.1) 0%,
       rgba(255, 255, 255, 0.02) 40%,
@@ -415,17 +416,17 @@
       rgba(0, 0, 0, 0.25) 100%);
 }
 
-.dark:active:not(:disabled)::after {
+:global(.dark) .glassBtn:active:not(:disabled)::after {
   opacity: 0.2;
 }
 
 /* ── Dark focus ── */
-.dark:focus-visible {
+:global(.dark) .glassBtn:focus-visible {
   outline-color: rgba(255, 255, 255, 0.3);
 }
 
 /* ── Dark disabled ── */
-.dark:disabled {
+:global(.dark) .glassBtn:disabled {
   box-shadow:
     0 0 6px 4px rgba(255, 255, 255, 0.04) inset,
     0 -6px 10px -3px rgba(0, 0, 0, 0.2) inset,
@@ -436,7 +437,7 @@
 }
 
 /* ── Dark spinner ── */
-.dark .spinner {
+:global(.dark) .glassBtn .spinner {
   border-color: rgba(255, 255, 255, 0.15);
   border-top-color: rgba(255, 255, 255, 0.6);
 }
@@ -563,6 +564,68 @@
       rgba(255, 255, 255, 0.7) 70%,
       transparent 100%);
   opacity: 0.6;
+}
+
+/* ── Icon span (filter handled in CSS so dark mode can override) ── */
+.iconSpan {
+  align-items: center;
+  display: flex;
+  filter: grayscale(100%) opacity(0.45);
+  transition: filter 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.socialIconBtn:hover .iconSpan,
+.socialIconBtn:active .iconSpan {
+  filter: none;
+}
+
+/* ── Social icon dark mode ── */
+:global(.dark) .socialIconBtn .iconSpan {
+  filter: grayscale(100%) brightness(3) opacity(0.55);
+}
+
+:global(.dark) .socialIconBtn:hover,
+:global(.dark) .socialIconBtn:active {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    3px -1px 2px 0 rgba(255, 255, 255, 0.12) inset,
+    -1px -3px 3px -2px rgba(0, 0, 0, 0.6) inset,
+    2px 1px 4px -4px rgba(0, 0, 0, 0.9) inset,
+    0 0 7px 4px rgba(255, 255, 255, 0.06) inset,
+    0 -9px 14px 4px rgba(0, 0, 0, 0.4) inset,
+    -2px -3px 5px 3px rgba(0, 0, 0, 0.3) inset,
+    0 20px 8px -9px rgba(255, 255, 255, 0.08) inset,
+    0 34px 10px -9px rgba(0, 0, 0, 0.3) inset,
+    0 27px 8px rgba(0, 0, 0, 0.04),
+    0 17px 6px rgba(0, 0, 0, 0.08),
+    0 10px 6px rgba(0, 0, 0, 0.14),
+    0 4px 4px rgba(0, 0, 0, 0.20),
+    0 1px 3px rgba(0, 0, 0, 0.22);
+}
+
+:global(.dark) .socialIconBtn:hover::before,
+:global(.dark) .socialIconBtn:active::before {
+  background: linear-gradient(145deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.04) 40%,
+      rgba(0, 0, 0, 0.3) 70%,
+      rgba(0, 0, 0, 0.2) 100%);
+}
+
+:global(.dark) .socialIconBtn:hover::after,
+:global(.dark) .socialIconBtn:active::after {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.2) 30%,
+      rgba(255, 255, 255, 0.35) 50%,
+      rgba(255, 255, 255, 0.2) 70%,
+      transparent 100%);
+  opacity: 0.4;
+}
+
+:global(.dark) .socialIconBtn:hover .iconSpan,
+:global(.dark) .socialIconBtn:active .iconSpan {
+  filter: none;
 }
 
 /* ── Active ── */

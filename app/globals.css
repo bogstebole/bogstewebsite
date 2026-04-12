@@ -7,6 +7,155 @@
   --font-sf-mono: "SF Mono", "SFMono-Regular", var(--font-geist-mono), monospace;
 }
 
+/* ══════════════════════════════════════════════════════════
+   Design Tokens
+   ══════════════════════════════════════════════════════════
+
+   Two-layer system:
+   - Reference tokens  — raw palette values, no semantic meaning
+   - Semantic tokens   — what things mean; swapped per theme in .dark
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Reference palette ── */
+:root {
+  --ref-neutral-0:    #FFFFFF;
+  --ref-neutral-50:   #F5F5F5;
+  --ref-neutral-100:  #F3F3F3;
+  --ref-neutral-150:  #F0F0F0;
+  --ref-neutral-200:  #EEEEEE;
+  --ref-neutral-250:  #DDDDDD;
+  --ref-neutral-300:  #F4F4F4;
+  --ref-neutral-400:  #E4E3DE;
+  --ref-neutral-600:  #585858;
+  --ref-neutral-700:  #4C4C4C;
+  --ref-neutral-800:  #434343;
+  --ref-neutral-900:  #212121;
+  --ref-neutral-950:  #141414;
+  --ref-neutral-970:  #111111;
+  --ref-neutral-1000: #000000;
+}
+
+/* ── Semantic tokens — Light mode ── */
+:root {
+  /* Text */
+  --color-text-primary:      #000000;
+  --color-text-secondary:    rgba(0, 0, 0, 0.80);
+  --color-text-tertiary:     rgba(0, 0, 0, 0.70);
+  --color-text-subdued:      rgba(0, 0, 0, 0.50);
+  --color-text-muted:        rgba(0, 0, 0, 0.40);
+  --color-text-ui:           #111111;
+  --color-text-heading:      #141414;
+  --color-text-body:         #212121;
+  --color-text-card:         #434343;
+  --color-text-glass:        rgba(0, 0, 0, 0.62);
+  --color-text-tag:          rgba(0, 0, 0, 0.40);
+  --color-text-tag-inverted: #EBEBEB;
+  --color-text-label:        #666666;
+
+  /* Surfaces */
+  --color-bg-page:           #FFFFFF;
+  --color-bg-card:           linear-gradient(to bottom, #FFFFFF, #F4F4F4);
+  --color-bg-layout:         linear-gradient(180deg, #FFFFFF 0%, #EEEEEE 100%);
+  --color-bg-sheet:          rgba(252, 252, 252, 0.95);
+  --color-bg-sheet-mobile:   rgba(252, 252, 252, 0.90);
+  --color-bg-sheet-header:   rgba(252, 252, 252, 0.70);
+  --color-bg-surface:        #F3F3F3;
+  --color-bg-container:      #F0F0F0;
+  --color-bg-skeleton:       #DDDDDD;
+  --color-bg-modal:          #F5F5F5;
+  --color-bg-envelope:       #E4E3DE;
+  --color-bg-tag-inverted:   #4C4C4C;
+  --color-bg-backdrop:       rgba(0, 0, 0, 0.15);
+
+  /* Borders */
+  --color-border-subtle:     rgba(0, 0, 0, 0.04);
+  --color-border-soft:       rgba(0, 0, 0, 0.08);
+
+  /* Divider */
+  --color-divider:           #585858;
+
+  /* Misc */
+  --color-card-rim:          #ffffff;
+}
+
+/* ── Semantic tokens — Dark mode ── */
+.dark {
+  /* Text */
+  --color-text-primary:      #FFFFFF;
+  --color-text-secondary:    rgba(255, 255, 255, 0.80);
+  --color-text-tertiary:     rgba(255, 255, 255, 0.70);
+  --color-text-subdued:      rgba(255, 255, 255, 0.50);
+  --color-text-muted:        rgba(255, 255, 255, 0.40);
+  --color-text-ui:           #F0F0F0;
+  --color-text-heading:      #EEEEEE;
+  --color-text-body:         #DDDDDD;
+  --color-text-card:         #BBBBBB;
+  --color-text-glass:        rgba(255, 255, 255, 0.70);
+  --color-text-tag:          rgba(255, 255, 255, 0.40);
+  --color-text-tag-inverted: #1A1A1A;
+  --color-text-label:        #999999;
+
+  /* Surfaces */
+  --color-bg-page:           #111111;
+  --color-bg-card:           linear-gradient(to bottom, #1E1E1E, #161616);
+  --color-bg-layout:         linear-gradient(180deg, #1A1A1A 0%, #111111 100%);
+  --color-bg-sheet:          rgba(24, 24, 24, 0.95);
+  --color-bg-sheet-mobile:   rgba(20, 20, 20, 0.95);
+  --color-bg-sheet-header:   rgba(24, 24, 24, 0.80);
+  --color-bg-surface:        #2A2A2A;
+  --color-bg-container:      #222222;
+  --color-bg-skeleton:       #333333;
+  --color-bg-modal:          #1E1E1E;
+  --color-bg-envelope:       #2E2D29;
+  --color-bg-tag-inverted:   #EFEFEF;
+  --color-bg-backdrop:       rgba(0, 0, 0, 0.50);
+
+  /* Borders */
+  --color-border-subtle:     rgba(255, 255, 255, 0.06);
+  --color-border-soft:       rgba(255, 255, 255, 0.10);
+
+  /* Divider */
+  --color-divider:           #444444;
+
+  /* Misc */
+  --color-card-rim:          rgba(255, 255, 255, 0.12);
+}
+
+/* ── Logo glass container ── */
+.logo-glass {
+  box-shadow:
+    #FFFFFF -2px 2px 2px 1px inset,
+    #00000069 -1px -3px 3px -2px inset,
+    #000000D6 2px 1px 4px -4px inset,
+    #FFFFFF 0px 0px 7px 4px inset,
+    #00000040 0px -9px 14px 4px inset,
+    #0000001A -2px -3px 5px 3px inset,
+    #FFFFFF 0px 20px 8px -9px inset,
+    #0000001A 0px 34px 10px -9px inset,
+    #00000003 0px 27px 8px,
+    #00000003 0px 17px 6px,
+    #0000000D 0px 10px 6px,
+    #0000001A 0px 4px 4px,
+    #0000001A 0px 1px 3px;
+}
+
+.dark .logo-glass {
+  box-shadow:
+    rgba(255, 255, 255, 0.12) -2px 2px 2px 1px inset,
+    rgba(0, 0, 0, 0.60) -1px -3px 3px -2px inset,
+    rgba(0, 0, 0, 0.85) 2px 1px 4px -4px inset,
+    rgba(255, 255, 255, 0.06) 0px 0px 7px 4px inset,
+    rgba(0, 0, 0, 0.40) 0px -9px 14px 4px inset,
+    rgba(0, 0, 0, 0.18) -2px -3px 5px 3px inset,
+    rgba(255, 255, 255, 0.08) 0px 20px 8px -9px inset,
+    rgba(0, 0, 0, 0.22) 0px 34px 10px -9px inset,
+    rgba(0, 0, 0, 0.04) 0px 27px 8px,
+    rgba(0, 0, 0, 0.12) 0px 17px 6px,
+    rgba(0, 0, 0, 0.18) 0px 10px 6px,
+    rgba(0, 0, 0, 0.25) 0px 4px 4px,
+    rgba(0, 0, 0, 0.25) 0px 1px 3px;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -25,8 +174,8 @@ html {
 
 body {
   width: 100%;
-  background: #fff;
-  color: #212121;
+  background: var(--color-bg-page);
+  color: var(--color-text-body);
 }
 
 @keyframes shimmer {

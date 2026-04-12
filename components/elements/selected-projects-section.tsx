@@ -216,7 +216,7 @@ function MobileDeck({
                   fontFamily: '"JetBrains Mono", system-ui, sans-serif',
                   fontSize: 16.8,
                   letterSpacing: "-0.04em",
-                  color: "#434343",
+                  color: "var(--color-text-card)",
                   whiteSpace: "nowrap",
                   lineHeight: 1.3,
                 }}
@@ -543,7 +543,7 @@ export function SelectedProjectsSection({
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
-          background: "#F0F0F0",
+          background: "var(--color-bg-container)",
           padding: isMobile ? 40 : 64,
           borderRadius: 40,
           ...(isMobile && { marginLeft: 16, marginRight: 16, width: "calc(100% - 32px)", boxSizing: "border-box" }),
@@ -732,7 +732,7 @@ export function SelectedProjectsSection({
                     style={{
                       borderRadius: isMobile ? 12 : 32,
                       overflow: "hidden",
-                      backgroundColor: '#DDDDDD',
+                      backgroundColor: "var(--color-bg-skeleton)",
                     }}
                   >
                     {asset.type === "image" ? (
@@ -811,7 +811,7 @@ export function SelectedProjectsSection({
               >
                 <motion.div
                   variants={GRID_ITEM_VARIANTS}
-                  style={{ borderRadius: isMobile ? 12 : 32, overflow: "hidden", backgroundColor: "#F2F2F2" }}
+                  style={{ borderRadius: isMobile ? 12 : 32, overflow: "hidden", backgroundColor: "var(--color-bg-surface)" }}
                 >
                   <video
                     src={encodeURI("/assets/Vorli/vorli video.MP4")}
@@ -823,7 +823,7 @@ export function SelectedProjectsSection({
                   <motion.div
                     key={s.src}
                     variants={GRID_ITEM_VARIANTS}
-                    style={{ borderRadius: isMobile ? 12 : 32, overflow: "hidden", backgroundColor: "#F2F2F2" }}
+                    style={{ borderRadius: isMobile ? 12 : 32, overflow: "hidden", backgroundColor: "var(--color-bg-surface)" }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={encodeURI(s.src)} alt={s.alt}
@@ -896,7 +896,7 @@ export function SelectedProjectsSection({
                       marginBottom: 0,
                       borderRadius: isMobile ? 12 : 32,
                       overflow: "hidden",
-                      backgroundColor: '#DDDDDD',
+                      backgroundColor: "var(--color-bg-skeleton)",
                     }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}

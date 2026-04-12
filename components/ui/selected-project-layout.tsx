@@ -94,13 +94,13 @@ export function SelectedProjectLayout({
       onClick={(e) => e.stopPropagation()}
       style={{
         alignItems: 'center',
-        backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #EEEEEE 100%)',
+        backgroundImage: 'var(--color-bg-layout)',
         backgroundOrigin: 'padding-box',
         borderTopLeftRadius: isMobile ? 32 : '40px',
         borderTopRightRadius: isMobile ? 32 : '40px',
         borderBottomLeftRadius: 0,
         borderBottomRightRadius: 0,
-        boxShadow: 'inset 0 0 0 4px #FFFFFF, #00000003 0px 400px 165px, #0000000D 0px 105px 140px, #0000001A 0px 105px 105px, #0000001A 0px 25px 55px',
+        boxShadow: 'inset 0 0 0 4px var(--color-card-rim), #00000003 0px 400px 165px, #0000000D 0px 105px 140px, #0000001A 0px 105px 105px, #0000001A 0px 25px 55px',
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
@@ -155,7 +155,7 @@ export function SelectedProjectLayout({
             alt={`${title} Icon`}
             style={{ width: "24px", height: "24px", objectFit: "cover", borderRadius: 4, ...iconStyle }}
           />
-          <span style={{ color: "#111111", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "16px", letterSpacing: "-0.01em", lineHeight: "1" }}>
+          <span style={{ color: "var(--color-text-ui)", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "16px", letterSpacing: "-0.01em", lineHeight: "1" }}>
             {title}
           </span>
         </div>
@@ -186,7 +186,7 @@ export function SelectedProjectLayout({
               alt={`${title} Icon`}
               style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: 8, flexShrink: 0, ...iconStyle }}
             />
-            <div style={{ color: '#111111', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '20px', letterSpacing: '-0.01em', lineHeight: '1' }}>
+            <div style={{ color: 'var(--color-text-ui)', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '20px', letterSpacing: '-0.01em', lineHeight: '1' }}>
               {title}
             </div>
           </div>
@@ -219,7 +219,7 @@ export function SelectedProjectLayout({
         >
           <motion.div
             variants={CONTENT_ITEM_VARIANTS}
-            style={{ color: '#000000CC', fontFamily: '"Geist", system-ui, sans-serif', fontSize: '14px', lineHeight: '18px', textAlign: 'center', whiteSpace: 'pre-wrap', width: '100%' }}
+            style={{ color: 'var(--color-text-secondary)', fontFamily: '"Geist", system-ui, sans-serif', fontSize: '14px', lineHeight: '18px', textAlign: 'center', whiteSpace: 'pre-wrap', width: '100%' }}
           >
             {description}
           </motion.div>
@@ -268,7 +268,7 @@ export function SelectedProjectLayout({
                       transition={{ type: "spring", stiffness: 360, damping: 28 }}
                       onClick={(e) => e.stopPropagation()}
                       style={{
-                        background: "#F5F5F5",
+                        background: "var(--color-bg-modal)",
                         borderRadius: 24,
                         padding: 64,
                         display: "flex",
@@ -287,8 +287,8 @@ export function SelectedProjectLayout({
                       <QRCodeSVG
                         value={NOTES_APP_STORE_URL}
                         size={220}
-                        bgColor="#F5F5F5"
-                        fgColor="#111111"
+                        bgColor="var(--color-bg-modal)"
+                        fgColor="var(--color-text-ui)"
                         level="M"
                         imageSettings={{
                           src: "/images/notes.png",
@@ -298,7 +298,7 @@ export function SelectedProjectLayout({
                         }}
                       />
                       <span style={{
-                        color: "#555",
+                        color: "var(--color-text-label)",
                         fontFamily: '"Geist", system-ui, sans-serif',
                         fontSize: 14,
                         lineHeight: "20px",

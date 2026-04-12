@@ -1,6 +1,6 @@
 export function Logo() {
   return (
-    <div style={{ alignItems: 'center', backdropFilter: 'blur(1px)', borderRadius: '16px', boxShadow: '#FFFFFF -2px 2px 2px 1px inset, #00000069 -1px -3px 3px -2px inset, #000000D6 2px 1px 4px -4px inset, #FFFFFF 0px 0px 7px 4px inset, #00000040 0px -9px 14px 4px inset, #0000001A -2px -3px 5px 3px inset, #FFFFFF 0px 20px 8px -9px inset, #0000001A 0px 34px 10px -9px inset, #00000003 0px 27px 8px, #00000003 0px 17px 6px, #0000000D 0px 10px 6px, #0000001A 0px 4px 4px, #0000001A 0px 1px 3px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0, gap: 14, height: '48px', justifyContent: 'center', overflow: 'clip', width: '48px' }}>
+    <div className="logo-glass" style={{ alignItems: 'center', backdropFilter: 'blur(1px)', borderRadius: '16px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', flexShrink: 0, gap: 14, height: '48px', justifyContent: 'center', overflow: 'clip', width: '48px' }}>
       <svg width="30" height="36" viewBox="0 0 30 36" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ width: '23px', height: '28px', flexShrink: 0, alignSelf: 'center' }}>
         <defs><clipPath id="_kgvxdk0"><rect width="26.665" height="33.227" fill="#fff" transform="translate(1.334 1.334)"/></clipPath></defs>
         <g clipPath="url(#_kgvxdk0)">

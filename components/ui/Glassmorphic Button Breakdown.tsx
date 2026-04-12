@@ -33,7 +33,6 @@ const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
         className={`
           ${styles.glassBtn}
           ${sizeClassMap[size]}
-          ${dark ? styles.dark : ""}
           ${loading ? styles.loading : ""}
           ${className ?? ""}
         `}

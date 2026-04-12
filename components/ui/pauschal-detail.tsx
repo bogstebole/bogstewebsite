@@ -28,8 +28,8 @@ export function PauschalDetail({ onCloseStart, onClose }: PauschalDetailProps) {
       tags={TAGS}
       shortDescription={
         <>
-          <span style={{ color: "#141414" }}>Pauschal Tracker</span>
-          <span style={{ color: "rgba(20,20,20,0.5)" }}>
+          <span style={{ color: "var(--color-text-heading)" }}>Pauschal Tracker</span>
+          <span style={{ color: "var(--color-text-subdued)" }}>
             {" — Personal SaaS for tracking freelance earning limits, invoices, and bank transactions."}
           </span>
         </>

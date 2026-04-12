@@ -24,30 +24,39 @@ interface ProjectTagProps {
   variant?: "light" | "dark" | "glass";
   /** Only used for "glass" variant — enables the glass-morphic pill style */
   active?: boolean;
+  /** Optional leading icon node (e.g. App Store icon) */
+  icon?: React.ReactNode;
 }
 
-export function ProjectTag({ label, variant = "light", active = false }: ProjectTagProps) {
+export function ProjectTag({ label, variant = "light", active = false, icon }: ProjectTagProps) {
   if (variant === "glass") {
     return (
       <div
         style={{
           alignItems: "center",
-          backgroundColor: active ? "transparent" : "#f3f3f3",
+          backgroundColor: active ? "transparent" : "var(--color-bg-surface)",
           backdropFilter: active ? "blur(1px)" : undefined,
           WebkitBackdropFilter: active ? "blur(1px)" : undefined,
           borderRadius: active ? 999 : 4,
           boxShadow: active ? GLASS_SHADOW : "none",
           display: "flex",
           flexShrink: 0,
+          gap: icon ? 4 : 0,
           height: 18,
           justifyContent: "center",
-          padding: "0 8px",
+          paddingLeft: icon ? 4 : 8,
+          paddingRight: 8,
           transition: "background-color 0.25s ease, border-radius 0.25s ease, box-shadow 0.25s ease",
         }}
       >
+        {icon && (
+          <span style={{ display: "flex", alignItems: "center", flexShrink: 0, transition: "filter 0.25s ease" }}>
+            {icon}
+          </span>
+        )}
         <span
           style={{
-            color: active ? "#111" : "rgba(0,0,0,0.4)",
+            color: active ? "var(--color-text-ui)" : "var(--color-text-tag)",
             fontFamily: '"JetBrains Mono", system-ui, sans-serif',
             fontSize: 10,
             letterSpacing: "-0.04em",
@@ -67,7 +76,7 @@ export function ProjectTag({ label, variant = "light", active = false }: Project
     <div
       style={{
         alignItems: "center",
-        backgroundColor: isDark ? "#4c4c4c" : "#F3F3F3",
+        backgroundColor: isDark ? "var(--color-bg-tag-inverted)" : "var(--color-bg-surface)",
         borderRadius: isDark ? 6 : 4,
         display: "flex",
         height: isDark ? undefined : 18,
@@ -77,7 +86,7 @@ export function ProjectTag({ label, variant = "light", active = false }: Project
     >
       <span
         style={{
-          color: isDark ? "#ebebeb" : "rgba(0,0,0,0.4)",
+          color: isDark ? "var(--color-text-tag-inverted)" : "var(--color-text-tag)",
           fontFamily: isDark
             ? '"Inter", system-ui, sans-serif'
             : '"JetBrains Mono", system-ui, sans-serif',

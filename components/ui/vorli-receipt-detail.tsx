@@ -31,15 +31,15 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
       tags={TAGS}
       shortDescription={
         <>
-          <span style={{ color: "#141414" }}>Vorli</span>
-          <span style={{ color: "rgba(20,20,20,0.5)" }}>
+          <span style={{ color: "var(--color-text-heading)" }}>Vorli</span>
+          <span style={{ color: "var(--color-text-subdued)" }}>
             {" — The first app I've built that actually changed how I spend."}
           </span>
         </>
       }
       longDescription="Most financial apps share the same assumption: if you can see your data, you'll change your behavior. I built Vorli because that assumption never worked for me. Existing tools asked me to think about money the way they were designed — not the way I actually do. Vorli puts AI at the center: it auto-categorizes spending, scans receipts, and reads your financial picture so you can just ask what matters. Not 'show me a chart' — more like 'should I be worried about this month?'"
     >
-      <div style={{ backgroundColor: "#F2F2F2", borderRadius: 24, padding: 16 }}>
+      <div style={{ backgroundColor: "var(--color-bg-surface)", borderRadius: 24, padding: 16 }}>
       {isMobile ? (
         // Mobile: single-column stack (video first, then screenshots)
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

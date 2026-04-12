@@ -187,11 +187,6 @@ export function V2Canvas() {
     return () => { document.body.style.overflow = ""; };
   }, [activeProject, envelopeOpen, isNotesExpanded, isStickyExpanded]);
 
-  // Light mode only for V2
-  const primaryColor = "#000000";
-  const primary80 = "rgba(0,0,0,0.80)";
-  const primary70 = "rgba(0,0,0,0.70)";
-  const primary40 = "rgba(0,0,0,0.40)";
 
   // Un-blur background as soon as close begins
   // NOTE: isStickyExpanded is intentionally excluded — scaling the container while
@@ -261,7 +256,7 @@ export function V2Canvas() {
                 fontSize: 15,
                 lineHeight: "18px",
                 letterSpacing: "-0.02em",
-                color: primaryColor,
+                color: "var(--color-text-primary)",
               }}
             >
               Hey You
@@ -273,7 +268,7 @@ export function V2Canvas() {
                 fontSize: isMobile ? 18 : 20,
                 lineHeight: isMobile ? "22px" : "24px",
                 letterSpacing: "-0.02em",
-                color: primaryColor,
+                color: "var(--color-text-primary)",
               }}
             >
               I&apos;m Bogdan
@@ -286,7 +281,7 @@ export function V2Canvas() {
                 fontSize: 12,
                 lineHeight: "16px",
                 letterSpacing: "-0.02em",
-                color: primary70,
+                color: "var(--color-text-tertiary)",
               }}
             >
               {getBuildVersion()}
@@ -306,11 +301,11 @@ export function V2Canvas() {
               lineHeight: "18px",
             }}
           >
-            <span style={{ color: primary40 }}>
+            <span style={{ color: "var(--color-text-muted)" }}>
               {displayText}
               <span
                 style={{
-                  color: primary80,
+                  color: "var(--color-text-secondary)",
                   animation: isIdle ? "blink 1s step-end infinite" : "none",
                 }}
               >
@@ -329,7 +324,7 @@ export function V2Canvas() {
               fontWeight: 400,
               fontSize: 14,
               lineHeight: "18px",
-              color: primary80,
+              color: "var(--color-text-secondary)",
               textAlign: "center",
               whiteSpace: "pre-wrap",
               width: isMobile ? "100%" : "80%",
@@ -355,8 +350,8 @@ export function V2Canvas() {
         {/* ── Project section ── */}
         <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0 }}>
           <ProjectSection
-            primaryColor={primaryColor}
-            primary40={primary40}
+            primaryColor="var(--color-text-primary)"
+            primary40="var(--color-text-muted)"
             isDark={false}
             activeProject={activeProject}
             returningProject={returningProject}
@@ -422,8 +417,8 @@ export function V2Canvas() {
               originRect={originRect}
               onCloseStart={handleCloseStart}
               onClose={handleClose}
-              primaryColor={primaryColor}
-              primary40={primary40}
+              primaryColor="var(--color-text-primary)"
+              primary40="var(--color-text-muted)"
             />
           )}
       </AnimatePresence>

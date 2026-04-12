@@ -19,8 +19,8 @@ export function WearDetail({ onCloseStart, onClose }: WearDetailProps) {
       tags={TAGS}
       shortDescription={
         <>
-          <span style={{ color: "#141414" }}>Wear</span>
-          <span style={{ color: "rgba(20,20,20,0.5)" }}>
+          <span style={{ color: "var(--color-text-heading)" }}>Wear</span>
+          <span style={{ color: "var(--color-text-subdued)" }}>
             {" — A weather app that shows what to wear instead of temperatures."}
           </span>
         </>

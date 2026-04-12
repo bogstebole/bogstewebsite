@@ -74,10 +74,6 @@ function SocialIconButton({
 }) {
   const [hovered, setHovered] = useState(false);
 
-  const iconFilter = hovered
-    ? (filterOverride ?? "none")
-    : "grayscale(100%) opacity(0.45)";
-
   return (
     <a
       href={href}
@@ -85,17 +81,13 @@ function SocialIconButton({
       rel="noopener noreferrer"
       aria-label={label}
       className={glassStyles.socialIconBtn}
-      style={{ color: hovered ? hoverColor : "#8A8A8A" } as React.CSSProperties}
+      style={{ color: hovered ? hoverColor : "var(--color-text-label)" } as React.CSSProperties}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       <span
-        style={{
-          alignItems: "center",
-          display: "flex",
-          filter: iconFilter,
-          transition: "filter 0.4s cubic-bezier(0.25, 1, 0.5, 1)",
-        }}
+        className={glassStyles.iconSpan}
+        style={hovered && filterOverride ? { filter: filterOverride } : undefined}
       >
         {children}
       </span>
@@ -200,7 +192,7 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         {/* Segmented divider */}
         <div style={{ alignItems: "start", display: "flex", gap: 2, height: "fit-content", opacity: 0.2, width: "100%" }}>
           {Array.from({ length: 56 }).map((_, i) => (
-            <div key={i} style={{ backgroundColor: "#585858", flex: 1, height: "1px" }} />
+            <div key={i} style={{ backgroundColor: "var(--color-divider)", flex: 1, height: "1px" }} />
           ))}
         </div>
 
@@ -219,7 +211,7 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             <SocialIconButton
               href="https://x.com/bgstdsgn"
               label="Twitter / X"
-              hoverColor="#000000"
+              hoverColor="var(--color-text-primary)"
             >
               <svg width="14" height="14" viewBox="0 0 1200 1227" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, transition: "fill 0.2s ease" }}>
                 <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.694H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="currentColor" />

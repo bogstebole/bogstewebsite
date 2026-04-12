@@ -28,8 +28,8 @@ export function ZounDetail({ onCloseStart, onClose }: ZounDetailProps) {
       tags={TAGS}
       shortDescription={
         <>
-          <span style={{ color: "#141414" }}>Zoun</span>
-          <span style={{ color: "rgba(20,20,20,0.5)" }}>
+          <span style={{ color: "var(--color-text-heading)" }}>Zoun</span>
+          <span style={{ color: "var(--color-text-subdued)" }}>
             {" — Time zones should feel spatial and immediate, not like reading a spreadsheet."}
           </span>
         </>

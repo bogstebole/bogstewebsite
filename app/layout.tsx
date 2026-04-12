@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { geistSans, geistMono, inter, silkscreen, jetbrainsMono, specialElite } from "@/lib/fonts";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${silkscreen.variable} ${jetbrainsMono.variable} ${specialElite.variable} antialiased`}
       >
+        <ThemeToggle />
         {children}
       </body>
     </html>

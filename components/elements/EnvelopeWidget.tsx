@@ -13,7 +13,7 @@ const EnvelopeWidgetBase = forwardRef<HTMLDivElement, EnvelopeWidgetProps>(
         ref={ref}
         onClick={onClick}
         style={{
-          backgroundColor: "#e4e3de",
+          backgroundColor: "var(--color-bg-envelope)",
           borderRadius: 3,
           boxShadow:
             "42px 25px 14px 0px rgba(0,0,0,0), 27px 16px 12px 0px rgba(0,0,0,0.02), 15px 9px 11px 0px rgba(0,0,0,0.08), 7px 4px 8px 0px rgba(0,0,0,0.14), 2px 1px 4px 0px rgba(0,0,0,0.16)",
