@@ -5,10 +5,10 @@ import { useEffect, useRef, useState } from "react";
 const GRAVITY = 1.35;
 const FRICTION = 0.94;
 const ITERATIONS = 35;
-const SEGMENT_COUNT = 22;
+const SEGMENT_COUNT = 11;
 const SEGMENT_LENGTH = 11;
-const TRIGGER_Y = 300;
-const REARM_Y = 260;
+const TRIGGER_Y = 150;
+const REARM_Y = 110;
 const DEBOUNCE_MS = 600;
 const ANCHOR_OFFSET_X = 50;
 
@@ -206,9 +206,20 @@ export function ThemeToggle() {
       mouseRef.current.y = ev.clientY;
     }
 
-    const onMouseDown = (e: MouseEvent) => { mouseRef.current.active = true; updateMouse(e); };
-    const onMouseMove = (e: MouseEvent) => updateMouse(e);
-    const onMouseUp = () => { mouseRef.current.active = false; mouseRef.current.targetPoint = null; };
+    function updateCursor(e: MouseEvent) {
+      const handle = pointsRef.current[pointsRef.current.length - 1];
+      if (!handle) return;
+      const dx = handle.x - e.clientX;
+      const dy = handle.y - e.clientY;
+      const near = Math.sqrt(dx * dx + dy * dy) < 70;
+      document.body.style.cursor = mouseRef.current.active && mouseRef.current.targetPoint
+        ? "grabbing"
+        : near ? "grab" : "";
+    }
+
+    const onMouseDown = (e: MouseEvent) => { mouseRef.current.active = true; updateMouse(e); updateCursor(e); };
+    const onMouseMove = (e: MouseEvent) => { updateMouse(e); updateCursor(e); };
+    const onMouseUp = (e: MouseEvent) => { mouseRef.current.active = false; mouseRef.current.targetPoint = null; updateCursor(e); };
     const onTouchStart = (e: TouchEvent) => { mouseRef.current.active = true; updateMouse(e); };
     const onTouchMove = (e: TouchEvent) => { updateMouse(e); };
     const onTouchEnd = () => { mouseRef.current.active = false; mouseRef.current.targetPoint = null; };
@@ -216,7 +227,7 @@ export function ThemeToggle() {
 
     window.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("mouseup", onMouseUp as EventListener);
     window.addEventListener("touchstart", onTouchStart);
     window.addEventListener("touchmove", onTouchMove);
     window.addEventListener("touchend", onTouchEnd);
@@ -229,7 +240,8 @@ export function ThemeToggle() {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("mouseup", onMouseUp as EventListener);
+      document.body.style.cursor = "";
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
@@ -248,7 +260,7 @@ export function ThemeToggle() {
           width: "100vw",
           height: "100vh",
           background:
-            "radial-gradient(circle at calc(100% - 50px) 0px, rgba(255,245,200,0.4) 0%, rgba(255,210,120,0.1) 20%, transparent 50%)",
+            "radial-gradient(circle at calc(100% - 50px) 0px, rgba(255,245,200,0.4) 0%, rgba(255,210,120,0.1) 12%, transparent 30%)",
           pointerEvents: "none",
           opacity: isDark ? 1 : 0,
           transition: "opacity 0.7s ease",
@@ -264,7 +276,7 @@ export function ThemeToggle() {
           width: "100vw",
           height: "100vh",
           background:
-            "radial-gradient(circle at calc(100% - 50px) 0px, rgba(255,225,140,0.6) 0%, rgba(255,180,70,0.25) 15%, rgba(255,130,30,0.08) 35%, rgba(255,100,20,0.01) 60%, transparent 85%)",
+            "radial-gradient(circle at calc(100% - 50px) 0px, rgba(255,225,140,0.6) 0%, rgba(255,180,70,0.25) 9%, rgba(255,130,30,0.08) 22%, rgba(255,100,20,0.01) 40%, transparent 60%)",
           pointerEvents: "none",
           opacity: isDark ? 1 : 0,
           transition: "opacity 0.6s ease",
