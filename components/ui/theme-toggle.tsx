@@ -53,6 +53,18 @@ export function ThemeToggle() {
     if (!ctx) return;
 
     const pullSound = new Audio("/sounds/light-switch.mp3");
+    let audioUnlocked = false;
+
+    function unlockAudio() {
+      if (audioUnlocked) return;
+      pullSound.volume = 0;
+      pullSound.play().then(() => {
+        pullSound.pause();
+        pullSound.currentTime = 0;
+        pullSound.volume = 1;
+        audioUnlocked = true;
+      }).catch(() => {});
+    }
 
     // Read persisted theme
     const stored = localStorage.getItem("theme");
@@ -222,10 +234,10 @@ export function ThemeToggle() {
         : near ? "grab" : "";
     }
 
-    const onMouseDown = (e: MouseEvent) => { mouseRef.current.active = true; updateMouse(e); updateCursor(e); document.body.style.userSelect = "none"; };
+    const onMouseDown = (e: MouseEvent) => { unlockAudio(); mouseRef.current.active = true; updateMouse(e); updateCursor(e); document.body.style.userSelect = "none"; };
     const onMouseMove = (e: MouseEvent) => { updateMouse(e); updateCursor(e); };
     const onMouseUp = (e: MouseEvent) => { mouseRef.current.active = false; mouseRef.current.targetPoint = null; updateCursor(e); document.body.style.userSelect = ""; };
-    const onTouchStart = (e: TouchEvent) => { mouseRef.current.active = true; updateMouse(e); };
+    const onTouchStart = (e: TouchEvent) => { unlockAudio(); mouseRef.current.active = true; updateMouse(e); };
     const onTouchMove = (e: TouchEvent) => { updateMouse(e); };
     const onTouchEnd = () => { mouseRef.current.active = false; mouseRef.current.targetPoint = null; };
     const onResize = () => init();
