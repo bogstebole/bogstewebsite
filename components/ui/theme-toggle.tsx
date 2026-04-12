@@ -52,6 +52,8 @@ export function ThemeToggle() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const pullSound = new Audio("/sounds/light-switch.mp3");
+
     // Read persisted theme
     const stored = localStorage.getItem("theme");
     const initialDark = stored === "dark";
@@ -149,6 +151,9 @@ export function ThemeToggle() {
       if (handle.y > TRIGGER_Y && !triggerActivatedRef.current) {
         const now = Date.now();
         if (now - lastTriggerTimeRef.current > DEBOUNCE_MS) {
+          pullSound.currentTime = 0;
+          pullSound.play().catch(e => console.log("Audio play blocked somewhat:", e));
+
           const next = !isDarkRef.current;
           isDarkRef.current = next;
           document.documentElement.classList.toggle("dark", next);
@@ -217,9 +222,9 @@ export function ThemeToggle() {
         : near ? "grab" : "";
     }
 
-    const onMouseDown = (e: MouseEvent) => { mouseRef.current.active = true; updateMouse(e); updateCursor(e); };
+    const onMouseDown = (e: MouseEvent) => { mouseRef.current.active = true; updateMouse(e); updateCursor(e); document.body.style.userSelect = "none"; };
     const onMouseMove = (e: MouseEvent) => { updateMouse(e); updateCursor(e); };
-    const onMouseUp = (e: MouseEvent) => { mouseRef.current.active = false; mouseRef.current.targetPoint = null; updateCursor(e); };
+    const onMouseUp = (e: MouseEvent) => { mouseRef.current.active = false; mouseRef.current.targetPoint = null; updateCursor(e); document.body.style.userSelect = ""; };
     const onTouchStart = (e: TouchEvent) => { mouseRef.current.active = true; updateMouse(e); };
     const onTouchMove = (e: TouchEvent) => { updateMouse(e); };
     const onTouchEnd = () => { mouseRef.current.active = false; mouseRef.current.targetPoint = null; };
@@ -242,6 +247,7 @@ export function ThemeToggle() {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp as EventListener);
       document.body.style.cursor = "";
+      document.body.style.userSelect = "";
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
