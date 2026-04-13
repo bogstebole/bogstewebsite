@@ -143,7 +143,7 @@ export function SelectedProjectLayout({
         height: isMobile ? "95dvh" : "95vh",
         overflowY: "scroll",
         overflowX: "hidden",
-        zIndex: 51,
+        zIndex: 10000,
         cursor: "default",
       }}
     >
@@ -338,7 +338,7 @@ export function SelectedProjectLayout({
           ...(isDesktop
             ? { left: 0, right: 0, margin: "0 auto", width: 1068 }
             : { left: 16, right: 16 }),
-          zIndex: 52,
+          zIndex: 10001,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>

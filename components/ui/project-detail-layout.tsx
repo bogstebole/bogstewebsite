@@ -174,7 +174,7 @@ export function ProjectDetailLayout({
             backgroundColor: "var(--color-bg-backdrop)",
             inset: 0,
             position: "fixed",
-            zIndex: 100,
+            zIndex: 10000,
           }}
         />
 
@@ -207,7 +207,7 @@ export function ProjectDetailLayout({
             position: "fixed",
             right: 0,
             width: "100%",
-            zIndex: 101,
+            zIndex: 10001,
           }}
         >
 
@@ -295,7 +295,7 @@ export function ProjectDetailLayout({
             position: "fixed",
             top: panelTopPx + 8,
             width: "calc(100% - 16px)",
-            zIndex: 102,
+            zIndex: 10002,
             backgroundColor: "var(--color-bg-sheet-header)",
             borderBottom: "1px solid rgba(0,0,0,0.05)",
             boxSizing: 'border-box'
@@ -333,7 +333,7 @@ export function ProjectDetailLayout({
         style={{
           position: "fixed",
           inset: 0,
-          zIndex: 100,
+          zIndex: 10000,
           display: "flex",
           justifyContent: "center",
           alignItems: "flex-end" // Align to bottom
@@ -465,7 +465,7 @@ export function ProjectDetailLayout({
           margin: "0 auto",
           width: "calc(100% - 32px)",
           maxWidth: cardWidth - 32,
-          zIndex: 102,
+          zIndex: 10002,
           boxShadow: "0px 8px 32px rgba(0,0,0,0.06)",
           backgroundColor: "var(--color-bg-sheet-header)",
           boxSizing: "border-box"
