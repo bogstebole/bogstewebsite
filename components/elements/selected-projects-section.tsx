@@ -323,6 +323,7 @@ export function SelectedProjectsSection({
   const { isMobile, isDesktop } = useBreakpoint();
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const stickyCardRef = useRef<HTMLDivElement>(null);
+  const logoControls = useAnimation();
   const contentControls = useAnimation();
   const gridControls = useAnimation();
   const badgeControls = useAnimation();
@@ -334,6 +335,7 @@ export function SelectedProjectsSection({
 
   // Sticky state local
   const [internalStickyExpanded, setInternalStickyExpanded] = useState(false);
+  const stickyLogoControls = useAnimation();
   const stickyContentControls = useAnimation();
   const stickyGridControls = useAnimation();
   const stickyBadgeControls = useAnimation();
@@ -351,6 +353,7 @@ export function SelectedProjectsSection({
   const [isVorliClosing, setIsVorliClosing] = useState(false);
   const [isVorliSheetReady, setIsVorliSheetReady] = useState(false);
   const [showVorliFloatingHeader, setShowVorliFloatingHeader] = useState(false);
+  const vorliLogoControls = useAnimation();
   const vorliContentControls = useAnimation();
   const vorliGridControls = useAnimation();
   const vorliBadgeControls = useAnimation();
@@ -441,6 +444,7 @@ export function SelectedProjectsSection({
     setIsNotesClosing(true);
     onNotesCloseStart?.();
     await Promise.all([
+      logoControls.start("exit"),
       contentControls.start("exit"),
       gridControls.start("exit"),
       badgeControls.start("exit"),
@@ -457,7 +461,7 @@ export function SelectedProjectsSection({
     setIsSheetReady(false);
     closingRef.current = false;
     setIsNotesClosing(false);
-  }, [contentControls, gridControls, badgeControls, onNotesCloseStart, onNotesClose, isDesktop, miniTagControls]);
+  }, [logoControls, contentControls, gridControls, badgeControls, onNotesCloseStart, onNotesClose, isDesktop, miniTagControls]);
 
   // Vorli Expand/Close Handlers
   const handleVorliExpand = useCallback(async () => {
@@ -473,6 +477,7 @@ export function SelectedProjectsSection({
     vorliClosingRef.current = true;
     setIsVorliClosing(true);
     await Promise.all([
+      vorliLogoControls.start("exit"),
       vorliContentControls.start("exit"),
       vorliGridControls.start("exit"),
       vorliBadgeControls.start("exit"),
@@ -486,7 +491,7 @@ export function SelectedProjectsSection({
     setIsVorliSheetReady(false);
     vorliClosingRef.current = false;
     setIsVorliClosing(false);
-  }, [vorliContentControls, vorliGridControls, vorliBadgeControls, isDesktop, vorliMiniTagControls]);
+  }, [vorliLogoControls, vorliContentControls, vorliGridControls, vorliBadgeControls, isDesktop, vorliMiniTagControls]);
 
   // Sticky Expand/Close Handlers
   const handleStickyExpandAction = useCallback(async () => {
@@ -504,6 +509,7 @@ export function SelectedProjectsSection({
     setIsStickyClosing(true);
     onStickyCloseStart?.();
     await Promise.all([
+      stickyLogoControls.start("exit"),
       stickyContentControls.start("exit"),
       stickyGridControls.start("exit"),
       stickyBadgeControls.start("exit"),
@@ -518,7 +524,7 @@ export function SelectedProjectsSection({
     setIsStickySheetReady(false);
     stickyClosingRef.current = false;
     setIsStickyClosing(false);
-  }, [stickyContentControls, stickyGridControls, stickyBadgeControls, onStickyCloseStart, onStickyClose, isDesktop, stickyMiniTagControls]);
+  }, [stickyLogoControls, stickyContentControls, stickyGridControls, stickyBadgeControls, onStickyCloseStart, onStickyClose, isDesktop, stickyMiniTagControls]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -703,6 +709,7 @@ export function SelectedProjectsSection({
                   </>
                 }
                 showDownloadButton
+                logoControls={logoControls}
                 badgeControls={badgeControls}
                 contentControls={contentControls}
                 gridControls={gridControls}
@@ -716,11 +723,10 @@ export function SelectedProjectsSection({
                 onAnimationComplete={() => {
                   if (!closingRef.current) {
                     setIsSheetReady(true);
-                    void badgeControls.start("visible");
-                    void contentControls.start("visible");
-                    setTimeout(() => {
-                      if (!closingRef.current) void gridControls.start("visible");
-                    }, 350);
+                    void logoControls.start("visible");
+                    setTimeout(() => { if (!closingRef.current) void badgeControls.start("visible"); }, 80);
+                    setTimeout(() => { if (!closingRef.current) void contentControls.start("visible"); }, 160);
+                    setTimeout(() => { if (!closingRef.current) void gridControls.start("visible"); }, 350);
                   }
                 }}
                 onClose={() => void handleClose()}
@@ -787,6 +793,7 @@ export function SelectedProjectsSection({
                 title="Vorli"
                 tags={["iOS", "AI Financial Assistant", "In testing"]}
                 description={VORLI_DESCRIPTION}
+                logoControls={vorliLogoControls}
                 badgeControls={vorliBadgeControls}
                 contentControls={vorliContentControls}
                 gridControls={vorliGridControls}
@@ -796,11 +803,10 @@ export function SelectedProjectsSection({
                 onAnimationComplete={() => {
                   if (!vorliClosingRef.current) {
                     setIsVorliSheetReady(true);
-                    void vorliBadgeControls.start("visible");
-                    void vorliContentControls.start("visible");
-                    setTimeout(() => {
-                      if (!vorliClosingRef.current) void vorliGridControls.start("visible");
-                    }, 350);
+                    void vorliLogoControls.start("visible");
+                    setTimeout(() => { if (!vorliClosingRef.current) void vorliBadgeControls.start("visible"); }, 80);
+                    setTimeout(() => { if (!vorliClosingRef.current) void vorliContentControls.start("visible"); }, 160);
+                    setTimeout(() => { if (!vorliClosingRef.current) void vorliGridControls.start("visible"); }, 350);
                   }
                 }}
                 onClose={() => void handleVorliClose()}
@@ -865,6 +871,7 @@ export function SelectedProjectsSection({
                 title="Sticky"
                 tags={["iOS", "Productivity"]}
                 description={STICKY_DESCRIPTION}
+                logoControls={stickyLogoControls}
                 badgeControls={stickyBadgeControls}
                 contentControls={stickyContentControls}
                 gridControls={stickyGridControls}
@@ -878,11 +885,10 @@ export function SelectedProjectsSection({
                 onAnimationComplete={() => {
                   if (!stickyClosingRef.current) {
                     setIsStickySheetReady(true);
-                    void stickyBadgeControls.start("visible");
-                    void stickyContentControls.start("visible");
-                    setTimeout(() => {
-                      if (!stickyClosingRef.current) void stickyGridControls.start("visible");
-                    }, 350);
+                    void stickyLogoControls.start("visible");
+                    setTimeout(() => { if (!stickyClosingRef.current) void stickyBadgeControls.start("visible"); }, 80);
+                    setTimeout(() => { if (!stickyClosingRef.current) void stickyContentControls.start("visible"); }, 160);
+                    setTimeout(() => { if (!stickyClosingRef.current) void stickyGridControls.start("visible"); }, 350);
                   }
                 }}
                 onClose={() => void handleStickyCloseAction()}

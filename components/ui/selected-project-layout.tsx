@@ -44,6 +44,7 @@ interface SelectedProjectLayoutProps {
   extraBadge?: React.ReactNode;
   description: React.ReactNode;
   showDownloadButton?: boolean;
+  logoControls: ReturnType<typeof useAnimation>;
   badgeControls: ReturnType<typeof useAnimation>;
   contentControls: ReturnType<typeof useAnimation>;
   gridControls: ReturnType<typeof useAnimation>;
@@ -65,6 +66,7 @@ export function SelectedProjectLayout({
   extraBadge,
   description,
   showDownloadButton,
+  logoControls,
   badgeControls,
   contentControls,
   gridControls,
@@ -179,7 +181,12 @@ export function SelectedProjectLayout({
       {/* Header section */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: isMobile ? '100%' : '480px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+          <motion.div
+            animate={logoControls}
+            initial="hidden"
+            variants={CONTENT_ITEM_VARIANTS}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={icon}
@@ -189,7 +196,7 @@ export function SelectedProjectLayout({
             <div style={{ color: 'var(--color-text-ui)', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '20px', letterSpacing: '-0.01em', lineHeight: '1' }}>
               {title}
             </div>
-          </div>
+          </motion.div>
 
           <motion.div
             ref={badgesRef}
