@@ -7,8 +7,8 @@ const FRICTION = 0.94;
 const ITERATIONS = 35;
 const SEGMENT_COUNT = 11;
 const SEGMENT_LENGTH = 11;
-const TRIGGER_Y = 150;
-const REARM_Y = 110;
+const TRIGGER_Y = 121;
+const REARM_Y = 118;
 const DEBOUNCE_MS = 600;
 const ANCHOR_OFFSET_X = 50;
 
