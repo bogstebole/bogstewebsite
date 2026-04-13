@@ -443,12 +443,13 @@ export function SelectedProjectsSection({
     closingRef.current = true;
     setIsNotesClosing(true);
     onNotesCloseStart?.();
-    await Promise.all([
-      logoControls.start("exit"),
-      contentControls.start("exit"),
-      gridControls.start("exit"),
-      badgeControls.start("exit"),
-    ]);
+    void logoControls.start("exit");
+    void contentControls.start("exit");
+    void gridControls.start("exit");
+    void badgeControls.start("exit");
+    // Collapse when the last grid item starts its exit (not after it completes).
+    // staggerChildren = 0.05s → last of N items starts at (N-1)*50ms.
+    await new Promise<void>(r => setTimeout(r, (USELESS_NOTES_ASSETS.length - 1) * 50));
     if (isDesktop) {
       // On desktop: FLIP animates the card back; onLayoutAnimationComplete staggers badges in
       returningRef.current = true;
@@ -476,12 +477,11 @@ export function SelectedProjectsSection({
     if (vorliClosingRef.current || vorliExpandingRef.current) return;
     vorliClosingRef.current = true;
     setIsVorliClosing(true);
-    await Promise.all([
-      vorliLogoControls.start("exit"),
-      vorliContentControls.start("exit"),
-      vorliGridControls.start("exit"),
-      vorliBadgeControls.start("exit"),
-    ]);
+    void vorliLogoControls.start("exit");
+    void vorliContentControls.start("exit");
+    void vorliGridControls.start("exit");
+    void vorliBadgeControls.start("exit");
+    await new Promise<void>(r => setTimeout(r, (VORLI_SCREENSHOTS.length - 1) * 50));
     if (isDesktop) {
       vorliReturningRef.current = true;
     } else {
@@ -508,12 +508,11 @@ export function SelectedProjectsSection({
     stickyClosingRef.current = true;
     setIsStickyClosing(true);
     onStickyCloseStart?.();
-    await Promise.all([
-      stickyLogoControls.start("exit"),
-      stickyContentControls.start("exit"),
-      stickyGridControls.start("exit"),
-      stickyBadgeControls.start("exit"),
-    ]);
+    void stickyLogoControls.start("exit");
+    void stickyContentControls.start("exit");
+    void stickyGridControls.start("exit");
+    void stickyBadgeControls.start("exit");
+    await new Promise<void>(r => setTimeout(r, (STICKY_ASSETS.length - 1) * 50));
     if (isDesktop) {
       stickyReturningRef.current = true;
     } else {
