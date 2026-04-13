@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -80,9 +81,29 @@ export function SelectedProjectLayout({
 }: SelectedProjectLayoutProps) {
   const { isMobile, isDesktop } = useBreakpoint();
   const [showQR, setShowQR] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [panelTopPx, setPanelTopPx] = useState(() =>
+    typeof window !== "undefined" ? window.innerHeight * 0.05 : 0
+  );
+
+  const measurePanelTop = useCallback(() => {
+    if (containerRef.current) {
+      setPanelTopPx(containerRef.current.getBoundingClientRect().top);
+    }
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
+    measurePanelTop();
+    window.addEventListener("resize", measurePanelTop);
+    return () => window.removeEventListener("resize", measurePanelTop);
+  }, [measurePanelTop]);
 
   return (
+    <>
     <motion.div
+      ref={containerRef}
       layoutId={isDesktop ? layoutId : undefined}
       animate={{ y: 0, rotate: 0 }}
       initial={isDesktop ? undefined : { y: "100%" }}
@@ -92,7 +113,10 @@ export function SelectedProjectLayout({
         y: { type: "spring", stiffness: 340, damping: 34 },
         rotate: { type: "spring", stiffness: 400, damping: 30 },
       }}
-      onAnimationComplete={onAnimationComplete}
+      onAnimationComplete={() => {
+        measurePanelTop();
+        onAnimationComplete?.();
+      }}
       onClick={(e) => e.stopPropagation()}
       style={{
         alignItems: 'center',
@@ -123,49 +147,6 @@ export function SelectedProjectLayout({
         cursor: "default",
       }}
     >
-      {/* Floating sticky header */}
-      <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{
-          opacity: showFloatingHeader && !isClosing ? 1 : 0,
-          y: showFloatingHeader && !isClosing ? 0 : -12,
-        }}
-        transition={{ type: "spring", stiffness: 400, damping: 36 }}
-        style={{
-          alignItems: "center",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          borderRadius: 9999,
-          boxSizing: "border-box",
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "20px 24px",
-          pointerEvents: showFloatingHeader && !isClosing ? "auto" : "none",
-          position: "fixed",
-          top: "calc(5vh + 8px)",
-          left: isMobile ? 8 : 0,
-          right: isMobile ? 8 : 0,
-          margin: isMobile ? undefined : "0 auto",
-          width: isMobile ? undefined : 1084,
-          zIndex: 52,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={icon}
-            alt={`${title} Icon`}
-            style={{ width: "24px", height: "24px", objectFit: "cover", borderRadius: 4, ...iconStyle }}
-          />
-          <span style={{ color: "var(--color-text-ui)", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "16px", letterSpacing: "-0.01em", lineHeight: "1" }}>
-            {title}
-          </span>
-        </div>
-        <GlassButton size="s" onClick={onClose} aria-label="Close">
-          {X_ICON}
-        </GlassButton>
-      </motion.div>
-
       {/* Absolute close button */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -333,5 +314,50 @@ export function SelectedProjectLayout({
         {children}
       </motion.div>
     </motion.div>
+
+    {mounted && createPortal(
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{
+          opacity: showFloatingHeader && !isClosing ? 1 : 0,
+          y: showFloatingHeader && !isClosing ? 0 : -12,
+        }}
+        transition={{ type: "spring", stiffness: 400, damping: 36 }}
+        style={{
+          alignItems: "center",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderRadius: 24,
+          boxSizing: "border-box",
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "20px 24px",
+          pointerEvents: showFloatingHeader && !isClosing ? "auto" : "none",
+          position: "fixed",
+          top: panelTopPx + 16,
+          ...(isDesktop
+            ? { left: 0, right: 0, margin: "0 auto", width: 1068 }
+            : { left: 16, right: 16 }),
+          zIndex: 52,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={icon}
+            alt={`${title} Icon`}
+            style={{ width: "24px", height: "24px", objectFit: "cover", borderRadius: 4, ...iconStyle }}
+          />
+          <span style={{ color: "var(--color-text-ui)", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: "16px", letterSpacing: "-0.01em", lineHeight: "1" }}>
+            {title}
+          </span>
+        </div>
+        <GlassButton size="s" onClick={onClose} aria-label="Close">
+          {X_ICON}
+        </GlassButton>
+      </motion.div>,
+      document.body
+    )}
+    </>
   );
 }

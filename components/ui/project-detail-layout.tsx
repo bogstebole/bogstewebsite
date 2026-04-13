@@ -52,6 +52,21 @@ export function ProjectDetailLayout({
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [cardAnimationComplete, setCardAnimationComplete] = useState(false);
 
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [panelTopPx, setPanelTopPx] = useState(0);
+
+  const measurePanelTop = useCallback(() => {
+    if (panelRef.current) {
+      setPanelTopPx(panelRef.current.getBoundingClientRect().top);
+    }
+  }, []);
+
+  useEffect(() => {
+    measurePanelTop();
+    window.addEventListener("resize", measurePanelTop);
+    return () => window.removeEventListener("resize", measurePanelTop);
+  }, [measurePanelTop]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -165,10 +180,11 @@ export function ProjectDetailLayout({
 
         {/* Bottom sheet */}
         <motion.div
+          ref={panelRef}
           initial={{ y: "100%" }}
           animate={{ y: isClosing ? "100%" : 0 }}
           transition={sheetSpring}
-          onAnimationComplete={() => { if (!isClosing) setCardAnimationComplete(true); }}
+          onAnimationComplete={() => { if (!isClosing) { setCardAnimationComplete(true); measurePanelTop(); } }}
           style={{
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
@@ -272,14 +288,12 @@ export function ProjectDetailLayout({
             borderRadius: 24,
             display: "flex",
             justifyContent: "space-between",
-            left: 0,
-            marginTop: "calc(5dvh + 8px)",
-            marginLeft: 8,
-            marginRight: 8,
+            left: 8,
+            right: 8,
             padding: 16,
             pointerEvents: showStickyHeader && !isClosing ? "auto" : "none",
             position: "fixed",
-            top: 0,
+            top: panelTopPx + 8,
             width: "calc(100% - 16px)",
             zIndex: 102,
             backgroundColor: "var(--color-bg-sheet-header)",
@@ -327,11 +341,12 @@ export function ProjectDetailLayout({
       >
         {/* Card Container - 95vh, Bottom Sheet */}
         <motion.div
+          ref={panelRef}
           className="layout-scroll"
           initial={{ opacity: 0, y: "100%" }}
           animate={isClosing ? { opacity: 0, y: "100%" } : { opacity: 1, y: 0 }}
           transition={desktopSpring}
-          onAnimationComplete={() => { if (!isClosing) setCardAnimationComplete(true); }}
+          onAnimationComplete={() => { if (!isClosing) { setCardAnimationComplete(true); measurePanelTop(); } }}
           onClick={(e) => e.stopPropagation()}
           style={{
             width: "100%",
@@ -444,7 +459,7 @@ export function ProjectDetailLayout({
           paddingTop: 16,
           pointerEvents: showStickyHeader && !isClosing ? "auto" : "none",
           position: "fixed",
-          top: "calc(5vh + 16px)",
+          top: panelTopPx + 16,
           left: 0,
           right: 0,
           margin: "0 auto",
