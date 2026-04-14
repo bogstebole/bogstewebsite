@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, useMotionValue, useAnimate } from "framer-motion";
 import { NotesToSelf } from "@/components/elements/notes-to-self";
 import { AboutMeStack } from "@/components/elements/about-me-stack";
@@ -51,7 +52,8 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
   const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
   const vh = typeof window !== "undefined" ? window.innerHeight : 900;
 
-  const targetWidth = vw * 0.30;
+  const isMobileViewport = vw < 640;
+  const targetWidth = isMobileViewport ? vw * 0.82 : vw * 0.30;
   const targetHeight = targetWidth * ENVELOPE_ASPECT;
   const targetTop = (vh - targetHeight) / 2;
   const targetLeft = (vw - targetWidth) / 2;
@@ -64,8 +66,13 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
   const notesHeight = notesWidth * NOTES_PAPER_ASPECT;
 
   const maxPaperHeight = Math.max(aboutHeight, notesHeight);
-  // About Me zoom: 1.3x native, constrained to 88vh
-  const zoomScale = Math.min((340 / aboutWidth) * 1.3, (vh * 0.88) / aboutHeight);
+  const LEFT_PADDING = 24;
+  // About Me zoom: 1.3x native, constrained to 88vh and (on mobile) viewport width
+  const zoomScale = Math.min(
+    (340 / aboutWidth) * 1.3,
+    (vh * 0.88) / aboutHeight,
+    isMobileViewport ? (vw - 2 * LEFT_PADDING) / aboutWidth : Infinity,
+  );
   // Notes zoom: scale up to fill ~75vh nicely
   const notesZoomScale = Math.min(1.6, (vh * 0.75) / notesHeight);
   const notesAbsCenterY = targetTop + (targetHeight * 0.96) - (notesHeight / 2);
@@ -73,12 +80,39 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
 
   // Center target calculations
   const paperAbsBottom = targetTop + (targetHeight * 0.96); // the anchor point is 96% of target height
-  const paperCenterY = paperAbsBottom - (aboutHeight / 2);
-  const deltaYtoCenter = (vh / 2) - paperCenterY;
   // Offset the anchor higher since envelope SVG carries a bottom drop-shadow. 
   // A 96% height bound ensures it stays visually tucked into the physical envelope, 
   // keeping the paper top under the folded closed hinge.
   const paperTopRatio = (targetHeight * 0.96 - maxPaperHeight) / targetHeight;
+
+  // Correct vertical centering when scale: zoomScale is applied with transformOrigin "bottom center".
+  // CSS translateY is applied AFTER scale (in final layout space, not pre-scale space).
+  // scope center y in viewport = paperAbsBottom + y - (zoomScale × aboutHeight / 2)
+  // Set equal to vh/2 and solve for y:
+  const yToCenter = (vh / 2) - paperAbsBottom + (zoomScale * aboutHeight) / 2;
+
+  // Mobile expanded x: position page 1 at LEFT_PADDING from the left viewport edge.
+  // The scope div has CSS left: "50%" (left edge at envelope centre = scopeAbsLeft).
+  // Framer x translates from that left edge (not centred), so:
+  //   viewport x of scope left = scopeAbsLeft + expandedX * zoomScale
+  // Set = LEFT_PADDING and solve for expandedX:
+  const scopeAbsLeft = targetLeft + targetWidth / 2; // viewport x of scope's CSS left anchor
+
+  const expandedX = isMobileViewport
+    ? (LEFT_PADDING - scopeAbsLeft) / zoomScale
+    : -(aboutWidth / 2); // desktop: keep centred (same as initial -50% of aboutWidth)
+
+  // Spread gap mirrors AboutMeStack's spreadGap = paperWidth * 0.05
+  const spreadGap = aboutWidth * 0.05;
+  const step = aboutWidth + spreadGap;
+  // Total spread width for all 4 pages (pre-scale): 3 steps + 1 page
+  const totalSpreadWidth = 3 * step + aboutWidth;
+  // Left drag limit: last page right edge lands at (vw - LEFT_PADDING) in viewport.
+  //   viewport x of last page right = scopeAbsLeft + (expandedX + totalSpreadWidth) * zoomScale
+  //   set = vw - LEFT_PADDING and solve for expandedX:
+  const expandedDragLeft = isMobileViewport
+    ? (vw - LEFT_PADDING - scopeAbsLeft) / zoomScale - totalSpreadWidth
+    : -vw * 2; // desktop: free pan
 
   // Scale ratio so paper fits correctly inside envelope during transit
   const scaleRatio = originRect.width / targetWidth;
@@ -136,7 +170,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
     phase === "focus-notes" ||
     phase.includes("return-paper");
 
-  return (
+  const overlay = (
     <div style={{ position: "fixed", inset: 0, zIndex: 10, overflowX: "hidden", overflowY: "hidden" }}>
       {/* Scrollable layout wrapper removed in favor of direct framer motion drag interaction */}
       
@@ -332,7 +366,7 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
                : phase === "open"
                ? { y: 0, rotate: 5, zIndex: 4, scale: 1 }
                : phase === "focus-about" || phase === "expand-about"
-               ? { y: deltaYtoCenter / zoomScale, rotate: 0, zIndex: 40, scale: zoomScale }
+               ? { y: yToCenter, rotate: 0, zIndex: 40, scale: zoomScale }
                : phase === "slide-notes-out" || phase === "focus-notes" || phase === "slide-notes-back"
                ? { y: 0, rotate: 5, zIndex: 4, scale: 1 }
                : phase === "move-to-origin"
@@ -383,10 +417,11 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
               userSelect: "none",
             }}
             initial={{ x: "-50%" }}
+            animate={phase === "expand-about" ? { x: expandedX } : phase === "open" || phase === "focus-about" ? { x: "-50%" } : undefined}
             whileHover={phase === "open" ? { scale: 1.04 } : {}}
             onClick={() => { if (phase === "open") setPhase("focus-about") }}
             drag={phase === "expand-about" ? "x" : false}
-            dragConstraints={{ right: 0, left: -vw * 2 }}
+            dragConstraints={{ right: expandedX, left: Math.min(expandedX, expandedDragLeft) }}
             dragElastic={0.08}
             transition={{ type: "spring", stiffness: 120, damping: 22 }}
           >
@@ -439,4 +474,6 @@ export function EnvelopeOverlay({ originRect, onCloseStart, onClose }: EnvelopeO
       </motion.div>
     </div>
   );
+
+  return typeof document !== "undefined" ? createPortal(overlay, document.body) : null;
 }
