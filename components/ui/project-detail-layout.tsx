@@ -317,7 +317,7 @@ export function ProjectDetailLayout({
   // -------------------------
   // DESKTOP: Centered layout (Notes wrapper style) docked at bottom
   // -------------------------
-  return (
+  return createPortal(
     <>
       <style>{`
         .layout-scroll::-webkit-scrollbar { display: none; }
@@ -478,6 +478,7 @@ export function ProjectDetailLayout({
           </svg>
         </GlassButton>
       </motion.div>
-    </>
+    </>,
+    document.body
   );
 }
