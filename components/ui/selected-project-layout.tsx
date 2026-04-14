@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
@@ -82,28 +82,20 @@ export function SelectedProjectLayout({
   const { isMobile, isDesktop } = useBreakpoint();
   const [showQR, setShowQR] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [panelTopPx, setPanelTopPx] = useState(() =>
     typeof window !== "undefined" ? window.innerHeight * 0.05 : 0
   );
 
-  const measurePanelTop = useCallback(() => {
-    if (containerRef.current) {
-      setPanelTopPx(containerRef.current.getBoundingClientRect().top);
-    }
-  }, []);
-
   useEffect(() => {
     setMounted(true);
-    measurePanelTop();
-    window.addEventListener("resize", measurePanelTop);
-    return () => window.removeEventListener("resize", measurePanelTop);
-  }, [measurePanelTop]);
+    const onResize = () => setPanelTopPx(window.innerHeight * 0.05);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   return (
     <>
     <motion.div
-      ref={containerRef}
       layoutId={isDesktop ? layoutId : undefined}
       animate={{ y: 0, rotate: 0 }}
       initial={isDesktop ? undefined : { y: "100%" }}
@@ -114,7 +106,6 @@ export function SelectedProjectLayout({
         rotate: { type: "spring", stiffness: 400, damping: 30 },
       }}
       onAnimationComplete={() => {
-        measurePanelTop();
         onAnimationComplete?.();
       }}
       onClick={(e) => e.stopPropagation()}
