@@ -35,6 +35,7 @@ interface MouseState {
 
 export function ThemeToggle() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hitZoneRef = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
 
   // All physics state in refs — never causes re-renders
@@ -242,12 +243,15 @@ export function ThemeToggle() {
     const onTouchEnd = () => { mouseRef.current.active = false; mouseRef.current.targetPoint = null; };
     const onResize = () => init();
 
+    // Attach touch listeners to the hit zone div so touch-action:none prevents scroll
+    const hitZone = hitZoneRef.current;
+
     window.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp as EventListener);
-    window.addEventListener("touchstart", onTouchStart);
-    window.addEventListener("touchmove", onTouchMove);
-    window.addEventListener("touchend", onTouchEnd);
+    hitZone?.addEventListener("touchstart", onTouchStart);
+    hitZone?.addEventListener("touchmove", onTouchMove);
+    hitZone?.addEventListener("touchend", onTouchEnd);
     window.addEventListener("resize", onResize);
 
     init();
@@ -260,9 +264,9 @@ export function ThemeToggle() {
       window.removeEventListener("mouseup", onMouseUp as EventListener);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
+      hitZone?.removeEventListener("touchstart", onTouchStart);
+      hitZone?.removeEventListener("touchmove", onTouchMove);
+      hitZone?.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("resize", onResize);
     };
   }, []);
@@ -299,6 +303,20 @@ export function ThemeToggle() {
           opacity: isDark ? 1 : 0,
           transition: "opacity 0.6s ease",
           zIndex: 10,
+        }}
+      />
+      {/* Touch hit zone — covers cord handle area, touch-action:none prevents scroll */}
+      <div
+        ref={hitZoneRef}
+        style={{
+          position: "fixed",
+          top: 0,
+          right: 0,
+          width: 110,
+          height: 200,
+          touchAction: "none",
+          zIndex: 10000,
+          background: "transparent",
         }}
       />
       {/* Rope canvas */}
