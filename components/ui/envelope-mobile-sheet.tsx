@@ -244,8 +244,8 @@ export function EnvelopeMobileSheet({ onCloseStart, onClose }: EnvelopeMobileShe
         transition={stickySpring}
         style={{
           alignItems: "center",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
           borderRadius: 24,
           display: "flex",
           justifyContent: "space-between",
