@@ -12,12 +12,31 @@ interface EnvelopeMobileSheetProps {
 }
 
 const sheetSpring = { type: "spring" as const, stiffness: 340, damping: 34 };
+const stickySpring = { type: "spring" as const, stiffness: 400, damping: 36 };
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 export function EnvelopeMobileSheet({ onCloseStart, onClose }: EnvelopeMobileSheetProps) {
   const [mounted, setMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const closingRef = useRef(false);
+
+  const panelRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [panelTopPx, setPanelTopPx] = useState(0);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [cardAnimationComplete, setCardAnimationComplete] = useState(false);
+
+  const measurePanelTop = useCallback(() => {
+    if (panelRef.current) {
+      setPanelTopPx(panelRef.current.getBoundingClientRect().top);
+    }
+  }, []);
+
+  useEffect(() => {
+    measurePanelTop();
+    window.addEventListener("resize", measurePanelTop);
+    return () => window.removeEventListener("resize", measurePanelTop);
+  }, [measurePanelTop]);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -38,7 +57,26 @@ export function EnvelopeMobileSheet({ onCloseStart, onClose }: EnvelopeMobileShe
     return () => window.removeEventListener("keydown", handler);
   }, [initiateClose]);
 
+  // Sticky header observer — only active after sheet animation completes
+  useEffect(() => {
+    if (!cardAnimationComplete) return;
+    const el = headerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyHeader(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [cardAnimationComplete]);
+
   if (!mounted) return null;
+
+  const closeIcon = (
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+    </svg>
+  );
 
   return createPortal(
     <>
@@ -60,9 +98,13 @@ export function EnvelopeMobileSheet({ onCloseStart, onClose }: EnvelopeMobileShe
 
       {/* Bottom sheet */}
       <motion.div
+        ref={panelRef}
         initial={{ y: "100%" }}
         animate={{ y: isClosing ? "100%" : 0 }}
         transition={sheetSpring}
+        onAnimationComplete={() => {
+          if (!isClosing) { setCardAnimationComplete(true); measurePanelTop(); }
+        }}
         style={{
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
@@ -88,12 +130,10 @@ export function EnvelopeMobileSheet({ onCloseStart, onClose }: EnvelopeMobileShe
         }}
       >
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+        <div ref={headerRef} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
           <PaperLogo size={32} />
           <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-            </svg>
+            {closeIcon}
           </GlassButton>
         </div>
 
@@ -134,22 +174,18 @@ export function EnvelopeMobileSheet({ onCloseStart, onClose }: EnvelopeMobileShe
             Childhood fascination with drawing dark circles alarmed my parents but led me to explore conceptual art, product design and eventually AI. AI gave me opportunity to bring to life concepts that were just an idea a while ago. Through the process I learned to harness a child&apos;s innate curiosity. Now as a father, my son&apos;s wonder helps me rediscover that questioning spirit I sometimes lose touch with.
           </p>
 
-          {/* Read more button */}
-          <GlassButton size="m" onClick={() => {/* step 3 */}}>
-            Read more
-          </GlassButton>
-
           {/* Illustration */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/images/me-and-son.png"
             alt="Me and my son illustration"
-            style={{
-              width: "100%",
-              height: "auto",
-              display: "block",
-            }}
+            style={{ width: "100%", height: "auto", display: "block" }}
           />
+
+          {/* Read more button */}
+          <GlassButton size="m" onClick={() => {/* step 3 */}}>
+            Read more
+          </GlassButton>
 
         </div>
 
@@ -196,6 +232,40 @@ export function EnvelopeMobileSheet({ onCloseStart, onClose }: EnvelopeMobileShe
           </div>
         </div>
 
+      </motion.div>
+
+      {/* Sticky header */}
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{
+          opacity: showStickyHeader && !isClosing ? 1 : 0,
+          y: showStickyHeader && !isClosing ? 0 : -12,
+        }}
+        transition={stickySpring}
+        style={{
+          alignItems: "center",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderRadius: 24,
+          display: "flex",
+          justifyContent: "space-between",
+          left: 8,
+          right: 8,
+          padding: 16,
+          pointerEvents: showStickyHeader && !isClosing ? "auto" : "none",
+          position: "fixed",
+          top: panelTopPx + 8,
+          width: "calc(100% - 16px)",
+          zIndex: 10002,
+          backgroundColor: "var(--color-bg-sheet-header)",
+          borderBottom: "1px solid rgba(0,0,0,0.05)",
+          boxSizing: "border-box",
+        }}
+      >
+        <PaperLogo size={24} />
+        <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+          {closeIcon}
+        </GlassButton>
       </motion.div>
     </>,
     document.body
