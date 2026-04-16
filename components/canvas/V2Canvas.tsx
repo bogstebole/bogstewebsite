@@ -9,6 +9,7 @@ import { ProjectSection } from "@/components/elements/project-section";
 import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
 import { VorliReceiptDetail } from "@/components/ui/vorli-receipt-detail";
 import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
+import { EnvelopeMobileSheet } from "@/components/ui/envelope-mobile-sheet";
 import { ZounDetail } from "@/components/ui/zoun-detail";
 import { WearDetail } from "@/components/ui/wear-detail";
 import { PauschalDetail } from "@/components/ui/pauschal-detail";
@@ -330,7 +331,7 @@ export function V2Canvas() {
               width: isMobile ? "100%" : "80%",
             }}
           >
-            I build things that feel considered, from iOS apps to interactive web experiences. My work lives in the overlap between design and engineering, where spacing decisions and code decisions are the same decision. Based in Belgrade, I spend most of my time on the parts that are easy to overlook: transitions, tap states, the moment a layout stops feeling like one. I&apos;m most interested in products where craft is treated as a requirement, not an afterthought. The goal is always the same, something that feels right before anyone can explain why.
+            I build things that feel considered, from iOS apps to interactive web experiences. Ten years in, mostly 0-to-1 B2B SaaS products built from scratch or completely reimagined. I'm most interested in products where craft is treated as a requirement, not an afterthought.
           </p>
         </div>
 
@@ -431,8 +432,16 @@ export function V2Canvas() {
         />
       )}
 
-      {/* ── Envelope overlay ── */}
-      {envelopeOpen && envelopeOriginRect && (
+      {/* ── Envelope — mobile bottom sheet ── */}
+      {envelopeOpen && isMobile && (
+        <EnvelopeMobileSheet
+          onCloseStart={handleEnvelopeCloseStart}
+          onClose={handleEnvelopeClose}
+        />
+      )}
+
+      {/* ── Envelope overlay (desktop) ── */}
+      {envelopeOpen && !isMobile && envelopeOriginRect && (
         <EnvelopeOverlay
           originRect={envelopeOriginRect}
           onCloseStart={handleEnvelopeCloseStart}

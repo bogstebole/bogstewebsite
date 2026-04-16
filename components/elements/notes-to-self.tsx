@@ -14,7 +14,7 @@ const NOTES = [
 ];
 
 // Logo SVG extracted from the Paper Design file
-function PaperLogo({ size }: { size: number }) {
+export function PaperLogo({ size }: { size: number }) {
   return (
     <svg
       width={size}
