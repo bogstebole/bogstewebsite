@@ -97,8 +97,61 @@ export function EnvelopeMobileSheet({ onCloseStart, onClose }: EnvelopeMobileShe
           </GlassButton>
         </div>
 
-        {/* Body placeholder — content added in next steps */}
-        <div style={{ flex: 1 }} />
+        {/* About Me section */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 32 }}>
+
+          {/* Title */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            <span style={{
+              color: "var(--color-text-primary)",
+              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+              fontSize: 14,
+              fontWeight: 300,
+              lineHeight: "20px",
+            }}>
+              About
+            </span>
+            <span style={{
+              color: "var(--color-text-secondary)",
+              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+              fontSize: 14,
+              fontWeight: 300,
+              lineHeight: "20px",
+            }}>
+              Eerie black circles and beyond
+            </span>
+          </div>
+
+          {/* Paragraph copy */}
+          <p style={{
+            color: "var(--color-text-secondary)",
+            fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+            fontSize: 13,
+            fontWeight: 300,
+            lineHeight: "150%",
+            margin: 0,
+          }}>
+            Childhood fascination with drawing dark circles alarmed my parents but led me to explore conceptual art, product design and eventually AI. AI gave me opportunity to bring to life concepts that were just an idea a while ago. Through the process I learned to harness a child&apos;s innate curiosity. Now as a father, my son&apos;s wonder helps me rediscover that questioning spirit I sometimes lose touch with.
+          </p>
+
+          {/* Read more button */}
+          <GlassButton size="m" onClick={() => {/* step 3 */}}>
+            Read more
+          </GlassButton>
+
+          {/* Illustration */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/me-and-son.png"
+            alt="Me and my son illustration"
+            style={{
+              width: "100%",
+              height: "auto",
+              display: "block",
+            }}
+          />
+
+        </div>
       </motion.div>
     </>,
     document.body
