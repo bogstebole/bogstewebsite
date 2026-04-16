@@ -152,6 +152,50 @@ export function EnvelopeMobileSheet({ onCloseStart, onClose }: EnvelopeMobileShe
           />
 
         </div>
+
+        {/* Dashed divider */}
+        <div style={{ alignItems: "start", display: "flex", gap: 2, height: "fit-content", opacity: 0.2, width: "100%", marginTop: 32 }}>
+          {Array.from({ length: 56 }).map((_, i) => (
+            <div key={i} style={{ backgroundColor: "var(--color-divider)", flex: 1, height: "1px" }} />
+          ))}
+        </div>
+
+        {/* Note to Self section */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 32, paddingBottom: 16 }}>
+          <span style={{
+            color: "var(--color-text-primary)",
+            fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+            fontSize: 14,
+            fontWeight: 300,
+            lineHeight: "20px",
+          }}>
+            Note to self
+          </span>
+          <div style={{
+            color: "var(--color-text-secondary)",
+            fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+            fontSize: 13,
+            fontWeight: 300,
+            lineHeight: "150%",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}>
+            {[
+              "Deep dive into things that tickle your passion",
+              "Don't be a fckn shit!",
+              'Start with "What if..."',
+              "Be respectful, listen, share...",
+              "Respect yourself and your work, but be open to criticism...",
+              "Be introspective",
+              "Be humble",
+              "Be honest",
+            ].map((note, i) => (
+              <span key={i}>{i + 1}. {note}</span>
+            ))}
+          </div>
+        </div>
+
       </motion.div>
     </>,
     document.body
