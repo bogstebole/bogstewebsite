@@ -434,64 +434,80 @@ export function SelectedProjectsSection({
     expandingRef.current = true;
     setIsNotesExpanded(true);
     onNotesExpand?.();
-    await miniTagControls.start("exit");
+    if (!isMobile) {
+      await miniTagControls.start("exit");
+    }
     expandingRef.current = false;
-  }, [isNotesExpanded, miniTagControls, onNotesExpand]);
+  }, [isNotesExpanded, miniTagControls, onNotesExpand, isMobile]);
 
   const handleClose = useCallback(async () => {
     if (closingRef.current || expandingRef.current) return;
     closingRef.current = true;
+
+    if (isMobile) {
+      // Mobile: sheet handles its own exit animation via mobileInitiateClose.
+      // By the time onClose fires, the sheet has already animated out.
+      setIsNotesExpanded(false);
+      onNotesClose?.();
+      setIsSheetReady(false);
+      closingRef.current = false;
+      return;
+    }
+
     setIsNotesClosing(true);
     onNotesCloseStart?.();
     void logoControls.start("exit");
     void contentControls.start("exit");
     void gridControls.start("exit");
     void badgeControls.start("exit");
-    // Collapse when the last grid item starts its exit (not after it completes).
-    // staggerChildren = 0.05s → last of N items starts at (N-1)*50ms.
     await new Promise<void>(r => setTimeout(r, (USELESS_NOTES_ASSETS.length - 1) * 50));
-    if (isDesktop) {
-      // On desktop: FLIP animates the card back; onLayoutAnimationComplete staggers badges in
-      returningRef.current = true;
-    } else {
-      // On mobile: no FLIP, no layoutId — restore badges directly
-      void miniTagControls.start("visible");
-    }
+    returningRef.current = true;
     setIsNotesExpanded(false);
     onNotesClose?.();
     setIsSheetReady(false);
     closingRef.current = false;
     setIsNotesClosing(false);
-  }, [logoControls, contentControls, gridControls, badgeControls, onNotesCloseStart, onNotesClose, isDesktop, miniTagControls]);
+  }, [logoControls, contentControls, gridControls, badgeControls, onNotesCloseStart, onNotesClose, isMobile]);
 
   // Vorli Expand/Close Handlers
   const handleVorliExpand = useCallback(async () => {
     if (isVorliExpanded || vorliClosingRef.current || vorliExpandingRef.current) return;
     vorliExpandingRef.current = true;
     setIsVorliExpanded(true);
-    await vorliMiniTagControls.start("exit");
+    if (!isMobile) {
+      await vorliMiniTagControls.start("exit");
+    }
     vorliExpandingRef.current = false;
-  }, [isVorliExpanded, vorliMiniTagControls]);
+  }, [isVorliExpanded, vorliMiniTagControls, isMobile]);
 
   const handleVorliClose = useCallback(async () => {
     if (vorliClosingRef.current || vorliExpandingRef.current) return;
     vorliClosingRef.current = true;
+
+    if (isMobile) {
+      setIsVorliExpanded(false);
+      setIsVorliSheetReady(false);
+      vorliClosingRef.current = false;
+      return;
+    }
+
     setIsVorliClosing(true);
     void vorliLogoControls.start("exit");
     void vorliContentControls.start("exit");
     void vorliGridControls.start("exit");
     void vorliBadgeControls.start("exit");
     await new Promise<void>(r => setTimeout(r, (VORLI_SCREENSHOTS.length - 1) * 50));
-    if (isDesktop) {
-      vorliReturningRef.current = true;
-    } else {
-      void vorliMiniTagControls.start("visible");
-    }
+    vorliReturningRef.current = true;
     setIsVorliExpanded(false);
     setIsVorliSheetReady(false);
     vorliClosingRef.current = false;
     setIsVorliClosing(false);
-  }, [vorliLogoControls, vorliContentControls, vorliGridControls, vorliBadgeControls, isDesktop, vorliMiniTagControls]);
+  }, [vorliLogoControls, vorliContentControls, vorliGridControls, vorliBadgeControls, isMobile]);
+
+  const handleVorliCloseStart = useCallback(() => {
+    // Fired by the mobile sheet at the start of close animation (for unblur etc.)
+    // No external callback needed for Vorli currently
+  }, []);
 
   // Sticky Expand/Close Handlers
   const handleStickyExpandAction = useCallback(async () => {
@@ -499,13 +515,25 @@ export function SelectedProjectsSection({
     stickyExpandingRef.current = true;
     setInternalStickyExpanded(true);
     onStickyExpand?.();
-    await stickyMiniTagControls.start("exit");
+    if (!isMobile) {
+      await stickyMiniTagControls.start("exit");
+    }
     stickyExpandingRef.current = false;
-  }, [internalStickyExpanded, stickyMiniTagControls, onStickyExpand]);
+  }, [internalStickyExpanded, stickyMiniTagControls, onStickyExpand, isMobile]);
 
   const handleStickyCloseAction = useCallback(async () => {
     if (stickyClosingRef.current || stickyExpandingRef.current) return;
     stickyClosingRef.current = true;
+
+    if (isMobile) {
+      // Mobile: sheet handles its own exit animation
+      setInternalStickyExpanded(false);
+      onStickyClose?.();
+      setIsStickySheetReady(false);
+      stickyClosingRef.current = false;
+      return;
+    }
+
     setIsStickyClosing(true);
     onStickyCloseStart?.();
     void stickyLogoControls.start("exit");
@@ -513,17 +541,13 @@ export function SelectedProjectsSection({
     void stickyGridControls.start("exit");
     void stickyBadgeControls.start("exit");
     await new Promise<void>(r => setTimeout(r, (STICKY_ASSETS.length - 1) * 50));
-    if (isDesktop) {
-      stickyReturningRef.current = true;
-    } else {
-      void stickyMiniTagControls.start("visible");
-    }
+    stickyReturningRef.current = true;
     setInternalStickyExpanded(false);
     onStickyClose?.();
     setIsStickySheetReady(false);
     stickyClosingRef.current = false;
     setIsStickyClosing(false);
-  }, [stickyLogoControls, stickyContentControls, stickyGridControls, stickyBadgeControls, onStickyCloseStart, onStickyClose, isDesktop, stickyMiniTagControls]);
+  }, [stickyLogoControls, stickyContentControls, stickyGridControls, stickyBadgeControls, onStickyCloseStart, onStickyClose, isMobile]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -669,67 +693,80 @@ export function SelectedProjectsSection({
       {/* ── Backdrop + Expanded sheet — portalled to body to escape filter stacking context ── */}
       {mounted && createPortal(
         <>
-          {/* ── Backdrop — blurs everything behind ── */}
-          <AnimatePresence>
-            {isNotesExpanded && (
-              <motion.div
-                key="notes-backdrop"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => void handleClose()}
-                style={{
-                  position: "fixed",
-                  inset: 0,
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                  zIndex: 50,
-                }}
-              />
-            )}
-          </AnimatePresence>
+          {/* ── Backdrop — blurs everything behind (desktop only; mobile sheet has its own) ── */}
+          {!isMobile && (
+            <AnimatePresence>
+              {isNotesExpanded && (
+                <motion.div
+                  key="notes-backdrop"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => void handleClose()}
+                  style={{
+                    position: "fixed",
+                    inset: 0,
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                    zIndex: 50,
+                  }}
+                />
+              )}
+            </AnimatePresence>
+          )}
 
           {/* ── Expanded card — Bottom Sheet Anchored ── */}
           <AnimatePresence>
             {isNotesExpanded && (
               <SelectedProjectLayout
                 key="notes-expanded"
-                layoutId={isDesktop ? "notes-card" : undefined}
-                icon="/images/notes.png"
-                iconStyle={{ transform: 'rotate(-17.2deg)' }}
-                title="Notes"
-                tags={["iOS", "Canvas"]}
-                extraBadge={<AppStoreBadge active={false} />}
-                description={
-                  <>
-                    It&apos;s a conceptual work that visually shows how we clutter our mental space.
-                    <br />The main &quot;canvas&quot; gets more &quot;useless&quot; over time, totally packed with notes and links, and the &quot;find&quot; mode is kind of the opposite, showing how we can only find things when we really need them. It&apos;s a reflection on the whole concept of how we deal with information overload today.
-                  </>
-                }
-                showDownloadButton
-                logoControls={logoControls}
-                badgeControls={badgeControls}
-                contentControls={contentControls}
-                gridControls={gridControls}
-                badgesRef={badgesRef}
-                isClosing={isNotesClosing}
-                showFloatingHeader={showStickyHeader}
-                gridStyle={isMobile
-                  ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
-                  : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
-                }
-                onAnimationComplete={() => {
-                  if (!closingRef.current) {
-                    setIsSheetReady(true);
+              layoutId={isDesktop ? "notes-card" : undefined}
+              icon="/images/notes.png"
+              iconStyle={{ transform: 'rotate(-17.2deg)' }}
+              title="Notes"
+              shortDescription={
+                <>
+                  <span style={{ color: "var(--color-text-heading)" }}>Notes</span>
+                  <span style={{ color: "var(--color-text-subdued)" }}>
+                    {" — A conceptual app about information overload, built on an infinite canvas."}
+                  </span>
+                </>
+              }
+              tags={["iOS", "Canvas"]}
+              extraBadge={<AppStoreBadge active={false} />}
+              description={
+                <>
+                  It&apos;s a conceptual work that visually shows how we clutter our mental space.
+                  <br />The main &quot;canvas&quot; gets more &quot;useless&quot; over time, totally packed with notes and links, and the &quot;find&quot; mode is kind of the opposite, showing how we can only find things when we really need them. It&apos;s a reflection on the whole concept of how we deal with information overload today.
+                </>
+              }
+              showDownloadButton
+              logoControls={logoControls}
+              badgeControls={badgeControls}
+              contentControls={contentControls}
+              gridControls={gridControls}
+              badgesRef={badgesRef}
+              isClosing={isNotesClosing}
+              showFloatingHeader={showStickyHeader}
+              gridStyle={isMobile
+                ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
+                : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
+              }
+              onAnimationComplete={() => {
+                if (!closingRef.current) {
+                  setIsSheetReady(true);
+                  if (!isMobile) {
                     void logoControls.start("visible");
                     setTimeout(() => { if (!closingRef.current) void badgeControls.start("visible"); }, 80);
                     setTimeout(() => { if (!closingRef.current) void contentControls.start("visible"); }, 160);
                     setTimeout(() => { if (!closingRef.current) void gridControls.start("visible"); }, 350);
                   }
-                }}
-                onClose={() => void handleClose()}
-              >
+                }
+              }}
+              onCloseStart={() => onNotesCloseStart?.()}
+              onClose={() => void handleClose()}
+            >
                 {USELESS_NOTES_ASSETS.map((asset, i) => (
                   <motion.div
                     key={i}
@@ -760,60 +797,73 @@ export function SelectedProjectsSection({
             )}
           </AnimatePresence>
 
-          {/* ── Vorli Backdrop ── */}
-          <AnimatePresence>
-            {isVorliExpanded && (
-              <motion.div
-                key="vorli-backdrop"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => void handleVorliClose()}
-                style={{
-                  position: "fixed",
-                  inset: 0,
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                  zIndex: 50,
-                }}
-              />
-            )}
-          </AnimatePresence>
+          {/* ── Vorli Backdrop (desktop only) ── */}
+          {!isMobile && (
+            <AnimatePresence>
+              {isVorliExpanded && (
+                <motion.div
+                  key="vorli-backdrop"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => void handleVorliClose()}
+                  style={{
+                    position: "fixed",
+                    inset: 0,
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                    zIndex: 50,
+                  }}
+                />
+              )}
+            </AnimatePresence>
+          )}
 
           {/* ── Vorli Expanded Card ── */}
           <AnimatePresence>
             {isVorliExpanded && (
               <SelectedProjectLayout
                 key="vorli-expanded"
-                layoutId={isDesktop ? "vorli-card" : undefined}
-                icon="/images/receipt.png"
-                iconStyle={{ rotate: "359.41deg", transformOrigin: "50% 50%" }}
-                title="Vorli"
-                tags={["iOS", "AI Financial Assistant", "In testing"]}
-                description={VORLI_DESCRIPTION}
-                logoControls={vorliLogoControls}
-                badgeControls={vorliBadgeControls}
-                contentControls={vorliContentControls}
-                gridControls={vorliGridControls}
-                badgesRef={vorliBadgesRef}
-                isClosing={isVorliClosing}
-                showFloatingHeader={showVorliFloatingHeader}
-                onAnimationComplete={() => {
-                  if (!vorliClosingRef.current) {
-                    setIsVorliSheetReady(true);
+              layoutId={isDesktop ? "vorli-card" : undefined}
+              icon="/images/receipt.png"
+              iconStyle={{ rotate: "359.41deg", transformOrigin: "50% 50%" }}
+              title="Vorli"
+              shortDescription={
+                <>
+                  <span style={{ color: "var(--color-text-heading)" }}>Vorli</span>
+                  <span style={{ color: "var(--color-text-subdued)" }}>
+                    {" — AI-powered expense tracking that reads your finances so you don\u2019t have to."}
+                  </span>
+                </>
+              }
+              tags={["iOS", "AI Financial Assistant", "In testing"]}
+              description={VORLI_DESCRIPTION}
+              logoControls={vorliLogoControls}
+              badgeControls={vorliBadgeControls}
+              contentControls={vorliContentControls}
+              gridControls={vorliGridControls}
+              badgesRef={vorliBadgesRef}
+              isClosing={isVorliClosing}
+              showFloatingHeader={showVorliFloatingHeader}
+              onAnimationComplete={() => {
+                if (!vorliClosingRef.current) {
+                  setIsVorliSheetReady(true);
+                  if (!isMobile) {
                     void vorliLogoControls.start("visible");
                     setTimeout(() => { if (!vorliClosingRef.current) void vorliBadgeControls.start("visible"); }, 80);
                     setTimeout(() => { if (!vorliClosingRef.current) void vorliContentControls.start("visible"); }, 160);
                     setTimeout(() => { if (!vorliClosingRef.current) void vorliGridControls.start("visible"); }, 350);
                   }
-                }}
-                onClose={() => void handleVorliClose()}
-                gridStyle={isMobile
-                  ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
-                  : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
                 }
-              >
+              }}
+              onCloseStart={handleVorliCloseStart}
+              onClose={() => void handleVorliClose()}
+              gridStyle={isMobile
+                ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
+                : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
+              }
+            >
                 <motion.div
                   variants={GRID_ITEM_VARIANTS}
                   style={{ borderRadius: isMobile ? 12 : 32, overflow: "hidden", backgroundColor: "var(--color-bg-surface)" }}
@@ -839,59 +889,72 @@ export function SelectedProjectsSection({
             )}
           </AnimatePresence>
 
-          {/* ── Sticky Backdrop ── */}
-          <AnimatePresence>
-            {internalStickyExpanded && (
-              <motion.div
-                key="sticky-backdrop"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => void handleStickyCloseAction()}
-                style={{
-                  position: "fixed",
-                  inset: 0,
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                  zIndex: 50,
-                }}
-              />
-            )}
-          </AnimatePresence>
+          {/* ── Sticky Backdrop (desktop only) ── */}
+          {!isMobile && (
+            <AnimatePresence>
+              {internalStickyExpanded && (
+                <motion.div
+                  key="sticky-backdrop"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => void handleStickyCloseAction()}
+                  style={{
+                    position: "fixed",
+                    inset: 0,
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                    zIndex: 50,
+                  }}
+                />
+              )}
+            </AnimatePresence>
+          )}
 
           {/* ── Sticky Expanded Card ── */}
           <AnimatePresence>
             {internalStickyExpanded && (
               <SelectedProjectLayout
                 key="sticky-expanded"
-                layoutId={isDesktop ? "sticky-project-modal" : undefined}
-                icon="/images/sticky.png"
-                title="Sticky"
-                tags={["iOS", "Productivity"]}
-                description={STICKY_DESCRIPTION}
-                logoControls={stickyLogoControls}
-                badgeControls={stickyBadgeControls}
-                contentControls={stickyContentControls}
-                gridControls={stickyGridControls}
-                badgesRef={stickyBadgesRef}
-                isClosing={isStickyClosing}
-                showFloatingHeader={showStickyFloatingHeader}
-                gridStyle={isMobile
-                  ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
-                  : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
-                }
-                onAnimationComplete={() => {
-                  if (!stickyClosingRef.current) {
-                    setIsStickySheetReady(true);
+              layoutId={isDesktop ? "sticky-project-modal" : undefined}
+              icon="/images/sticky.png"
+              title="Sticky"
+              shortDescription={
+                <>
+                  <span style={{ color: "var(--color-text-heading)" }}>Sticky</span>
+                  <span style={{ color: "var(--color-text-subdued)" }}>
+                    {" — A to-do app where tasks float and drift like actual sticky notes."}
+                  </span>
+                </>
+              }
+              tags={["iOS", "Productivity"]}
+              description={STICKY_DESCRIPTION}
+              logoControls={stickyLogoControls}
+              badgeControls={stickyBadgeControls}
+              contentControls={stickyContentControls}
+              gridControls={stickyGridControls}
+              badgesRef={stickyBadgesRef}
+              isClosing={isStickyClosing}
+              showFloatingHeader={showStickyFloatingHeader}
+              gridStyle={isMobile
+                ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
+                : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
+              }
+              onAnimationComplete={() => {
+                if (!stickyClosingRef.current) {
+                  setIsStickySheetReady(true);
+                  if (!isMobile) {
                     void stickyLogoControls.start("visible");
                     setTimeout(() => { if (!stickyClosingRef.current) void stickyBadgeControls.start("visible"); }, 80);
                     setTimeout(() => { if (!stickyClosingRef.current) void stickyContentControls.start("visible"); }, 160);
                     setTimeout(() => { if (!stickyClosingRef.current) void stickyGridControls.start("visible"); }, 350);
                   }
-                }}
-                onClose={() => void handleStickyCloseAction()}
-              >
+                }
+              }}
+              onCloseStart={() => onStickyCloseStart?.()}
+              onClose={() => void handleStickyCloseAction()}
+            >
                 {STICKY_ASSETS.map((asset, i) => (
                   <motion.div
                     key={i}
