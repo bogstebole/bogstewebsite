@@ -396,9 +396,11 @@ export function SelectedProjectLayout({
                 alt={`${title} Icon`}
                 style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: 8, flexShrink: 0, ...iconStyle }}
               />
-              <div style={{ color: 'var(--color-text-ui)', fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: '20px', letterSpacing: '-0.01em', lineHeight: '1' }}>
-                {title}
-              </div>
+              {shortDescription && (
+                <div style={{ fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 20, fontWeight: 500, lineHeight: 1.3, textAlign: 'center' }}>
+                  {shortDescription}
+                </div>
+              )}
             </motion.div>
 
             <motion.div
@@ -427,14 +429,6 @@ export function SelectedProjectLayout({
             variants={STAGGER_VARIANTS}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%' }}
           >
-            {shortDescription && (
-              <motion.div
-                variants={CONTENT_ITEM_VARIANTS}
-                style={{ fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 20, fontWeight: 500, lineHeight: 1.3, textAlign: 'center', width: '100%' }}
-              >
-                {shortDescription}
-              </motion.div>
-            )}
             <motion.div
               variants={CONTENT_ITEM_VARIANTS}
               style={{ color: 'var(--color-text-secondary)', fontFamily: '"Geist", system-ui, sans-serif', fontSize: '14px', lineHeight: '18px', textAlign: 'center', whiteSpace: 'pre-wrap', width: '100%' }}
