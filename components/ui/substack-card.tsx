@@ -53,12 +53,12 @@ function SubstackIcon() {
 
 function CTA({
   hovered,
-  pressed,
   fullWidth,
+  onPressStart,
 }: {
   hovered: boolean;
-  pressed: boolean;
   fullWidth: boolean;
+  onPressStart: (e: React.SyntheticEvent) => void;
 }) {
   const showLabel = hovered || fullWidth;
   return (
@@ -69,8 +69,9 @@ function CTA({
         glassStyles.glassBtn,
         glassStyles.sizeXs,
         hovered && glassStyles.hovered,
-        pressed && glassStyles.pressed,
       )}
+      onMouseDown={onPressStart}
+      onTouchStart={onPressStart}
       style={fullWidth ? { width: "100%", display: "flex" } : undefined}
     >
       <SubstackIcon />
@@ -99,19 +100,20 @@ function CTA({
 
 export function SubstackCard({ title, date, time, href, image }: Props) {
   const [hovered, setHovered] = useState(false);
-  const [pressed, setPressed] = useState(false);
+  const [cardPressed, setCardPressed] = useState(false);
   const { isMobile } = useBreakpoint();
 
   const restingRotate = isMobile ? 0 : 1.33;
-  const targetRotate = hovered || pressed ? 0 : restingRotate;
-  const targetScale = pressed ? 0.99 : 1;
-  const targetShadow = pressed
+  const targetRotate = hovered || cardPressed ? 0 : restingRotate;
+  const targetScale = cardPressed ? 0.99 : 1;
+  const targetShadow = cardPressed
     ? CARD_SHADOW_PRESS
     : hovered
       ? CARD_SHADOW_HOVER
       : CARD_SHADOW_REST;
 
-  const clearPress = () => setPressed(false);
+  const clearPress = () => setCardPressed(false);
+  const stopCardPress = (e: React.SyntheticEvent) => e.stopPropagation();
 
   return (
     <motion.a
@@ -123,9 +125,9 @@ export function SubstackCard({ title, date, time, href, image }: Props) {
         setHovered(false);
         setPressed(false);
       }}
-      onMouseDown={() => setPressed(true)}
+      onMouseDown={() => setCardPressed(true)}
       onMouseUp={clearPress}
-      onTouchStart={() => setPressed(true)}
+      onTouchStart={() => setCardPressed(true)}
       onTouchEnd={clearPress}
       onTouchCancel={clearPress}
       animate={{
@@ -209,13 +211,15 @@ export function SubstackCard({ title, date, time, href, image }: Props) {
             <span>-</span>
             <span>{time}</span>
           </div>
-          {!isMobile && <CTA hovered={hovered} pressed={pressed} fullWidth={false} />}
+          {!isMobile && (
+            <CTA hovered={hovered} fullWidth={false} onPressStart={stopCardPress} />
+          )}
         </div>
       </div>
 
       {isMobile && (
         <div style={{ width: "100%" }}>
-          <CTA hovered={false} pressed={pressed} fullWidth={true} />
+          <CTA hovered={false} fullWidth={true} onPressStart={stopCardPress} />
         </div>
       )}
     </motion.a>
