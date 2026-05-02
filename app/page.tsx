@@ -1,5 +1,7 @@
 import { V2Canvas } from "@/components/canvas/V2Canvas";
+import { getLatestSubstackPost } from "@/lib/substack";
 
-export default function Home() {
-  return <V2Canvas />;
+export default async function Home() {
+  const latestPost = await getLatestSubstackPost();
+  return <V2Canvas latestPost={latestPost} />;
 }

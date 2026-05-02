@@ -16,6 +16,8 @@ import { PauschalDetail } from "@/components/ui/pauschal-detail";
 import { FynnDetail } from "@/components/ui/fynn-detail";
 import { ContentSnareDetail } from "@/components/ui/content-snare-detail";
 import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
+import { WritingsSection } from "@/components/elements/writings-section";
+import type { SubstackPost } from "@/lib/substack";
 
 
 function getBuildVersion(): string {
@@ -99,7 +101,7 @@ function useTypewriter() {
 }
 
 
-export function V2Canvas() {
+export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const { displayText, isIdle } = useTypewriter();
   const { isMobile, isTablet } = useBreakpoint();
   const [activeProject, setActiveProject] = useState<string | null>(null);
@@ -362,7 +364,9 @@ export function V2Canvas() {
             onEnvelopeClick={handleEnvelopeClick}
             isEnvelopeOpen={envelopeOpen || isEnvelopeClosing}
             style={{ marginTop: isMobile ? 20 : 32, marginBottom: isMobile ? 60 : 120 }}
-          />
+          >
+            {latestPost && <WritingsSection post={latestPost} />}
+          </ProjectSection>
         </div>
       </motion.div>
 

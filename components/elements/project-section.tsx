@@ -19,6 +19,7 @@ interface ProjectSectionProps {
   onEnvelopeClick?: () => void;
   isEnvelopeOpen?: boolean;
   style?: React.CSSProperties;
+  children?: React.ReactNode;
 }
 
 function ProjectIcon({
@@ -95,7 +96,7 @@ function SocialIconButton({
   );
 }
 
-export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, envelopeRef, onEnvelopeClick, isEnvelopeOpen, style }: ProjectSectionProps) {
+export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, envelopeRef, onEnvelopeClick, isEnvelopeOpen, style, children }: ProjectSectionProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const { isMobile } = useBreakpoint();
 
@@ -185,6 +186,8 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
           />
         </div>
       </div>
+
+      {children}
 
       {/* ── Footer ── */}
       <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 24, marginTop: 32, width: "100%" }}>

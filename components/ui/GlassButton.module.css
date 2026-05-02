@@ -124,7 +124,8 @@
    Glass fills with light, lifts slightly
    ═══════════════════════════════════════════ */
 
-.glassBtn:hover:not(:disabled) {
+.glassBtn:hover:not(:disabled),
+.glassBtn.hovered:not(:disabled) {
   --glass-fill: rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
   color: rgba(0, 0, 0, 0.72);
@@ -143,7 +144,8 @@
     0 2px 4px 0 rgba(0, 0, 0, 0.12);
 }
 
-.glassBtn:hover:not(:disabled)::before {
+.glassBtn:hover:not(:disabled)::before,
+.glassBtn.hovered:not(:disabled)::before {
   background: linear-gradient(145deg,
       rgba(255, 255, 255, 0.55) 0%,
       rgba(0, 0, 0, 0.1) 40%,
@@ -151,7 +153,8 @@
       rgba(0, 0, 0, 0.12) 100%);
 }
 
-.glassBtn:hover:not(:disabled)::after {
+.glassBtn:hover:not(:disabled)::after,
+.glassBtn.hovered:not(:disabled)::after {
   opacity: 0.85;
 }
 
@@ -160,7 +163,8 @@
    Concavity deepens, pressed into surface
    ═══════════════════════════════════════════ */
 
-.glassBtn:active:not(:disabled) {
+.glassBtn:active:not(:disabled),
+.glassBtn.pressed:not(:disabled) {
   --glass-fill: rgba(0, 0, 0, 0.02);
   transform: translateY(1px) scale(0.98);
   transition-duration: 0.08s;
@@ -180,7 +184,8 @@
     0 0 2px 0 rgba(0, 0, 0, 0.07);
 }
 
-.glassBtn:active:not(:disabled)::before {
+.glassBtn:active:not(:disabled)::before,
+.glassBtn.pressed:not(:disabled)::before {
   background: linear-gradient(145deg,
       rgba(255, 255, 255, 0.3) 0%,
       rgba(0, 0, 0, 0.15) 40%,
@@ -188,7 +193,8 @@
       rgba(0, 0, 0, 0.18) 100%);
 }
 
-.glassBtn:active:not(:disabled)::after {
+.glassBtn:active:not(:disabled)::after,
+.glassBtn.pressed:not(:disabled)::after {
   opacity: 0.3;
 }
 
@@ -313,6 +319,18 @@
   gap: 0.5rem;
 }
 
+.sizeXs {
+  height: 24px;
+  padding: 0 0.375rem;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  gap: 0.25rem;
+  border-radius: 8px;
+  color: #888;
+}
+
 /* ═══════════════════════════════════════════
    DARK MODE
    Responds to .dark class on <html> (theme toggle).
@@ -359,7 +377,8 @@
 }
 
 /* ── Dark hover ── */
-:global(.dark) .glassBtn:hover:not(:disabled) {
+:global(.dark) .glassBtn:hover:not(:disabled),
+:global(.dark) .glassBtn.hovered:not(:disabled) {
   --glass-fill: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.85);
   box-shadow:
@@ -377,7 +396,8 @@
     0 2px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
-:global(.dark) .glassBtn:hover:not(:disabled)::before {
+:global(.dark) .glassBtn:hover:not(:disabled)::before,
+:global(.dark) .glassBtn.hovered:not(:disabled)::before {
   background: linear-gradient(145deg,
       rgba(255, 255, 255, 0.2) 0%,
       rgba(255, 255, 255, 0.06) 40%,
@@ -385,12 +405,14 @@
       rgba(0, 0, 0, 0.16) 100%);
 }
 
-:global(.dark) .glassBtn:hover:not(:disabled)::after {
+:global(.dark) .glassBtn:hover:not(:disabled)::after,
+:global(.dark) .glassBtn.hovered:not(:disabled)::after {
   opacity: 0.55;
 }
 
 /* ── Dark active ── */
-:global(.dark) .glassBtn:active:not(:disabled) {
+:global(.dark) .glassBtn:active:not(:disabled),
+:global(.dark) .glassBtn.pressed:not(:disabled) {
   --glass-fill: rgba(0, 0, 0, 0.1);
   color: rgba(255, 255, 255, 0.6);
   box-shadow:
@@ -408,7 +430,8 @@
     0 0 2px 0 rgba(0, 0, 0, 0.18);
 }
 
-:global(.dark) .glassBtn:active:not(:disabled)::before {
+:global(.dark) .glassBtn:active:not(:disabled)::before,
+:global(.dark) .glassBtn.pressed:not(:disabled)::before {
   background: linear-gradient(145deg,
       rgba(255, 255, 255, 0.1) 0%,
       rgba(255, 255, 255, 0.02) 40%,
@@ -416,7 +439,8 @@
       rgba(0, 0, 0, 0.25) 100%);
 }
 
-:global(.dark) .glassBtn:active:not(:disabled)::after {
+:global(.dark) .glassBtn:active:not(:disabled)::after,
+:global(.dark) .glassBtn.pressed:not(:disabled)::after {
   opacity: 0.2;
 }
 
