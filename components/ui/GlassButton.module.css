@@ -332,6 +332,23 @@
 }
 
 /* ═══════════════════════════════════════════
+   GHOST MODIFIER
+   Transparent at rest, full glass on hover/active
+   ═══════════════════════════════════════════ */
+
+.ghost:not(:hover):not(.hovered):not(:active):not(.pressed) {
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.ghost:not(:hover):not(.hovered):not(:active):not(.pressed)::before,
+.ghost:not(:hover):not(.hovered):not(:active):not(.pressed)::after {
+  opacity: 0;
+}
+
+/* ═══════════════════════════════════════════
    DARK MODE
    Responds to .dark class on <html> (theme toggle).
    Inverted glass — light rims on dark surface.

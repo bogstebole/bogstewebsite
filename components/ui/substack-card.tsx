@@ -60,19 +60,35 @@ function CTA({
   fullWidth: boolean;
   onPressStart: (e: React.SyntheticEvent) => void;
 }) {
+  const [btnPressed, setBtnPressed] = useState(false);
   const showLabel = hovered || fullWidth;
+
+  const handlePressStart = (e: React.SyntheticEvent) => {
+    setBtnPressed(true);
+    onPressStart(e);
+  };
+  const handlePressEnd = () => {
+    setBtnPressed(false);
+  };
+
   return (
     <motion.span
-      animate={{ gap: showLabel ? 4 : 0 }}
+      animate={{ gap: showLabel ? "8px" : "0px" }}
       transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       className={clsx(
         glassStyles.glassBtn,
         glassStyles.sizeXs,
+        glassStyles.ghost,
         hovered && glassStyles.hovered,
+        btnPressed && glassStyles.pressed,
       )}
-      onMouseDown={onPressStart}
-      onTouchStart={onPressStart}
-      style={fullWidth ? { width: "100%", display: "flex" } : undefined}
+      onMouseDown={handlePressStart}
+      onMouseUp={handlePressEnd}
+      onMouseLeave={handlePressEnd}
+      onTouchStart={handlePressStart}
+      onTouchEnd={handlePressEnd}
+      onTouchCancel={handlePressEnd}
+      style={fullWidth ? { width: "100%", display: "flex" } : {}}
     >
       <SubstackIcon />
       <AnimatePresence initial={false}>
@@ -123,7 +139,7 @@ export function SubstackCard({ title, date, time, href, image }: Props) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => {
         setHovered(false);
-        setPressed(false);
+        setCardPressed(false);
       }}
       onMouseDown={() => setCardPressed(true)}
       onMouseUp={clearPress}
