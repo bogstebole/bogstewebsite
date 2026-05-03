@@ -664,13 +664,13 @@ export function SelectedProjectsSection({
               alt="Sticky"
               title="Sticky"
               tags={["iOS", "Productivity", "To Do App"]}
-              rotate={3}
+              rotate={-1}
               marginLeft={-21}
               zIndex={1}
               layoutId="sticky-project-modal"
               overflow={internalStickyExpanded ? "visible" : undefined}
               visibility={internalStickyExpanded ? "hidden" : undefined}
-              animate={internalStickyExpanded ? undefined : { rotate: 3, opacity: 1 }}
+              animate={internalStickyExpanded ? undefined : { rotate: -1, opacity: 1 }}
               whileHover={internalStickyExpanded ? undefined : { y: -16, rotate: 0 }}
               transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
               onLayoutAnimationComplete={() => {
