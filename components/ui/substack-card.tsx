@@ -55,10 +55,12 @@ function CTA({
   hovered,
   fullWidth,
   onPressStart,
+  mobile = false,
 }: {
   hovered: boolean;
   fullWidth: boolean;
   onPressStart: (e: React.SyntheticEvent) => void;
+  mobile?: boolean;
 }) {
   const [btnPressed, setBtnPressed] = useState(false);
   const showLabel = hovered || fullWidth;
@@ -78,7 +80,7 @@ function CTA({
       className={clsx(
         glassStyles.glassBtn,
         glassStyles.sizeXs,
-        glassStyles.ghost,
+        !mobile && glassStyles.ghost,
         hovered && glassStyles.hovered,
         btnPressed && glassStyles.pressed,
       )}
@@ -88,7 +90,18 @@ function CTA({
       onTouchStart={handlePressStart}
       onTouchEnd={handlePressEnd}
       onTouchCancel={handlePressEnd}
-      style={fullWidth ? { width: "100%", display: "flex" } : {}}
+      style={
+        fullWidth
+          ? {
+              width: "100%",
+              display: "flex",
+              boxSizing: "border-box",
+              height: mobile ? 44 : undefined,
+              borderRadius: mobile ? 9999 : undefined,
+              fontSize: mobile ? "0.875rem" : undefined,
+            }
+          : {}
+      }
     >
       <SubstackIcon />
       <AnimatePresence initial={false}>
@@ -235,7 +248,12 @@ export function SubstackCard({ title, date, time, href, image }: Props) {
 
       {isMobile && (
         <div style={{ width: "100%" }}>
-          <CTA hovered={false} fullWidth={true} onPressStart={stopCardPress} />
+          <CTA
+            hovered={false}
+            fullWidth={true}
+            mobile={true}
+            onPressStart={stopCardPress}
+          />
         </div>
       )}
     </motion.a>
