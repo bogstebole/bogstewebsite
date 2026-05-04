@@ -14,13 +14,13 @@ type Props = {
 };
 
 const CARD_SHADOW_REST =
-  "0px 15px 2px rgba(107,107,107,0), 0px 10px 2px rgba(107,107,107,0.01), 0px 5px 1.5px rgba(107,107,107,0.05), 0px 2px 1px rgba(107,107,107,0.09), 0px 1px 0.5px rgba(107,107,107,0.1)";
+  "0px 15px 2px rgba(0,0,0,0), 0px 10px 2px rgba(0,0,0,0.01), 0px 5px 1.5px rgba(0,0,0,0.05), 0px 2px 1px rgba(0,0,0,0.09), 0px 1px 0.5px rgba(0,0,0,0.1)";
 
 const CARD_SHADOW_HOVER =
   "0px 130px 18px rgba(0,0,0,0), 0px 83px 16.5px rgba(0,0,0,0.01), 0px 47px 14px rgba(0,0,0,0.05), 0px 21px 10.5px rgba(0,0,0,0.09), 0px 5px 5.5px rgba(0,0,0,0.1)";
 
 const CARD_SHADOW_PRESS =
-  "0px 6px 1px rgba(107,107,107,0), 0px 4px 1px rgba(107,107,107,0.01), 0px 2px 1px rgba(107,107,107,0.04), 0px 1px 0.5px rgba(107,107,107,0.06), 0px 0.5px 0.25px rgba(107,107,107,0.07)";
+  "0px 6px 1px rgba(0,0,0,0), 0px 4px 1px rgba(0,0,0,0.01), 0px 2px 1px rgba(0,0,0,0.04), 0px 1px 0.5px rgba(0,0,0,0.06), 0px 0.5px 0.25px rgba(0,0,0,0.07)";
 
 const dateStyle: React.CSSProperties = {
   fontFamily: "var(--font-jetbrains-mono), monospace",
@@ -28,7 +28,7 @@ const dateStyle: React.CSSProperties = {
   fontSize: 10,
   lineHeight: 1.3,
   letterSpacing: "-0.04em",
-  color: "#888",
+  color: "var(--color-text-label)",
   whiteSpace: "nowrap",
 };
 
@@ -176,8 +176,8 @@ export function SubstackCard({ title, date, time, href, image }: Props) {
         gap: isMobile ? 10 : 12,
         padding: 8,
         borderRadius: 24,
-        border: "1px solid #ffffff",
-        background: "linear-gradient(180deg, #ffffff 0%, #f4f4f4 100%)",
+        border: "1px solid var(--color-card-rim)",
+        background: "var(--color-bg-card)",
         width: "100%",
         textDecoration: "none",
         cursor: "pointer",
@@ -190,7 +190,7 @@ export function SubstackCard({ title, date, time, href, image }: Props) {
           height: isMobile ? undefined : 58,
           aspectRatio: isMobile ? "16 / 9" : undefined,
           borderRadius: 16,
-          backgroundColor: "#d9d9d9",
+          backgroundColor: "var(--color-bg-skeleton)",
           backgroundImage: image ? `url(${image})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -203,7 +203,7 @@ export function SubstackCard({ title, date, time, href, image }: Props) {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          gap: 3,
+          gap: 8,
           flex: isMobile ? "0 0 auto" : 1,
           minWidth: 0,
           width: isMobile ? "100%" : undefined,
@@ -217,7 +217,7 @@ export function SubstackCard({ title, date, time, href, image }: Props) {
             fontSize: 12,
             lineHeight: 1.3,
             letterSpacing: "-0.04em",
-            color: "#434343",
+            color: "var(--color-text-card)",
             overflow: "hidden",
             display: "-webkit-box",
             WebkitLineClamp: 2,
