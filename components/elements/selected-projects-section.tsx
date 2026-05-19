@@ -928,7 +928,7 @@ export function SelectedProjectsSection({
                   </span>
                 </>
               }
-              tags={["iOS", "Productivity"]}
+              tags={["iOS", "Productivity", "In progress.."]}
               description={STICKY_DESCRIPTION}
               logoControls={stickyLogoControls}
               badgeControls={stickyBadgeControls}

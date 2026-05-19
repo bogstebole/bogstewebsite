@@ -150,6 +150,8 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             icon={<ProjectIcon src="/images/globe.png" alt="Zoun" grayscale={false} opacity={1} />}
             label="Zoun"
             tags={["iOS", "Time Zone Tracker"]}
+            inProgress
+            clickable
           />
 
           <ProjectEntry
