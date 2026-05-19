@@ -23,24 +23,14 @@ export function WritingsSection({ post }: Props) {
       style={{
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "flex-start",
         gap: 24,
         padding: "0 24px",
         marginTop: 32,
         width: "100%",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%" }}>
-        <div style={labelStyle}>Latest Writing_</div>
-        <div style={{ display: "flex", flex: 1, gap: 2, opacity: 0.2 }}>
-          {Array.from({ length: 40 }).map((_, i) => (
-            <div
-              key={i}
-              style={{ backgroundColor: "var(--color-divider)", flex: 1, height: 1 }}
-            />
-          ))}
-        </div>
-      </div>
+      <div style={labelStyle}>Latest Writing_</div>
 
       <SubstackCard
         title={post.title}
