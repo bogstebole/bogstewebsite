@@ -15,11 +15,13 @@ interface ProjectSectionProps {
   returningProject: string | null;
   onProjectClick: (key: string) => void;
   entryRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
+  style?: React.CSSProperties;
+}
+
+interface SiteFooterProps {
   envelopeRef?: React.RefObject<HTMLDivElement | null>;
   onEnvelopeClick?: () => void;
   isEnvelopeOpen?: boolean;
-  style?: React.CSSProperties;
-  children?: React.ReactNode;
 }
 
 function ProjectIcon({
@@ -96,7 +98,7 @@ function SocialIconButton({
   );
 }
 
-export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, envelopeRef, onEnvelopeClick, isEnvelopeOpen, style, children }: ProjectSectionProps) {
+export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, style }: ProjectSectionProps) {
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const { isMobile } = useBreakpoint();
 
@@ -187,67 +189,63 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         </div>
       </div>
 
-      {children}
+    </div>
+  );
+}
 
-      {/* ── Footer ── */}
-      <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 24, marginTop: 32, width: "100%" }}>
+export function SiteFooter({ envelopeRef, onEnvelopeClick, isEnvelopeOpen }: SiteFooterProps) {
+  return (
+    <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
 
-        {/* Segmented divider */}
-        <div style={{ alignItems: "start", display: "flex", gap: 2, height: "fit-content", opacity: 0.2, width: "100%" }}>
-          {Array.from({ length: 56 }).map((_, i) => (
-            <div key={i} style={{ backgroundColor: "var(--color-divider)", flex: 1, height: "1px" }} />
-          ))}
+      {/* Segmented divider */}
+      <div style={{ alignItems: "start", display: "flex", gap: 2, height: "fit-content", opacity: 0.2, width: "100%" }}>
+        {Array.from({ length: 56 }).map((_, i) => (
+          <div key={i} style={{ backgroundColor: "var(--color-divider)", flex: 1, height: "1px" }} />
+        ))}
+      </div>
+
+      {/* Footer row */}
+      <div style={{ alignItems: "center", display: "flex", padding: "0 24px", gap: 24, justifyContent: "space-between", width: "100%" }}>
+
+        <div style={{ opacity: isEnvelopeOpen ? 0 : 1 }}>
+          <EnvelopeWidget ref={envelopeRef} onClick={onEnvelopeClick} />
         </div>
 
-        {/* Footer row */}
-        <div style={{ alignItems: "center", display: "flex", padding: "0 24px", gap: 24, justifyContent: "space-between", width: "100%" }}>
+        <div style={{ alignItems: "center", display: "flex", gap: 0 }}>
 
-          {/* Envelope widget — interactive, FLIP-animates from footer to overlay */}
-          <div style={{ opacity: isEnvelopeOpen ? 0 : 1 }}>
-            <EnvelopeWidget ref={envelopeRef} onClick={onEnvelopeClick} />
-          </div>
+          <SocialIconButton
+            href="https://x.com/bgstdsgn"
+            label="Twitter / X"
+            hoverColor="var(--color-text-primary)"
+          >
+            <svg width="14" height="14" viewBox="0 0 1200 1227" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, transition: "fill 0.2s ease" }}>
+              <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.694H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="currentColor" />
+            </svg>
+          </SocialIconButton>
 
-          {/* Social icon buttons */}
-          <div style={{ alignItems: "center", display: "flex", gap: 0 }}>
+          <SocialIconButton
+            href="https://linkedin.com/in/bogdan-stefanovic"
+            label="LinkedIn"
+            hoverColor="#2867B2"
+            filterOverride="invert(27%) sepia(89%) saturate(502%) hue-rotate(190deg) brightness(92%) contrast(91%)"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://workers.paper.design/file-assets/01KM2PRGZVJ24AH6QP30SA1ZFC/01KMEAR89PJZFZMEPT1FJH06NQ.png"
+              alt="LinkedIn"
+              style={{ flexShrink: 0, height: 14, width: 14 }}
+            />
+          </SocialIconButton>
 
-            {/* Twitter / X */}
-            <SocialIconButton
-              href="https://x.com/bgstdsgn"
-              label="Twitter / X"
-              hoverColor="var(--color-text-primary)"
-            >
-              <svg width="14" height="14" viewBox="0 0 1200 1227" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, transition: "fill 0.2s ease" }}>
-                <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.694H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="currentColor" />
-              </svg>
-            </SocialIconButton>
-
-            {/* LinkedIn */}
-            <SocialIconButton
-              href="https://linkedin.com/in/bogdan-stefanovic"
-              label="LinkedIn"
-              hoverColor="#2867B2"
-              filterOverride="invert(27%) sepia(89%) saturate(502%) hue-rotate(190deg) brightness(92%) contrast(91%)"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://workers.paper.design/file-assets/01KM2PRGZVJ24AH6QP30SA1ZFC/01KMEAR89PJZFZMEPT1FJH06NQ.png"
-                alt="LinkedIn"
-                style={{ flexShrink: 0, height: 14, width: 14 }}
-              />
-            </SocialIconButton>
-
-            {/* Substack */}
-            <SocialIconButton
-              href="https://substack.com/@bogste?utm_campaign=profile&utm_medium=profile-page"
-              label="Substack"
-              hoverColor="#FF6719"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-                <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z" fill="currentColor" />
-              </svg>
-            </SocialIconButton>
-
-          </div>
+          <SocialIconButton
+            href="https://substack.com/@bogste?utm_campaign=profile&utm_medium=profile-page"
+            label="Substack"
+            hoverColor="#FF6719"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+              <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z" fill="currentColor" />
+            </svg>
+          </SocialIconButton>
 
         </div>
       </div>

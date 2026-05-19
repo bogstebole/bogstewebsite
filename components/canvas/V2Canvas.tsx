@@ -5,7 +5,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { motion, AnimatePresence } from "framer-motion";
 // import { Water } from "@paper-design/shaders-react"; // POOL_HIDDEN
 import { Logo } from "@/components/ui/logo";
-import { ProjectSection } from "@/components/elements/project-section";
+import { ProjectSection, SiteFooter } from "@/components/elements/project-section";
 import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
 import { VorliReceiptDetail } from "@/components/ui/vorli-receipt-detail";
 import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
@@ -353,20 +353,31 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
         {/* ── Project section ── */}
         <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0 }}>
           <ProjectSection
-            primaryColor="var(--color-text-primary)"
+            primaryColor="var(--color-text-card)"
             primary40="var(--color-text-muted)"
             isDark={false}
             activeProject={activeProject}
             returningProject={returningProject}
             onProjectClick={handleProjectClick}
             entryRefs={entryRefs}
+            style={{ marginTop: isMobile ? 20 : 32 }}
+          />
+        </div>
+
+        {/* ── Latest writing section ── */}
+        {latestPost && (
+          <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0 }}>
+            <WritingsSection post={latestPost} />
+          </div>
+        )}
+
+        {/* ── Footer section ── */}
+        <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0, marginBottom: isMobile ? 60 : 120, marginTop: 32 }}>
+          <SiteFooter
             envelopeRef={envelopeRef}
             onEnvelopeClick={handleEnvelopeClick}
             isEnvelopeOpen={envelopeOpen || isEnvelopeClosing}
-            style={{ marginTop: isMobile ? 20 : 32, marginBottom: isMobile ? 60 : 120 }}
-          >
-            {latestPost && <WritingsSection post={latestPost} />}
-          </ProjectSection>
+          />
         </div>
       </motion.div>
 

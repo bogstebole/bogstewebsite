@@ -47,7 +47,6 @@ export function WritingsSection({ post }: Props) {
         date={post.dateText}
         time={post.timeText}
         href={post.link}
-        image={post.image}
       />
     </div>
   );
