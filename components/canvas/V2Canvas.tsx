@@ -17,6 +17,7 @@ import { FynnDetail } from "@/components/ui/fynn-detail";
 import { ContentSnareDetail } from "@/components/ui/content-snare-detail";
 import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
 import { WritingsSection } from "@/components/elements/writings-section";
+import { PlaygroundSection } from "@/components/elements/playground-section";
 import type { SubstackPost } from "@/lib/substack";
 
 
@@ -362,6 +363,11 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
             entryRefs={entryRefs}
             style={{ marginTop: isMobile ? 20 : 32 }}
           />
+        </div>
+
+        {/* ── Playground section ── */}
+        <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0 }}>
+          <PlaygroundSection />
         </div>
 
         {/* ── Latest writing section ── */}
