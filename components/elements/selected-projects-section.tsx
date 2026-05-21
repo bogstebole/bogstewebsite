@@ -654,19 +654,19 @@ export function SelectedProjectsSection({
             {!isMobile && openedFrom && (
               <motion.div
                 key="tab-bar-portal"
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 style={{
                   position: "fixed",
-                  top: 16,
-                  left: 0,
-                  right: 0,
+                  top: "5vh",
+                  bottom: 0,
+                  left: "calc(50% - 610px)",
                   display: "flex",
-                  justifyContent: "center",
+                  alignItems: "center",
                   zIndex: 10002,
-                  pointerEvents: "auto",
+                  pointerEvents: "none",
                 }}
               >
                 <ProjectTabBar

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import styles from "@/components/ui/GlassButton.module.css";
 
@@ -7,10 +8,10 @@ export type ProjectKey = "notes" | "vorli" | "sticky";
 
 export const PROJECT_ORDER: ProjectKey[] = ["notes", "vorli", "sticky"];
 
-const TABS: Array<{ key: ProjectKey; label: string; icon: string }> = [
-  { key: "notes", label: "Notes", icon: "/images/notes.png" },
-  { key: "vorli", label: "Vorli", icon: "/images/receipt.png" },
-  { key: "sticky", label: "Sticky", icon: "/images/sticky.png" },
+const TABS: Array<{ key: ProjectKey; icon: string }> = [
+  { key: "notes", icon: "/images/notes.png" },
+  { key: "vorli", icon: "/images/receipt.png" },
+  { key: "sticky", icon: "/images/sticky.png" },
 ];
 
 interface ProjectTabBarProps {
@@ -19,15 +20,20 @@ interface ProjectTabBarProps {
 }
 
 export function ProjectTabBar({ active, onChange }: ProjectTabBarProps) {
+  const [hovered, setHovered] = useState<ProjectKey | null>(null);
+
   return (
     <div
       style={{
-        display: "inline-flex",
+        display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         backgroundColor: "var(--color-bg-container)",
-        borderRadius: 16,
-        padding: 2,
+        borderRadius: 9999,
+        padding: 4,
+        width: 48,
         flexShrink: 0,
+        pointerEvents: "auto",
       }}
     >
       {TABS.map((tab) => {
@@ -36,63 +42,55 @@ export function ProjectTabBar({ active, onChange }: ProjectTabBarProps) {
           <motion.button
             key={tab.key}
             onClick={isActive ? undefined : () => onChange(tab.key)}
-            className={isActive ? `${styles.glassBtn} ${styles.sizeS}` : ""}
-            whileHover={!isActive ? { opacity: 0.75 } : undefined}
+            onMouseEnter={() => { if (!isActive) setHovered(tab.key); }}
+            onMouseLeave={() => setHovered(null)}
+            className={isActive ? `${styles.glassBtn} ${styles.sizeM}` : ""}
             transition={{ duration: 0.15 }}
             style={
               isActive
                 ? {
-                    display: "inline-flex",
+                    display: "flex",
                     alignItems: "center",
-                    gap: 8,
-                    paddingLeft: 8,
-                    paddingRight: 12,
+                    justifyContent: "center",
+                    width: 40,
+                    height: 40,
+                    padding: 0,
                     cursor: "default",
                     pointerEvents: "none",
-                    fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                    fontSize: 12,
-                    letterSpacing: "0.03em",
+                    flexShrink: 0,
                   }
                 : {
                     display: "flex",
                     alignItems: "center",
-                    gap: 8,
-                    borderRadius: 9999,
-                    height: 32,
-                    paddingLeft: 12,
-                    paddingRight: 12,
+                    justifyContent: "center",
+                    width: 40,
+                    height: 40,
+                    padding: 0,
                     border: "none",
-                    background: "transparent",
+                    backgroundColor: hovered === tab.key ? "rgba(0,0,0,0.07)" : "transparent",
                     cursor: "pointer",
-                    fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                    fontSize: 12,
-                    letterSpacing: "0.03em",
-                    lineHeight: 1,
-                    color: "var(--color-text-label)",
-                    whiteSpace: "nowrap" as const,
-                    userSelect: "none" as const,
+                    borderRadius: 9999,
+                    flexShrink: 0,
+                    transition: "background-color 0.15s ease",
                   }
             }
           >
-            {isActive && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={tab.icon}
-                alt=""
-                style={{
-                  width: 20,
-                  height: 20,
-                  objectFit: "cover",
-                  borderRadius: 5,
-                  flexShrink: 0,
-                  position: "relative",
-                  zIndex: 1,
-                }}
-              />
-            )}
-            <span style={{ position: "relative", zIndex: 1, whiteSpace: "nowrap", userSelect: "none" }}>
-              {tab.label}
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={tab.icon}
+              alt=""
+              style={{
+                width: isActive ? 22 : 18,
+                height: isActive ? 22 : 18,
+                objectFit: "cover",
+                borderRadius: 5,
+                flexShrink: 0,
+                position: "relative",
+                zIndex: 1,
+                opacity: isActive ? 1 : 0.4,
+                filter: isActive ? "none" : "grayscale(1)",
+              }}
+            />
           </motion.button>
         );
       })}
