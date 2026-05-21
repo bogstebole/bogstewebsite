@@ -9,6 +9,7 @@ import { useRippleWave } from "@/useRippleWave";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { SelectedProjectLayout, GRID_ITEM_VARIANTS } from "@/components/ui/selected-project-layout";
 import { ProjectTag } from "@/components/ui/project-tag";
+import { ProjectTabBar, type ProjectKey, PROJECT_ORDER } from "@/components/ui/project-tab-bar";
 import {
   ProjectCard,
   CARD_STYLE,
@@ -18,11 +19,8 @@ import {
 } from "@/components/ui/project-card";
 
 interface SelectedProjectsSectionProps {
-  /** Called when Notes card starts expanding */
   onNotesExpand?: () => void;
-  /** Called the moment Notes close sequence begins (un-blur immediately) */
   onNotesCloseStart?: () => void;
-  /** Called after Notes card has fully returned to mini state */
   onNotesClose?: () => void;
   onStickyExpand?: () => void;
   onStickyCloseStart?: () => void;
@@ -30,253 +28,7 @@ interface SelectedProjectsSectionProps {
   isStickyExpanded?: boolean;
 }
 
-// ── Mobile card deck ──────────────────────────────────────────────────────────
-
-const DECK_CARDS = [
-  { key: "notes", image: "/images/notes.png", title: "Notes", tags: ["iOS", "Canvas"] },
-  { key: "vorli", image: "/images/receipt.png", title: "Vorli", tags: ["iOS", "AI Financial"] },
-  { key: "sticky", image: "/images/sticky.png", title: "Sticky", tags: ["iOS", "Productivity"] },
-] as const;
-
-const SWIPE_THRESHOLD = 80;
-const SWIPE_VELOCITY = 400;
-
-// Random-looking fan offsets for each stack position (pos 0 = front)
-// Front card is always neutral; cards behind get organic spread
-const FAN: Record<number, { x: number; y: number; rotate: number; scale: number }> = {
-  0: { x: 0, y: 0, rotate: 0, scale: 1 },
-  1: { x: 10, y: 6, rotate: 6, scale: 0.95 },
-  2: { x: -6, y: 10, rotate: -9, scale: 0.90 },
-};
-
-function stackTransform(pos: number) {
-  const f = FAN[pos] ?? FAN[2];
-  return { ...f, opacity: 1 };
-}
-
-interface MobileDeckProps {
-  isNotesExpanded: boolean;
-  isStickyExpanded: boolean;
-  isVorliExpanded: boolean;
-  isDesktop: boolean;
-  onNotesClick: () => void;
-  onVorliClick: () => void;
-  onStickyClick: () => void;
-  notesRippleRef: React.RefObject<HTMLDivElement | null>;
-  miniTagControls: ReturnType<typeof useAnimation>;
-  stickyMiniTagControls: ReturnType<typeof useAnimation>;
-  vorliMiniTagControls: ReturnType<typeof useAnimation>;
-  returningRef: React.RefObject<boolean>;
-  stickyReturningRef: React.RefObject<boolean>;
-  vorliReturningRef: React.RefObject<boolean>;
-}
-
-function MobileDeck({
-  isNotesExpanded,
-  isStickyExpanded,
-  isVorliExpanded,
-  isDesktop,
-  onNotesClick,
-  onVorliClick,
-  onStickyClick,
-  notesRippleRef,
-  miniTagControls,
-  stickyMiniTagControls,
-  vorliMiniTagControls,
-  returningRef,
-  stickyReturningRef,
-  vorliReturningRef,
-}: MobileDeckProps) {
-  const [order, setOrder] = useState([0, 1, 2]);
-  const [exitDir, setExitDir] = useState<number | null>(null);
-  const animatingRef = useRef(false);
-
-  const handleDragEnd = (_: unknown, info: PanInfo) => {
-    if (animatingRef.current) return;
-    const { offset, velocity } = info;
-    if (Math.abs(offset.x) < SWIPE_THRESHOLD && Math.abs(velocity.x) < SWIPE_VELOCITY) return;
-
-    animatingRef.current = true;
-    setExitDir(offset.x > 0 ? 1 : -1);
-
-    setTimeout(() => {
-      setOrder(prev => [...prev.slice(1), prev[0]]);
-      setExitDir(null);
-      animatingRef.current = false;
-    }, 200);
-  };
-
-  // Render back-to-front so front card sits on top
-  const reversed = [...order].reverse();
-
-  return (
-    <div
-      style={{
-        position: "relative",
-        // 160px card + 24px max stack offset; 220px card + 24px stack offset
-        width: 184,
-        height: 244,
-        margin: "0 auto",
-      }}
-    >
-      {reversed.map((cardIdx) => {
-        const stackPos = order.indexOf(cardIdx);
-        const isFront = stackPos === 0;
-        const card = DECK_CARDS[cardIdx];
-        const isNotesCard = card.key === "notes";
-        const isStickyCard = card.key === "sticky";
-        const isVorliCard = card.key === "vorli";
-
-        const animateTarget =
-          isFront && exitDir !== null
-            ? { x: exitDir * 280, y: stackPos * 6, scale: 0.9, rotate: exitDir * 10, opacity: 0 }
-            : stackTransform(stackPos);
-
-        const handleClick = () => {
-          if (!isFront || exitDir !== null) return;
-          if (isNotesCard) { onNotesClick(); return; }
-          if (card.key === "vorli") { onVorliClick?.(); return; }
-          if (isStickyCard) { onStickyClick(); return; }
-        };
-
-        return (
-          <motion.div
-            key={cardIdx}
-            ref={isNotesCard ? notesRippleRef : undefined}
-            layoutId={isDesktop ? (isNotesCard ? "notes-card" : isStickyCard ? "sticky-card" : isVorliCard ? "vorli-card" : undefined) : undefined}
-            animate={animateTarget}
-            transition={
-              isFront && exitDir !== null
-                ? { type: "tween", duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }
-                : { type: "spring", stiffness: 340, damping: 28 }
-            }
-            drag={isFront && !isNotesExpanded && !isStickyExpanded && !isVorliExpanded && exitDir === null ? "x" : false}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={1}
-            onDragEnd={isFront ? handleDragEnd : undefined}
-            onLayoutAnimationComplete={
-              isNotesCard
-                ? () => {
-                  if (returningRef.current) {
-                    returningRef.current = false;
-                    void miniTagControls.start("visible");
-                  }
-                }
-                : isStickyCard
-                  ? () => {
-                    if (stickyReturningRef.current) {
-                      stickyReturningRef.current = false;
-                      void stickyMiniTagControls.start("visible");
-                    }
-                  }
-                  : isVorliCard
-                    ? () => {
-                      if (vorliReturningRef.current) {
-                        vorliReturningRef.current = false;
-                        void vorliMiniTagControls.start("visible");
-                      }
-                    }
-                    : undefined
-            }
-            onClick={handleClick}
-            style={{
-              ...CARD_STYLE,
-              position: "absolute",
-              top: 0,
-              left: 0,
-              zIndex: order.length - stackPos,
-              cursor: isFront && !isNotesExpanded && !isStickyExpanded && !isVorliExpanded ? (isNotesCard || isStickyCard || isVorliCard ? "pointer" : "grab") : "default",
-              pointerEvents: isFront ? "auto" : "none",
-              overflow: (isNotesCard && isNotesExpanded) || (isStickyCard && isStickyExpanded) || (isVorliCard && isVorliExpanded) ? "visible" : "hidden",
-              visibility: ((isNotesCard && isNotesExpanded) || (isStickyCard && isStickyExpanded) || (isVorliCard && isVorliExpanded)) && isDesktop ? "hidden" : "visible",
-              userSelect: "none",
-              WebkitUserSelect: "none",
-            }}
-            whileDrag={isFront && !isNotesCard && !isStickyCard && !isVorliCard ? { cursor: "grabbing" } : undefined}
-          >
-            {/* Icon area */}
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 12,
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={card.image}
-                alt={card.title}
-                style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8, flexShrink: 0 }}
-              />
-              <span
-                style={{
-                  fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-                  fontSize: 16.8,
-                  letterSpacing: "-0.04em",
-                  color: "var(--color-text-card)",
-                  whiteSpace: "nowrap",
-                  lineHeight: 1.3,
-                }}
-              >
-                {card.title}
-              </span>
-            </div>
-
-            {/* Tags */}
-            {isNotesCard ? (
-              <motion.div
-                animate={miniTagControls}
-                initial="visible"
-                variants={BADGE_CONTAINER_VARIANTS}
-                style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", justifyContent: "center", width: "100%" }}
-              >
-                {card.tags.map((label) => (
-                  <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
-                    <ProjectTag label={label} variant="glass" />
-                  </motion.div>
-                ))}
-                <motion.div variants={BADGE_ITEM_VARIANTS}>
-                  <AppStoreBadge active={false} />
-                </motion.div>
-              </motion.div>
-            ) : isStickyCard ? (
-              <motion.div
-                animate={stickyMiniTagControls}
-                initial="visible"
-                variants={BADGE_CONTAINER_VARIANTS}
-                style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center", width: "100%" }}
-              >
-                {card.tags.map((label) => (
-                  <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
-                    <ProjectTag label={label} variant="glass" />
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : isVorliCard ? (
-              <motion.div
-                animate={vorliMiniTagControls}
-                initial="visible"
-                variants={BADGE_CONTAINER_VARIANTS}
-                style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center", width: "100%" }}
-              >
-                {card.tags.map((label) => (
-                  <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
-                    <ProjectTag label={label} variant="glass" />
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : null}
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Useless Notes assets ───────────────────────────────────────────────────────
+// ─── Project data ─────────────────────────────────────────────────────────────
 
 const STICKY_ASSETS = [
   { src: "/assets/Sticky/Home screen.png", alt: "Sticky home screen" },
@@ -285,9 +37,6 @@ const STICKY_ASSETS = [
   { src: "/assets/Sticky/Reorder.png", alt: "Reorder tasks" },
 ];
 
-const STICKY_DESCRIPTION =
-  "Most task apps organize your work into lists that feel like chores. Sticky treats your tasks as a living canvas — notes float, stack, and drift, making the act of planning feel more like thinking than filing. Built for people who want their tools to have personality.";
-
 const VORLI_SCREENSHOTS = [
   { src: "/assets/Vorli/vorli 1.PNG", alt: "Vorli screenshot 1" },
   { src: "/assets/Vorli/vorli 2.PNG", alt: "Vorli screenshot 2" },
@@ -295,9 +44,6 @@ const VORLI_SCREENSHOTS = [
   { src: "/assets/Vorli/vorli 4.PNG", alt: "Vorli screenshot 4" },
   { src: "/assets/Vorli/vorli 5.PNG", alt: "Vorli screenshot 5" },
 ];
-
-const VORLI_DESCRIPTION =
-  "Most financial apps share the same assumption: if you can see your data, you'll change your behavior. I built Vorli because that assumption never worked for me. Existing tools asked me to think about money the way they were designed — not the way I actually do. Vorli puts AI at the center: it auto-categorizes spending, scans receipts, and reads your financial picture so you can just ask what matters. Not 'show me a chart' — more like 'should I be worried about this month?'";
 
 const USELESS_NOTES_ASSETS = [
   { type: "video" as const, src: "/assets/Useless Notes/Onboarding.mp4" },
@@ -311,6 +57,170 @@ const USELESS_NOTES_ASSETS = [
   { type: "image" as const, src: "/assets/Useless Notes/5Uslsnts.png" },
 ];
 
+// ─── Mobile card deck ─────────────────────────────────────────────────────────
+
+const DECK_CARDS = [
+  { key: "notes" as ProjectKey, image: "/images/notes.png", title: "Notes", tags: ["iOS", "Canvas"] },
+  { key: "vorli" as ProjectKey, image: "/images/receipt.png", title: "Vorli", tags: ["iOS", "AI Financial"] },
+  { key: "sticky" as ProjectKey, image: "/images/sticky.png", title: "Sticky", tags: ["iOS", "Productivity"] },
+] as const;
+
+const SWIPE_THRESHOLD = 80;
+const SWIPE_VELOCITY = 400;
+
+const FAN: Record<number, { x: number; y: number; rotate: number; scale: number }> = {
+  0: { x: 0, y: 0, rotate: 0, scale: 1 },
+  1: { x: 10, y: 6, rotate: 6, scale: 0.95 },
+  2: { x: -6, y: 10, rotate: -9, scale: 0.90 },
+};
+
+function stackTransform(pos: number) {
+  return { ...(FAN[pos] ?? FAN[2]), opacity: 1 };
+}
+
+interface MobileDeckProps {
+  openedFrom: ProjectKey | null;
+  isDesktop: boolean;
+  onCardClick: (key: ProjectKey) => void;
+  notesRippleRef: React.RefObject<HTMLDivElement | null>;
+  notesMiniTagControls: ReturnType<typeof useAnimation>;
+  vorliMiniTagControls: ReturnType<typeof useAnimation>;
+  stickyMiniTagControls: ReturnType<typeof useAnimation>;
+  notesReturningRef: React.RefObject<boolean>;
+  vorliReturningRef: React.RefObject<boolean>;
+  stickyReturningRef: React.RefObject<boolean>;
+}
+
+function MobileDeck({
+  openedFrom,
+  isDesktop,
+  onCardClick,
+  notesRippleRef,
+  notesMiniTagControls,
+  vorliMiniTagControls,
+  stickyMiniTagControls,
+  notesReturningRef,
+  vorliReturningRef,
+  stickyReturningRef,
+}: MobileDeckProps) {
+  const [order, setOrder] = useState([0, 1, 2]);
+  const [exitDir, setExitDir] = useState<number | null>(null);
+  const animatingRef = useRef(false);
+
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
+    if (animatingRef.current) return;
+    const { offset, velocity } = info;
+    if (Math.abs(offset.x) < SWIPE_THRESHOLD && Math.abs(velocity.x) < SWIPE_VELOCITY) return;
+    animatingRef.current = true;
+    setExitDir(offset.x > 0 ? 1 : -1);
+    setTimeout(() => {
+      setOrder(prev => [...prev.slice(1), prev[0]]);
+      setExitDir(null);
+      animatingRef.current = false;
+    }, 200);
+  };
+
+  const reversed = [...order].reverse();
+
+  return (
+    <div style={{ position: "relative", width: 184, height: 244, margin: "0 auto" }}>
+      {reversed.map((cardIdx) => {
+        const stackPos = order.indexOf(cardIdx);
+        const isFront = stackPos === 0;
+        const card = DECK_CARDS[cardIdx];
+        const isExpanded = openedFrom === card.key;
+
+        const miniControls =
+          card.key === "notes" ? notesMiniTagControls :
+          card.key === "vorli" ? vorliMiniTagControls :
+          stickyMiniTagControls;
+
+        const returningRef =
+          card.key === "notes" ? notesReturningRef :
+          card.key === "vorli" ? vorliReturningRef :
+          stickyReturningRef;
+
+        const animateTarget =
+          isFront && exitDir !== null
+            ? { x: exitDir * 280, y: stackPos * 6, scale: 0.9, rotate: exitDir * 10, opacity: 0 }
+            : stackTransform(stackPos);
+
+        return (
+          <motion.div
+            key={cardIdx}
+            ref={card.key === "notes" ? notesRippleRef : undefined}
+            layoutId={isDesktop ? `${card.key}-card` : undefined}
+            animate={animateTarget}
+            transition={
+              isFront && exitDir !== null
+                ? { type: "tween", duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }
+                : { type: "spring", stiffness: 340, damping: 28 }
+            }
+            drag={isFront && !openedFrom && exitDir === null ? "x" : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={1}
+            onDragEnd={isFront ? handleDragEnd : undefined}
+            onLayoutAnimationComplete={() => {
+              if (returningRef.current) {
+                returningRef.current = false;
+                void miniControls.start("visible");
+              }
+            }}
+            onClick={() => {
+              if (!isFront || exitDir !== null || openedFrom) return;
+              onCardClick(card.key);
+            }}
+            style={{
+              ...CARD_STYLE,
+              position: "absolute",
+              top: 0,
+              left: 0,
+              zIndex: order.length - stackPos,
+              cursor: isFront && !openedFrom ? "pointer" : "default",
+              pointerEvents: isFront ? "auto" : "none",
+              overflow: isExpanded ? "visible" : "hidden",
+              visibility: isExpanded && isDesktop ? "hidden" : "visible",
+              userSelect: "none",
+              WebkitUserSelect: "none",
+            }}
+          >
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={card.image}
+                alt={card.title}
+                style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 8, flexShrink: 0 }}
+              />
+              <span style={{ fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: 16.8, letterSpacing: "-0.04em", color: "var(--color-text-card)", whiteSpace: "nowrap", lineHeight: 1.3 }}>
+                {card.title}
+              </span>
+            </div>
+            <motion.div
+              animate={miniControls}
+              initial="visible"
+              variants={BADGE_CONTAINER_VARIANTS}
+              style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", justifyContent: "center", width: "100%" }}
+            >
+              {card.tags.map((label) => (
+                <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
+                  <ProjectTag label={label} variant="glass" />
+                </motion.div>
+              ))}
+              {card.key === "notes" && (
+                <motion.div variants={BADGE_ITEM_VARIANTS}>
+                  <AppStoreBadge active={false} />
+                </motion.div>
+              )}
+            </motion.div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
 export function SelectedProjectsSection({
   onNotesExpand,
   onNotesCloseStart,
@@ -318,248 +228,278 @@ export function SelectedProjectsSection({
   onStickyExpand,
   onStickyCloseStart,
   onStickyClose,
-  isStickyExpanded,
 }: SelectedProjectsSectionProps) {
   const { isMobile, isDesktop } = useBreakpoint();
-  const [isNotesExpanded, setIsNotesExpanded] = useState(false);
-  const stickyCardRef = useRef<HTMLDivElement>(null);
-  const logoControls = useAnimation();
-  const contentControls = useAnimation();
-  const gridControls = useAnimation();
-  const badgeControls = useAnimation();
-  const miniTagControls = useAnimation();
+
+  // ── Unified sheet state ──
+  const [openedFrom, setOpenedFrom] = useState<ProjectKey | null>(null);
+  const [activeProject, setActiveProject] = useState<ProjectKey | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<-1 | 0 | 1>(0);
+  const [isSheetReady, setIsSheetReady] = useState(false);
+  const [showFloatingHeader, setShowFloatingHeader] = useState(false);
   const closingRef = useRef(false);
   const expandingRef = useRef(false);
-  const [isNotesClosing, setIsNotesClosing] = useState(false);
-  const returningRef = useRef(false);
-
-  // Sticky state local
-  const [internalStickyExpanded, setInternalStickyExpanded] = useState(false);
-  const stickyLogoControls = useAnimation();
-  const stickyContentControls = useAnimation();
-  const stickyGridControls = useAnimation();
-  const stickyBadgeControls = useAnimation();
-  const stickyMiniTagControls = useAnimation();
-  const stickyClosingRef = useRef(false);
-  const stickyExpandingRef = useRef(false);
-  const [isStickyClosing, setIsStickyClosing] = useState(false);
-  const stickyReturningRef = useRef(false);
-  const stickyBadgesRef = useRef<HTMLDivElement>(null);
-  const [showStickyFloatingHeader, setShowStickyFloatingHeader] = useState(false);
-  const [isStickySheetReady, setIsStickySheetReady] = useState(false);
-
-  // Vorli state
-  const [isVorliExpanded, setIsVorliExpanded] = useState(false);
-  const [isVorliClosing, setIsVorliClosing] = useState(false);
-  const [isVorliSheetReady, setIsVorliSheetReady] = useState(false);
-  const [showVorliFloatingHeader, setShowVorliFloatingHeader] = useState(false);
-  const vorliLogoControls = useAnimation();
-  const vorliContentControls = useAnimation();
-  const vorliGridControls = useAnimation();
-  const vorliBadgeControls = useAnimation();
-  const vorliMiniTagControls = useAnimation();
-  const vorliClosingRef = useRef(false);
-  const vorliExpandingRef = useRef(false);
-  const vorliReturningRef = useRef(false);
-  const vorliBadgesRef = useRef<HTMLDivElement>(null);
-
-  const [mounted, setMounted] = useState(false);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => setMounted(true), []);
-  useEffect(() => { void miniTagControls.start("visible"); }, [miniTagControls]);
-  useEffect(() => { void stickyMiniTagControls.start("visible"); }, [stickyMiniTagControls]);
-  useEffect(() => { void vorliMiniTagControls.start("visible"); }, [vorliMiniTagControls]);
-
-
   const badgesRef = useRef<HTMLDivElement>(null);
-  const [showStickyHeader, setShowStickyHeader] = useState(false); // Notes floating header
-  const [isSheetReady, setIsSheetReady] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    if (!isNotesExpanded || !isSheetReady) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowStickyHeader(false);
-      return;
-    }
-    const el = badgesRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowStickyHeader(!entry.isIntersecting),
-      { threshold: 0 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [isNotesExpanded, isSheetReady]);
+  // ── Sheet animation controls (single set) ──
+  const logoControls = useAnimation();
+  const badgeControls = useAnimation();
+  const contentControls = useAnimation();
+  const gridControls = useAnimation();
 
-  // Sticky header observer
-  useEffect(() => {
-    if (!internalStickyExpanded || !isStickySheetReady) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowStickyFloatingHeader(false);
-      return;
-    }
-    const el = stickyBadgesRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowStickyFloatingHeader(!entry.isIntersecting),
-      { threshold: 0 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [internalStickyExpanded, isStickySheetReady]);
-
-  // Vorli header observer
-  useEffect(() => {
-    if (!isVorliExpanded || !isVorliSheetReady) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowVorliFloatingHeader(false);
-      return;
-    }
-    const el = vorliBadgesRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowVorliFloatingHeader(!entry.isIntersecting),
-      { threshold: 0 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [isVorliExpanded, isVorliSheetReady]);
+  // ── Per-card mini tag controls ──
+  const notesMiniTagControls = useAnimation();
+  const vorliMiniTagControls = useAnimation();
+  const stickyMiniTagControls = useAnimation();
+  const notesReturningRef = useRef(false);
+  const vorliReturningRef = useRef(false);
+  const stickyReturningRef = useRef(false);
 
   const RIPPLE_CONFIG = { speed: 270, ringWidth: 42, duration: 1000, textStrength: 7, imageStrength: 5 };
   const notesRippleRef = useRippleWave(RIPPLE_CONFIG) as unknown as React.RefObject<HTMLDivElement>;
   const vorliRippleRef = useRippleWave(RIPPLE_CONFIG) as unknown as React.RefObject<HTMLDivElement>;
 
-  const handleExpand = useCallback(async () => {
-    if (isNotesExpanded || closingRef.current || expandingRef.current) return;
+  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { void notesMiniTagControls.start("visible"); }, [notesMiniTagControls]);
+  useEffect(() => { void vorliMiniTagControls.start("visible"); }, [vorliMiniTagControls]);
+  useEffect(() => { void stickyMiniTagControls.start("visible"); }, [stickyMiniTagControls]);
+
+  // ── Floating header observer ──
+  useEffect(() => {
+    if (!isSheetReady) {
+      setShowFloatingHeader(false);
+      return;
+    }
+    const el = badgesRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowFloatingHeader(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isSheetReady]);
+
+  // ── Tab switch: animate in new content after exit + enter slide completes ──
+  // EXIT_MS must cover: exit animation (150ms) + spring enter (~250ms) before controls fire
+  useEffect(() => {
+    if (!isSheetReady || !activeProject) return;
+    logoControls.set("hidden");
+    badgeControls.set("hidden");
+    contentControls.set("hidden");
+    gridControls.set("hidden");
+    const AFTER_SLIDE_MS = 320;
+    const t1 = setTimeout(() => void logoControls.start("visible"), AFTER_SLIDE_MS);
+    const t2 = setTimeout(() => void badgeControls.start("visible"), AFTER_SLIDE_MS + 60);
+    const t3 = setTimeout(() => void contentControls.start("visible"), AFTER_SLIDE_MS + 120);
+    const t4 = setTimeout(() => void gridControls.start("visible"), AFTER_SLIDE_MS + 220);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProject]);
+
+  // ── Helpers ──
+  const getMiniControls = (k: ProjectKey) =>
+    k === "notes" ? notesMiniTagControls :
+    k === "vorli" ? vorliMiniTagControls :
+    stickyMiniTagControls;
+
+  const getAssetCount = (k: ProjectKey) =>
+    k === "notes" ? USELESS_NOTES_ASSETS.length :
+    k === "vorli" ? VORLI_SCREENSHOTS.length + 1 :
+    STICKY_ASSETS.length;
+
+  // ── Expand ──
+  const handleExpand = useCallback(async (project: ProjectKey) => {
+    if (openedFrom || closingRef.current || expandingRef.current) return;
     expandingRef.current = true;
-    setIsNotesExpanded(true);
-    onNotesExpand?.();
+    setOpenedFrom(project);
+    setActiveProject(project);
+    setSlideDirection(0);
+    if (project === "notes") onNotesExpand?.();
+    if (project === "sticky") onStickyExpand?.();
     if (!isMobile) {
-      await miniTagControls.start("exit");
+      await getMiniControls(project).start("exit");
     }
     expandingRef.current = false;
-  }, [isNotesExpanded, miniTagControls, onNotesExpand, isMobile]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openedFrom, isMobile, onNotesExpand, onStickyExpand]);
 
+  // ── Tab switch ──
+  const handleTabSwitch = useCallback((project: ProjectKey) => {
+    if (!activeProject || project === activeProject || closingRef.current) return;
+    const prevIdx = PROJECT_ORDER.indexOf(activeProject);
+    const nextIdx = PROJECT_ORDER.indexOf(project);
+    setSlideDirection(nextIdx > prevIdx ? 1 : -1);
+    setShowFloatingHeader(false);
+    setActiveProject(project);
+  }, [activeProject]);
+
+  // ── Close ──
   const handleClose = useCallback(async () => {
-    if (closingRef.current || expandingRef.current) return;
+    if (closingRef.current || !openedFrom) return;
     closingRef.current = true;
+    setIsClosing(true);
 
     if (isMobile) {
-      // Mobile: sheet handles its own exit animation via mobileInitiateClose.
-      // By the time onClose fires, the sheet has already animated out.
-      setIsNotesExpanded(false);
-      onNotesClose?.();
+      // Mobile sheet handles its own exit animation
+      const wasOpenedFrom = openedFrom;
+      setOpenedFrom(null);
+      setActiveProject(null);
       setIsSheetReady(false);
       closingRef.current = false;
+      if (wasOpenedFrom === "notes") onNotesClose?.();
+      if (wasOpenedFrom === "sticky") onStickyClose?.();
+      setIsClosing(false);
       return;
     }
 
-    setIsNotesClosing(true);
-    onNotesCloseStart?.();
+    if (openedFrom === "notes") onNotesCloseStart?.();
+    if (openedFrom === "sticky") onStickyCloseStart?.();
     void logoControls.start("exit");
     void contentControls.start("exit");
     void gridControls.start("exit");
     void badgeControls.start("exit");
-    await new Promise<void>(r => setTimeout(r, (USELESS_NOTES_ASSETS.length - 1) * 50));
-    returningRef.current = true;
-    setIsNotesExpanded(false);
-    onNotesClose?.();
+    await new Promise<void>(r => setTimeout(r, (getAssetCount(openedFrom) - 1) * 50));
+
+    const wasOpenedFrom = openedFrom;
+    if (wasOpenedFrom === "notes") notesReturningRef.current = true;
+    if (wasOpenedFrom === "vorli") vorliReturningRef.current = true;
+    if (wasOpenedFrom === "sticky") stickyReturningRef.current = true;
+
+    setOpenedFrom(null);
+    setActiveProject(null);
     setIsSheetReady(false);
+    setIsClosing(false);
     closingRef.current = false;
-    setIsNotesClosing(false);
-  }, [logoControls, contentControls, gridControls, badgeControls, onNotesCloseStart, onNotesClose, isMobile]);
 
-  // Vorli Expand/Close Handlers
-  const handleVorliExpand = useCallback(async () => {
-    if (isVorliExpanded || vorliClosingRef.current || vorliExpandingRef.current) return;
-    vorliExpandingRef.current = true;
-    setIsVorliExpanded(true);
-    if (!isMobile) {
-      await vorliMiniTagControls.start("exit");
-    }
-    vorliExpandingRef.current = false;
-  }, [isVorliExpanded, vorliMiniTagControls, isMobile]);
+    if (wasOpenedFrom === "notes") onNotesClose?.();
+    if (wasOpenedFrom === "sticky") onStickyClose?.();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openedFrom, isMobile, logoControls, contentControls, gridControls, badgeControls]);
 
-  const handleVorliClose = useCallback(async () => {
-    if (vorliClosingRef.current || vorliExpandingRef.current) return;
-    vorliClosingRef.current = true;
+  const handleCloseStart = useCallback(() => {
+    if (openedFrom === "notes") onNotesCloseStart?.();
+    if (openedFrom === "sticky") onStickyCloseStart?.();
+  }, [openedFrom, onNotesCloseStart, onStickyCloseStart]);
 
-    if (isMobile) {
-      setIsVorliExpanded(false);
-      setIsVorliSheetReady(false);
-      vorliClosingRef.current = false;
-      return;
-    }
-
-    setIsVorliClosing(true);
-    void vorliLogoControls.start("exit");
-    void vorliContentControls.start("exit");
-    void vorliGridControls.start("exit");
-    void vorliBadgeControls.start("exit");
-    await new Promise<void>(r => setTimeout(r, (VORLI_SCREENSHOTS.length - 1) * 50));
-    vorliReturningRef.current = true;
-    setIsVorliExpanded(false);
-    setIsVorliSheetReady(false);
-    vorliClosingRef.current = false;
-    setIsVorliClosing(false);
-  }, [vorliLogoControls, vorliContentControls, vorliGridControls, vorliBadgeControls, isMobile]);
-
-  const handleVorliCloseStart = useCallback(() => {
-    // Fired by the mobile sheet at the start of close animation (for unblur etc.)
-    // No external callback needed for Vorli currently
-  }, []);
-
-  // Sticky Expand/Close Handlers
-  const handleStickyExpandAction = useCallback(async () => {
-    if (internalStickyExpanded || stickyClosingRef.current || stickyExpandingRef.current) return;
-    stickyExpandingRef.current = true;
-    setInternalStickyExpanded(true);
-    onStickyExpand?.();
-    if (!isMobile) {
-      await stickyMiniTagControls.start("exit");
-    }
-    stickyExpandingRef.current = false;
-  }, [internalStickyExpanded, stickyMiniTagControls, onStickyExpand, isMobile]);
-
-  const handleStickyCloseAction = useCallback(async () => {
-    if (stickyClosingRef.current || stickyExpandingRef.current) return;
-    stickyClosingRef.current = true;
-
-    if (isMobile) {
-      // Mobile: sheet handles its own exit animation
-      setInternalStickyExpanded(false);
-      onStickyClose?.();
-      setIsStickySheetReady(false);
-      stickyClosingRef.current = false;
-      return;
-    }
-
-    setIsStickyClosing(true);
-    onStickyCloseStart?.();
-    void stickyLogoControls.start("exit");
-    void stickyContentControls.start("exit");
-    void stickyGridControls.start("exit");
-    void stickyBadgeControls.start("exit");
-    await new Promise<void>(r => setTimeout(r, (STICKY_ASSETS.length - 1) * 50));
-    stickyReturningRef.current = true;
-    setInternalStickyExpanded(false);
-    onStickyClose?.();
-    setIsStickySheetReady(false);
-    stickyClosingRef.current = false;
-    setIsStickyClosing(false);
-  }, [stickyLogoControls, stickyContentControls, stickyGridControls, stickyBadgeControls, onStickyCloseStart, onStickyClose, isMobile]);
-
+  // ── Escape key ──
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (isNotesExpanded) void handleClose();
-        if (internalStickyExpanded) void handleStickyCloseAction();
-        if (isVorliExpanded) void handleVorliClose();
-      }
+      if (e.key === "Escape" && openedFrom) void handleClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [handleClose, isNotesExpanded, internalStickyExpanded, handleStickyCloseAction, isVorliExpanded, handleVorliClose]);
+  }, [handleClose, openedFrom]);
+
+  // ── Derived per-project props ──
+  const getProjectProps = (k: ProjectKey) => {
+    switch (k) {
+      case "notes": return {
+        icon: "/images/notes.png",
+        iconStyle: { transform: "rotate(-17.2deg)" },
+        layoutId: "notes-card" as const,
+        title: "Notes",
+        shortDescription: (
+          <>
+            <span style={{ color: "var(--color-text-heading)" }}>Notes</span>
+            <span style={{ color: "var(--color-text-subdued)" }}>{" — A conceptual app about information overload, built on an infinite canvas."}</span>
+          </>
+        ),
+        description: (
+          <>
+            It&apos;s a conceptual work that visually shows how we clutter our mental space.
+            <br />The main &quot;canvas&quot; gets more &quot;useless&quot; over time, totally packed with notes and links, and the &quot;find&quot; mode is kind of the opposite, showing how we can only find things when we really need them. It&apos;s a reflection on the whole concept of how we deal with information overload today.
+          </>
+        ),
+        tags: ["iOS", "Canvas"],
+        extraBadge: <AppStoreBadge active={false} />,
+        showDownloadButton: true,
+      };
+      case "vorli": return {
+        icon: "/images/receipt.png",
+        iconStyle: { rotate: "359.41deg", transformOrigin: "50% 50%" },
+        layoutId: "vorli-card" as const,
+        title: "Vorli",
+        shortDescription: (
+          <>
+            <span style={{ color: "var(--color-text-heading)" }}>Vorli</span>
+            <span style={{ color: "var(--color-text-subdued)" }}>{" — AI-powered expense tracking that reads your finances so you don’t have to."}</span>
+          </>
+        ),
+        description: "Most financial apps share the same assumption: if you can see your data, you'll change your behavior. I built Vorli because that assumption never worked for me. Existing tools asked me to think about money the way they were designed — not the way I actually do. Vorli puts AI at the center: it auto-categorizes spending, scans receipts, and reads your financial picture so you can just ask what matters. Not 'show me a chart' — more like 'should I be worried about this month?'",
+        tags: ["iOS", "AI Financial Assistant", "In testing"],
+        extraBadge: undefined,
+        showDownloadButton: false,
+      };
+      case "sticky": return {
+        icon: "/images/sticky.png",
+        iconStyle: undefined,
+        layoutId: "sticky-project-modal" as const,
+        title: "Sticky",
+        shortDescription: (
+          <>
+            <span style={{ color: "var(--color-text-heading)" }}>Sticky</span>
+            <span style={{ color: "var(--color-text-subdued)" }}>{" — A to-do app where tasks float and drift like actual sticky notes."}</span>
+          </>
+        ),
+        description: "Most task apps organize your work into lists that feel like chores. Sticky treats your tasks as a living canvas — notes float, stack, and drift, making the act of planning feel more like thinking than filing. Built for people who want their tools to have personality.",
+        tags: ["iOS", "Productivity", "In progress.."],
+        extraBadge: undefined,
+        showDownloadButton: false,
+      };
+    }
+  };
+
+  const getProjectGrid = (k: ProjectKey) => {
+    const borderR = isMobile ? 12 : 32;
+    switch (k) {
+      case "notes":
+        return USELESS_NOTES_ASSETS.map((asset, i) => (
+          <motion.div
+            key={i}
+            variants={GRID_ITEM_VARIANTS}
+            style={{ borderRadius: borderR, overflow: "hidden", backgroundColor: "var(--color-bg-skeleton)" }}
+          >
+            {asset.type === "image" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={encodeURI(asset.src)} alt={`Notes screenshot ${i + 1}`} style={{ width: "100%", height: "auto", display: "block" }} />
+            ) : (
+              <video src={encodeURI(asset.src)} autoPlay loop muted playsInline style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+            )}
+          </motion.div>
+        ));
+      case "vorli":
+        return [
+          <motion.div key="video" variants={GRID_ITEM_VARIANTS} style={{ borderRadius: borderR, overflow: "hidden", backgroundColor: "var(--color-bg-surface)" }}>
+            <video src={encodeURI("/assets/Vorli/vorli video.MP4")} autoPlay loop muted playsInline style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+          </motion.div>,
+          ...VORLI_SCREENSHOTS.map((s) => (
+            <motion.div key={s.src} variants={GRID_ITEM_VARIANTS} style={{ borderRadius: borderR, overflow: "hidden", backgroundColor: "var(--color-bg-surface)" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={encodeURI(s.src)} alt={s.alt} style={{ width: "100%", height: "auto", display: "block" }} />
+            </motion.div>
+          )),
+        ];
+      case "sticky":
+        return STICKY_ASSETS.map((asset, i) => (
+          <motion.div
+            key={i}
+            variants={GRID_ITEM_VARIANTS}
+            style={{ breakInside: isMobile ? undefined : "avoid", borderRadius: borderR, overflow: "hidden", backgroundColor: "var(--color-bg-skeleton)" }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={encodeURI(asset.src)} alt={asset.alt} style={{ width: "100%", height: "auto", display: "block" }} />
+          </motion.div>
+        ));
+    }
+  };
+
+  const projectProps = activeProject ? getProjectProps(activeProject) : null;
+  const gridStyle = isMobile
+    ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
+    : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 };
 
   return (
     <LayoutGroup id="selected-projects">
@@ -579,25 +519,19 @@ export function SelectedProjectsSection({
         }}
       >
         {isMobile ? (
-          /* ── Mobile: swipeable card deck ── */
           <MobileDeck
-            isNotesExpanded={isNotesExpanded}
-            isStickyExpanded={internalStickyExpanded}
-            isVorliExpanded={isVorliExpanded}
+            openedFrom={openedFrom}
             isDesktop={isDesktop}
-            onNotesClick={() => void handleExpand()}
-            onVorliClick={() => void handleVorliExpand()}
-            onStickyClick={() => void handleStickyExpandAction()}
+            onCardClick={(key) => void handleExpand(key)}
             notesRippleRef={notesRippleRef}
-            miniTagControls={miniTagControls}
-            stickyMiniTagControls={stickyMiniTagControls}
+            notesMiniTagControls={notesMiniTagControls}
             vorliMiniTagControls={vorliMiniTagControls}
-            returningRef={returningRef}
-            stickyReturningRef={stickyReturningRef}
+            stickyMiniTagControls={stickyMiniTagControls}
+            notesReturningRef={notesReturningRef}
             vorliReturningRef={vorliReturningRef}
+            stickyReturningRef={stickyReturningRef}
           />
         ) : (
-          /* ── Desktop: three fanned cards side by side ── */
           <>
             {/* ── Notes card ── */}
             <ProjectCard
@@ -609,23 +543,23 @@ export function SelectedProjectsSection({
               layoutId="notes-card"
               cardRef={notesRippleRef}
               rotate={5}
-              overflow={isNotesExpanded ? "visible" : undefined}
-              visibility={isNotesExpanded ? "hidden" : undefined}
-              animate={isNotesExpanded ? undefined : { rotate: 5, opacity: 1 }}
-              whileHover={isNotesExpanded ? undefined : { y: -16, rotate: 0 }}
+              overflow={openedFrom === "notes" ? "visible" : undefined}
+              visibility={openedFrom === "notes" ? "hidden" : undefined}
+              animate={openedFrom === "notes" ? undefined : { rotate: 5, opacity: 1 }}
+              whileHover={openedFrom === "notes" ? undefined : { y: -16, rotate: 0 }}
               transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
               onLayoutAnimationComplete={() => {
-                if (returningRef.current) {
-                  returningRef.current = false;
-                  void miniTagControls.start("visible");
+                if (notesReturningRef.current) {
+                  notesReturningRef.current = false;
+                  void notesMiniTagControls.start("visible");
                 }
               }}
               marginRight={-21}
               zIndex={3}
-              cursor={isNotesExpanded ? "default" : "pointer"}
-              pointerEvents={isNotesExpanded ? "none" : "auto"}
-              onClick={!isNotesExpanded ? () => void handleExpand() : undefined}
-              tagControls={miniTagControls}
+              cursor={openedFrom === "notes" ? "default" : "pointer"}
+              pointerEvents={openedFrom === "notes" ? "none" : "auto"}
+              onClick={!openedFrom ? () => void handleExpand("notes") : undefined}
+              tagControls={notesMiniTagControls}
               tagInitial="visible"
             />
 
@@ -639,10 +573,10 @@ export function SelectedProjectsSection({
               layoutId="vorli-card"
               rotate={-5}
               zIndex={2}
-              overflow={isVorliExpanded ? "visible" : undefined}
-              visibility={isVorliExpanded ? "hidden" : undefined}
-              animate={isVorliExpanded ? undefined : { rotate: -5, opacity: 1 }}
-              whileHover={isVorliExpanded ? undefined : { y: -16, rotate: 0 }}
+              overflow={openedFrom === "vorli" ? "visible" : undefined}
+              visibility={openedFrom === "vorli" ? "hidden" : undefined}
+              animate={openedFrom === "vorli" ? undefined : { rotate: -5, opacity: 1 }}
+              whileHover={openedFrom === "vorli" ? undefined : { y: -16, rotate: 0 }}
               transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
               onLayoutAnimationComplete={() => {
                 if (vorliReturningRef.current) {
@@ -650,9 +584,9 @@ export function SelectedProjectsSection({
                   void vorliMiniTagControls.start("visible");
                 }
               }}
-              cursor={isVorliExpanded ? "default" : "pointer"}
-              pointerEvents={isVorliExpanded ? "none" : "auto"}
-              onClick={!isVorliExpanded ? () => void handleVorliExpand() : undefined}
+              cursor={openedFrom === "vorli" ? "default" : "pointer"}
+              pointerEvents={openedFrom === "vorli" ? "none" : "auto"}
+              onClick={!openedFrom ? () => void handleExpand("vorli") : undefined}
               imageStyle={{ rotate: "359.41deg", transformOrigin: "50% 50%" }}
               tagControls={vorliMiniTagControls}
               tagInitial="visible"
@@ -668,10 +602,10 @@ export function SelectedProjectsSection({
               marginLeft={-21}
               zIndex={1}
               layoutId="sticky-project-modal"
-              overflow={internalStickyExpanded ? "visible" : undefined}
-              visibility={internalStickyExpanded ? "hidden" : undefined}
-              animate={internalStickyExpanded ? undefined : { rotate: -1, opacity: 1 }}
-              whileHover={internalStickyExpanded ? undefined : { y: -16, rotate: 0 }}
+              overflow={openedFrom === "sticky" ? "visible" : undefined}
+              visibility={openedFrom === "sticky" ? "hidden" : undefined}
+              animate={openedFrom === "sticky" ? undefined : { rotate: -1, opacity: 1 }}
+              whileHover={openedFrom === "sticky" ? undefined : { y: -16, rotate: 0 }}
               transition={{ opacity: { duration: 0.15 }, y: CARD_SPRING }}
               onLayoutAnimationComplete={() => {
                 if (stickyReturningRef.current) {
@@ -679,10 +613,9 @@ export function SelectedProjectsSection({
                   void stickyMiniTagControls.start("visible");
                 }
               }}
-              cardRef={stickyCardRef}
-              cursor={internalStickyExpanded ? "default" : "pointer"}
-              pointerEvents={internalStickyExpanded ? "none" : "auto"}
-              onClick={!internalStickyExpanded ? () => void handleStickyExpandAction() : undefined}
+              cursor={openedFrom === "sticky" ? "default" : "pointer"}
+              pointerEvents={openedFrom === "sticky" ? "none" : "auto"}
+              onClick={!openedFrom ? () => void handleExpand("sticky") : undefined}
               tagControls={stickyMiniTagControls}
               tagInitial="visible"
             />
@@ -690,15 +623,15 @@ export function SelectedProjectsSection({
         )}
       </div>
 
-      {/* ── Backdrop + Expanded sheet — portalled to body to escape filter stacking context ── */}
+      {/* ── Expanded sheet — portalled to body ── */}
       {mounted && createPortal(
         <>
-          {/* ── Backdrop — blurs everything behind (desktop only; mobile sheet has its own) ── */}
+          {/* Backdrop */}
           {!isMobile && (
             <AnimatePresence>
-              {isNotesExpanded && (
+              {openedFrom && (
                 <motion.div
-                  key="notes-backdrop"
+                  key="sheet-backdrop"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -716,265 +649,73 @@ export function SelectedProjectsSection({
             </AnimatePresence>
           )}
 
-          {/* ── Expanded card — Bottom Sheet Anchored ── */}
+          {/* Tab bar — fixed above the sheet, outside the layout */}
           <AnimatePresence>
-            {isNotesExpanded && (
-              <SelectedProjectLayout
-                key="notes-expanded"
-              layoutId={isDesktop ? "notes-card" : undefined}
-              icon="/images/notes.png"
-              iconStyle={{ transform: 'rotate(-17.2deg)' }}
-              title="Notes"
-              shortDescription={
-                <>
-                  <span style={{ color: "var(--color-text-heading)" }}>Notes</span>
-                  <span style={{ color: "var(--color-text-subdued)" }}>
-                    {" — A conceptual app about information overload, built on an infinite canvas."}
-                  </span>
-                </>
-              }
-              tags={["iOS", "Canvas"]}
-              extraBadge={<AppStoreBadge active={false} />}
-              description={
-                <>
-                  It&apos;s a conceptual work that visually shows how we clutter our mental space.
-                  <br />The main &quot;canvas&quot; gets more &quot;useless&quot; over time, totally packed with notes and links, and the &quot;find&quot; mode is kind of the opposite, showing how we can only find things when we really need them. It&apos;s a reflection on the whole concept of how we deal with information overload today.
-                </>
-              }
-              showDownloadButton
-              logoControls={logoControls}
-              badgeControls={badgeControls}
-              contentControls={contentControls}
-              gridControls={gridControls}
-              badgesRef={badgesRef}
-              isClosing={isNotesClosing}
-              showFloatingHeader={showStickyHeader}
-              gridStyle={isMobile
-                ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
-                : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
-              }
-              onAnimationComplete={() => {
-                if (!closingRef.current) {
-                  setIsSheetReady(true);
-                  if (!isMobile) {
-                    void logoControls.start("visible");
-                    setTimeout(() => { if (!closingRef.current) void badgeControls.start("visible"); }, 80);
-                    setTimeout(() => { if (!closingRef.current) void contentControls.start("visible"); }, 160);
-                    setTimeout(() => { if (!closingRef.current) void gridControls.start("visible"); }, 350);
-                  }
-                }
-              }}
-              onCloseStart={() => onNotesCloseStart?.()}
-              onClose={() => void handleClose()}
-            >
-                {USELESS_NOTES_ASSETS.map((asset, i) => (
-                  <motion.div
-                    key={i}
-                    variants={GRID_ITEM_VARIANTS}
-                    style={{
-                      borderRadius: isMobile ? 12 : 32,
-                      overflow: "hidden",
-                      backgroundColor: "var(--color-bg-skeleton)",
-                    }}
-                  >
-                    {asset.type === "image" ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={encodeURI(asset.src)}
-                        alt={`Useless Notes screenshot ${i + 1}`}
-                        style={{ width: "100%", height: "auto", display: "block" }}
-                      />
-                    ) : (
-                      <video
-                        src={encodeURI(asset.src)}
-                        autoPlay loop muted playsInline
-                        style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
-                      />
-                    )}
-                  </motion.div>
-                ))}
-              </SelectedProjectLayout>
+            {!isMobile && openedFrom && (
+              <motion.div
+                key="tab-bar-portal"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                style={{
+                  position: "fixed",
+                  top: 16,
+                  left: 0,
+                  right: 0,
+                  display: "flex",
+                  justifyContent: "center",
+                  zIndex: 10002,
+                  pointerEvents: "auto",
+                }}
+              >
+                <ProjectTabBar
+                  active={activeProject ?? "notes"}
+                  onChange={handleTabSwitch}
+                />
+              </motion.div>
             )}
           </AnimatePresence>
 
-          {/* ── Vorli Backdrop (desktop only) ── */}
-          {!isMobile && (
-            <AnimatePresence>
-              {isVorliExpanded && (
-                <motion.div
-                  key="vorli-backdrop"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  onClick={() => void handleVorliClose()}
-                  style={{
-                    position: "fixed",
-                    inset: 0,
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
-                    zIndex: 50,
-                  }}
-                />
-              )}
-            </AnimatePresence>
-          )}
-
-          {/* ── Vorli Expanded Card ── */}
+          {/* Expanded sheet */}
           <AnimatePresence>
-            {isVorliExpanded && (
+            {openedFrom && projectProps && (
               <SelectedProjectLayout
-                key="vorli-expanded"
-              layoutId={isDesktop ? "vorli-card" : undefined}
-              icon="/images/receipt.png"
-              iconStyle={{ rotate: "359.41deg", transformOrigin: "50% 50%" }}
-              title="Vorli"
-              shortDescription={
-                <>
-                  <span style={{ color: "var(--color-text-heading)" }}>Vorli</span>
-                  <span style={{ color: "var(--color-text-subdued)" }}>
-                    {" — AI-powered expense tracking that reads your finances so you don\u2019t have to."}
-                  </span>
-                </>
-              }
-              tags={["iOS", "AI Financial Assistant", "In testing"]}
-              description={VORLI_DESCRIPTION}
-              logoControls={vorliLogoControls}
-              badgeControls={vorliBadgeControls}
-              contentControls={vorliContentControls}
-              gridControls={vorliGridControls}
-              badgesRef={vorliBadgesRef}
-              isClosing={isVorliClosing}
-              showFloatingHeader={showVorliFloatingHeader}
-              onAnimationComplete={() => {
-                if (!vorliClosingRef.current) {
-                  setIsVorliSheetReady(true);
-                  if (!isMobile) {
-                    void vorliLogoControls.start("visible");
-                    setTimeout(() => { if (!vorliClosingRef.current) void vorliBadgeControls.start("visible"); }, 80);
-                    setTimeout(() => { if (!vorliClosingRef.current) void vorliContentControls.start("visible"); }, 160);
-                    setTimeout(() => { if (!vorliClosingRef.current) void vorliGridControls.start("visible"); }, 350);
+                key="expanded-sheet"
+                layoutId={isDesktop ? projectProps.layoutId : undefined}
+                icon={projectProps.icon}
+                iconStyle={projectProps.iconStyle}
+                title={projectProps.title}
+                shortDescription={projectProps.shortDescription}
+                tags={projectProps.tags}
+                extraBadge={projectProps.extraBadge}
+                description={projectProps.description}
+                showDownloadButton={projectProps.showDownloadButton}
+                logoControls={logoControls}
+                badgeControls={badgeControls}
+                contentControls={contentControls}
+                gridControls={gridControls}
+                badgesRef={badgesRef}
+                isClosing={isClosing}
+                showFloatingHeader={showFloatingHeader}
+                gridStyle={gridStyle}
+                contentKey={activeProject ?? undefined}
+                slideDirection={slideDirection}
+                onAnimationComplete={() => {
+                  if (!closingRef.current) {
+                    setIsSheetReady(true);
+                    if (!isMobile) {
+                      void logoControls.start("visible");
+                      setTimeout(() => { if (!closingRef.current) void badgeControls.start("visible"); }, 80);
+                      setTimeout(() => { if (!closingRef.current) void contentControls.start("visible"); }, 160);
+                      setTimeout(() => { if (!closingRef.current) void gridControls.start("visible"); }, 350);
+                    }
                   }
-                }
-              }}
-              onCloseStart={handleVorliCloseStart}
-              onClose={() => void handleVorliClose()}
-              gridStyle={isMobile
-                ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
-                : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
-              }
-            >
-                <motion.div
-                  variants={GRID_ITEM_VARIANTS}
-                  style={{ borderRadius: isMobile ? 12 : 32, overflow: "hidden", backgroundColor: "var(--color-bg-surface)" }}
-                >
-                  <video
-                    src={encodeURI("/assets/Vorli/vorli video.MP4")}
-                    autoPlay loop muted playsInline
-                    style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
-                  />
-                </motion.div>
-                {VORLI_SCREENSHOTS.map((s) => (
-                  <motion.div
-                    key={s.src}
-                    variants={GRID_ITEM_VARIANTS}
-                    style={{ borderRadius: isMobile ? 12 : 32, overflow: "hidden", backgroundColor: "var(--color-bg-surface)" }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={encodeURI(s.src)} alt={s.alt}
-                      style={{ width: "100%", height: "auto", display: "block" }} />
-                  </motion.div>
-                ))}
-              </SelectedProjectLayout>
-            )}
-          </AnimatePresence>
-
-          {/* ── Sticky Backdrop (desktop only) ── */}
-          {!isMobile && (
-            <AnimatePresence>
-              {internalStickyExpanded && (
-                <motion.div
-                  key="sticky-backdrop"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  onClick={() => void handleStickyCloseAction()}
-                  style={{
-                    position: "fixed",
-                    inset: 0,
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
-                    zIndex: 50,
-                  }}
-                />
-              )}
-            </AnimatePresence>
-          )}
-
-          {/* ── Sticky Expanded Card ── */}
-          <AnimatePresence>
-            {internalStickyExpanded && (
-              <SelectedProjectLayout
-                key="sticky-expanded"
-              layoutId={isDesktop ? "sticky-project-modal" : undefined}
-              icon="/images/sticky.png"
-              title="Sticky"
-              shortDescription={
-                <>
-                  <span style={{ color: "var(--color-text-heading)" }}>Sticky</span>
-                  <span style={{ color: "var(--color-text-subdued)" }}>
-                    {" — A to-do app where tasks float and drift like actual sticky notes."}
-                  </span>
-                </>
-              }
-              tags={["iOS", "Productivity", "In progress.."]}
-              description={STICKY_DESCRIPTION}
-              logoControls={stickyLogoControls}
-              badgeControls={stickyBadgeControls}
-              contentControls={stickyContentControls}
-              gridControls={stickyGridControls}
-              badgesRef={stickyBadgesRef}
-              isClosing={isStickyClosing}
-              showFloatingHeader={showStickyFloatingHeader}
-              gridStyle={isMobile
-                ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }
-                : { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }
-              }
-              onAnimationComplete={() => {
-                if (!stickyClosingRef.current) {
-                  setIsStickySheetReady(true);
-                  if (!isMobile) {
-                    void stickyLogoControls.start("visible");
-                    setTimeout(() => { if (!stickyClosingRef.current) void stickyBadgeControls.start("visible"); }, 80);
-                    setTimeout(() => { if (!stickyClosingRef.current) void stickyContentControls.start("visible"); }, 160);
-                    setTimeout(() => { if (!stickyClosingRef.current) void stickyGridControls.start("visible"); }, 350);
-                  }
-                }
-              }}
-              onCloseStart={() => onStickyCloseStart?.()}
-              onClose={() => void handleStickyCloseAction()}
-            >
-                {STICKY_ASSETS.map((asset, i) => (
-                  <motion.div
-                    key={i}
-                    variants={GRID_ITEM_VARIANTS}
-                    style={{
-                      breakInside: isMobile ? undefined : "avoid",
-                      marginBottom: 0,
-                      borderRadius: isMobile ? 12 : 32,
-                      overflow: "hidden",
-                      backgroundColor: "var(--color-bg-skeleton)",
-                    }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={encodeURI(asset.src)}
-                      alt={asset.alt}
-                      style={{ width: "100%", height: "auto", display: "block" }}
-                    />
-                  </motion.div>
-                ))}
+                }}
+                onCloseStart={handleCloseStart}
+                onClose={() => void handleClose()}
+              >
+                {getProjectGrid(activeProject!)}
               </SelectedProjectLayout>
             )}
           </AnimatePresence>
