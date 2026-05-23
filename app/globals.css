@@ -195,3 +195,8 @@ body {
     background-position: 200% 0;
   }
 }
+
+/* ── DialKit panel bottom padding override ── */
+.dialkit-panel-inner {
+  padding-bottom: 12px !important;
+}
