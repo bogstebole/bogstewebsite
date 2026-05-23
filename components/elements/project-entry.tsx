@@ -54,6 +54,9 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
         controls.set("hidden");
       } else if (isReturning) {
         controls.start("visible");
+      } else {
+        // Tab switch: previous active entry lost focus without a close — restore instantly
+        controls.set("visible");
       }
     }, [isActive, isReturning, controls]);
 

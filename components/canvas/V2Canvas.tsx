@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { motion, AnimatePresence } from "framer-motion";
 // import { Water } from "@paper-design/shaders-react"; // POOL_HIDDEN
@@ -10,11 +11,8 @@ import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
 import { VorliReceiptDetail } from "@/components/ui/vorli-receipt-detail";
 import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
 import { EnvelopeMobileSheet } from "@/components/ui/envelope-mobile-sheet";
-import { ZounDetail } from "@/components/ui/zoun-detail";
-import { WearDetail } from "@/components/ui/wear-detail";
-import { PauschalDetail } from "@/components/ui/pauschal-detail";
-import { FynnDetail } from "@/components/ui/fynn-detail";
-import { ContentSnareDetail } from "@/components/ui/content-snare-detail";
+import { SectionProjectDetail } from "@/components/ui/section-project-detail";
+import { SectionProjectTabBar, SECTION_PROJECT_ORDER, type SectionProjectKey } from "@/components/ui/section-project-tab-bar";
 import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
 import { WritingsSection } from "@/components/elements/writings-section";
 import { PlaygroundSection } from "@/components/elements/playground-section";
@@ -109,6 +107,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isClosing, setIsClosing] = useState(false);
   const [returningProject, setReturningProject] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const entryRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [envelopeOpen, setEnvelopeOpen] = useState(false);
   const [isEnvelopeClosing, setIsEnvelopeClosing] = useState(false);
@@ -118,18 +117,32 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const [isNotesClosing, setIsNotesClosing] = useState(false);
   const [isStickyExpanded, setIsStickyExpanded] = useState(false);
   const [isStickyClosing, setIsStickyClosing] = useState(false);
+  const [isDetailFullyOpen, setIsDetailFullyOpen] = useState(false);
   const handleProjectClick = (key: string) => {
     const el = entryRefs.current[key];
     if (el) {
       setOriginRect(el.getBoundingClientRect());
       setActiveProject(key);
       setIsClosing(false);
+      setIsDetailFullyOpen(false);
     }
+  };
+
+  const SECTION_PROJECT_KEYS: SectionProjectKey[] = SECTION_PROJECT_ORDER;
+  const isSectionProject = (key: string | null): key is SectionProjectKey =>
+    SECTION_PROJECT_KEYS.includes(key as SectionProjectKey);
+
+  const handleSectionTabSwitch = (key: SectionProjectKey) => {
+    if (key === activeProject) return;
+    setActiveProject(key);
+    setOriginRect(null);
+    setIsClosing(false);
   };
 
   // Called when the close sequence begins — un-blur background immediately
   const handleCloseStart = () => {
     setIsClosing(true);
+    setIsDetailFullyOpen(false);
   };
 
   const handleClose = () => {
@@ -184,6 +197,8 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
     setIsStickyExpanded(false);
     setIsStickyClosing(false);
   };
+
+  useEffect(() => { setMounted(true); }, []);
 
   // Lock body scroll when detail is open
   useEffect(() => {
@@ -387,45 +402,13 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
         </div>
       </motion.div>
 
-      {/* ── Zoun detail overlay ── */}
-      {activeProject === "zoun" && (
-        <ZounDetail
+      {/* ── Section project detail overlay (single instance for all 5, enables tab slide transitions) ── */}
+      {isSectionProject(activeProject) && (
+        <SectionProjectDetail
+          activeProject={activeProject}
           onCloseStart={handleCloseStart}
           onClose={handleClose}
-        />
-      )}
-
-      {/* ── Wear detail overlay ── */}
-      {activeProject === "weatherWear" && (
-        <WearDetail
-          onCloseStart={handleCloseStart}
-          onClose={handleClose}
-        />
-      )}
-
-      {/* ── Pauschal Tracker detail overlay ── */}
-      {activeProject === "pauschalTracker" && (
-        <PauschalDetail
-          onCloseStart={handleCloseStart}
-          onClose={handleClose}
-        />
-      )}
-
-      {/* ── Fynn.io detail overlay ── */}
-      {activeProject === "fynn" && !!originRect && (
-        <FynnDetail
-          originRect={originRect}
-          onCloseStart={handleCloseStart}
-          onClose={handleClose}
-        />
-      )}
-
-      {/* ── Content Snare detail overlay ── */}
-      {activeProject === "contentSnare" && !!originRect && (
-        <ContentSnareDetail
-          originRect={originRect}
-          onCloseStart={handleCloseStart}
-          onClose={handleClose}
+          onOpenComplete={() => setIsDetailFullyOpen(true)}
         />
       )}
 
@@ -451,6 +434,37 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
           onCloseStart={handleCloseStart}
           onClose={handleClose}
         />
+      )}
+
+      {/* ── Section project tab bar (portalled to body to escape blur/scale stacking context) ── */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {!isMobile && isSectionProject(activeProject) && isDetailFullyOpen && (
+            <motion.div
+              key="section-tab-bar"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -8 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              style={{
+                position: "fixed",
+                top: "5vh",
+                bottom: 0,
+                left: "calc(50% - 610px)",
+                display: "flex",
+                alignItems: "center",
+                zIndex: 10002,
+                pointerEvents: "none",
+              }}
+            >
+              <SectionProjectTabBar
+                active={activeProject}
+                onChange={handleSectionTabSwitch}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
 
       {/* ── Envelope — mobile bottom sheet ── */}

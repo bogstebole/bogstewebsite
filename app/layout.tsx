@@ -7,6 +7,30 @@ export const metadata: Metadata = {
   title: "Boule's Portfolio",
   description:
     "An interactive portfolio that challenges design conformity — pixel art meets high-end shaders meets retro game aesthetics.",
+  metadataBase: new URL("https://bogste.com"),
+  openGraph: {
+    title: "Boule's Portfolio",
+    description:
+      "An interactive portfolio that challenges design conformity — pixel art meets high-end shaders meets retro game aesthetics.",
+    url: "https://bogste.com",
+    siteName: "Boule's Portfolio",
+    images: [
+      {
+        url: "/images/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Boule's Portfolio",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Boule's Portfolio",
+    description:
+      "An interactive portfolio that challenges design conformity — pixel art meets high-end shaders meets retro game aesthetics.",
+    images: ["/images/og.png"],
+  },
 };
 
 export default function RootLayout({

@@ -22,6 +22,7 @@ interface ProjectDetailLayoutProps {
   primaryColor?: string;
   contentKey?: string;
   slideDirection?: number;
+  onOpenComplete?: () => void;
 }
 
 const EXIT_DURATION = 0.4;
@@ -79,6 +80,7 @@ export function ProjectDetailLayout({
   primaryColor = "#000000",
   contentKey,
   slideDirection,
+  onOpenComplete,
 }: ProjectDetailLayoutProps) {
   const [mounted, setMounted] = useState(false);
   const closingRef = useRef(false);
@@ -228,7 +230,7 @@ export function ProjectDetailLayout({
           initial={{ y: "100%" }}
           animate={{ y: isClosing ? "100%" : 0 }}
           transition={sheetSpring}
-          onAnimationComplete={() => { if (!isClosing) { setCardAnimationComplete(true); setStickyReady(true); measurePanelTop(); } }}
+          onAnimationComplete={() => { if (!isClosing) { setCardAnimationComplete(true); setStickyReady(true); measurePanelTop(); onOpenComplete?.(); } }}
           style={{
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
@@ -390,7 +392,7 @@ export function ProjectDetailLayout({
           initial={{ opacity: 0, y: "100%" }}
           animate={isClosing ? { opacity: 0, y: "100%" } : { opacity: 1, y: 0 }}
           transition={desktopSpring}
-          onAnimationComplete={() => { if (!isClosing) { setCardAnimationComplete(true); setStickyReady(true); measurePanelTop(); } }}
+          onAnimationComplete={() => { if (!isClosing) { setCardAnimationComplete(true); setStickyReady(true); measurePanelTop(); onOpenComplete?.(); } }}
           onClick={(e) => e.stopPropagation()}
           style={{
             width: "100%",

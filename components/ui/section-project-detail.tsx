@@ -10,6 +10,7 @@ interface SectionProjectDetailProps {
   activeProject: SectionProjectKey;
   onCloseStart: () => void;
   onClose: () => void;
+  onOpenComplete?: () => void;
 }
 
 const ZOUN_SCREENSHOTS = [
@@ -163,7 +164,7 @@ const FYNN_CONTAINER = {
   },
 };
 
-export function SectionProjectDetail({ activeProject, onCloseStart, onClose }: SectionProjectDetailProps) {
+export function SectionProjectDetail({ activeProject, onCloseStart, onClose, onOpenComplete }: SectionProjectDetailProps) {
   const { isMobile } = useBreakpoint();
   const [prevProject, setPrevProject] = useState<SectionProjectKey>(activeProject);
   const [slideDirection, setSlideDirection] = useState(0);
@@ -380,6 +381,7 @@ export function SectionProjectDetail({ activeProject, onCloseStart, onClose }: S
       longDescription={config.longDescription}
       contentKey={activeProject}
       slideDirection={slideDirection}
+      onOpenComplete={onOpenComplete}
     >
       {renderChildren()}
     </ProjectDetailLayout>

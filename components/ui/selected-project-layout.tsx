@@ -368,7 +368,14 @@ export function SelectedProjectLayout({
           rotate: { type: "spring", stiffness: 400, damping: 30 },
         }}
         onAnimationComplete={() => {
-          onAnimationComplete?.();
+          if (!layoutId) {
+            onAnimationComplete?.();
+          }
+        }}
+        onLayoutAnimationComplete={() => {
+          if (layoutId) {
+            onAnimationComplete?.();
+          }
         }}
         onClick={(e) => e.stopPropagation()}
         style={{

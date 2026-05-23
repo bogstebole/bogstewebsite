@@ -314,6 +314,7 @@ export function SelectedProjectsSection({
   const handleExpand = useCallback(async (project: ProjectKey) => {
     if (openedFrom || closingRef.current || expandingRef.current) return;
     expandingRef.current = true;
+    setIsSheetReady(false);
     setOpenedFrom(project);
     setActiveProject(project);
     setSlideDirection(0);
@@ -341,6 +342,7 @@ export function SelectedProjectsSection({
     if (closingRef.current || !openedFrom) return;
     closingRef.current = true;
     setIsClosing(true);
+    setIsSheetReady(false);
 
     if (isMobile) {
       // Mobile sheet handles its own exit animation
@@ -651,7 +653,7 @@ export function SelectedProjectsSection({
 
           {/* Tab bar — fixed above the sheet, outside the layout */}
           <AnimatePresence>
-            {!isMobile && openedFrom && (
+            {!isMobile && openedFrom && isSheetReady && (
               <motion.div
                 key="tab-bar-portal"
                 initial={{ opacity: 0, x: -8 }}

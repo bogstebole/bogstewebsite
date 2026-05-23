@@ -4,7 +4,6 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { ProjectDetailLayout } from "./project-detail-layout";
 
 interface FynnDetailProps {
-  originRect: DOMRect;
   onCloseStart: () => void;
   onClose: () => void;
 }
