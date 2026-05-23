@@ -23,6 +23,17 @@ interface ProjectTabBarProps {
 export function ProjectTabBar({ active, onChange }: ProjectTabBarProps) {
   const [hovered, setHovered] = useState<ProjectKey | null>(null);
 
+  const [prevActive, setPrevActive] = useState<ProjectKey>(active);
+  const [transformOrigin, setTransformOrigin] = useState("center");
+
+  if (active !== prevActive) {
+    const prevIndex = PROJECT_ORDER.indexOf(prevActive);
+    const currentIndex = PROJECT_ORDER.indexOf(active);
+    const origin = currentIndex > prevIndex ? "top" : currentIndex < prevIndex ? "bottom" : "center";
+    setTransformOrigin(origin);
+    setPrevActive(active);
+  }
+
   const dial = useDialKit("Project Tab Spring", {
     stiffness: [350, 10, 1000],
     damping: [25, 1, 100],
@@ -86,6 +97,7 @@ export function ProjectTabBar({ active, onChange }: ProjectTabBarProps) {
                   zIndex: 0,
                   pointerEvents: "none",
                   transition: "none",
+                  transformOrigin,
                 }}
                 transition={{
                   scaleY: { duration: dial.stretchDuration, ease: "easeOut" },

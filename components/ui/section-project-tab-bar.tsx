@@ -31,6 +31,17 @@ interface SectionProjectTabBarProps {
 export function SectionProjectTabBar({ active, onChange }: SectionProjectTabBarProps) {
   const [hovered, setHovered] = useState<SectionProjectKey | null>(null);
 
+  const [prevActive, setPrevActive] = useState<SectionProjectKey>(active);
+  const [transformOrigin, setTransformOrigin] = useState("center");
+
+  if (active !== prevActive) {
+    const prevIndex = SECTION_PROJECT_ORDER.indexOf(prevActive);
+    const currentIndex = SECTION_PROJECT_ORDER.indexOf(active);
+    const origin = currentIndex > prevIndex ? "top" : currentIndex < prevIndex ? "bottom" : "center";
+    setTransformOrigin(origin);
+    setPrevActive(active);
+  }
+
   const dial = useDialKit("Section Tab Spring", {
     stiffness: [350, 10, 1000],
     damping: [25, 1, 100],
@@ -94,6 +105,7 @@ export function SectionProjectTabBar({ active, onChange }: SectionProjectTabBarP
                   zIndex: 0,
                   pointerEvents: "none",
                   transition: "none",
+                  transformOrigin,
                 }}
                 transition={{
                   scaleY: { duration: dial.stretchDuration, ease: "easeOut" },
