@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDialKit, DialRoot } from "dialkit";
+import Link from "next/link";
+import { ArrowLeft, Share } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import {
@@ -104,7 +106,16 @@ export default function Page() {
     updateTurn(id, { user: trimmed, state: "responding" });
 
     setTimeout(() => {
-      document.getElementById(`turn-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const el = document.getElementById(`turn-${id}`);
+      const feed = document.querySelector('.chatFeed');
+      const header = document.querySelector('.chatHeader');
+      if (el && feed) {
+        const headerHeight = header ? (header as HTMLElement).offsetHeight : 80;
+        // Scroll so the element is exactly 16px below the bottom of the header
+        feed.scrollTo({ top: el.offsetTop - headerHeight - 16, behavior: "smooth" });
+      } else {
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }, 150);
 
     const response = turnCountRef.current % 2 === 0 ? AI_RESPONSE : HIGGS_RESPONSE;
@@ -186,10 +197,13 @@ export default function Page() {
               </div>
             </div>
 
-            <motion.div variants={introItemVariants}>
-              <GlassButton size="m" onClick={handleStart}>
+            <motion.div variants={introItemVariants} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+              <GlassButton size="s" onClick={handleStart}>
                 Start experience
               </GlassButton>
+              <Link href="/" className="secondaryBtn">
+                Back to home
+              </Link>
             </motion.div>
           </div>
         </motion.div>
@@ -201,6 +215,22 @@ export default function Page() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
+          <div className="topBlur" />
+          <header className="chatHeader">
+            <div className="chatHeaderLeft">
+              <Link href="/" className="secondaryBtn iconBtn" aria-label="Back to home">
+                <ArrowLeft size={16} />
+              </Link>
+              <span className="chatHeaderTitle">inline chat experience</span>
+            </div>
+            <button 
+              className="secondaryBtn iconBtn" 
+              onClick={() => navigator.share?.({ title: "Inline chat experience", url: window.location.href })}
+              aria-label="Share"
+            >
+              <Share size={16} />
+            </button>
+          </header>
           <div className="chatFeed">
             <AnimatePresence>
               {turns.map((turn, i) => {
