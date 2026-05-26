@@ -47,6 +47,7 @@ export default function Page() {
     itemDuration: [0.28, 0, 1],
     itemYOffset: [-10, -100, 100],
     itemBlur: [10, 0, 50],
+    chatDelay: [0.3, 0, 1.5],
   });
 
   const introContainerVariants = {
@@ -166,22 +167,24 @@ export default function Page() {
           exit="exit"
         >
           <div className={introStyles.container}>
-            <motion.div className={introStyles.infoContainer} variants={introItemVariants}>
-              <Logo />
+            <div className={introStyles.infoContainer}>
+              <motion.div variants={introItemVariants}>
+                <Logo />
+              </motion.div>
               <div className={introStyles.content}>
                 <div className={introStyles.introContent}>
-                  <div className={introStyles.nameContent}>
+                  <motion.div className={introStyles.nameContent} variants={introItemVariants}>
                     <span className={introStyles.welcome}>Welcome</span>
                     <span className={introStyles.title}>This is inline chat experience</span>
-                  </div>
-                  <span className={introStyles.version}>v1.0.0</span>
+                  </motion.div>
+                  <motion.span className={introStyles.version} variants={introItemVariants}>v1.0.0</motion.span>
                 </div>
-                <p className={introStyles.description}>
+                <motion.p className={introStyles.description} variants={introItemVariants}>
                   Exploration of having the input be the same as response. Or better said input
                   morphing into chat bubble and maintains the continuous experience.
-                </p>
+                </motion.p>
               </div>
-            </motion.div>
+            </div>
 
             <motion.div variants={introItemVariants}>
               <GlassButton size="m" onClick={handleStart}>
@@ -211,7 +214,11 @@ export default function Page() {
                     className={`chatTurn${isActiveInput ? " activeInput" : ""}`}
                     initial={{ opacity: 0, y: -16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ 
+                      duration: 0.4, 
+                      ease: [0.22, 1, 0.36, 1],
+                      delay: i === 0 ? dial.chatDelay : 0
+                    }}
                   >
                     <div className="userRow">
                       <ChatInput
