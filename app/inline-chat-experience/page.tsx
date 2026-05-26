@@ -145,7 +145,7 @@ export default function Page() {
   };
 
   return (
-    <AnimatePresence mode="sync">
+    <AnimatePresence mode="wait">
       {phase === "intro" ? (
         <motion.div
           key="intro"
