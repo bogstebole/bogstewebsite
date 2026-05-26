@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDialKit, DialRoot } from "dialkit";
 import { Logo } from "@/components/ui/logo";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import {
@@ -40,27 +41,34 @@ const newTurn = (): Turn => ({
   state: "idle",
 });
 
-const introContainerVariants = {
-  visible: {},
-  exit: {
-    transition: {
-      staggerChildren: 0.07,
-      staggerDirection: -1 as const,
-    },
-  },
-};
-
-const introItemVariants = {
-  visible: { opacity: 1, filter: "blur(0px)", y: 0 },
-  exit: {
-    opacity: 0,
-    filter: "blur(10px)",
-    y: -10,
-    transition: { duration: 0.28, ease: [0.4, 0, 1, 1] as const },
-  },
-};
-
 export default function Page() {
+  const dial = useDialKit("Animation Setup", {
+    staggerDelay: [0.07, 0, 0.5],
+    itemDuration: [0.28, 0, 1],
+    itemYOffset: [-10, -100, 100],
+    itemBlur: [10, 0, 50],
+  });
+
+  const introContainerVariants = {
+    visible: {},
+    exit: {
+      transition: {
+        staggerChildren: dial.staggerDelay,
+        staggerDirection: -1 as const,
+      },
+    },
+  };
+
+  const introItemVariants = {
+    visible: { opacity: 1, filter: "blur(0px)", y: 0 },
+    exit: {
+      opacity: 0,
+      filter: `blur(${dial.itemBlur}px)`,
+      y: dial.itemYOffset,
+      transition: { duration: dial.itemDuration, ease: [0.4, 0, 1, 1] as const },
+    },
+  };
+
   const [phase, setPhase] = useState<Phase>("intro");
   const [turns, setTurns] = useState<Turn[]>([]);
   const streamingRef = useRef<number | null>(null);
@@ -145,7 +153,9 @@ export default function Page() {
   };
 
   return (
-    <AnimatePresence mode="wait">
+    <>
+      <DialRoot />
+      <AnimatePresence mode="wait">
       {phase === "intro" ? (
         <motion.div
           key="intro"
@@ -227,5 +237,6 @@ export default function Page() {
         </motion.div>
       )}
     </AnimatePresence>
+    </>
   );
 }
