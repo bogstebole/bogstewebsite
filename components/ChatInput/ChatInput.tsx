@@ -175,6 +175,17 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
     const animCfgRef = useRef(animationConfig);
     animCfgRef.current = animationConfig;
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [attachedImage, setAttachedImage] = useState<string | null>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        setAttachedImage(url);
+      }
+    };
+
     useImperativeHandle(ref, () => ({
       focus: () => editorRef.current?.focus(),
       setValue: (v) => {
@@ -404,37 +415,53 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
               filter: { type: "tween", duration: 0.2, ease: "easeOut" },
             }}
           >
-            <motion.div
-              className={`${styles.surface} ${isGlass ? styles.glass : ""} ${isRestingHovered ? styles.hovered : ""} ${pulsing ? styles.pulsed : ""}`}
-              style={{
-                alignItems: "center",
-                flexWrap: expandedMode ? "wrap" : "nowrap",
-                justifyContent: expandedMode ? "flex-end" : "flex-start",
-              }}
-              transition={bubbleSpring}
-              animate={surfaceControls}
-              onClick={() => editorRef.current?.focus()}
-            >
-              <span
-                ref={measureSpanRef}
-                aria-hidden="true"
+              <motion.div
+                className={`${styles.surface} ${isGlass ? styles.glass : ""} ${isRestingHovered ? styles.hovered : ""} ${pulsing ? styles.pulsed : ""}`}
                 style={{
-                  position: "absolute",
-                  visibility: "hidden",
-                  pointerEvents: "none",
-                  whiteSpace: "nowrap",
-                  font: "inherit",
-                  letterSpacing: "inherit",
+                  alignItems: attachedImage ? "stretch" : "center",
+                  flexDirection: attachedImage ? "column" : "row",
+                  flexWrap: (!attachedImage && expandedMode) ? "wrap" : "nowrap",
+                  justifyContent: (!attachedImage && expandedMode) ? "flex-end" : "flex-start",
                 }}
+                transition={bubbleSpring}
+                animate={surfaceControls}
+                onClick={() => editorRef.current?.focus()}
               >
-                {value}
-              </span>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/png, image/jpeg"
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
 
-              <div
-                ref={editorClipRef}
-                className={styles.editorClip}
-                style={{ flexBasis: expandedMode ? "100%" : undefined }}
-              >
+                {attachedImage && (
+                  <div style={{ flexShrink: 0, height: 80, backgroundColor: '#FFFFFF', borderRadius: '16px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: 8, marginBottom: 8 }}>
+                    <div style={{ backgroundImage: `url(${attachedImage})`, backgroundPosition: '50%', backgroundSize: 'cover', borderRadius: '8px', boxShadow: '#00000033 0px 2px 3px -2px', boxSizing: 'border-box', flexShrink: 0, height: '64px', outline: '1px solid #FFFFFF', width: '64px' }} />
+                  </div>
+                )}
+
+                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", flexWrap: expandedMode ? "wrap" : "nowrap", justifyContent: expandedMode ? "flex-end" : "flex-start", width: "100%", minWidth: 0, flex: 1 }}>
+                  <span
+                    ref={measureSpanRef}
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      visibility: "hidden",
+                      pointerEvents: "none",
+                      whiteSpace: "nowrap",
+                      font: "inherit",
+                      letterSpacing: "inherit",
+                    }}
+                  >
+                    {value}
+                  </span>
+
+                  <div
+                    ref={editorClipRef}
+                    className={styles.editorClip}
+                    style={{ flexBasis: expandedMode ? "100%" : undefined }}
+                  >
                 <motion.div
                   ref={editorWrapRef}
                   className={`${styles.editorWrap} ${isGlass ? styles.editorWrapGlass : ""}`}
@@ -567,6 +594,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                   )}
                 </AnimatePresence>
               </div>
+              </div>
             </motion.div>
 
             <TrailingActionButton
@@ -584,7 +612,12 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
           <AddCardsOverlay
             isAddOpen={isAddOpen}
             setIsAddOpen={setIsAddOpen}
-            onAdd={onAdd}
+            onAdd={(label) => {
+              if (!label || label === "Add") {
+                fileInputRef.current?.click();
+              }
+              onAdd?.();
+            }}
             showInlineGlyph={showInlineGlyph}
             showButtons={showButtons}
             ac={ac}
