@@ -17,8 +17,9 @@ function placeCursorAtEnd(el: HTMLElement) {
   sel?.addRange(range);
 }
 import { AnimatePresence, LayoutGroup, animate, motion, useAnimationControls, type Transition } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { Button } from "@/components/Button/Button";
+import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { MorphGlyph } from "./MorphGlyph";
 import { TrailingActionButton } from "./TrailingActionButton";
 import { HoverActionsRow } from "./HoverActionsRow";
@@ -437,7 +438,22 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
 
                 {attachedImage && (
                   <div style={{ flexShrink: 0, height: 80, backgroundColor: '#FFFFFF', borderRadius: '16px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: 8, marginBottom: 8 }}>
-                    <div style={{ backgroundImage: `url(${attachedImage})`, backgroundPosition: '50%', backgroundSize: 'cover', borderRadius: '8px', boxShadow: '#00000033 0px 2px 3px -2px', boxSizing: 'border-box', flexShrink: 0, height: '64px', outline: '1px solid #FFFFFF', width: '64px' }} />
+                    <div className={styles.attachedImgWrap}>
+                      <div className={styles.attachedImgBg} style={{ backgroundImage: `url(${attachedImage})` }} />
+                      <div className={styles.attachedImgOverlay}>
+                        <GlassButton 
+                          size="s" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAttachedImage(null);
+                          }}
+                          aria-label="Remove attached image"
+                          style={{ padding: 0, width: 28, height: 28, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                        >
+                          <X size={14} />
+                        </GlassButton>
+                      </div>
+                    </div>
                   </div>
                 )}
 

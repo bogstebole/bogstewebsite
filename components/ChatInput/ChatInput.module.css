@@ -347,6 +347,48 @@
   cursor: default;
 }
 
+/* ─────────────────────────────────────────────
+   Attached Image Preview
+   ───────────────────────────────────────────── */
+
+.attachedImgWrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: #00000033 0px 2px 3px -2px;
+  outline: 1px solid #FFFFFF;
+}
+
+.attachedImgBg {
+  width: 100%;
+  height: 100%;
+  background-position: 50%;
+  background-size: cover;
+  transition: filter 0.2s ease;
+}
+
+.attachedImgOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.attachedImgWrap:hover .attachedImgBg {
+  filter: blur(2px);
+}
+
+.attachedImgWrap:hover .attachedImgOverlay {
+  opacity: 1;
+}
+
 .addOverlay {
   position: absolute;
   inset: 0;
