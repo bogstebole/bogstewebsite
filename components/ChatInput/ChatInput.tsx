@@ -437,22 +437,24 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                 />
 
                 {attachedImage && (
-                  <div style={{ flexShrink: 0, height: 80, backgroundColor: '#FFFFFF', borderRadius: '16px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: 8, marginBottom: 8 }}>
+                  <div style={{ flexShrink: 0, height: 80, backgroundColor: isGlass ? 'transparent' : '#FFFFFF', borderRadius: '16px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: 8, marginBottom: 8 }}>
                     <div className={styles.attachedImgWrap}>
                       <div className={styles.attachedImgBg} style={{ backgroundImage: `url(${attachedImage})` }} />
-                      <div className={styles.attachedImgOverlay}>
-                        <GlassButton 
-                          size="s" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setAttachedImage(null);
-                          }}
-                          aria-label="Remove attached image"
-                          style={{ padding: 0, width: 28, height: 28, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                        >
-                          <X size={14} />
-                        </GlassButton>
-                      </div>
+                      {!isGlass && (
+                        <div className={styles.attachedImgOverlay}>
+                          <GlassButton 
+                            size="s" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setAttachedImage(null);
+                            }}
+                            aria-label="Remove attached image"
+                            style={{ padding: 0, width: 28, height: 28, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                          >
+                            <X size={14} />
+                          </GlassButton>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

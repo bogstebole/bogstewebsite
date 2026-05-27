@@ -26,6 +26,10 @@
   position: relative;
   padding-top: 100px;
   padding-bottom: 99vh;
+  padding-left: 32px;
+  padding-right: 32px;
+  margin-left: -32px;
+  margin-right: -32px;
   display: flex;
   flex-direction: column;
   gap: 48px;
