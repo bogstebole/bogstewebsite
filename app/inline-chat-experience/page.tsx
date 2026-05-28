@@ -45,30 +45,60 @@ const newTurn = (): Turn => ({
 
 export default function Page() {
   const dial = useDialKit("Animation Setup", {
-    staggerDelay: [0.07, 0, 0.5],
-    itemDuration: [0.28, 0, 1],
-    itemYOffset: [-10, -100, 100],
-    itemBlur: [10, 0, 50],
-    chatDelay: [0.3, 0, 1.5],
+    "Entrance Animation": {
+      staggerDelay: [0.07, 0, 0.5],
+      stiffness: [100, 50, 800],
+      damping: [36, 5, 100],
+      yOffset: [-10, -100, 100],
+      blur: [10, 0, 50],
+    },
+    "Start Experience": {
+      staggerDelay: [0.07, 0, 0.5],
+      duration: [0.28, 0, 1],
+      yOffset: [-10, -100, 100],
+      blur: [10, 0, 50],
+    },
+    "Chat Feed": {
+      delay: [0.3, 0, 1.5],
+    },
   });
 
   const introContainerVariants = {
-    visible: {},
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: dial["Entrance Animation"].staggerDelay,
+      },
+    },
     exit: {
       transition: {
-        staggerChildren: dial.staggerDelay,
+        staggerChildren: dial["Start Experience"].staggerDelay,
         staggerDirection: -1 as const,
       },
     },
   };
 
   const introItemVariants = {
-    visible: { opacity: 1, filter: "blur(0px)", y: 0 },
+    hidden: { 
+      opacity: 0, 
+      filter: `blur(${dial["Entrance Animation"].blur}px)`, 
+      y: dial["Entrance Animation"].yOffset 
+    },
+    visible: { 
+      opacity: 1, 
+      filter: "blur(0px)", 
+      y: 0,
+      transition: { 
+        type: "spring", 
+        stiffness: dial["Entrance Animation"].stiffness, 
+        damping: dial["Entrance Animation"].damping 
+      }
+    },
     exit: {
       opacity: 0,
-      filter: `blur(${dial.itemBlur}px)`,
-      y: dial.itemYOffset,
-      transition: { duration: dial.itemDuration, ease: [0.4, 0, 1, 1] as const },
+      filter: `blur(${dial["Start Experience"].blur}px)`,
+      y: dial["Start Experience"].yOffset,
+      transition: { duration: dial["Start Experience"].duration, ease: [0.4, 0, 1, 1] as const },
     },
   };
 
@@ -166,14 +196,14 @@ export default function Page() {
 
   return (
     <>
-      <DialRoot />
+      <DialRoot position="bottom-right" />
       <AnimatePresence mode="wait">
       {phase === "intro" ? (
         <motion.div
           key="intro"
           className={introStyles.page}
           variants={introContainerVariants}
-          initial="visible"
+          initial="hidden"
           animate="visible"
           exit="exit"
         >
@@ -247,7 +277,7 @@ export default function Page() {
                     transition={{ 
                       duration: 0.4, 
                       ease: [0.22, 1, 0.36, 1],
-                      delay: i === 0 ? dial.chatDelay : 0
+                      delay: i === 0 ? dial["Chat Feed"].delay : 0
                     }}
                   >
                     <div className="userRow">
