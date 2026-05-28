@@ -1,4 +1,5 @@
 import type { InlineChatFeatureStatus } from "@/lib/constants";
+import styles from "./InlineChatBanner.module.css";
 
 interface InlineChatBannerProps {
   status: InlineChatFeatureStatus;
@@ -70,20 +71,9 @@ export function InlineChatBanner({ status }: InlineChatBannerProps) {
       </div>
 
       {/* Status columns */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "stretch",
-          backgroundColor: "#ffffff",
-          borderRadius: 16,
-          padding: "8px 20px",
-          gap: 4,
-        }}
-      >
+      <div className={styles.columns}>
         <Column label="Works" items={status.works} />
-
         <Column label="Not working" items={status.notWorking} />
-
         <Column label="Soon" items={status.soon} />
       </div>
     </div>

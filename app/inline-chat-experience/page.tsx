@@ -227,7 +227,7 @@ export default function Page() {
               </div>
             </div>
 
-            <motion.div variants={introItemVariants} style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+            <motion.div variants={introItemVariants} className={introStyles.bannerWrapper}>
               <InlineChatBanner status={INLINE_CHAT_FEATURE_STATUS} />
             </motion.div>
 
@@ -236,7 +236,7 @@ export default function Page() {
             <motion.div variants={introItemVariants} style={{ display: "none" }} />
             <motion.div variants={introItemVariants} style={{ display: "none" }} />
 
-            <motion.div variants={introItemVariants} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+            <motion.div variants={introItemVariants} className={introStyles.buttonWrapper}>
               <GlassButton size="s" onClick={handleStart}>
                 Start experience
               </GlassButton>

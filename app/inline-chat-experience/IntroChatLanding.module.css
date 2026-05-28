@@ -94,6 +94,29 @@
   gap: 16px;
 }
 
+.bannerWrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.buttonWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+@media (max-width: 540px) {
+  .bannerWrapper {
+    order: 2;
+  }
+
+  .buttonWrapper {
+    order: 1;
+  }
+}
+
 
 .fyi {
   font-family: var(--font-geist-sans), "Geist", system-ui, sans-serif;
