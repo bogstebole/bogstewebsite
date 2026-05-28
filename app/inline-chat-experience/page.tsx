@@ -12,6 +12,8 @@ import {
   type ChatInputState,
   defaultInlineAnimConfig,
 } from "@/components/ChatInput/ChatInput";
+import { InlineChatBanner } from "@/components/ui/InlineChatBanner";
+import { INLINE_CHAT_FEATURE_STATUS } from "@/lib/constants";
 import introStyles from "./IntroChatLanding.module.css";
 import "./ChatExperience.css";
 
@@ -225,6 +227,15 @@ export default function Page() {
                 </motion.p>
               </div>
             </div>
+
+            <motion.div variants={introItemVariants} style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+              <InlineChatBanner status={INLINE_CHAT_FEATURE_STATUS} />
+            </motion.div>
+
+            {/* Invisible elements to consume stagger slots and create a pause before the button animates */}
+            <motion.div variants={introItemVariants} style={{ display: "none" }} />
+            <motion.div variants={introItemVariants} style={{ display: "none" }} />
+            <motion.div variants={introItemVariants} style={{ display: "none" }} />
 
             <motion.div variants={introItemVariants} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
               <GlassButton size="s" onClick={handleStart}>
