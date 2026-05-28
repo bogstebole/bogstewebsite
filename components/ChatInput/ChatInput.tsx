@@ -447,6 +447,9 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                             onClick={(e) => {
                               e.stopPropagation();
                               setAttachedImage(null);
+                              if (fileInputRef.current) {
+                                fileInputRef.current.value = "";
+                              }
                             }}
                             aria-label="Remove attached image"
                             style={{ padding: 0, width: 28, height: 28, display: 'flex', justifyContent: 'center', alignItems: 'center' }}

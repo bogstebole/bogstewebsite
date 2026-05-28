@@ -63,7 +63,7 @@ export default function Page() {
     },
   });
 
-  const introContainerVariants = {
+  const introContainerVariants: any = {
     hidden: {},
     visible: {
       transition: {
@@ -78,7 +78,7 @@ export default function Page() {
     },
   };
 
-  const introItemVariants = {
+  const introItemVariants: any = {
     hidden: { 
       opacity: 0, 
       filter: `blur(${dial["Entrance Animation"].blur}px)`, 
@@ -196,7 +196,6 @@ export default function Page() {
 
   return (
     <>
-      <DialRoot position="bottom-right" />
       <AnimatePresence mode="wait">
       {phase === "intro" ? (
         <motion.div
