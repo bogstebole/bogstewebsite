@@ -18,6 +18,7 @@ import { ContentSnareDetail } from "@/components/ui/content-snare-detail";
 import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
 import { WritingsSection } from "@/components/elements/writings-section";
 import { PlaygroundSection } from "@/components/elements/playground-section";
+import { HoverProvider } from "@/components/ui/hover-context";
 import type { SubstackPost } from "@/lib/substack";
 
 
@@ -205,8 +206,9 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const blurTransition = { type: "tween" as const, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 1.04, filter: "blur(12px)" }}
+    <HoverProvider>
+      <motion.div
+        initial={{ opacity: 0, scale: 1.04, filter: "blur(12px)" }}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
       transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
       style={{
@@ -470,6 +472,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
         />
       )}
 
-    </motion.div>
+      </motion.div>
+    </HoverProvider>
   );
 }

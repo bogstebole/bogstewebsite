@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useHover } from "@/components/ui/hover-context";
 
 type Props = {
   title: string;
@@ -11,24 +12,18 @@ type Props = {
 };
 
 export function SubstackCard({ title, date, time, href }: Props) {
-  const [hovered, setHovered] = useState(false);
-  const [pressed, setPressed] = useState(false);
+  const { hoveredKey, setHoveredKey } = useHover();
 
-  const targetScale = pressed ? 0.96 : hovered ? 0.98 : 1;
+  const isHovered = hoveredKey === "writing";
+  const isDimmed = hoveredKey !== null && hoveredKey !== "writing";
 
   return (
     <motion.a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => { setHovered(false); setPressed(false); }}
-      onMouseDown={() => setPressed(true)}
-      onMouseUp={() => setPressed(false)}
-      onTouchStart={() => setPressed(true)}
-      onTouchEnd={() => setPressed(false)}
-      onTouchCancel={() => setPressed(false)}
-      animate={{ scale: targetScale }}
+      onMouseEnter={() => setHoveredKey("writing")}
+      onMouseLeave={() => { setHoveredKey(null); }}
       transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
       style={{
         display: "flex",
@@ -38,6 +33,8 @@ export function SubstackCard({ title, date, time, href }: Props) {
         textDecoration: "none",
         cursor: "pointer",
         transformOrigin: "50% 50%",
+        opacity: isDimmed ? 0.5 : 1,
+        transition: "opacity 0.2s ease",
       }}
     >
       <div

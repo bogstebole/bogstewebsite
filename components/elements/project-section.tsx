@@ -6,6 +6,7 @@ import { ProjectEntry } from "@/components/elements/project-entry";
 import { EnvelopeWidget } from "@/components/elements/EnvelopeWidget";
 import glassStyles from "@/components/ui/GlassButton.module.css";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { useHover } from "@/components/ui/hover-context";
 
 interface ProjectSectionProps {
   primaryColor: string;
@@ -99,7 +100,7 @@ function SocialIconButton({
 }
 
 export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, style }: ProjectSectionProps) {
-  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const { hoveredKey, setHoveredKey } = useHover();
   const { isMobile } = useBreakpoint();
 
   const entryProps = (key: string) => ({

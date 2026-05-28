@@ -116,6 +116,18 @@ export interface InteractionZone {
   label: string;
 }
 
+export interface InlineChatFeatureStatus {
+  works: string[];
+  notWorking: string[];
+  soon: string[];
+}
+
+export const INLINE_CHAT_FEATURE_STATUS: InlineChatFeatureStatus = {
+  works: ["Send a message", "Attach a single image", "Multiline input"],
+  notWorking: ["Copy", "Edit", "Other dropdown actions"],
+  soon: ["Customization", "Threads", "Voice"],
+};
+
 /** Shuffled cringy motivational messages revealed inside the envelope widget */
 export const ENVELOPE_MESSAGES: string[] = [
   "You have a great fuckin' day...",

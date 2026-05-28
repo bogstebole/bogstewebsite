@@ -14,7 +14,7 @@ const ADD_CARDS = [
 interface AddCardsOverlayProps {
   isAddOpen: boolean;
   setIsAddOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onAdd?: () => void;
+  onAdd?: (label?: string) => void;
   showInlineGlyph: boolean;
   showButtons: boolean;
   ac: InlineAnimConfig | undefined;
@@ -88,7 +88,7 @@ export function AddCardsOverlay({
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsAddOpen(false);
-                      onAdd?.();
+                      onAdd?.(label);
                     }}
                     aria-label={label}
                   >

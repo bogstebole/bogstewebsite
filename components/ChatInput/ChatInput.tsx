@@ -17,8 +17,9 @@ function placeCursorAtEnd(el: HTMLElement) {
   sel?.addRange(range);
 }
 import { AnimatePresence, LayoutGroup, animate, motion, useAnimationControls, type Transition } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { Button } from "@/components/Button/Button";
+import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { MorphGlyph } from "./MorphGlyph";
 import { TrailingActionButton } from "./TrailingActionButton";
 import { HoverActionsRow } from "./HoverActionsRow";
@@ -175,6 +176,17 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
     const animCfgRef = useRef(animationConfig);
     animCfgRef.current = animationConfig;
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [attachedImage, setAttachedImage] = useState<string | null>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        setAttachedImage(url);
+      }
+    };
+
     useImperativeHandle(ref, () => ({
       focus: () => editorRef.current?.focus(),
       setValue: (v) => {
@@ -187,7 +199,9 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
 
     const isGlass = state === "responding" || state === "resting";
     const isReadOnly = isGlass;
-    const showSend = state === "typing" && value.trim().length > 0;
+    const hasContent = value.trim().length > 0 || !!attachedImage;
+    const isInputting = state === "typing" || state === "idle";
+    const showSend = isInputting && hasContent;
     const showStop = state === "responding";
     const isRestingHovered = state === "resting" && hovered;
     const showActions = isRestingHovered;
@@ -366,11 +380,11 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key === "Enter") {
           e.preventDefault();
-          if (!e.shiftKey && value.trim().length > 0) onSubmit(value);
+          if (!e.shiftKey && (value.trim().length > 0 || !!attachedImage)) onSubmit(value);
           else if (e.shiftKey) document.execCommand("insertText", false, "\n");
         }
       },
-      [value, onSubmit]
+      [value, onSubmit, attachedImage]
     );
 
     useEffect(() => {
@@ -404,37 +418,73 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
               filter: { type: "tween", duration: 0.2, ease: "easeOut" },
             }}
           >
-            <motion.div
-              className={`${styles.surface} ${isGlass ? styles.glass : ""} ${isRestingHovered ? styles.hovered : ""} ${pulsing ? styles.pulsed : ""}`}
-              style={{
-                alignItems: "center",
-                flexWrap: expandedMode ? "wrap" : "nowrap",
-                justifyContent: expandedMode ? "flex-end" : "flex-start",
-              }}
-              transition={bubbleSpring}
-              animate={surfaceControls}
-              onClick={() => editorRef.current?.focus()}
-            >
-              <span
-                ref={measureSpanRef}
-                aria-hidden="true"
+              <motion.div
+                className={`${styles.surface} ${isGlass ? styles.glass : ""} ${isRestingHovered ? styles.hovered : ""} ${pulsing ? styles.pulsed : ""}`}
                 style={{
-                  position: "absolute",
-                  visibility: "hidden",
-                  pointerEvents: "none",
-                  whiteSpace: "nowrap",
-                  font: "inherit",
-                  letterSpacing: "inherit",
+                  alignItems: attachedImage ? "stretch" : "center",
+                  flexDirection: attachedImage ? "column" : "row",
+                  flexWrap: (!attachedImage && expandedMode) ? "wrap" : "nowrap",
+                  justifyContent: (!attachedImage && expandedMode) ? "flex-end" : "flex-start",
                 }}
+                transition={bubbleSpring}
+                animate={surfaceControls}
+                onClick={() => editorRef.current?.focus()}
               >
-                {value}
-              </span>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/png, image/jpeg"
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
 
-              <div
-                ref={editorClipRef}
-                className={styles.editorClip}
-                style={{ flexBasis: expandedMode ? "100%" : undefined }}
-              >
+                {attachedImage && (
+                  <div style={{ flexShrink: 0, height: 80, backgroundColor: isGlass ? 'transparent' : '#FFFFFF', borderRadius: '16px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: 8, marginBottom: 8 }}>
+                    <div className={styles.attachedImgWrap}>
+                      <div className={styles.attachedImgBg} style={{ backgroundImage: `url(${attachedImage})` }} />
+                      {!isGlass && (
+                        <div className={styles.attachedImgOverlay}>
+                          <GlassButton 
+                            size="s" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setAttachedImage(null);
+                              if (fileInputRef.current) {
+                                fileInputRef.current.value = "";
+                              }
+                            }}
+                            aria-label="Remove attached image"
+                            style={{ padding: 0, width: 28, height: 28, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                          >
+                            <X size={14} />
+                          </GlassButton>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: "flex", flexDirection: "row", alignItems: "center", flexWrap: expandedMode ? "wrap" : "nowrap", justifyContent: expandedMode ? "flex-end" : "flex-start", width: "100%", minWidth: 0, flex: 1 }}>
+                  <span
+                    ref={measureSpanRef}
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      visibility: "hidden",
+                      pointerEvents: "none",
+                      whiteSpace: "nowrap",
+                      font: "inherit",
+                      letterSpacing: "inherit",
+                    }}
+                  >
+                    {value}
+                  </span>
+
+                  <div
+                    ref={editorClipRef}
+                    className={styles.editorClip}
+                    style={{ flexBasis: expandedMode ? "100%" : undefined }}
+                  >
                 <motion.div
                   ref={editorWrapRef}
                   className={`${styles.editorWrap} ${isGlass ? styles.editorWrapGlass : ""}`}
@@ -456,7 +506,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                     role="textbox"
                     aria-multiline="true"
                     aria-label={placeholder}
-                    data-placeholder={placeholder}
+                    data-placeholder={isReadOnly ? "" : placeholder}
                   />
                 </motion.div>
               </div>
@@ -567,6 +617,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                   )}
                 </AnimatePresence>
               </div>
+              </div>
             </motion.div>
 
             <TrailingActionButton
@@ -584,7 +635,12 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
           <AddCardsOverlay
             isAddOpen={isAddOpen}
             setIsAddOpen={setIsAddOpen}
-            onAdd={onAdd}
+            onAdd={(label) => {
+              if (!label || label === "Add") {
+                fileInputRef.current?.click();
+              }
+              onAdd?.();
+            }}
             showInlineGlyph={showInlineGlyph}
             showButtons={showButtons}
             ac={ac}
