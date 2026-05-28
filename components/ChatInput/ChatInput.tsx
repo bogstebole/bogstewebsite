@@ -199,7 +199,9 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
 
     const isGlass = state === "responding" || state === "resting";
     const isReadOnly = isGlass;
-    const showSend = state === "typing" && value.trim().length > 0;
+    const hasContent = value.trim().length > 0 || !!attachedImage;
+    const isInputting = state === "typing" || state === "idle";
+    const showSend = isInputting && hasContent;
     const showStop = state === "responding";
     const isRestingHovered = state === "resting" && hovered;
     const showActions = isRestingHovered;
@@ -378,11 +380,11 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key === "Enter") {
           e.preventDefault();
-          if (!e.shiftKey && value.trim().length > 0) onSubmit(value);
+          if (!e.shiftKey && (value.trim().length > 0 || !!attachedImage)) onSubmit(value);
           else if (e.shiftKey) document.execCommand("insertText", false, "\n");
         }
       },
-      [value, onSubmit]
+      [value, onSubmit, attachedImage]
     );
 
     useEffect(() => {
@@ -504,7 +506,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                     role="textbox"
                     aria-multiline="true"
                     aria-label={placeholder}
-                    data-placeholder={placeholder}
+                    data-placeholder={isReadOnly ? "" : placeholder}
                   />
                 </motion.div>
               </div>

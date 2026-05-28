@@ -81,9 +81,9 @@ export function InlineChatBanner({ status }: InlineChatBannerProps) {
         }}
       >
         <Column label="Works" items={status.works} />
-        <Divider />
+
         <Column label="Not working" items={status.notWorking} />
-        <Divider />
+
         <Column label="Soon" items={status.soon} />
       </div>
     </div>

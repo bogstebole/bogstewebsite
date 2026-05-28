@@ -134,7 +134,6 @@ export default function Page() {
 
   const handleSubmit = (id: string, value: string) => {
     const trimmed = value.trim();
-    if (!trimmed) return;
     updateTurn(id, { user: trimmed, state: "responding" });
 
     setTimeout(() => {

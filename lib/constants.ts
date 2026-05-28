@@ -125,7 +125,7 @@ export interface InlineChatFeatureStatus {
 export const INLINE_CHAT_FEATURE_STATUS: InlineChatFeatureStatus = {
   works: ["Send a message", "Attach a single image", "Multiline input"],
   notWorking: ["Copy", "Edit", "Other dropdown actions"],
-  soon: ["Chat bubble customization", "Threads", "Voice"],
+  soon: ["Customization", "Threads", "Voice"],
 };
 
 /** Shuffled cringy motivational messages revealed inside the envelope widget */
