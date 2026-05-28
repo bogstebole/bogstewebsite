@@ -438,31 +438,43 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                   onChange={handleFileChange}
                 />
 
-                {attachedImage && (
-                  <div style={{ flexShrink: 0, height: 80, backgroundColor: isGlass ? 'transparent' : '#FFFFFF', borderRadius: '16px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: 8, marginBottom: 8 }}>
-                    <div className={styles.attachedImgWrap}>
-                      <div className={styles.attachedImgBg} style={{ backgroundImage: `url(${attachedImage})` }} />
-                      {!isGlass && (
-                        <div className={styles.attachedImgOverlay}>
-                          <GlassButton 
-                            size="s" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setAttachedImage(null);
-                              if (fileInputRef.current) {
-                                fileInputRef.current.value = "";
-                              }
-                            }}
-                            aria-label="Remove attached image"
-                            style={{ padding: 0, width: 28, height: 28, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                          >
-                            <X size={14} />
-                          </GlassButton>
+                <AnimatePresence>
+                  {attachedImage && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+                      style={{ overflow: "hidden", width: "100%", flexShrink: 0 }}
+                    >
+                      <div style={{ height: 80, backgroundColor: isGlass ? 'transparent' : '#FFFFFF', borderRadius: '16px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: 8, marginBottom: 8 }}>
+                        <div className={styles.attachedImgWrap}>
+                          <div className={styles.attachedImgBg} style={{ backgroundImage: `url(${attachedImage})` }} />
+                          {!isGlass && (
+                            <div className={styles.attachedImgOverlay}>
+                              <GlassButton 
+                                size="s" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setAttachedImage(null);
+                                  if (fileInputRef.current) {
+                                    fileInputRef.current.value = "";
+                                  }
+                                }}
+                                aria-label="Remove attached image"
+                                style={{ padding: 0, width: 28, height: 28, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                              >
+                                <X size={14} />
+                              </GlassButton>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+
 
                 <div style={{ display: "flex", flexDirection: "row", alignItems: "center", flexWrap: expandedMode ? "wrap" : "nowrap", justifyContent: expandedMode ? "flex-end" : "flex-start", width: "100%", minWidth: 0, flex: 1 }}>
                   <span

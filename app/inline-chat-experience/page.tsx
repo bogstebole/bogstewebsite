@@ -124,19 +124,6 @@ export default function Page() {
     };
   }, []);
 
-  // Scroll to new empty input after AI response finishes
-  useEffect(() => {
-    if (turns.length <= 1) return;
-    const last = turns[turns.length - 1];
-    if (last.state !== "idle") return;
-    const el = document.getElementById(`turn-${last.id}`);
-    const feed = feedRef.current;
-    const header = document.querySelector(".chatHeader") as HTMLElement | null;
-    if (el && feed) {
-      const headerHeight = header ? header.offsetHeight : 80;
-      feed.scrollTo({ top: el.offsetTop - headerHeight - 16, behavior: "smooth" });
-    }
-  }, [turns.length]);
 
   const updateTurn = (id: string, patch: Partial<Turn>) => {
     setTurns((t) => t.map((turn) => (turn.id === id ? { ...turn, ...patch } : turn)));
