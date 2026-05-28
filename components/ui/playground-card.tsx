@@ -3,28 +3,23 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useHover } from "@/components/ui/hover-context";
 
 export function PlaygroundCard() {
   const router = useRouter();
-  const [hovered, setHovered] = useState(false);
-  const [pressed, setPressed] = useState(false);
+  const { hoveredKey, setHoveredKey } = useHover();
 
-  const targetScale = pressed ? 0.96 : hovered ? 0.98 : 1;
+  const isHovered = hoveredKey === "playground";
+  const isDimmed = hoveredKey !== null && hoveredKey !== "playground";
 
   return (
     <motion.div
       role="button"
       tabIndex={0}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => { setHovered(false); setPressed(false); }}
-      onMouseDown={() => setPressed(true)}
-      onMouseUp={() => setPressed(false)}
-      onTouchStart={() => setPressed(true)}
-      onTouchEnd={() => setPressed(false)}
-      onTouchCancel={() => setPressed(false)}
+      onMouseEnter={() => setHoveredKey("playground")}
+      onMouseLeave={() => { setHoveredKey(null); }}
       onClick={() => router.push("/inline-chat-experience")}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push("/inline-chat-experience"); }}
-      animate={{ scale: targetScale }}
       transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
       style={{
         display: "flex",
@@ -34,6 +29,8 @@ export function PlaygroundCard() {
         textDecoration: "none",
         cursor: "pointer",
         transformOrigin: "50% 50%",
+        opacity: isDimmed ? 0.5 : 1,
+        transition: "opacity 0.2s ease",
       }}
     >
       <div
