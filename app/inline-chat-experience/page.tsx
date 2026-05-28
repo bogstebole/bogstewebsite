@@ -10,6 +10,7 @@ import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import {
   ChatInput,
   type ChatInputState,
+  type ChatInputHandle,
   defaultInlineAnimConfig,
 } from "@/components/ChatInput/ChatInput";
 import { InlineChatBanner } from "@/components/ui/InlineChatBanner";
@@ -38,8 +39,13 @@ interface Turn {
   state: ChatInputState;
 }
 
+const randomId = () =>
+  typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2) + Date.now().toString(36);
+
 const newTurn = (): Turn => ({
-  id: crypto.randomUUID(),
+  id: randomId(),
   user: "",
   ai: "",
   state: "idle",
@@ -108,6 +114,7 @@ export default function Page() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const streamingRef = useRef<number | null>(null);
   const turnCountRef = useRef(0);
+  const activeInputRef = useRef<ChatInputHandle>(null);
   const animConfig = defaultInlineAnimConfig;
 
   useEffect(() => {
@@ -253,6 +260,7 @@ export default function Page() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
+          onAnimationComplete={() => activeInputRef.current?.focus()}
         >
           <div className="topBlur" />
           <header className="chatHeader">
@@ -291,6 +299,7 @@ export default function Page() {
                   >
                     <div className="userRow">
                       <ChatInput
+                        ref={isActiveInput ? activeInputRef : null}
                         state={turn.state}
                         value={turn.user}
                         onChange={(v) => handleChange(turn.id, v)}
