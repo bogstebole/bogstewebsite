@@ -24,7 +24,7 @@ export function WritingsSection({ post }: Props) {
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        gap: 24,
+        gap: 16,
         padding: "0 24px",
         marginTop: 32,
         width: "100%",
