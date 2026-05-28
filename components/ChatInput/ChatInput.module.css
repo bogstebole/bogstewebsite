@@ -243,6 +243,7 @@
   pointer-events: none;
 }
 
+
 /* In glass mode the text is inked, not muted, and the caret is hidden */
 .surface.glass .editor {
   color: #111;
