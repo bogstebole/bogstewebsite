@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const GRAVITY = 1.35;
@@ -34,6 +35,7 @@ interface MouseState {
 }
 
 export function ThemeToggle() {
+  const pathname = usePathname();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hitZoneRef = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
@@ -48,6 +50,8 @@ export function ThemeToggle() {
   const lastTriggerTimeRef = useRef(0);
 
   useEffect(() => {
+    if (pathname === "/inline-chat-experience") return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -269,7 +273,9 @@ export function ThemeToggle() {
       hitZone?.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("resize", onResize);
     };
-  }, []);
+  }, [pathname]);
+
+  if (pathname === "/inline-chat-experience") return null;
 
   return (
     <>
