@@ -156,6 +156,10 @@
   .chatHeader {
     padding: 16px;
   }
+
+  .bottomBlur {
+    height: 80px;
+  }
 }
 
 .chatHeaderLeft {

@@ -115,6 +115,7 @@ export default function Page() {
   const streamingRef = useRef<number | null>(null);
   const turnCountRef = useRef(0);
   const activeInputRef = useRef<ChatInputHandle>(null);
+  const feedRef = useRef<HTMLDivElement>(null);
   const animConfig = defaultInlineAnimConfig;
 
   useEffect(() => {
@@ -122,6 +123,20 @@ export default function Page() {
       if (streamingRef.current) clearTimeout(streamingRef.current);
     };
   }, []);
+
+  // Scroll to new empty input after AI response finishes
+  useEffect(() => {
+    if (turns.length <= 1) return;
+    const last = turns[turns.length - 1];
+    if (last.state !== "idle") return;
+    const el = document.getElementById(`turn-${last.id}`);
+    const feed = feedRef.current;
+    const header = document.querySelector(".chatHeader") as HTMLElement | null;
+    if (el && feed) {
+      const headerHeight = header ? header.offsetHeight : 80;
+      feed.scrollTo({ top: el.offsetTop - headerHeight - 16, behavior: "smooth" });
+    }
+  }, [turns.length]);
 
   const updateTurn = (id: string, patch: Partial<Turn>) => {
     setTurns((t) => t.map((turn) => (turn.id === id ? { ...turn, ...patch } : turn)));
@@ -234,6 +249,30 @@ export default function Page() {
               </div>
             </div>
 
+            <motion.div variants={introItemVariants} className={introStyles.mobileNotice}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 8, paddingInline: 4, paddingBottom: 4 }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, marginTop: 1 }}>
+                  <circle cx="8" cy="8" r="7" stroke="#111111" strokeWidth="1.2" />
+                  <path d="M8 7v4" stroke="#111111" strokeWidth="1.2" strokeLinecap="round" />
+                  <circle cx="8" cy="5" r="0.8" fill="#111111" />
+                </svg>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <span style={{ fontFamily: "var(--font-jetbrains-mono), 'JetBrains Mono', monospace", fontSize: 12, lineHeight: "16px", letterSpacing: "-0.02em", color: "#111111" }}>
+                    Desktop only for now
+                  </span>
+                  <span style={{ fontFamily: "var(--font-geist-sans), 'Geist', system-ui, sans-serif", fontSize: 12, lineHeight: "18px", color: "rgba(17,17,17,0.7)" }}>
+                    Inline chat experience is built for desktop. Mobile support is on the way, check back soon.
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div variants={introItemVariants} className={introStyles.mobileButton}>
+              <Link href="/">
+                <GlassButton size="s">Back to home</GlassButton>
+              </Link>
+            </motion.div>
+
             <motion.div variants={introItemVariants} className={introStyles.bannerWrapper}>
               <InlineChatBanner status={INLINE_CHAT_FEATURE_STATUS} />
             </motion.div>
@@ -278,7 +317,7 @@ export default function Page() {
               <Share size={16} />
             </button>
           </header>
-          <div className="chatFeed">
+          <div className="chatFeed" ref={feedRef}>
             <AnimatePresence>
               {turns.map((turn, i) => {
                 const isActiveInput =

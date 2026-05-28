@@ -107,13 +107,38 @@
   gap: 16px;
 }
 
+.mobileNotice {
+  display: none;
+}
+
+.mobileButton {
+  display: none;
+}
+
 @media (max-width: 540px) {
   .bannerWrapper {
-    order: 2;
+    display: none;
   }
 
   .buttonWrapper {
-    order: 1;
+    display: none;
+  }
+
+  .mobileNotice {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 24px;
+    padding: 12px 8px 8px;
+    width: 100%;
+    max-width: 540px;
+    box-sizing: border-box;
+  }
+
+  .mobileButton {
+    display: flex;
+    justify-content: center;
   }
 }
 
