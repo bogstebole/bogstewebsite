@@ -421,10 +421,9 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
               <motion.div
                 className={`${styles.surface} ${isGlass ? styles.glass : ""} ${isRestingHovered ? styles.hovered : ""} ${pulsing ? styles.pulsed : ""}`}
                 style={{
-                  alignItems: attachedImage ? "stretch" : "center",
-                  flexDirection: attachedImage ? "column" : "row",
-                  flexWrap: (!attachedImage && expandedMode) ? "wrap" : "nowrap",
-                  justifyContent: (!attachedImage && expandedMode) ? "flex-end" : "flex-start",
+                  alignItems: "stretch",
+                  flexDirection: "column",
+                  justifyContent: "center",
                 }}
                 transition={bubbleSpring}
                 animate={surfaceControls}
@@ -441,11 +440,15 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                 <AnimatePresence>
                   {attachedImage && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
-                      style={{ overflow: "hidden", width: "100%", flexShrink: 0 }}
+                      initial={{ opacity: 0, scale: 0.5, height: 0 }}
+                      animate={{ opacity: 1, scale: 1, height: 88 }}
+                      exit={{ opacity: 0, scale: 0.5, height: 0 }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 300, 
+                        damping: 28 
+                      }}
+                      style={{ overflow: "hidden", width: "100%", flexShrink: 0, transformOrigin: "center" }}
                     >
                       <div style={{ height: 80, backgroundColor: isGlass ? 'transparent' : '#FFFFFF', borderRadius: '16px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: 8, marginBottom: 8 }}>
                         <div className={styles.attachedImgWrap}>

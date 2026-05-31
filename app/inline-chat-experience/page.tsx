@@ -14,6 +14,7 @@ import {
   defaultInlineAnimConfig,
 } from "@/components/ChatInput/ChatInput";
 import { InlineChatBanner } from "@/components/ui/InlineChatBanner";
+import { TextHighlighter } from "@/components/ui/text-highlighter";
 import { INLINE_CHAT_FEATURE_STATUS } from "@/lib/constants";
 import introStyles from "./IntroChatLanding.module.css";
 import "./ChatExperience.css";
@@ -37,6 +38,11 @@ interface Turn {
   user: string;
   ai: string;
   state: ChatInputState;
+}
+
+interface Highlight {
+  turnId: string;
+  text: string;
 }
 
 const randomId = () =>
@@ -112,6 +118,8 @@ export default function Page() {
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [turns, setTurns] = useState<Turn[]>([]);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [showHighlightsModal, setShowHighlightsModal] = useState(false);
   const streamingRef = useRef<number | null>(null);
   const turnCountRef = useRef(0);
   const activeInputRef = useRef<ChatInputHandle>(null);
@@ -296,13 +304,23 @@ export default function Page() {
               </Link>
               <span className="chatHeaderTitle">inline chat experience</span>
             </div>
-            <button 
-              className="secondaryBtn iconBtn" 
-              onClick={() => navigator.share?.({ title: "Inline chat experience", url: window.location.href })}
-              aria-label="Share"
-            >
-              <Share size={16} />
-            </button>
+            <div style={{ display: "flex", gap: "8px" }}>
+              {highlights.length > 0 && (
+                <button 
+                  className="secondaryBtn" 
+                  onClick={() => setShowHighlightsModal(true)}
+                >
+                  Highlights ({highlights.length})
+                </button>
+              )}
+              <button 
+                className="secondaryBtn iconBtn" 
+                onClick={() => navigator.share?.({ title: "Inline chat experience", url: window.location.href })}
+                aria-label="Share"
+              >
+                <Share size={16} />
+              </button>
+            </div>
           </header>
           <div className="chatFeed" ref={feedRef}>
             <AnimatePresence>
@@ -338,7 +356,18 @@ export default function Page() {
                         placeholder="Ask me about particle physics…"
                       />
                     </div>
-                    {turn.ai && <p className="aiText">{turn.ai}</p>}
+                    {turn.ai && (
+                      <p className="aiText">
+                        <TextHighlighter 
+                          text={turn.ai} 
+                          onHighlightComplete={(text) => {
+                            if (text.trim().length > 0) {
+                              setHighlights(prev => [...prev, { turnId: turn.id, text: text.trim() }]);
+                            }
+                          }} 
+                        />
+                      </p>
+                    )}
                   </motion.article>
                 );
               })}
@@ -347,7 +376,77 @@ export default function Page() {
           <div className="bottomBlur" />
         </motion.div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showHighlightsModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              backdropFilter: "blur(4px)",
+              zIndex: 100,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "24px"
+            }}
+            onClick={() => setShowHighlightsModal(false)}
+          >
+            <motion.div
+              initial={{ y: 20, scale: 0.95 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 20, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundColor: "var(--color-bg-page, #fff)",
+                borderRadius: "24px",
+                padding: "32px",
+                width: "100%",
+                maxWidth: "600px",
+                maxHeight: "80vh",
+                overflowY: "auto",
+                boxShadow: "0 24px 48px rgba(0,0,0,0.1)",
+                border: "1px solid rgba(0,0,0,0.05)"
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                <h2 style={{ margin: 0, fontFamily: "var(--font-geist-mono), monospace", fontSize: "16px", color: "var(--color-text, #111)" }}>Highlights</h2>
+                <button className="secondaryBtn iconBtn" onClick={() => setShowHighlightsModal(false)}>
+                  Close
+                </button>
+              </div>
+              
+              {Array.from(new Set(highlights.map(h => h.turnId))).map((turnId, index) => (
+                <div key={turnId} style={{ marginBottom: "24px" }}>
+                  <h3 style={{ fontSize: "12px", color: "rgba(17,17,17,0.5)", marginBottom: "8px", fontFamily: "var(--font-geist-mono), monospace" }}>
+                    Paragraph {index + 1}
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {highlights.filter(h => h.turnId === turnId).map((h, i) => (
+                      <div key={i} style={{ 
+                        padding: "12px 16px", 
+                        backgroundColor: "rgba(250, 192, 246, 0.2)", 
+                        borderRadius: "12px",
+                        fontSize: "14px",
+                        fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
+                        lineHeight: 1.5,
+                        color: "var(--color-text, #111)"
+                      }}>
+                        {h.text}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
