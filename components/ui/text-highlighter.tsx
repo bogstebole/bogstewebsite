@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 
 const SKEW_ANGLE = -20;
 const TAN_ANGLE = Math.tan((SKEW_ANGLE * Math.PI) / 180);
-const MARKER_COLOR = "rgba(250, 192, 246, 1)"; // Pink marker color
+const MARKER_COLOR = "rgba(204, 255, 0, 0.7)"; // #CCFF00 at 70% opacity
 
 const markerSvg = `<svg width="34" height="20" viewBox="0 0 34 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.383 7.767L25.309 1.111C27.347 0.259 29.69 1.22 30.542 3.259L32.085 6.949C32.937 8.987 31.975 11.33 29.937 12.182L14.011 18.839L5.353 17.813L3.251 18.692L1.228 15.821L4.03 14.65L9.383 7.767Z" fill="#FFFFFF" /><path d="M4.03 14.65L9.383 7.767L25.309 1.111C27.347 0.259 29.69 1.22 30.542 3.259L32.085 6.949C32.937 8.987 31.975 11.33 29.937 12.182L14.011 18.839L5.353 17.813M9.383 7.767L14.011 18.839M4.03 14.65L1.228 15.821L3.251 18.692L5.353 17.813M4.03 14.65L5.353 17.813" stroke="#111111" stroke-width="1.6" /></svg>`;
 const cursorUrl = `url('data:image/svg+xml;utf8,${encodeURIComponent(markerSvg)}') 2 15, auto`;

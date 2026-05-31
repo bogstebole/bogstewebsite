@@ -446,7 +446,7 @@ export default function Page() {
                         }}
                         style={{ 
                           padding: "12px 16px", 
-                          backgroundColor: "rgba(250, 192, 246, 0.2)", 
+                          backgroundColor: "rgba(204, 255, 0, 0.2)", 
                           borderRadius: "12px",
                           fontSize: "14px",
                           fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
@@ -455,8 +455,8 @@ export default function Page() {
                           cursor: "pointer",
                           transition: "background-color 0.2s"
                         }}
-                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = "rgba(250, 192, 246, 0.4)"}
-                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = "rgba(250, 192, 246, 0.2)"}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = "rgba(204, 255, 0, 0.4)"}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = "rgba(204, 255, 0, 0.2)"}
                       >
                         {h.text}
                       </div>
