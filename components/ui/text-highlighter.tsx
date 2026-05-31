@@ -128,6 +128,18 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
+      {/* Proximity Hitbox: proširuje zonu "hvatanja" miša za 20px bez pomeranja layouta */}
+      <div 
+        style={{
+          position: "absolute",
+          top: -20,
+          left: -20,
+          right: -20,
+          bottom: -20,
+          zIndex: 0,
+        }}
+      />
+
       {/* Underlying text */}
       <span style={{ position: "relative", zIndex: 1 }}>
         {tokens.map((token, i) => (
