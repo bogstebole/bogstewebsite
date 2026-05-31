@@ -21,6 +21,7 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
   const [paths, setPaths] = useState<PathData[]>([]);
   const [currentPath, setCurrentPath] = useState<PathData | null>(null);
   const [isHovering, setIsHovering] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   // Split text by words and keep spaces separate so we can render them properly
@@ -48,6 +49,7 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
     // Only left click / main touch
     if (e.button !== 0 && e.pointerType === "mouse") return;
     
+    setIsDrawing(true);
     const target = e.currentTarget as HTMLDivElement;
     target.setPointerCapture(e.pointerId);
 
@@ -88,6 +90,7 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    setIsDrawing(false);
     if (!currentPath) return;
     const target = e.currentTarget as HTMLDivElement;
     target.releasePointerCapture(e.pointerId);
@@ -192,9 +195,23 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
       <AnimatePresence>
         {isHovering && (
           <motion.div
-            initial={{ scale: 0.4, opacity: 0 }}
-            animate={{ scale: 0.8, opacity: 1 }}
-            exit={{ scale: 0.4, opacity: 0 }}
+            initial={{ 
+              scale: 0.4, 
+              opacity: 0,
+              filter: "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0))" 
+            }}
+            animate={{ 
+              scale: isDrawing ? 0.75 : 0.8, 
+              opacity: 1,
+              filter: isDrawing 
+                ? "drop-shadow(0px 1px 0px rgba(17, 17, 17, 0.2))" 
+                : "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0.2))"
+            }}
+            exit={{ 
+              scale: 0.4, 
+              opacity: 0,
+              filter: "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0))"
+            }}
             transition={{
               type: "spring",
               stiffness: 300,
