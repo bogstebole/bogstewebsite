@@ -93,11 +93,14 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
     setPaths((prev) => [...prev, currentPath]);
     
     if (onHighlightComplete && currentPath.highlightedIndices.size > 0) {
-      // Reconstruct highlighted text
+      // Reconstruct highlighted text by filling in any gaps (e.g., spaces missed by fast mouse movement)
       const sortedIndices = Array.from(currentPath.highlightedIndices).sort((a, b) => a - b);
+      const minIdx = sortedIndices[0];
+      const maxIdx = sortedIndices[sortedIndices.length - 1];
+      
       let highlightedText = "";
-      for (const idx of sortedIndices) {
-        highlightedText += tokens[idx];
+      for (let i = minIdx; i <= maxIdx; i++) {
+        highlightedText += tokens[i];
       }
       onHighlightComplete(highlightedText.trim());
     }

@@ -428,15 +428,36 @@ export default function Page() {
                   </h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     {highlights.filter(h => h.turnId === turnId).map((h, i) => (
-                      <div key={i} style={{ 
-                        padding: "12px 16px", 
-                        backgroundColor: "rgba(250, 192, 246, 0.2)", 
-                        borderRadius: "12px",
-                        fontSize: "14px",
-                        fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
-                        lineHeight: 1.5,
-                        color: "var(--color-text, #111)"
-                      }}>
+                      <div 
+                        key={i} 
+                        onClick={() => {
+                          setShowHighlightsModal(false);
+                          setTimeout(() => {
+                            const el = document.getElementById(`turn-${turnId}`);
+                            const feed = document.querySelector('.chatFeed');
+                            const header = document.querySelector('.chatHeader');
+                            if (el && feed) {
+                              const headerHeight = header ? (header as HTMLElement).offsetHeight : 80;
+                              feed.scrollTo({ top: el.offsetTop - headerHeight - 16, behavior: "smooth" });
+                            } else {
+                              el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                            }
+                          }, 100);
+                        }}
+                        style={{ 
+                          padding: "12px 16px", 
+                          backgroundColor: "rgba(250, 192, 246, 0.2)", 
+                          borderRadius: "12px",
+                          fontSize: "14px",
+                          fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
+                          lineHeight: 1.5,
+                          color: "var(--color-text, #111)",
+                          cursor: "pointer",
+                          transition: "background-color 0.2s"
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = "rgba(250, 192, 246, 0.4)"}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = "rgba(250, 192, 246, 0.2)"}
+                      >
                         {h.text}
                       </div>
                     ))}
