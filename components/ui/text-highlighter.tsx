@@ -208,10 +208,10 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
                 : "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0.2))"
             }}
             exit={{ 
-              scale: 0.4, 
+              scale: 0.8, // Zadržavamo veličinu da se ne bi skupljao
               opacity: 0,
               filter: "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0))",
-              transition: { duration: 0 } // Uklanja animaciju pri izlasku da se ne bi videla oba kursora
+              transition: { duration: 0.15, ease: "easeOut" } // Brzi fade-out stvara efekat "crossfade-a" sa običnim kursorom
             }}
             transition={{
               type: "spring",
