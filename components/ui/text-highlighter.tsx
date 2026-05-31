@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SKEW_ANGLE = -20;
 const TAN_ANGLE = Math.tan((SKEW_ANGLE * Math.PI) / 180);
 const MARKER_COLOR = "rgba(204, 255, 0, 0.7)"; // #CCFF00 at 70% opacity
-
-const markerSvg = `<svg width="34" height="20" viewBox="0 0 34 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.383 7.767L25.309 1.111C27.347 0.259 29.69 1.22 30.542 3.259L32.085 6.949C32.937 8.987 31.975 11.33 29.937 12.182L14.011 18.839L5.353 17.813L3.251 18.692L1.228 15.821L4.03 14.65L9.383 7.767Z" fill="#FFFFFF" /><path d="M4.03 14.65L9.383 7.767L25.309 1.111C27.347 0.259 29.69 1.22 30.542 3.259L32.085 6.949C32.937 8.987 31.975 11.33 29.937 12.182L14.011 18.839L5.353 17.813M9.383 7.767L14.011 18.839M4.03 14.65L1.228 15.821L3.251 18.692L5.353 17.813M4.03 14.65L5.353 17.813" stroke="#111111" stroke-width="1.6" /></svg>`;
-const cursorUrl = `url('data:image/svg+xml;utf8,${encodeURIComponent(markerSvg)}') 2 15, auto`;
 
 interface PathData {
   id: string;
@@ -22,6 +20,8 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
   const containerRef = useRef<HTMLDivElement>(null);
   const [paths, setPaths] = useState<PathData[]>([]);
   const [currentPath, setCurrentPath] = useState<PathData | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   // Split text by words and keep spaces separate so we can render them properly
   const tokens = text.split(/(\s+)/);
@@ -66,6 +66,8 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+
     if (!currentPath) return;
 
     const rect = containerRef.current!.getBoundingClientRect();
@@ -113,12 +115,14 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
       ref={containerRef}
       style={{
         position: "relative",
-        cursor: cursorUrl,
+        cursor: "none",
         userSelect: "none",
         WebkitUserSelect: "none",
         touchAction: "none", // Prevent scrolling while highlighting on touch devices
         display: "block", // to wrap the text tightly
       }}
+      onPointerEnter={() => setIsHovering(true)}
+      onPointerLeave={() => setIsHovering(false)}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -171,6 +175,34 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
           )}
         </g>
       </svg>
+
+      {/* Custom Marker Cursor */}
+      <AnimatePresence>
+        {isHovering && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 25,
+            }}
+            style={{
+              position: "fixed",
+              top: mousePos.y - 15, // offset hotspot y
+              left: mousePos.x - 2, // offset hotspot x
+              pointerEvents: "none",
+              zIndex: 9999,
+            }}
+          >
+            <svg width="34" height="20" viewBox="0 0 34 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9.383 7.767L25.309 1.111C27.347 0.259 29.69 1.22 30.542 3.259L32.085 6.949C32.937 8.987 31.975 11.33 29.937 12.182L14.011 18.839L5.353 17.813L3.251 18.692L1.228 15.821L4.03 14.65L9.383 7.767Z" fill="#FFFFFF" />
+              <path d="M4.03 14.65L9.383 7.767L25.309 1.111C27.347 0.259 29.69 1.22 30.542 3.259L32.085 6.949C32.937 8.987 31.975 11.33 29.937 12.182L14.011 18.839L5.353 17.813M9.383 7.767L14.011 18.839M4.03 14.65L1.228 15.821L3.251 18.692L5.353 17.813M4.03 14.65L5.353 17.813" stroke="#111111" strokeWidth="1.6" />
+            </svg>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
