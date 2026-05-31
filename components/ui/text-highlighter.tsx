@@ -210,7 +210,8 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
             exit={{ 
               scale: 0.4, 
               opacity: 0,
-              filter: "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0))"
+              filter: "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0))",
+              transition: { duration: 0 } // Uklanja animaciju pri izlasku da se ne bi videla oba kursora
             }}
             transition={{
               type: "spring",
