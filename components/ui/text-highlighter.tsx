@@ -131,6 +131,11 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
+      {/* Global cursor hide when hovering to prevent native cursor flashes on fast moves */}
+      {isHovering && (
+        <style dangerouslySetInnerHTML={{ __html: `* { cursor: none !important; }` }} />
+      )}
+
       {/* Proximity Hitbox: proširuje zonu "hvatanja" miša za 20px bez pomeranja layouta */}
       <div 
         style={{
@@ -140,13 +145,14 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
           right: -20,
           bottom: -20,
           zIndex: 0,
+          cursor: "none"
         }}
       />
 
       {/* Underlying text */}
-      <span style={{ position: "relative", zIndex: 1 }}>
+      <span style={{ position: "relative", zIndex: 1, cursor: "none" }}>
         {tokens.map((token, i) => (
-          <span key={i} data-index={i}>
+          <span key={i} data-index={i} style={{ cursor: "none" }}>
             {token}
           </span>
         ))}
@@ -208,10 +214,9 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
                 : "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0.2))"
             }}
             exit={{ 
-              scale: 0.8, // Zadržavamo veličinu da se ne bi skupljao
+              scale: 0.4, 
               opacity: 0,
-              filter: "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0))",
-              transition: { duration: 0.15, ease: "easeOut" } // Brzi fade-out stvara efekat "crossfade-a" sa običnim kursorom
+              filter: "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0))"
             }}
             transition={{
               type: "spring",
