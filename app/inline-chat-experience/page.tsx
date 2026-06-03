@@ -71,6 +71,19 @@ export default function Page() {
     },
   });
 
+  // Force light mode for the chat experience
+  useEffect(() => {
+    const wasDark = document.documentElement.classList.contains("dark");
+    if (wasDark) {
+      document.documentElement.classList.remove("dark");
+    }
+    return () => {
+      if (wasDark) {
+        document.documentElement.classList.add("dark");
+      }
+    };
+  }, []);
+
   const introContainerVariants: any = {
     hidden: {},
     visible: {
