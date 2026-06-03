@@ -22,7 +22,7 @@ jobs:
           proxy_port: 22
           script: |
             set -e
-            APP_DIR="$HOME/website"
+            APP_DIR="$HOME/work/bogstewebsite"
             BACKUP_DIR="$HOME/website-backups"
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
