@@ -15,6 +15,7 @@ import {
 } from "@/components/ChatInput/ChatInput";
 import { InlineChatBanner } from "@/components/ui/InlineChatBanner";
 import { TextHighlighter } from "@/components/ui/text-highlighter";
+import { CustomCursor } from "@/components/ui/custom-cursor";
 import { INLINE_CHAT_FEATURE_STATUS } from "@/lib/constants";
 import introStyles from "./IntroChatLanding.module.css";
 import "./ChatExperience.css";
@@ -214,6 +215,8 @@ export default function Page() {
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{ __html: `* { cursor: none !important; }` }} />
+      <CustomCursor />
       <AnimatePresence mode="wait">
       {phase === "intro" ? (
         <motion.div

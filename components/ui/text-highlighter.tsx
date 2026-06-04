@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/Button/Button";
+import { MessageCircle, Trash2 } from "lucide-react";
 
 const SKEW_ANGLE = -20;
 const TAN_ANGLE = Math.tan((SKEW_ANGLE * Math.PI) / 180);
@@ -20,9 +22,19 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
   const containerRef = useRef<HTMLDivElement>(null);
   const [paths, setPaths] = useState<PathData[]>([]);
   const [currentPath, setCurrentPath] = useState<PathData | null>(null);
-  const [isHovering, setIsHovering] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [menuAnchor, setMenuAnchor] = useState<{ x: number | string, y: number, pathId: string } | null>(null);
+  const [hoveredPathId, setHoveredPathId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleGlobalPointerDown = (e: PointerEvent) => {
+      if (menuAnchor && containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setMenuAnchor(null);
+      }
+    };
+    window.addEventListener("pointerdown", handleGlobalPointerDown);
+    return () => window.removeEventListener("pointerdown", handleGlobalPointerDown);
+  }, [menuAnchor]);
 
   // Split text by words and keep spaces separate so we can render them properly
   const tokens = text.split(/(\s+)/);
@@ -64,12 +76,11 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
       highlightedIndices: new Set<number>(),
     };
     setCurrentPath(newPath);
+    setMenuAnchor(null); // Hide menu when starting a new highlight
     checkHighlight(e.clientX, e.clientY, newPath.highlightedIndices);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-
     if (!currentPath) return;
 
     const rect = containerRef.current!.getBoundingClientRect();
@@ -97,6 +108,15 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
 
     setPaths((prev) => [...prev, currentPath]);
     
+    if (currentPath.highlightedIndices.size > 0) {
+      // Find the maxY to position the menu inline with the lower edge
+      let maxY = -Infinity;
+      currentPath.points.forEach(p => {
+        if (p.y > maxY) maxY = p.y;
+      });
+      setMenuAnchor({ x: "calc(100% + 16px)", y: maxY, pathId: currentPath.id });
+    }
+
     if (onHighlightComplete && currentPath.highlightedIndices.size > 0) {
       // Reconstruct highlighted text by filling in any gaps (e.g., spaces missed by fast mouse movement)
       const sortedIndices = Array.from(currentPath.highlightedIndices).sort((a, b) => a - b);
@@ -113,28 +133,33 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
     setCurrentPath(null);
   };
 
+  const removeHighlight = (id: string) => {
+    setPaths(prev => prev.filter(p => p.id !== id));
+    setMenuAnchor(null);
+  };
+
+  const replyInThread = () => {
+    console.log("Reply in thread clicked for path", menuAnchor?.pathId);
+    setMenuAnchor(null);
+  };
+
   return (
     <div
       ref={containerRef}
+      data-cursor="marker"
+      data-cursor-active={isDrawing ? "true" : "false"}
       style={{
         position: "relative",
-        cursor: "none",
         userSelect: "none",
         WebkitUserSelect: "none",
         touchAction: "none", // Prevent scrolling while highlighting on touch devices
         display: "block", // to wrap the text tightly
       }}
-      onPointerEnter={() => setIsHovering(true)}
-      onPointerLeave={() => setIsHovering(false)}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      {/* Global cursor hide when hovering to prevent native cursor flashes on fast moves */}
-      {isHovering && (
-        <style dangerouslySetInnerHTML={{ __html: `* { cursor: none !important; }` }} />
-      )}
 
       {/* Proximity Hitbox: proširuje zonu "hvatanja" miša za 20px bez pomeranja layouta */}
       <div 
@@ -145,14 +170,13 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
           right: -20,
           bottom: -20,
           zIndex: 0,
-          cursor: "none"
         }}
       />
 
       {/* Underlying text */}
-      <span style={{ position: "relative", zIndex: 1, cursor: "none" }}>
+      <span style={{ position: "relative", zIndex: 1 }}>
         {tokens.map((token, i) => (
-          <span key={i} data-index={i} style={{ cursor: "none" }}>
+          <span key={i} data-index={i}>
             {token}
           </span>
         ))}
@@ -174,15 +198,51 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
       >
         <g transform={`skewX(${SKEW_ANGLE})`}>
           {paths.map((path) => (
-            <path
-              key={path.id}
-              d={makePathString(path.points)}
-              fill="none"
-              stroke={MARKER_COLOR}
-              strokeWidth="20px"
-              strokeLinejoin="round"
-              strokeLinecap="butt"
-            />
+            <React.Fragment key={path.id}>
+              <motion.path
+                d={makePathString(path.points)}
+                fill="none"
+                stroke={MARKER_COLOR}
+                strokeLinejoin="round"
+                strokeLinecap="butt"
+                animate={{ 
+                  strokeWidth: hoveredPathId === path.id ? "24px" : "20px",
+                  opacity: hoveredPathId === path.id ? 0.9 : 1 
+                }}
+                transition={{ duration: 0.15 }}
+                data-cursor="pointer"
+                style={{
+                  pointerEvents: isDrawing ? "none" : "stroke",
+                }}
+                onPointerEnter={() => !isDrawing && setHoveredPathId(path.id)}
+                onPointerLeave={() => setHoveredPathId(null)}
+                onPointerDown={(e) => {
+                  if (isDrawing) return;
+                  e.stopPropagation();
+                  let maxY = -Infinity;
+                  path.points.forEach(p => { if (p.y > maxY) maxY = p.y; });
+                  setMenuAnchor({ x: "calc(100% + 16px)", y: maxY, pathId: path.id });
+                }}
+              />
+              {/* Animated drawing shimmer over the path */}
+              <AnimatePresence>
+                {hoveredPathId === path.id && (
+                  <motion.path
+                    initial={{ pathLength: 0, opacity: 0.8 }}
+                    animate={{ pathLength: 1, opacity: 0 }}
+                    exit={{ opacity: 0, transition: { duration: 0.1 } }}
+                    transition={{ duration: 0.7, ease: "easeOut", repeat: Infinity, repeatDelay: 0.15 }}
+                    d={makePathString(path.points)}
+                    fill="none"
+                    stroke="#ffffff"
+                    strokeWidth="24px"
+                    strokeLinejoin="round"
+                    strokeLinecap="butt"
+                    style={{ pointerEvents: "none", mixBlendMode: "overlay" }}
+                  />
+                )}
+              </AnimatePresence>
+            </React.Fragment>
           ))}
           {currentPath && (
             <path
@@ -197,45 +257,48 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
         </g>
       </svg>
 
-      {/* Custom Marker Cursor */}
+      {/* Floating Action Menu */}
       <AnimatePresence>
-        {isHovering && (
+        {menuAnchor && (
           <motion.div
-            initial={{ 
-              scale: 0.4, 
-              opacity: 0,
-              filter: "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0))" 
-            }}
-            animate={{ 
-              scale: isDrawing ? 0.75 : 0.8, 
-              opacity: 1,
-              filter: isDrawing 
-                ? "drop-shadow(0px 1px 0px rgba(17, 17, 17, 0.2))" 
-                : "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0.2))"
-            }}
-            exit={{ 
-              scale: 0.4, 
-              opacity: 0,
-              filter: "drop-shadow(0px 3px 0px rgba(17, 17, 17, 0))"
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 25,
-              mass: 0.8
-            }}
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
             style={{
-              position: "fixed",
-              top: mousePos.y - 15, // offset hotspot y
-              left: mousePos.x - 2, // offset hotspot x
-              pointerEvents: "none",
-              zIndex: 9999,
+              position: "absolute",
+              left: menuAnchor.x,
+              top: menuAnchor.y,
+              transform: "translateY(-50%)",
+              zIndex: 10000,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+              pointerEvents: "auto",
             }}
           >
-            <svg width="34" height="20" viewBox="0 0 34 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9.383 7.767L25.309 1.111C27.347 0.259 29.69 1.22 30.542 3.259L32.085 6.949C32.937 8.987 31.975 11.33 29.937 12.182L14.011 18.839L5.353 17.813L3.251 18.692L1.228 15.821L4.03 14.65L9.383 7.767Z" fill="#FFFFFF" />
-              <path d="M4.03 14.65L9.383 7.767L25.309 1.111C27.347 0.259 29.69 1.22 30.542 3.259L32.085 6.949C32.937 8.987 31.975 11.33 29.937 12.182L14.011 18.839L5.353 17.813M9.383 7.767L14.011 18.839M4.03 14.65L1.228 15.821L3.251 18.692L5.353 17.813M4.03 14.65L5.353 17.813" stroke="#111111" strokeWidth="1.6" />
-            </svg>
+            <Button
+              variant="primary"
+              icon={<MessageCircle size={14} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                replyInThread();
+              }}
+              title="Reply in thread"
+            >
+              Reply in thread
+            </Button>
+            <Button
+              variant="primary"
+              icon={<Trash2 size={14} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                removeHighlight(menuAnchor.pathId);
+              }}
+              title="Remove highlight"
+              aria-label="Remove highlight"
+            />
           </motion.div>
         )}
       </AnimatePresence>
