@@ -516,72 +516,76 @@ export default function Page() {
                 width: activeReply.rect.width, 
                 height: activeReply.rect.height,
                 borderRadius: 12,
-                opacity: 0,
-                scale: 0.95
+                opacity: 0
               }}
               animate={{ 
                 x: replyTargetX, 
                 y: replyTargetY, 
                 width: replyTargetWidth, 
                 height: "auto",
-                borderRadius: 24,
+                borderRadius: 28,
                 opacity: 1,
-                scale: 1,
-                backgroundColor: "var(--color-bg-page, #fff)",
-                boxShadow: "0 24px 48px rgba(0,0,0,0.1)",
-                border: "1px solid rgba(0,0,0,0.05)"
+                backgroundColor: "#F3F3F3",
+                boxShadow: "0px 12px 31px -9px rgba(0,0,0,0.2)"
               }}
               exit={{ 
-                x: activeReply.rect.left, 
-                y: activeReply.rect.top, 
-                width: activeReply.rect.width, 
-                height: activeReply.rect.height,
                 opacity: 0,
-                borderRadius: 12,
-                scale: 0.95
+                scale: 0.95,
+                filter: "blur(4px)"
               }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               style={{
                 position: "absolute",
-                padding: "24px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px",
-                overflow: "hidden"
+                padding: "4px",
+                overflow: "hidden",
+                transformOrigin: "center center"
               }}
             >
-              <div 
-                style={{ 
-                  backgroundColor: "rgba(204, 255, 0, 0.2)", 
-                  padding: "16px", 
-                  borderRadius: "12px",
-                  fontSize: "14px",
-                  lineHeight: 1.6,
-                  fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
-                  color: "var(--color-text, #111)",
-                  border: "1px solid rgba(204, 255, 0, 0.3)"
-                }}
-              >
-                {activeReply.text}
+              <div style={{ width: replyTargetWidth - 8, display: "flex", flexDirection: "column" }}>
+                <div style={{ alignItems: 'center', alignSelf: 'stretch', borderRadius: '16px', display: 'flex', gap: '4px', justifyContent: 'center', paddingBottom: 4, paddingInline: '16px', paddingTop: 6 }}>
+                <div style={{ alignItems: 'center', display: 'flex', flex: 1, gap: 4 }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" style={{ width: '16px', height: 'auto', overflow: 'visible', flexShrink: '0' }}>
+                    <path d="m85.1 21c1.5-2.2 4.6-6.7 5.8-11 0.7-2.5 0.3-4.7-1.6-6.1-1.6-1.4-4.3-1.7-7.3-0.4-3.2 1.2-7.3 4.6-12 9.1l-0.2 0.2c-0.9-0.3-1.9-0.6-2.9-0.7-7.9-1.2-14.7 0-20 3.6-6.8 4.6-10.8 12.3-9.5 22.6 0.1 1.4 1.2 2.4 2.7 2.3 1.4 0 2.6-1.4 2.4-2.8-1.1-6.8 1-12.9 6.5-16.9 3.9-2.9 9.1-4.8 16.5-3.9l-35.4 39.5c0 0.3 4.1 2.8 4.2 2.8 1-0.9 4-4.4 5.2-5.7l27.2-30.6c-0.4 3.3 0.6 5.8 5.6 5.1-8.4 9.4-25.2 25.2-33.5 33.7 0.5 0.5 4 2 4.8 2.3 7.8-7.2 25.4-24 34.8-34.5l3.5-4.6c4.1 3.7 11.7 11.9 11.7 24.7 0 9.6-6 20-20 22.7-8.2 1.2-17.3 0.1-26.4-3.5-8.5-3.1-15.7-7.8-22.3-13.1-7-6-13.3-13.5-14.9-21.8-0.9-4.9 0.2-9.7 4.1-12.9 2.8-2.4 6.5-4.2 12-4.3 3.8-0.1 7.3 0.4 11.9 2.1 1.2 0.6 2.8 0.4 3.4-0.8 0.8-1.1 0.2-3.2-1.1-3.6-5.2-1.9-9-2.9-14-2.9-5.7 0.1-10.7 1.5-14.9 4.9-4.7 3.8-8.5 10.3-5.8 20 2.4 9.2 9.5 17.3 19.5 25.4l-20.8 27.8c-1.4 1.7-2.3 2.8-2.3 3.9-0.2 1.5 0.6 2.7 1.6 3.3 1.3 0.8 3.4 0.6 4.7-0.3 3.4-2.2 15.8-13.1 29.7-26.7 6.5 3 16.5 7 27.9 7.8 5.6 0.2 10.7-0.2 15.4-1.9 10.8-3.5 17.2-13 17.1-25.8 0-11.9-6.7-22.3-13.3-29zm-73.3 65.7 17.5-21.9 4.1 2.5c-5.8 5.2-13.6 12.4-21.6 19.4zm64.9-63.3c-1.7 0.7-4.7 2-6.6 1.9-0.7-0.4 1.5-6.5 1.7-6.5 2.1 0.9 4.7 2 6.1 3.1l-1.2 1.5zm4.2-5.5c-1.6-1.1-3.7-2.3-5.5-3.2 2.1-1.9 4.7-4 6.3-5.1 1.4-0.9 3.2-0.5 3 1.4-0.3 2-3 5.8-3.8 6.9z" fill="#11111180" />
+                  </svg>
+                  <div style={{ color: 'rgba(17,17,17,0.5)', display: 'inline-block', flex: 1, fontFamily: 'var(--font-geist-sans), system-ui, sans-serif', fontSize: '11px', lineHeight: '150%', fontWeight: 500 }}>
+                    Replying in a thread
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setActiveReply(null)}
+                  className="iconBtn"
+                  style={{ background: 'transparent', border: 'none', padding: 4, cursor: 'pointer', display: 'flex' }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible', flexShrink: '0' }}>
+                    <path d="M12 4L4 12M4 4L12 12" fill="none" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
               </div>
-              
-              <div style={{ pointerEvents: "auto" }}>
-                <ChatInput
-                  state={replyInputValue.length > 0 ? "typing" : "idle"}
-                  value={replyInputValue}
-                  onChange={setReplyInputValue}
-                  onSubmit={(v) => {
-                    console.log("Thread replied:", v);
-                    setReplyInputValue("");
-                    setActiveReply(null);
-                  }}
-                  onStop={() => {}}
-                  onCopy={() => {}}
-                  onEdit={() => {}}
-                  variant="inline"
-                  animationConfig={animConfig}
-                  placeholder="Ask me about this text..."
-                />
+
+              <div style={{ alignItems: 'start', backgroundColor: '#FFFFFF', borderRadius: '24px', display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
+                <div style={{ color: '#111111', display: 'inline-block', fontFamily: 'var(--font-geist-sans), system-ui, sans-serif', fontSize: '13px', letterSpacing: '0.01em', lineHeight: '150%' }}>
+                  {activeReply.text}
+                </div>
+                
+                <div style={{ pointerEvents: "auto", alignSelf: 'stretch', width: '100%' }}>
+                  <ChatInput
+                    state={replyInputValue.length > 0 ? "typing" : "idle"}
+                    value={replyInputValue}
+                    onChange={setReplyInputValue}
+                    onSubmit={(v) => {
+                      console.log("Thread replied:", v);
+                      setReplyInputValue("");
+                      setActiveReply(null);
+                    }}
+                    onStop={() => {}}
+                    onCopy={() => {}}
+                    onEdit={() => {}}
+                    variant="inline"
+                    animationConfig={animConfig}
+                    placeholder="Ask me about this text..."
+                  />
+                </div>
+              </div>
               </div>
             </motion.div>
           </div>
