@@ -34,6 +34,7 @@
   font-family: var(--font-geist-sans), sans-serif;
   font-size: 13px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .btn:focus-visible {
