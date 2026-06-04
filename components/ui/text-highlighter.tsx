@@ -16,9 +16,10 @@ interface PathData {
 interface TextHighlighterProps {
   text: string;
   onHighlightComplete?: (highlightedText: string) => void;
+  onReplyInThread?: (text: string, rect: DOMRect) => void;
 }
 
-export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterProps) {
+export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: TextHighlighterProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [paths, setPaths] = useState<PathData[]>([]);
   const [currentPath, setCurrentPath] = useState<PathData | null>(null);
@@ -134,13 +135,33 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
     setCurrentPath(null);
   };
 
+  const getHighlightedText = (pathId: string) => {
+    const pathData = paths.find(p => p.id === pathId);
+    if (!pathData || pathData.highlightedIndices.size === 0) return "";
+    const sortedIndices = Array.from(pathData.highlightedIndices).sort((a, b) => a - b);
+    const minIdx = sortedIndices[0];
+    const maxIdx = sortedIndices[sortedIndices.length - 1];
+    
+    let highlightedText = "";
+    for (let i = minIdx; i <= maxIdx; i++) {
+      highlightedText += tokens[i];
+    }
+    return highlightedText.trim();
+  };
+
   const removeHighlight = (id: string) => {
     setPaths(prev => prev.filter(p => p.id !== id));
     setMenuAnchor(null);
   };
 
   const replyInThread = () => {
-    console.log("Reply in thread clicked for path", menuAnchor?.pathId);
+    if (menuAnchor && onReplyInThread) {
+      const text = getHighlightedText(menuAnchor.pathId);
+      const el = document.getElementById(`highlight-path-${menuAnchor.pathId}`);
+      if (el) {
+        onReplyInThread(text, el.getBoundingClientRect());
+      }
+    }
     setMenuAnchor(null);
   };
 
@@ -229,6 +250,7 @@ export function TextHighlighter({ text, onHighlightComplete }: TextHighlighterPr
           {paths.map((path) => (
             <React.Fragment key={path.id}>
               <motion.path
+                id={`highlight-path-${path.id}`}
                 d={makePathString(path.points)}
                 fill="none"
                 stroke={MARKER_COLOR}

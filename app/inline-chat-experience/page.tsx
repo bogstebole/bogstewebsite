@@ -121,6 +121,8 @@ export default function Page() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [showHighlightsModal, setShowHighlightsModal] = useState(false);
+  const [activeReply, setActiveReply] = useState<{ text: string, rect: DOMRect } | null>(null);
+  const [replyInputValue, setReplyInputValue] = useState("");
   const streamingRef = useRef<number | null>(null);
   const turnCountRef = useRef(0);
   const activeInputRef = useRef<ChatInputHandle>(null);
@@ -213,6 +215,22 @@ export default function Page() {
     finishTurn(turnId);
   };
 
+  let replyTargetX = 0;
+  let replyTargetY = 0;
+  let replyTargetWidth = 480;
+  
+  if (activeReply) {
+    // If we're rendering on server (though it's "use client"), window might not be defined. We are safe in useEffect/events, but for render:
+    const screenWidth = typeof window !== "undefined" ? window.innerWidth : 1200;
+    replyTargetWidth = Math.max(activeReply.rect.width + 80, 480);
+    replyTargetX = activeReply.rect.left + activeReply.rect.width / 2 - replyTargetWidth / 2;
+    const padding = 24;
+    if (replyTargetX < padding) replyTargetX = padding;
+    if (replyTargetX + replyTargetWidth > screenWidth - padding) replyTargetX = screenWidth - padding - replyTargetWidth;
+    
+    replyTargetY = activeReply.rect.top - 24;
+  }
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `* { cursor: none !important; }` }} />
@@ -295,7 +313,10 @@ export default function Page() {
           key="chat"
           className="chatPage"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{ 
+            opacity: (activeReply || showHighlightsModal) ? 0.4 : 1,
+            filter: (activeReply || showHighlightsModal) ? "blur(8px)" : "blur(0px)"
+          }}
           transition={{ duration: 0.3 }}
           onAnimationComplete={() => activeInputRef.current?.focus()}
         >
@@ -367,7 +388,10 @@ export default function Page() {
                             if (text.trim().length > 0) {
                               setHighlights(prev => [...prev, { turnId: turn.id, text: text.trim() }]);
                             }
-                          }} 
+                          }}
+                          onReplyInThread={(text, rect) => {
+                            setActiveReply({ text, rect });
+                          }}
                         />
                       </p>
                     )}
@@ -469,6 +493,98 @@ export default function Page() {
               ))}
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {activeReply && (
+          <div 
+            style={{
+              position: "fixed",
+              top: 0, left: 0, right: 0, bottom: 0,
+              zIndex: 200,
+              display: "block",
+              pointerEvents: "auto",
+            }}
+            onClick={() => setActiveReply(null)}
+          >
+            <motion.div
+              onClick={(e) => e.stopPropagation()}
+              initial={{ 
+                x: activeReply.rect.left, 
+                y: activeReply.rect.top, 
+                width: activeReply.rect.width, 
+                height: activeReply.rect.height,
+                borderRadius: 12,
+                opacity: 0,
+                scale: 0.95
+              }}
+              animate={{ 
+                x: replyTargetX, 
+                y: replyTargetY, 
+                width: replyTargetWidth, 
+                height: "auto",
+                borderRadius: 24,
+                opacity: 1,
+                scale: 1,
+                backgroundColor: "var(--color-bg-page, #fff)",
+                boxShadow: "0 24px 48px rgba(0,0,0,0.1)",
+                border: "1px solid rgba(0,0,0,0.05)"
+              }}
+              exit={{ 
+                x: activeReply.rect.left, 
+                y: activeReply.rect.top, 
+                width: activeReply.rect.width, 
+                height: activeReply.rect.height,
+                opacity: 0,
+                borderRadius: 12,
+                scale: 0.95
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              style={{
+                position: "absolute",
+                padding: "24px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "16px",
+                overflow: "hidden"
+              }}
+            >
+              <div 
+                style={{ 
+                  backgroundColor: "rgba(204, 255, 0, 0.2)", 
+                  padding: "16px", 
+                  borderRadius: "12px",
+                  fontSize: "14px",
+                  lineHeight: 1.6,
+                  fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
+                  color: "var(--color-text, #111)",
+                  border: "1px solid rgba(204, 255, 0, 0.3)"
+                }}
+              >
+                {activeReply.text}
+              </div>
+              
+              <div style={{ pointerEvents: "auto" }}>
+                <ChatInput
+                  state={replyInputValue.length > 0 ? "typing" : "idle"}
+                  value={replyInputValue}
+                  onChange={setReplyInputValue}
+                  onSubmit={(v) => {
+                    console.log("Thread replied:", v);
+                    setReplyInputValue("");
+                    setActiveReply(null);
+                  }}
+                  onStop={() => {}}
+                  onCopy={() => {}}
+                  onEdit={() => {}}
+                  variant="inline"
+                  animationConfig={animConfig}
+                  placeholder="Ask me about this text..."
+                />
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>
