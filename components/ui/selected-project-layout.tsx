@@ -62,7 +62,26 @@ interface SelectedProjectLayoutProps {
   onCloseStart?: () => void;
   onClose: () => void;
   children: React.ReactNode;
+  contentKey?: string;
+  slideDirection?: number;
 }
+
+const SLIDE_VARIANTS = {
+  enter: (dir: number) => ({
+    x: dir === 0 ? 0 : dir * 56,
+    opacity: dir === 0 ? 1 : 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    transition: { type: "spring" as const, stiffness: 280, damping: 28 },
+  },
+  exit: (dir: number) => ({
+    x: dir === 0 ? 0 : dir * -56,
+    opacity: 0,
+    transition: { duration: 0.15, ease: "easeIn" as const },
+  }),
+};
 
 export function SelectedProjectLayout({
   layoutId,
@@ -86,6 +105,8 @@ export function SelectedProjectLayout({
   onCloseStart,
   onClose,
   children,
+  contentKey,
+  slideDirection = 0,
 }: SelectedProjectLayoutProps) {
   const { isMobile } = useBreakpoint();
   const [showQR, setShowQR] = useState(false);
@@ -231,7 +252,16 @@ export function SelectedProjectLayout({
             </div>
 
             {/* Short description + Description + tags */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <AnimatePresence mode="wait" custom={slideDirection}>
+            <motion.div
+              key={contentKey ?? "default"}
+              custom={slideDirection}
+              variants={SLIDE_VARIANTS}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              style={{ display: "flex", flexDirection: "column", gap: 16 }}
+            >
               {shortDescription && (
                 <div style={{
                   fontFamily: "var(--font-geist-sans), sans-serif",
@@ -268,12 +298,13 @@ export function SelectedProjectLayout({
                   Download the app
                 </GlassButton>
               )}
-            </div>
 
-            {/* Grid content */}
-            <div style={{ width: "100%", boxSizing: "border-box", ...gridStyle }}>
-              {children}
-            </div>
+              {/* Grid content */}
+              <div style={{ width: "100%", boxSizing: "border-box", ...gridStyle }}>
+                {children}
+              </div>
+            </motion.div>
+            </AnimatePresence>
           </div>
         </motion.div>
 
@@ -337,7 +368,14 @@ export function SelectedProjectLayout({
           rotate: { type: "spring", stiffness: 400, damping: 30 },
         }}
         onAnimationComplete={() => {
-          onAnimationComplete?.();
+          if (!layoutId) {
+            onAnimationComplete?.();
+          }
+        }}
+        onLayoutAnimationComplete={() => {
+          if (layoutId) {
+            onAnimationComplete?.();
+          }
         }}
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -381,156 +419,169 @@ export function SelectedProjectLayout({
           </GlassButton>
         </motion.div>
 
-        {/* Header section */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '480px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}>
-            <motion.div
-              animate={logoControls}
-              initial="hidden"
-              variants={CONTENT_ITEM_VARIANTS}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={icon}
-                alt={`${title} Icon`}
-                style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: 8, flexShrink: 0, ...iconStyle }}
-              />
-              {shortDescription && (
-                <div style={{ fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 20, fontWeight: 500, lineHeight: 1.3, textAlign: 'center' }}>
-                  {shortDescription}
-                </div>
-              )}
-            </motion.div>
-
-            <motion.div
-              ref={badgesRef}
-              animate={badgeControls}
-              initial="hidden"
-              variants={BADGE_CONTAINER_VARIANTS}
-              style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center" }}
-            >
-              {tags.map((label) => (
-                <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
-                  <ProjectTag label={label} variant="glass" />
-                </motion.div>
-              ))}
-              {extraBadge && (
-                <motion.div variants={BADGE_ITEM_VARIANTS}>
-                  {extraBadge}
-                </motion.div>
-              )}
-            </motion.div>
-          </div>
-
+        {/* Sliding content area — keyed by contentKey so AnimatePresence handles tab transitions */}
+        <AnimatePresence mode="wait" custom={slideDirection}>
           <motion.div
-            animate={contentControls}
-            initial="hidden"
-            variants={STAGGER_VARIANTS}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%' }}
+            key={contentKey ?? "default"}
+            custom={slideDirection}
+            variants={SLIDE_VARIANTS}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 48, width: "100%" }}
           >
-            <motion.div
-              variants={CONTENT_ITEM_VARIANTS}
-              style={{ color: 'var(--color-text-secondary)', fontFamily: '"Geist", system-ui, sans-serif', fontSize: '14px', lineHeight: '18px', textAlign: 'center', whiteSpace: 'pre-wrap', width: '100%' }}
-            >
-              {description}
-            </motion.div>
-
-            {showDownloadButton && (
-              <>
-                <motion.div variants={CONTENT_ITEM_VARIANTS}>
-                  <GlassButton
-                    size="s"
-                    onClick={() => setShowQR(true)}
-                  >
-                    Download the app
-                  </GlassButton>
+            {/* Header section */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '480px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}>
+                <motion.div
+                  animate={logoControls}
+                  initial="hidden"
+                  variants={CONTENT_ITEM_VARIANTS}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={icon}
+                    alt={`${title} Icon`}
+                    style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: 8, flexShrink: 0, ...iconStyle }}
+                  />
+                  {shortDescription && (
+                    <div style={{ fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 20, fontWeight: 500, lineHeight: 1.3, textAlign: 'center' }}>
+                      {shortDescription}
+                    </div>
+                  )}
                 </motion.div>
 
-                {/* QR modal — desktop only */}
-                <AnimatePresence>
-                  {showQR && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      onClick={() => setShowQR(false)}
-                      style={{
-                        position: "fixed",
-                        inset: 0,
-                        zIndex: 200,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backdropFilter: "blur(8px)",
-                        WebkitBackdropFilter: "blur(8px)",
-                      }}
-                    >
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 12 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 8 }}
-                        transition={{ type: "spring", stiffness: 360, damping: 28 }}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{
-                          background: "var(--color-bg-modal)",
-                          borderRadius: 24,
-                          padding: 64,
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          gap: 20,
-                          position: "relative",
-                          boxShadow: "0 237px 66px 0 rgba(0, 0, 0, 0.00), 0 152px 61px 0 rgba(0, 0, 0, 0.01), 0 85px 51px 0 rgba(0, 0, 0, 0.05), 0 38px 38px 0 rgba(0, 0, 0, 0.09), 0 9px 21px 0 rgba(0, 0, 0, 0.10)",
-                        }}
-                      >
-                        <div style={{ position: "absolute", top: 16, right: 16 }}>
-                          <GlassButton size="s" onClick={() => setShowQR(false)} aria-label="Close">
-                            {X_ICON}
-                          </GlassButton>
-                        </div>
-                        <QRCodeSVG
-                          value={NOTES_APP_STORE_URL}
-                          size={220}
-                          bgColor="var(--color-bg-modal)"
-                          fgColor="var(--color-text-ui)"
-                          level="M"
-                          imageSettings={{
-                            src: "/images/notes.png",
-                            width: 40,
-                            height: 40,
-                            excavate: true,
-                          }}
-                        />
-                        <span style={{
-                          color: "var(--color-text-label)",
-                          fontFamily: '"Geist", system-ui, sans-serif',
-                          fontSize: 14,
-                          lineHeight: "20px",
-                          textAlign: "center",
-                          maxWidth: 200,
-                        }}>
-                          Scan with your camera to download Notes from the App Store
-                        </span>
-                      </motion.div>
+                <motion.div
+                  ref={badgesRef}
+                  animate={badgeControls}
+                  initial="hidden"
+                  variants={BADGE_CONTAINER_VARIANTS}
+                  style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", justifyContent: "center" }}
+                >
+                  {tags.map((label) => (
+                    <motion.div key={label} variants={BADGE_ITEM_VARIANTS}>
+                      <ProjectTag label={label} variant="glass" />
+                    </motion.div>
+                  ))}
+                  {extraBadge && (
+                    <motion.div variants={BADGE_ITEM_VARIANTS}>
+                      {extraBadge}
                     </motion.div>
                   )}
-                </AnimatePresence>
-              </>
-            )}
-          </motion.div>
-        </div>
+                </motion.div>
+              </div>
 
-        {/* Grid section */}
-        <motion.div
-          animate={gridControls}
-          initial="hidden"
-          variants={STAGGER_VARIANTS}
-          style={{ width: "100%", paddingBottom: 48, boxSizing: "border-box", ...gridStyle }}
-        >
-          {children}
-        </motion.div>
+              <motion.div
+                animate={contentControls}
+                initial="hidden"
+                variants={STAGGER_VARIANTS}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%' }}
+              >
+                <motion.div
+                  variants={CONTENT_ITEM_VARIANTS}
+                  style={{ color: 'var(--color-text-secondary)', fontFamily: '"Geist", system-ui, sans-serif', fontSize: '14px', lineHeight: '18px', textAlign: 'center', whiteSpace: 'pre-wrap', width: '100%' }}
+                >
+                  {description}
+                </motion.div>
+
+                {showDownloadButton && (
+                  <>
+                    <motion.div variants={CONTENT_ITEM_VARIANTS}>
+                      <GlassButton
+                        size="s"
+                        onClick={() => setShowQR(true)}
+                      >
+                        Download the app
+                      </GlassButton>
+                    </motion.div>
+
+                    {/* QR modal — desktop only */}
+                    <AnimatePresence>
+                      {showQR && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          onClick={() => setShowQR(false)}
+                          style={{
+                            position: "fixed",
+                            inset: 0,
+                            zIndex: 200,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backdropFilter: "blur(8px)",
+                            WebkitBackdropFilter: "blur(8px)",
+                          }}
+                        >
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 12 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 8 }}
+                            transition={{ type: "spring", stiffness: 360, damping: 28 }}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                              background: "var(--color-bg-modal)",
+                              borderRadius: 24,
+                              padding: 64,
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              gap: 20,
+                              position: "relative",
+                              boxShadow: "0 237px 66px 0 rgba(0, 0, 0, 0.00), 0 152px 61px 0 rgba(0, 0, 0, 0.01), 0 85px 51px 0 rgba(0, 0, 0, 0.05), 0 38px 38px 0 rgba(0, 0, 0, 0.09), 0 9px 21px 0 rgba(0, 0, 0, 0.10)",
+                            }}
+                          >
+                            <div style={{ position: "absolute", top: 16, right: 16 }}>
+                              <GlassButton size="s" onClick={() => setShowQR(false)} aria-label="Close">
+                                {X_ICON}
+                              </GlassButton>
+                            </div>
+                            <QRCodeSVG
+                              value={NOTES_APP_STORE_URL}
+                              size={220}
+                              bgColor="var(--color-bg-modal)"
+                              fgColor="var(--color-text-ui)"
+                              level="M"
+                              imageSettings={{
+                                src: "/images/notes.png",
+                                width: 40,
+                                height: 40,
+                                excavate: true,
+                              }}
+                            />
+                            <span style={{
+                              color: "var(--color-text-label)",
+                              fontFamily: '"Geist", system-ui, sans-serif',
+                              fontSize: 14,
+                              lineHeight: "20px",
+                              textAlign: "center",
+                              maxWidth: 200,
+                            }}>
+                              Scan with your camera to download Notes from the App Store
+                            </span>
+                          </motion.div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
+                )}
+              </motion.div>
+            </div>
+
+            {/* Grid section */}
+            <motion.div
+              animate={gridControls}
+              initial="hidden"
+              variants={STAGGER_VARIANTS}
+              style={{ width: "100%", paddingBottom: 48, boxSizing: "border-box", ...gridStyle }}
+            >
+              {children}
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
       </motion.div>
 
       {mounted && createPortal(

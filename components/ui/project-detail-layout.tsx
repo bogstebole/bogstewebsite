@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { ProjectTag } from "@/components/ui/project-tag";
@@ -20,12 +20,48 @@ interface ProjectDetailLayoutProps {
   longDescription?: React.ReactNode;
   children: React.ReactNode;
   primaryColor?: string;
+  contentKey?: string;
+  slideDirection?: number;
+  onOpenComplete?: () => void;
 }
 
 const EXIT_DURATION = 0.4;
 const sheetSpring = { type: "spring" as const, stiffness: 340, damping: 34 };
 const desktopSpring = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stickySpring = { type: "spring" as const, stiffness: 400, damping: 36 };
+
+const SLIDE_VARIANTS = {
+  enter: (dir: number) => ({
+    x: dir === 0 ? 0 : dir * 56,
+    opacity: dir === 0 ? 1 : 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    transition: { type: "spring" as const, stiffness: 280, damping: 28 },
+  },
+  exit: (dir: number) => ({
+    x: dir === 0 ? 0 : dir * -56,
+    opacity: 0,
+    transition: { duration: 0.15, ease: "easeIn" as const },
+  }),
+};
+
+const CONTENT_STAGGER = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.12 } },
+};
+
+export const CONTENT_ITEM = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 280, damping: 24 } },
+};
+
+// Transparent stagger wrapper: no self-animation, just staggers children
+const CHILDREN_STAGGER = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06 } },
+};
 
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -42,6 +78,9 @@ export function ProjectDetailLayout({
   longDescription,
   children,
   primaryColor = "#000000",
+  contentKey,
+  slideDirection,
+  onOpenComplete,
 }: ProjectDetailLayoutProps) {
   const [mounted, setMounted] = useState(false);
   const closingRef = useRef(false);
@@ -51,6 +90,7 @@ export function ProjectDetailLayout({
   const headerRef = useRef<HTMLDivElement>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [cardAnimationComplete, setCardAnimationComplete] = useState(false);
+  const [stickyReady, setStickyReady] = useState(false);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const [panelTopPx, setPanelTopPx] = useState(0);
@@ -90,10 +130,16 @@ export function ProjectDetailLayout({
   }, [initiateClose]);
 
 
-  // Intersection Observer for Sticky Header — only start after card animation completes
-  // to avoid the header being reported as off-screen while the card is still sliding in
+  // Reset sticky state on tab switch so the old observer doesn't fire a false negative
+  // when AnimatePresence removes the old headerRef from the DOM
   useEffect(() => {
-    if (!cardAnimationComplete) return;
+    setStickyReady(false);
+    setShowStickyHeader(false);
+  }, [contentKey]);
+
+  // Intersection Observer — only attaches when stickyReady, so tab-switch gaps are clean
+  useEffect(() => {
+    if (!stickyReady) return;
     const el = headerRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
@@ -102,7 +148,7 @@ export function ProjectDetailLayout({
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [cardAnimationComplete]);
+  }, [stickyReady]);
 
 
   if (!mounted) return null;
@@ -184,7 +230,7 @@ export function ProjectDetailLayout({
           initial={{ y: "100%" }}
           animate={{ y: isClosing ? "100%" : 0 }}
           transition={sheetSpring}
-          onAnimationComplete={() => { if (!isClosing) { setCardAnimationComplete(true); measurePanelTop(); } }}
+          onAnimationComplete={() => { if (!isClosing) { setCardAnimationComplete(true); setStickyReady(true); measurePanelTop(); onOpenComplete?.(); } }}
           style={{
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
@@ -346,7 +392,7 @@ export function ProjectDetailLayout({
           initial={{ opacity: 0, y: "100%" }}
           animate={isClosing ? { opacity: 0, y: "100%" } : { opacity: 1, y: 0 }}
           transition={desktopSpring}
-          onAnimationComplete={() => { if (!isClosing) { setCardAnimationComplete(true); measurePanelTop(); } }}
+          onAnimationComplete={() => { if (!isClosing) { setCardAnimationComplete(true); setStickyReady(true); measurePanelTop(); onOpenComplete?.(); } }}
           onClick={(e) => e.stopPropagation()}
           style={{
             width: "100%",
@@ -370,71 +416,81 @@ export function ProjectDetailLayout({
           }}
         >
 
-          {/* Main Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={isClosing ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, ...desktopSpring }}
-            style={{ display: "flex", flexDirection: "column", gap: 48, paddingBottom: 32, position: "relative", zIndex: 1 }}
-          >
-            {/* Header: icon (left) + close (right) */}
-            <div ref={headerRef} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingInline: 16, paddingBlock: 8, flexShrink: 0 }}>
-              {icon && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={icon}
-                  alt=""
-                  style={{ width: 48, height: 48, objectFit: "contain", borderRadius: 8, rotate: iconRotate, transformOrigin: "50% 50%", flexShrink: 0 }}
-                />
-              )}
-              <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-                </svg>
-              </GlassButton>
-            </div>
-
-            {/* Standardized 2-Column Description + Tags */}
-            {(shortDescription || longDescription) && (
-              <div style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: 32,
-                alignItems: "flex-start",
-                paddingInline: 16
-              }}>
-                {(shortDescription || tags) && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minWidth: 0 }}>
-                    {shortDescription && (
-                      <div style={{ fontSize: 20, fontWeight: 500, lineHeight: 1.3, margin: 0, fontFamily: "var(--font-geist-sans), sans-serif", color: "var(--color-text-heading)" }}>
-                        {shortDescription}
-                      </div>
+          {/* Main Content — stagger on open, slide on tab switch */}
+          <AnimatePresence mode="wait" custom={slideDirection ?? 0}>
+            <motion.div
+              key={contentKey ?? "default"}
+              custom={slideDirection ?? 0}
+              variants={SLIDE_VARIANTS}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              onAnimationComplete={(definition) => {
+                if (definition === "center") setStickyReady(true);
+              }}
+            >
+              <motion.div
+                variants={CONTENT_STAGGER}
+                initial="hidden"
+                animate="visible"
+                style={{ display: "flex", flexDirection: "column", gap: 48, paddingBottom: 32, position: "relative", zIndex: 1 }}
+              >
+                {/* Header: icon (left) + close (right) */}
+                <motion.div variants={CONTENT_ITEM} style={{ flexShrink: 0 }}>
+                  <div ref={headerRef} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingInline: 16, paddingBlock: 8 }}>
+                    {icon && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={icon}
+                        alt=""
+                        style={{ width: 48, height: 48, objectFit: "contain", borderRadius: 8, rotate: iconRotate, transformOrigin: "50% 50%", flexShrink: 0 }}
+                      />
                     )}
-
-                    {/* Tags below short description */}
-                    {tags && tags.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {tags.map((tag) => (
-                          <ProjectTag key={tag} label={tag} variant="light" />
-                        ))}
-                        {appStore && <AppStoreBadge active />}
-                      </div>
-                    )}
+                    <GlassButton size="s" onClick={() => void initiateClose()} aria-label="Close">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                        <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+                      </svg>
+                    </GlassButton>
                   </div>
+                </motion.div>
+
+                {/* Standardized 2-Column Description + Tags */}
+                {(shortDescription || longDescription) && (
+                  <motion.div variants={CONTENT_ITEM} style={{ paddingInline: 16 }}>
+                    <div style={{ display: "flex", flexDirection: "row", gap: 32, alignItems: "flex-start" }}>
+                      {(shortDescription || tags) && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 16, flex: 1, minWidth: 0 }}>
+                          {shortDescription && (
+                            <div style={{ fontSize: 20, fontWeight: 500, lineHeight: 1.3, margin: 0, fontFamily: "var(--font-geist-sans), sans-serif", color: "var(--color-text-heading)" }}>
+                              {shortDescription}
+                            </div>
+                          )}
+                          {tags && tags.length > 0 && (
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                              {tags.map((tag) => (
+                                <ProjectTag key={tag} label={tag} variant="light" />
+                              ))}
+                              {appStore && <AppStoreBadge active />}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {longDescription && (
+                        <div style={{ flex: 1.2, minWidth: 0, color: "var(--color-text-tertiary)", fontSize: 14, lineHeight: "21px", fontFamily: "var(--font-geist-sans), sans-serif" }}>
+                          {longDescription}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
                 )}
 
-                {longDescription && (
-                  <div style={{ flex: 1.2, minWidth: 0, color: "var(--color-text-tertiary)", fontSize: 14, lineHeight: "21px", fontFamily: "var(--font-geist-sans), sans-serif" }}>
-                    {longDescription}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 24, flex: 1, fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 14 }}>
-              {children}
-            </div>
-          </motion.div>
+                {/* Children — transparent stagger wrapper; each child animates individually */}
+                <motion.div variants={CHILDREN_STAGGER} style={{ display: "flex", flexDirection: "column", gap: 24, flex: 1, fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 14 }}>
+                  {children}
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
         </motion.div>
       </motion.div>
 
