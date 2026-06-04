@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useDialKit } from "dialkit";
 import styles from "@/components/ui/GlassButton.module.css";
 
 export type ProjectKey = "notes" | "vorli" | "sticky";
@@ -34,13 +33,13 @@ export function ProjectTabBar({ active, onChange }: ProjectTabBarProps) {
     setPrevActive(active);
   }
 
-  const dial = useDialKit("Project Tab Spring", {
-    stiffness: [350, 10, 1000],
-    damping: [25, 1, 100],
-    mass: [1, 0.1, 5],
-    stretchAmount: [1.4, 1.0, 2.5],
-    stretchDuration: [0.35, 0.1, 1.0],
-  });
+  const dial = {
+    stiffness: 350,
+    damping: 25,
+    mass: 1,
+    stretchAmount: 1.4,
+    stretchDuration: 0.35,
+  };
 
   return (
     <div

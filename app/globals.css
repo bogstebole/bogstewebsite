@@ -196,7 +196,3 @@ body {
   }
 }
 
-/* ── DialKit panel bottom padding override ── */
-.dialkit-panel-inner {
-  padding-bottom: 12px !important;
-}

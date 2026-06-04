@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { geistSans, geistMono, inter, silkscreen, jetbrainsMono, specialElite } from "@/lib/fonts";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import "./globals.css";
-import { DialRoot } from "dialkit";
-import "dialkit/styles.css";
 
 export const metadata: Metadata = {
   title: "Boule's Portfolio",
@@ -50,7 +48,6 @@ export default function RootLayout({
       >
         <ThemeToggle />
         {children}
-        <DialRoot />
       </body>
     </html>
   );
