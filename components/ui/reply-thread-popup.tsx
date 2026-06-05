@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X, Save } from 'lucide-react';
 import { ChatInput, ChatInputHandle, defaultInlineAnimConfig } from '../ChatInput/ChatInput';
+import { Button } from '../Button/Button';
 
 export interface Turn {
   id: string;
@@ -28,9 +30,10 @@ const HIGGS_RESPONSE = [
 interface ReplyThreadPopupProps {
   activeReply: { text: string; rect: DOMRect };
   onClose: () => void;
+  onSave?: () => void;
 }
 
-export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps) {
+export function ReplyThreadPopup({ activeReply, onClose, onSave }: ReplyThreadPopupProps) {
   const [threadTurns, setThreadTurns] = useState<Turn[]>([newTurn()]);
   const [threadFade, setThreadFade] = useState<"none" | "top" | "bottom" | "both">("none");
   const threadStreamingRef = useRef<number | null>(null);
@@ -241,7 +244,7 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
       }}
     >
       <div style={{ width: replyTargetWidth - 8, display: "flex", flexDirection: "column" }}>
-        <div style={{ alignItems: 'center', alignSelf: 'stretch', borderRadius: '16px', display: 'flex', gap: '4px', justifyContent: 'center', paddingBottom: 4, paddingInline: '16px', paddingTop: 6 }}>
+        <div style={{ alignItems: 'center', alignSelf: 'stretch', borderRadius: '16px', display: 'flex', gap: '4px', justifyContent: 'center', paddingBottom: 12, paddingInline: '16px', paddingTop: 6 }}>
           <div style={{ alignItems: 'center', display: 'flex', flex: 1, gap: 4 }}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" style={{ width: '16px', height: 'auto', overflow: 'visible', flexShrink: '0' }}>
               <path d="m85.1 21c1.5-2.2 4.6-6.7 5.8-11 0.7-2.5 0.3-4.7-1.6-6.1-1.6-1.4-4.3-1.7-7.3-0.4-3.2 1.2-7.3 4.6-12 9.1l-0.2 0.2c-0.9-0.3-1.9-0.6-2.9-0.7-7.9-1.2-14.7 0-20 3.6-6.8 4.6-10.8 12.3-9.5 22.6 0.1 1.4 1.2 2.4 2.7 2.3 1.4 0 2.6-1.4 2.4-2.8-1.1-6.8 1-12.9 6.5-16.9 3.9-2.9 9.1-4.8 16.5-3.9l-35.4 39.5c0 0.3 4.1 2.8 4.2 2.8 1-0.9 4-4.4 5.2-5.7l27.2-30.6c-0.4 3.3 0.6 5.8 5.6 5.1-8.4 9.4-25.2 25.2-33.5 33.7 0.5 0.5 4 2 4.8 2.3 7.8-7.2 25.4-24 34.8-34.5l3.5-4.6c4.1 3.7 11.7 11.9 11.7 24.7 0 9.6-6 20-20 22.7-8.2 1.2-17.3 0.1-26.4-3.5-8.5-3.1-15.7-7.8-22.3-13.1-7-6-13.3-13.5-14.9-21.8-0.9-4.9 0.2-9.7 4.1-12.9 2.8-2.4 6.5-4.2 12-4.3 3.8-0.1 7.3 0.4 11.9 2.1 1.2 0.6 2.8 0.4 3.4-0.8 0.8-1.1 0.2-3.2-1.1-3.6-5.2-1.9-9-2.9-14-2.9-5.7 0.1-10.7 1.5-14.9 4.9-4.7 3.8-8.5 10.3-5.8 20 2.4 9.2 9.5 17.3 19.5 25.4l-20.8 27.8c-1.4 1.7-2.3 2.8-2.3 3.9-0.2 1.5 0.6 2.7 1.6 3.3 1.3 0.8 3.4 0.6 4.7-0.3 3.4-2.2 15.8-13.1 29.7-26.7 6.5 3 16.5 7 27.9 7.8 5.6 0.2 10.7-0.2 15.4-1.9 10.8-3.5 17.2-13 17.1-25.8 0-11.9-6.7-22.3-13.3-29zm-73.3 65.7 17.5-21.9 4.1 2.5c-5.8 5.2-13.6 12.4-21.6 19.4zm64.9-63.3c-1.7 0.7-4.7 2-6.6 1.9-0.7-0.4 1.5-6.5 1.7-6.5 2.1 0.9 4.7 2 6.1 3.1l-1.2 1.5zm4.2-5.5c-1.6-1.1-3.7-2.3-5.5-3.2 2.1-1.9 4.7-4 6.3-5.1 1.4-0.9 3.2-0.5 3 1.4-0.3 2-3 5.8-3.8 6.9z" fill="#11111180" />
@@ -250,23 +253,21 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
               Replying in a thread
             </p>
           </div>
-          <button 
-            onClick={onClose}
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              cursor: 'pointer', 
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#111111'
-            }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Button
+              variant="primary"
+              icon={<Save size={16} />}
+              onClick={onSave}
+            >
+              Save
+            </Button>
+            <Button
+              variant="secondary"
+              icon={<X size={16} />}
+              onClick={onClose}
+              aria-label="Close thread"
+            />
+          </div>
         </div>
 
         <div style={{
