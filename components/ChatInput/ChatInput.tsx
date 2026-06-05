@@ -59,7 +59,7 @@ export const defaultInlineAnimConfig: InlineAnimConfig = {
 export type ChatInputVariant = "default" | "absorb" | "mass" | "baton" | "inline";
 
 export interface ChatInputHandle {
-  focus: () => void;
+  focus: (options?: FocusOptions) => void;
   setValue: (value: string) => void;
   getValue: () => string;
 }
@@ -190,7 +190,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
     };
 
     useImperativeHandle(ref, () => ({
-      focus: () => editorRef.current?.focus(),
+      focus: (options) => editorRef.current?.focus(options),
       setValue: (v) => {
         const el = editorRef.current;
         if (el) { el.textContent = v; placeCursorAtEnd(el); }

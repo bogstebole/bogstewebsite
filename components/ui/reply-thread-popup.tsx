@@ -161,11 +161,15 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
     threadStreamingRef.current = window.setTimeout(() => {
       threadStreamingRef.current = null;
       setThreadTurns((t) => [...t, newTurn()]);
-      setTimeout(() => {
-        if (threadActiveInputRef.current) {
-          threadActiveInputRef.current.focus();
+      // New input reserves its full height immediately (transform-based entrance,
+      // no layout reflow), so scrollHeight is final and a single smooth scroll lands cleanly.
+      requestAnimationFrame(() => {
+        if (threadFeedRef.current) {
+          threadFeedRef.current.scrollTo({ top: threadFeedRef.current.scrollHeight, behavior: "smooth" });
         }
-      }, 50);
+        // preventScroll so focusing the input doesn't fight our smooth scroll.
+        threadActiveInputRef.current?.focus({ preventScroll: true });
+      });
     }, 400);
   };
 
@@ -329,10 +333,10 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
                 <motion.div
                   key={turn.id}
                   id={`thread-turn-${turn.id}`}
-                  initial={{ opacity: 0, height: 0, marginTop: 0, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, height: "auto", marginTop: 40, filter: "blur(0px)" }}
-                  transition={{ type: "spring", stiffness: 200, damping: 24, mass: 0.8 }}
-                  style={{ display: "flex", flexDirection: "column", width: "100%", gap: "40px" }}
+                  initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ type: "spring", stiffness: 260, damping: 30, mass: 0.8 }}
+                  style={{ display: "flex", flexDirection: "column", width: "100%", gap: "40px", marginTop: 40 }}
                 >
                   <div style={{ 
                     alignSelf: isInputMode ? "stretch" : "flex-end", 
