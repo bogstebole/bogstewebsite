@@ -136,12 +136,19 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
       );
       const char = fullText[i];
       i += 1;
+      
+      if (i % 2 === 0 && threadFeedRef.current) {
+        const el = document.getElementById(`thread-turn-${turnId}`);
+        if (el) {
+          const feedRect = threadFeedRef.current.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+          const relativeTop = elRect.top - feedRect.top + threadFeedRef.current.scrollTop;
+          threadFeedRef.current.scrollTo({ top: relativeTop - 16, behavior: "auto" });
+        }
+      }
+
       const delay = char === "." ? 40 : char === "," ? 18 : 3;
       threadStreamingRef.current = window.setTimeout(tick, delay);
-      
-      if (i % 5 === 0 && threadFeedRef.current) {
-         threadFeedRef.current.scrollTop = threadFeedRef.current.scrollHeight;
-      }
     };
     threadStreamingRef.current = window.setTimeout(tick, 300);
   };
@@ -200,18 +207,16 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
       <motion.div
         onClick={(e) => e.stopPropagation()}
         initial={{ 
-        x: activeReply.rect.left, 
-        y: activeReply.rect.top, 
+        left: activeReply.rect.left, 
+        top: activeReply.rect.top, 
         width: activeReply.rect.width, 
-        height: activeReply.rect.height,
         borderRadius: 12,
         opacity: 0
       }}
       animate={{ 
-        x: replyTargetX, 
-        y: replyTargetY, 
+        left: replyTargetX, 
+        top: replyTargetY, 
         width: replyTargetWidth, 
-        height: "auto",
         borderRadius: 28,
         opacity: 1,
         backgroundColor: "#F3F3F3",
@@ -307,8 +312,7 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
               display: 'flex', 
               flexDirection: 'column', 
               padding: '16px',
-              alignItems: 'start',
-              gap: '40px'
+              alignItems: 'start'
             }}>
             <div style={{ color: '#111111', display: 'inline-block', fontFamily: 'var(--font-geist-sans), system-ui, sans-serif', fontSize: '13px', letterSpacing: '0.01em', lineHeight: '150%' }}>
               {activeReply.text}
@@ -325,8 +329,8 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
                 <motion.div
                   key={turn.id}
                   id={`thread-turn-${turn.id}`}
-                  initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, height: 0, marginTop: 0, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, height: "auto", marginTop: 40, filter: "blur(0px)" }}
                   transition={{ type: "spring", stiffness: 200, damping: 24, mass: 0.8 }}
                   style={{ display: "flex", flexDirection: "column", width: "100%", gap: "40px" }}
                 >
