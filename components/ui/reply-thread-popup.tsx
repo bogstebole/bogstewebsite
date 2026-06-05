@@ -48,9 +48,17 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
   const updateThreadFade = () => {
     const wrap = threadFeedRef.current;
     if (!wrap) return;
-    const isAtMaxHeight = wrap.clientHeight >= 638;
-    const hasOverflow = isAtMaxHeight && Math.abs(wrap.scrollHeight - wrap.clientHeight) > 2;
-    if (!hasOverflow) { setThreadFade("none"); return; }
+    
+    // Strict max height check: only allow fade if container has physically hit max height bounds
+    const isAtMaxHeight = wrap.clientHeight >= 630; // Small tolerance for borders/rounding
+    const overflowAmount = wrap.scrollHeight - wrap.clientHeight;
+    const hasOverflow = isAtMaxHeight && overflowAmount > 2;
+    
+    if (!hasOverflow) { 
+      setThreadFade("none"); 
+      return; 
+    }
+    
     const atTop = wrap.scrollTop <= 2;
     const atBottom = wrap.scrollTop + wrap.clientHeight >= wrap.scrollHeight - 2;
     if (!atTop && !atBottom) setThreadFade("both");
@@ -293,8 +301,7 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
               flexDirection: 'column', 
               gap: '40px',
               padding: '16px',
-              alignItems: 'start', 
-              minHeight: '100%'
+              alignItems: 'start'
             }}>
             <div style={{ color: '#111111', display: 'inline-block', fontFamily: 'var(--font-geist-sans), system-ui, sans-serif', fontSize: '13px', letterSpacing: '0.01em', lineHeight: '150%' }}>
               {activeReply.text}
