@@ -147,22 +147,22 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
     threadStreamingRef.current = window.setTimeout(() => {
       threadStreamingRef.current = null;
       setThreadTurns((t) => [...t, newTurn()]);
-      
-      const start = performance.now();
-      const frame = (time: number) => {
-        if (!threadFeedRef.current) return;
-        threadFeedRef.current.scrollTop = threadFeedRef.current.scrollHeight;
-        if (time - start < 450) {
-          requestAnimationFrame(frame);
-        }
-      };
-      requestAnimationFrame(frame);
-
       setTimeout(() => {
+        if (threadFeedRef.current) {
+          // Scroll to a very large number to ensure it tracks the bottom even as height expands
+          threadFeedRef.current.scrollTo({ top: 999999, behavior: "smooth" });
+        }
         if (threadActiveInputRef.current) {
           threadActiveInputRef.current.focus();
         }
       }, 50);
+      
+      // Ensure it's fully scrolled after animation completes
+      setTimeout(() => {
+        if (threadFeedRef.current) {
+          threadFeedRef.current.scrollTo({ top: 999999, behavior: "smooth" });
+        }
+      }, 450);
     }, 400);
   };
 
@@ -327,15 +327,10 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
               return (
                 <motion.div
                   key={turn.id}
-                  initial={{ opacity: 0, height: 0, marginTop: 0, overflow: "hidden" }}
-                  animate={{ 
-                    opacity: 1, 
-                    height: "auto", 
-                    marginTop: 40,
-                    transitionEnd: { overflow: "visible" }
-                  }}
-                  transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-                  style={{ display: "flex", flexDirection: "column", width: "100%", gap: "40px" }} // Increased to 40px as requested
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginTop: 40 }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
+                  style={{ display: "flex", flexDirection: "column", width: "100%" }}
                 >
                   <div style={{ 
                     alignSelf: isInputMode ? "stretch" : "flex-end", 
