@@ -48,10 +48,10 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
   const updateThreadFade = () => {
     const wrap = threadFeedRef.current;
     if (!wrap) return;
-    const hasOverflow = wrap.scrollHeight > wrap.clientHeight;
+    const hasOverflow = Math.abs(wrap.scrollHeight - wrap.clientHeight) > 2;
     if (!hasOverflow) { setThreadFade("none"); return; }
-    const atTop = wrap.scrollTop <= 1;
-    const atBottom = wrap.scrollTop + wrap.clientHeight >= wrap.scrollHeight - 1;
+    const atTop = wrap.scrollTop <= 2;
+    const atBottom = wrap.scrollTop + wrap.clientHeight >= wrap.scrollHeight - 2;
     if (!atTop && !atBottom) setThreadFade("both");
     else if (!atTop) setThreadFade("top");
     else if (!atBottom) setThreadFade("bottom");
@@ -61,10 +61,25 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
   useEffect(() => {
     const wrap = threadFeedRef.current;
     if (!wrap) return;
-    wrap.addEventListener("scroll", updateThreadFade, { passive: true });
-    updateThreadFade(); // Check initially
-    return () => wrap.removeEventListener("scroll", updateThreadFade);
-  }, [threadTurns]); // Re-bind/check when turns change
+    
+    const handleScroll = () => updateThreadFade();
+    wrap.addEventListener("scroll", handleScroll, { passive: true });
+    
+    const resizeObserver = new ResizeObserver(() => {
+      updateThreadFade();
+    });
+    
+    resizeObserver.observe(wrap);
+    if (wrap.firstElementChild) {
+      resizeObserver.observe(wrap.firstElementChild);
+    }
+    
+    updateThreadFade(); 
+    return () => {
+      wrap.removeEventListener("scroll", handleScroll);
+      resizeObserver.disconnect();
+    };
+  }, [threadTurns]);
 
   const updateThreadTurn = (id: string, patch: Partial<Turn>) => {
     setThreadTurns((t) => t.map((turn) => (turn.id === id ? { ...turn, ...patch } : turn)));
@@ -261,13 +276,8 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
           <div 
             ref={threadFeedRef}
             style={{ 
-              alignItems: 'start', 
               backgroundColor: '#FFFFFF', 
               borderRadius: '24px', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: '40px', // Increased to 40px as requested 
-              padding: '16px',
               maxHeight: '640px',
               overflowY: 'auto',
               scrollbarWidth: 'none',
@@ -277,6 +287,14 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
                 display: none;
               }
             `}</style>
+            <div style={{
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '40px',
+              padding: '16px',
+              alignItems: 'start', 
+              minHeight: '100%'
+            }}>
             <div style={{ color: '#111111', display: 'inline-block', fontFamily: 'var(--font-geist-sans), system-ui, sans-serif', fontSize: '13px', letterSpacing: '0.01em', lineHeight: '150%' }}>
               {activeReply.text}
             </div>
@@ -314,6 +332,7 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
                       variant="inline"
                       animationConfig={animConfig}
                       placeholder="Ask me about this text..."
+                      style={isInputMode ? { width: "100%", maxWidth: "100%" } : {}}
                     />
                   </div>
                   
@@ -325,6 +344,7 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
                 </motion.div>
               );
             })}
+            </div>
           </div>
         </div>
       </div>

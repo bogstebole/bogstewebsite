@@ -76,6 +76,7 @@ interface ChatInputProps {
   placeholder?: string;
   variant?: ChatInputVariant;
   animationConfig?: InlineAnimConfig;
+  style?: React.CSSProperties;
 }
 
 const spring: Transition = {
@@ -148,6 +149,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       placeholder = "Placeholder text...",
       variant = "default",
       animationConfig,
+      style,
     },
     ref
   ) {
@@ -411,7 +413,8 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
               filter: isAddOpen ? `blur(${ac?.addCards?.inputBlur ?? 2}px)` : "blur(0px)",
             }}
             style={{
-              pointerEvents: isAddOpen ? "none" : "auto"
+              pointerEvents: isAddOpen ? "none" : "auto",
+              ...style,
             }}
             transition={{
               ...bubbleSpring,
