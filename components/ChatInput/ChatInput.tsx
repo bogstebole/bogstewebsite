@@ -405,6 +405,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
           className={styles.wrap}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
+          style={style}
         >
           <motion.div
             className={`${styles.root} ${isGlass ? styles.isGlassRoot : ""}`}
@@ -414,7 +415,8 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
             }}
             style={{
               pointerEvents: isAddOpen ? "none" : "auto",
-              ...style,
+              width: style?.width === "100%" ? "100%" : undefined,
+              maxWidth: style?.maxWidth,
             }}
             transition={{
               ...bubbleSpring,

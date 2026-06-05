@@ -48,7 +48,8 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
   const updateThreadFade = () => {
     const wrap = threadFeedRef.current;
     if (!wrap) return;
-    const hasOverflow = Math.abs(wrap.scrollHeight - wrap.clientHeight) > 2;
+    const isAtMaxHeight = wrap.clientHeight >= 638;
+    const hasOverflow = isAtMaxHeight && Math.abs(wrap.scrollHeight - wrap.clientHeight) > 2;
     if (!hasOverflow) { setThreadFade("none"); return; }
     const atTop = wrap.scrollTop <= 2;
     const atBottom = wrap.scrollTop + wrap.clientHeight >= wrap.scrollHeight - 2;
@@ -314,9 +315,9 @@ export function ReplyThreadPopup({ activeReply, onClose }: ReplyThreadPopupProps
                   style={{ display: "flex", flexDirection: "column", width: "100%", gap: "40px" }} // Increased to 40px as requested
                 >
                   <div style={{ 
-                    alignSelf: "flex-end", 
+                    alignSelf: isInputMode ? "stretch" : "flex-end", 
                     display: "flex", 
-                    justifyContent: "flex-end", 
+                    justifyContent: isInputMode ? "stretch" : "flex-end", 
                     maxWidth: "100%",
                     width: isInputMode ? "100%" : "auto"
                   }}>
