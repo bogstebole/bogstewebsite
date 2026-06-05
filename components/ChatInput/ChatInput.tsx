@@ -508,6 +508,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                 <motion.div
                   ref={editorWrapRef}
                   className={`${styles.editorWrap} ${isGlass ? styles.editorWrapGlass : ""}`}
+                  layout="position"
                   animate={isGlass && isOverflowing
                     ? { maxHeight: isExpanded ? textScrollHeightRef.current : 240 }
                     : undefined
