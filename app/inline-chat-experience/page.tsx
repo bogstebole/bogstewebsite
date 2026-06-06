@@ -297,11 +297,12 @@ export default function Page() {
           key="chat"
           className="chatPage"
           initial={{ opacity: 0 }}
-          animate={{ 
+          animate={{
             opacity: (activeReply || showHighlightsModal) ? 0.4 : 1,
-            filter: (activeReply || showHighlightsModal) ? "blur(8px)" : "blur(0px)"
+            filter: (activeReply || showHighlightsModal) ? "blur(3px)" : "blur(0px)",
+            scale: (activeReply || showHighlightsModal) ? 0.9 : 1
           }}
-          transition={{ duration: 0.3 }}
+          transition={{ type: "spring", stiffness: 260, damping: 30, mass: 0.9 }}
           onAnimationComplete={() => activeInputRef.current?.focus()}
         >
           <div className="topBlur" />

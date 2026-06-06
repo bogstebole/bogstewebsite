@@ -51,6 +51,19 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
     return d;
   };
 
+  // Menu position: horizontal center + top edge of the highlight (in container coords).
+  // Points store skew-corrected x, so reapply the skew (visualX = x + TAN_ANGLE * y) to get the rendered x.
+  const getMenuPosition = (points: { x: number; y: number }[]) => {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity;
+    points.forEach((p) => {
+      const visualX = p.x + TAN_ANGLE * p.y;
+      if (visualX < minX) minX = visualX;
+      if (visualX > maxX) maxX = visualX;
+      if (p.y < minY) minY = p.y;
+    });
+    return { x: (minX + maxX) / 2, y: minY };
+  };
+
   const checkHighlight = (clientX: number, clientY: number, indices: Set<number>) => {
     const el = document.elementFromPoint(clientX, clientY);
     if (el && el.hasAttribute("data-index")) {
@@ -111,12 +124,8 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
     setPaths((prev) => [...prev, currentPath]);
     
     if (currentPath.highlightedIndices.size > 0) {
-      // Find the maxY to position the menu inline with the lower edge
-      let maxY = -Infinity;
-      currentPath.points.forEach(p => {
-        if (p.y > maxY) maxY = p.y;
-      });
-      setMenuAnchor({ x: "calc(100% + 16px)", y: maxY, pathId: currentPath.id });
+      const pos = getMenuPosition(currentPath.points);
+      setMenuAnchor({ x: pos.x, y: pos.y, pathId: currentPath.id });
     }
 
     if (onHighlightComplete && currentPath.highlightedIndices.size > 0) {
@@ -285,9 +294,8 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
                 onPointerUp={(e) => {
                   if (pressedPathId === path.id) {
                     e.stopPropagation();
-                    let maxY = -Infinity;
-                    path.points.forEach(p => { if (p.y > maxY) maxY = p.y; });
-                    setMenuAnchor({ x: "calc(100% + 16px)", y: maxY, pathId: path.id });
+                    const pos = getMenuPosition(path.points);
+                    setMenuAnchor({ x: pos.x, y: pos.y, pathId: path.id });
                     setPressedPathId(null);
                   }
                 }}
@@ -337,7 +345,7 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
               position: "absolute",
               left: menuAnchor.x,
               top: menuAnchor.y,
-              transform: "translateY(-50%)",
+              transform: "translate(-50%, calc(-100% - 16px))",
               zIndex: 10000,
               display: "flex",
               flexDirection: "row",
