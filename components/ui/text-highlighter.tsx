@@ -17,6 +17,7 @@ interface SelectionHighlight {
   id: string;
   rects: { x: number; y: number; w: number; h: number }[]; // container-relative
   text: string;
+  highlightedIndices: Set<number>;
 }
 
 interface TextHighlighterProps {
@@ -94,7 +95,6 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
   // Precise (native) selection capture — char-level. Registered once; reads refs.
   useEffect(() => {
     const handleMouseUp = (e: MouseEvent) => {
-      if (selectionModeRef.current !== "precise") return;
       const container = containerRef.current;
       if (!container) return;
       const sel = window.getSelection();
@@ -114,6 +114,8 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
         return;
       }
 
+      if (selectionModeRef.current !== "precise") return;
+
       const range = sel.getRangeAt(0);
       if (!container.contains(range.commonAncestorContainer)) return; // selection not in this paragraph
 
@@ -125,7 +127,16 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
       if (rects.length === 0) return;
 
       const id = Date.now().toString();
-      setSelections((prev) => [...prev, { id, rects, text }]);
+      
+      const highlightedIndices = new Set<number>();
+      const tokenSpans = container.querySelectorAll("span[data-index]");
+      tokenSpans.forEach((span) => {
+        if (sel.containsNode(span, true)) {
+          highlightedIndices.add(parseInt(span.getAttribute("data-index")!, 10));
+        }
+      });
+
+      setSelections((prev) => [...prev, { id, rects, text, highlightedIndices }]);
       const pos = getRectsMenuPosition(rects);
       setMenuAnchor({ x: pos.x, y: pos.y, pathId: id, kind: "selection" });
       onHighlightCompleteRef.current?.(text);
@@ -314,19 +325,37 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
       {/* Underlying text */}
       <span style={{ position: "relative", zIndex: 1 }}>
         {tokens.map((token, i) => {
-          // Only freeform (path) highlights dim the surrounding tokens; precise selections don't.
-          const isHighlightActive = !!menuAnchor && menuAnchor.kind === "path";
-          const activePath = isHighlightActive ? paths.find(p => p.id === menuAnchor.pathId) : null;
-          const isPartOfActiveHighlight = activePath?.highlightedIndices.has(i);
+          // Both freeform (path) and precise (selection) highlights dim the surrounding tokens.
+          const isHighlightActive = !!menuAnchor;
+          let isPartOfActiveHighlight = false;
+
+          if (isHighlightActive) {
+            if (menuAnchor.kind === "path") {
+              const activePath = paths.find(p => p.id === menuAnchor.pathId);
+              isPartOfActiveHighlight = activePath?.highlightedIndices?.has(i) ?? false;
+            } else if (menuAnchor.kind === "selection") {
+              const activeSel = selections.find(s => s.id === menuAnchor.pathId);
+              isPartOfActiveHighlight = activeSel?.highlightedIndices?.has(i) ?? false;
+            }
+          }
+
           const isBlurred = isHighlightActive && !isPartOfActiveHighlight;
           
           const pressedPath = pressedPathId ? paths.find(p => p.id === pressedPathId) : null;
-          const isPartOfPressed = pressedPath?.highlightedIndices.has(i);
+          const isPartOfPressed = pressedPath?.highlightedIndices?.has(i);
+          
+          const isPartOfAnySelection = selections.some(s => s.highlightedIndices?.has(i));
 
           return (
             <motion.span 
               key={i} 
               data-index={i}
+              data-cursor={isPartOfAnySelection ? "pointer" : undefined}
+              onPointerDown={(e) => {
+                if (selectionMode === "marker" && isPartOfAnySelection && !isDrawing) {
+                  e.stopPropagation();
+                }
+              }}
               animate={{
                 filter: isBlurred ? "blur(3px)" : "blur(0px)",
                 opacity: isBlurred ? 0.15 : 1,
@@ -350,7 +379,7 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
             <motion.div
               key={ri}
               initial={{ opacity: 0, scaleX: 0.6 }}
-              animate={{ opacity: 1, scaleX: 1 }}
+              animate={{ opacity: menuAnchor ? (menuAnchor.pathId === s.id ? 1 : 0.15) : 1, scaleX: 1 }}
               transition={{ type: "spring", stiffness: 380, damping: 28 }}
               style={{
                 position: "absolute",
@@ -399,7 +428,7 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
                     : menuAnchor?.pathId === path.id 
                     ? "28px" 
                     : hoveredPathId === path.id ? "24px" : "20px",
-                  opacity: menuAnchor?.pathId === path.id ? 1 : hoveredPathId === path.id ? 0.9 : 1,
+                  opacity: menuAnchor ? (menuAnchor.pathId === path.id ? 1 : 0.15) : (hoveredPathId === path.id ? 0.9 : 1),
                   filter: menuAnchor?.pathId === path.id 
                     ? "drop-shadow(0px 6px 16px rgba(204, 255, 0, 0.6))" 
                     : "drop-shadow(0px 0px 0px rgba(0, 0, 0, 0))"
