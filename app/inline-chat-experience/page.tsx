@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDialKit, DialRoot } from "dialkit";
 import Link from "next/link";
-import { ArrowLeft, Share } from "lucide-react";
+import { ArrowLeft, Share, Highlighter, TextCursor } from "lucide-react";
 import { ReplyThreadPopup } from "@/components/ui/reply-thread-popup";
 import { Logo } from "@/components/ui/logo";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
@@ -123,6 +123,7 @@ export default function Page() {
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [showHighlightsModal, setShowHighlightsModal] = useState(false);
   const [activeReply, setActiveReply] = useState<{ text: string, rect: DOMRect } | null>(null);
+  const [selectionMode, setSelectionMode] = useState<"marker" | "precise">("marker");
   const streamingRef = useRef<number | null>(null);
   const turnCountRef = useRef(0);
   const activeInputRef = useRef<ChatInputHandle>(null);
@@ -313,7 +314,27 @@ export default function Page() {
               </Link>
               <span className="chatHeaderTitle">inline chat experience</span>
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <div className="selectModeToggle" role="group" aria-label="Selection mode">
+                <button
+                  type="button"
+                  data-active={selectionMode === "marker"}
+                  onClick={() => setSelectionMode("marker")}
+                  aria-label="Freeform marker"
+                  title="Freeform marker"
+                >
+                  <Highlighter size={15} />
+                </button>
+                <button
+                  type="button"
+                  data-active={selectionMode === "precise"}
+                  onClick={() => setSelectionMode("precise")}
+                  aria-label="Precise text selection"
+                  title="Precise text selection"
+                >
+                  <TextCursor size={15} />
+                </button>
+              </div>
               {highlights.length > 0 && (
                 <button 
                   className="secondaryBtn" 
@@ -367,8 +388,9 @@ export default function Page() {
                     </div>
                     {turn.ai && (
                       <p className="aiText">
-                        <TextHighlighter 
-                          text={turn.ai} 
+                        <TextHighlighter
+                          text={turn.ai}
+                          selectionMode={selectionMode}
                           onHighlightComplete={(text) => {
                             if (text.trim().length > 0) {
                               setHighlights(prev => [...prev, { turnId: turn.id, text: text.trim() }]);

@@ -13,18 +13,26 @@ interface PathData {
   highlightedIndices: Set<number>;
 }
 
+interface SelectionHighlight {
+  id: string;
+  rects: { x: number; y: number; w: number; h: number }[]; // container-relative
+  text: string;
+}
+
 interface TextHighlighterProps {
   text: string;
+  selectionMode?: "marker" | "precise";
   onHighlightComplete?: (highlightedText: string) => void;
   onReplyInThread?: (text: string, rect: DOMRect) => void;
 }
 
-export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: TextHighlighterProps) {
+export function TextHighlighter({ text, selectionMode = "marker", onHighlightComplete, onReplyInThread }: TextHighlighterProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [paths, setPaths] = useState<PathData[]>([]);
+  const [selections, setSelections] = useState<SelectionHighlight[]>([]);
   const [currentPath, setCurrentPath] = useState<PathData | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [menuAnchor, setMenuAnchor] = useState<{ x: number | string, y: number, pathId: string } | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<{ x: number | string, y: number, pathId: string, kind: "path" | "selection" } | null>(null);
   const [hoveredPathId, setHoveredPathId] = useState<string | null>(null);
   const [pressedPathId, setPressedPathId] = useState<string | null>(null);
 
@@ -64,6 +72,76 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
     return { x: (minX + maxX) / 2, y: minY };
   };
 
+  // Same idea for precise-mode rect highlights (container-relative rects).
+  const getRectsMenuPosition = (rects: { x: number; y: number; w: number; h: number }[]) => {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity;
+    rects.forEach((r) => {
+      if (r.x < minX) minX = r.x;
+      if (r.x + r.w > maxX) maxX = r.x + r.w;
+      if (r.y < minY) minY = r.y;
+    });
+    return { x: (minX + maxX) / 2, y: minY };
+  };
+
+  // Live values for the stable document listener (avoids re-registering on every render).
+  const selectionModeRef = useRef(selectionMode);
+  selectionModeRef.current = selectionMode;
+  const selectionsRef = useRef(selections);
+  selectionsRef.current = selections;
+  const onHighlightCompleteRef = useRef(onHighlightComplete);
+  onHighlightCompleteRef.current = onHighlightComplete;
+
+  // Precise (native) selection capture — char-level. Registered once; reads refs.
+  useEffect(() => {
+    const handleMouseUp = (e: MouseEvent) => {
+      if (selectionModeRef.current !== "precise") return;
+      const container = containerRef.current;
+      if (!container) return;
+      const sel = window.getSelection();
+
+      // Collapsed click → reopen an existing highlight's menu if clicked on one, else ignore.
+      if (!sel || sel.isCollapsed || sel.rangeCount === 0 || !sel.toString().trim()) {
+        const cRect = container.getBoundingClientRect();
+        const px = e.clientX - cRect.left;
+        const py = e.clientY - cRect.top;
+        const hit = selectionsRef.current.find((s) =>
+          s.rects.some((r) => px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h)
+        );
+        if (hit) {
+          const pos = getRectsMenuPosition(hit.rects);
+          setMenuAnchor({ x: pos.x, y: pos.y, pathId: hit.id, kind: "selection" });
+        }
+        return;
+      }
+
+      const range = sel.getRangeAt(0);
+      if (!container.contains(range.commonAncestorContainer)) return; // selection not in this paragraph
+
+      const text = sel.toString().trim();
+      const cRect = container.getBoundingClientRect();
+      const rects = Array.from(range.getClientRects())
+        .map((r) => ({ x: r.left - cRect.left, y: r.top - cRect.top, w: r.width, h: r.height }))
+        .filter((r) => r.w > 0 && r.h > 0);
+      if (rects.length === 0) return;
+
+      const id = Date.now().toString();
+      setSelections((prev) => [...prev, { id, rects, text }]);
+      const pos = getRectsMenuPosition(rects);
+      setMenuAnchor({ x: pos.x, y: pos.y, pathId: id, kind: "selection" });
+      onHighlightCompleteRef.current?.(text);
+      // Clear the native selection on the next frame so it doesn't linger as blue.
+      requestAnimationFrame(() => window.getSelection()?.removeAllRanges());
+    };
+
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => document.removeEventListener("mouseup", handleMouseUp);
+  }, []);
+
+  // Close any open menu when switching selection mode.
+  useEffect(() => {
+    setMenuAnchor(null);
+  }, [selectionMode]);
+
   const checkHighlight = (clientX: number, clientY: number, indices: Set<number>) => {
     const el = document.elementFromPoint(clientX, clientY);
     if (el && el.hasAttribute("data-index")) {
@@ -73,9 +151,10 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    if (selectionMode === "precise") return; // native selection handles this mode
     // Only left click / main touch
     if (e.button !== 0 && e.pointerType === "mouse") return;
-    
+
     setIsDrawing(true);
     const target = e.currentTarget as HTMLDivElement;
     target.setPointerCapture(e.pointerId);
@@ -96,6 +175,7 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
+    if (selectionMode === "precise") return;
     if (!currentPath) return;
 
     const rect = containerRef.current!.getBoundingClientRect();
@@ -116,6 +196,7 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    if (selectionMode === "precise") return;
     setIsDrawing(false);
     if (!currentPath) return;
     const target = e.currentTarget as HTMLDivElement;
@@ -125,7 +206,7 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
     
     if (currentPath.highlightedIndices.size > 0) {
       const pos = getMenuPosition(currentPath.points);
-      setMenuAnchor({ x: pos.x, y: pos.y, pathId: currentPath.id });
+      setMenuAnchor({ x: pos.x, y: pos.y, pathId: currentPath.id, kind: "path" });
     }
 
     if (onHighlightComplete && currentPath.highlightedIndices.size > 0) {
@@ -159,16 +240,36 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
   };
 
   const removeHighlight = (id: string) => {
-    setPaths(prev => prev.filter(p => p.id !== id));
+    if (menuAnchor?.kind === "selection") {
+      setSelections(prev => prev.filter(s => s.id !== id));
+    } else {
+      setPaths(prev => prev.filter(p => p.id !== id));
+    }
     setMenuAnchor(null);
   };
 
   const replyInThread = () => {
     if (menuAnchor && onReplyInThread) {
-      const text = getHighlightedText(menuAnchor.pathId);
-      const el = document.getElementById(`highlight-path-${menuAnchor.pathId}`);
-      if (el) {
-        onReplyInThread(text, el.getBoundingClientRect());
+      if (menuAnchor.kind === "selection") {
+        const sel = selections.find(s => s.id === menuAnchor.pathId);
+        const container = containerRef.current;
+        if (sel && container) {
+          // Build a viewport-space union rect from the container-relative rects.
+          const cRect = container.getBoundingClientRect();
+          let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+          sel.rects.forEach(r => {
+            minX = Math.min(minX, r.x); minY = Math.min(minY, r.y);
+            maxX = Math.max(maxX, r.x + r.w); maxY = Math.max(maxY, r.y + r.h);
+          });
+          const rect = new DOMRect(cRect.left + minX, cRect.top + minY, maxX - minX, maxY - minY);
+          onReplyInThread(sel.text, rect);
+        }
+      } else {
+        const text = getHighlightedText(menuAnchor.pathId);
+        const el = document.getElementById(`highlight-path-${menuAnchor.pathId}`);
+        if (el) {
+          onReplyInThread(text, el.getBoundingClientRect());
+        }
       }
     }
     setMenuAnchor(null);
@@ -177,7 +278,7 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
   return (
     <motion.div
       ref={containerRef}
-      data-cursor="marker"
+      data-cursor={selectionMode === "precise" ? "text" : "marker"}
       data-cursor-active={isDrawing ? "true" : "false"}
       animate={{
         scale: 1,
@@ -186,8 +287,8 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       style={{
         position: "relative",
-        userSelect: "none",
-        WebkitUserSelect: "none",
+        userSelect: selectionMode === "precise" ? "text" : "none",
+        WebkitUserSelect: selectionMode === "precise" ? "text" : "none",
         touchAction: "none", // Prevent scrolling while highlighting on touch devices
         display: "block", // to wrap the text tightly
         zIndex: !!menuAnchor ? 10 : 1, // elevate above other paragraphs
@@ -213,7 +314,8 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
       {/* Underlying text */}
       <span style={{ position: "relative", zIndex: 1 }}>
         {tokens.map((token, i) => {
-          const isHighlightActive = !!menuAnchor;
+          // Only freeform (path) highlights dim the surrounding tokens; precise selections don't.
+          const isHighlightActive = !!menuAnchor && menuAnchor.kind === "path";
           const activePath = isHighlightActive ? paths.find(p => p.id === menuAnchor.pathId) : null;
           const isPartOfActiveHighlight = activePath?.highlightedIndices.has(i);
           const isBlurred = isHighlightActive && !isPartOfActiveHighlight;
@@ -240,6 +342,32 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
           );
         })}
       </span>
+
+      {/* Precise-mode marker rects — same yellow marker, drawn over exact selection rects */}
+      {selections.map((s) => (
+        <React.Fragment key={s.id}>
+          {s.rects.map((r, ri) => (
+            <motion.div
+              key={ri}
+              initial={{ opacity: 0, scaleX: 0.6 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ type: "spring", stiffness: 380, damping: 28 }}
+              style={{
+                position: "absolute",
+                left: r.x,
+                top: r.y,
+                width: r.w,
+                height: r.h,
+                background: MARKER_COLOR,
+                borderRadius: 3,
+                transformOrigin: "left center",
+                pointerEvents: "none", // never block starting a new selection
+                zIndex: 0, // behind the text so the text stays readable
+              }}
+            />
+          ))}
+        </React.Fragment>
+      ))}
 
       {/* SVG Canvas overlay */}
       <svg
@@ -295,7 +423,7 @@ export function TextHighlighter({ text, onHighlightComplete, onReplyInThread }: 
                   if (pressedPathId === path.id) {
                     e.stopPropagation();
                     const pos = getMenuPosition(path.points);
-                    setMenuAnchor({ x: pos.x, y: pos.y, pathId: path.id });
+                    setMenuAnchor({ x: pos.x, y: pos.y, pathId: path.id, kind: "path" });
                     setPressedPathId(null);
                   }
                 }}
