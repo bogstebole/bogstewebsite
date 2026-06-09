@@ -124,9 +124,11 @@ export default function Page() {
   const [showHighlightsModal, setShowHighlightsModal] = useState(false);
   const [activeReply, setActiveReply] = useState<{ text: string, rect: DOMRect } | null>(null);
   const [selectionMode, setSelectionMode] = useState<"marker" | "precise">("marker");
+  const [editingTurnId, setEditingTurnId] = useState<string | null>(null);
   const streamingRef = useRef<number | null>(null);
   const turnCountRef = useRef(0);
   const editingRef = useRef(false);
+  const editSnapshotRef = useRef<{ id: string; user: string } | null>(null);
   const activeInputRef = useRef<ChatInputHandle>(null);
   const feedRef = useRef<HTMLDivElement>(null);
   const animConfig = defaultInlineAnimConfig;
@@ -154,11 +156,29 @@ export default function Page() {
     });
   };
 
+  const handleEdit = (id: string) => {
+    const turn = turns.find((t) => t.id === id);
+    if (turn) editSnapshotRef.current = { id, user: turn.user };
+    updateTurn(id, { state: "typing" });
+  };
+
+  const handleCancelEdit = (id: string) => {
+    const snap = editSnapshotRef.current;
+    editSnapshotRef.current = null;
+    const patch: Partial<Turn> = { state: "resting" };
+    if (snap && snap.id === id) patch.user = snap.user;
+    updateTurn(id, patch);
+  };
+
   const handleSubmit = (id: string, value: string) => {
     const trimmed = value.trim();
     // An edit is a re-submit of a turn that was already answered — it
     // already has an input below it, so we must not append another one.
     editingRef.current = turns.some((turn) => turn.id === id && turn.ai.length > 0);
+    editSnapshotRef.current = null;
+    // While the answer regenerates, hide the trailing input so only the
+    // streaming response is visible; it re-appears once finished.
+    if (editingRef.current) setEditingTurnId(id);
     updateTurn(id, { user: trimmed, state: "responding", ai: "" });
 
     setTimeout(() => {
@@ -208,8 +228,10 @@ export default function Page() {
     );
     // Editing an existing turn regenerates its answer in place — the
     // trailing input is already present, so don't spawn a duplicate.
+    // Reveal it again now that the response is complete.
     if (editingRef.current) {
       editingRef.current = false;
+      setEditingTurnId(null);
       return;
     }
     streamingRef.current = window.setTimeout(() => {
@@ -368,6 +390,11 @@ export default function Page() {
                 const isActiveInput =
                   i === turns.length - 1 &&
                   (turn.state === "idle" || turn.state === "typing");
+                // Trailing empty input hides while an earlier turn regenerates,
+                // then animates back in once that response finishes.
+                if (editingTurnId !== null && isActiveInput && turn.ai.length === 0) {
+                  return null;
+                }
                 return (
                   <motion.article
                     key={turn.id}
@@ -375,8 +402,9 @@ export default function Page() {
                     className={`chatTurn${isActiveInput ? " activeInput" : ""}`}
                     initial={{ opacity: 0, y: -16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ 
-                      duration: 0.4, 
+                    exit={{ opacity: 0, y: -16 }}
+                    transition={{
+                      duration: 0.4,
                       ease: [0.22, 1, 0.36, 1],
                       delay: i === 0 ? dial["Chat Feed"].delay : 0
                     }}
@@ -390,7 +418,8 @@ export default function Page() {
                         onSubmit={(v) => handleSubmit(turn.id, v)}
                         onStop={() => handleStop(turn.id)}
                         onCopy={(v) => navigator.clipboard.writeText(v)}
-                        onEdit={() => updateTurn(turn.id, { state: "typing" })}
+                        onEdit={() => handleEdit(turn.id)}
+                        onCancelEdit={() => handleCancelEdit(turn.id)}
                         isEditing={turn.ai.length > 0 && turn.state === "typing"}
                         variant="inline"
                         animationConfig={animConfig}

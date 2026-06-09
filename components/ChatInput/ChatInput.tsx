@@ -73,6 +73,7 @@ interface ChatInputProps {
   onAdd?: () => void;
   onCopy?: (value: string) => void;
   onEdit?: (value: string) => void;
+  onCancelEdit?: () => void;
   isEditing?: boolean;
   placeholder?: string;
   variant?: ChatInputVariant;
@@ -147,6 +148,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       onAdd,
       onCopy,
       onEdit,
+      onCancelEdit,
       isEditing = false,
       placeholder = "Placeholder text...",
       variant = "default",
@@ -568,8 +570,29 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                       }}
                       style={{ display: "flex", justifyContent: "center", alignItems: "center", flexShrink: 0, position: "relative" }}
                     >
-                      <AnimatePresence>
-                        {!isAddOpen && (
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        {isEditing ? (
+                          <motion.div
+                            key="cancel-btn"
+                            initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
+                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                            exit={{ opacity: 0, scale: 0.5, rotate: -90 }}
+                            transition={{ duration: 0.14, ease: "easeOut" }}
+                            style={{ position: "absolute", inset: 0 }}
+                          >
+                            <Button
+                              variant="ghost"
+                              icon={<X size={14} aria-hidden />}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onCancelEdit?.();
+                              }}
+                              aria-label="Cancel edit"
+                              title="Cancel edit"
+                              style={{ width: "100%", height: "100%" }}
+                            />
+                          </motion.div>
+                        ) : !isAddOpen ? (
                           <motion.div
                             key="plus-btn"
                             initial={{ opacity: 0, scale: 0.5 }}
@@ -590,7 +613,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                               style={{ width: "100%", height: "100%" }}
                             />
                           </motion.div>
-                        )}
+                        ) : null}
                       </AnimatePresence>
                     </motion.div>
                   )}
