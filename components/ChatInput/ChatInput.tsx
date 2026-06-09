@@ -73,6 +73,7 @@ interface ChatInputProps {
   onAdd?: () => void;
   onCopy?: (value: string) => void;
   onEdit?: (value: string) => void;
+  isEditing?: boolean;
   placeholder?: string;
   variant?: ChatInputVariant;
   animationConfig?: InlineAnimConfig;
@@ -146,6 +147,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       onAdd,
       onCopy,
       onEdit,
+      isEditing = false,
       placeholder = "Placeholder text...",
       variant = "default",
       animationConfig,
@@ -625,13 +627,13 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                     >
                       <Button
                         variant="primary"
-                        icon={<MorphGlyph mode={showStop ? "stop" : "send"} color="#111" />}
+                        icon={<MorphGlyph mode={showStop ? "stop" : isEditing ? "check" : "send"} color="#111" />}
                         onClick={(e) => {
                           e.stopPropagation();
                           if (showStop) onStop?.();
                           else onSubmit(value);
                         }}
-                        aria-label={showStop ? "Stop response" : "Send message"}
+                        aria-label={showStop ? "Stop response" : isEditing ? "Save edits" : "Send message"}
                         style={{ flexShrink: 0, width: 28 }}
                       />
                     </motion.div>

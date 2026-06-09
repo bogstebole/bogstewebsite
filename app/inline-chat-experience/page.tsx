@@ -126,6 +126,7 @@ export default function Page() {
   const [selectionMode, setSelectionMode] = useState<"marker" | "precise">("marker");
   const streamingRef = useRef<number | null>(null);
   const turnCountRef = useRef(0);
+  const editingRef = useRef(false);
   const activeInputRef = useRef<ChatInputHandle>(null);
   const feedRef = useRef<HTMLDivElement>(null);
   const animConfig = defaultInlineAnimConfig;
@@ -155,7 +156,10 @@ export default function Page() {
 
   const handleSubmit = (id: string, value: string) => {
     const trimmed = value.trim();
-    updateTurn(id, { user: trimmed, state: "responding" });
+    // An edit is a re-submit of a turn that was already answered — it
+    // already has an input below it, so we must not append another one.
+    editingRef.current = turns.some((turn) => turn.id === id && turn.ai.length > 0);
+    updateTurn(id, { user: trimmed, state: "responding", ai: "" });
 
     setTimeout(() => {
       const el = document.getElementById(`turn-${id}`);
@@ -202,6 +206,12 @@ export default function Page() {
     setTurns((t) =>
       t.map((turn) => (turn.id === turnId ? { ...turn, state: "resting" } : turn))
     );
+    // Editing an existing turn regenerates its answer in place — the
+    // trailing input is already present, so don't spawn a duplicate.
+    if (editingRef.current) {
+      editingRef.current = false;
+      return;
+    }
     streamingRef.current = window.setTimeout(() => {
       streamingRef.current = null;
       setTurns((t) => [...t, newTurn()]);
@@ -381,6 +391,7 @@ export default function Page() {
                         onStop={() => handleStop(turn.id)}
                         onCopy={(v) => navigator.clipboard.writeText(v)}
                         onEdit={() => updateTurn(turn.id, { state: "typing" })}
+                        isEditing={turn.ai.length > 0 && turn.state === "typing"}
                         variant="inline"
                         animationConfig={animConfig}
                         placeholder="Ask me about particle physics…"
