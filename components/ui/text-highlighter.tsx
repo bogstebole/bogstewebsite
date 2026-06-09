@@ -92,25 +92,35 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
   const onHighlightCompleteRef = useRef(onHighlightComplete);
   onHighlightCompleteRef.current = onHighlightComplete;
 
+  const menuAnchorRef = useRef(menuAnchor);
+  menuAnchorRef.current = menuAnchor;
+
+  const getSelectionPathString = (rects: { x: number; y: number; w: number; h: number }[]) => {
+    let d = "";
+    rects.forEach(r => {
+      const centerY = r.y + r.h / 2;
+      const startX = r.x - centerY * TAN_ANGLE;
+      const endX = (r.x + r.w) - centerY * TAN_ANGLE;
+      d += `M ${startX} ${centerY} L ${endX} ${centerY} `;
+    });
+    return d.trim();
+  };
+
+  const allMarkers = [
+    ...paths.map(p => ({ id: p.id, d: makePathString(p.points), kind: "path" as const, item: p })),
+    ...selections.map(s => ({ id: s.id, d: getSelectionPathString(s.rects), kind: "selection" as const, item: s }))
+  ];
+
   // Precise (native) selection capture — char-level. Registered once; reads refs.
   useEffect(() => {
     const handleMouseUp = (e: MouseEvent) => {
+      if (menuAnchorRef.current) return;
+
       const container = containerRef.current;
       if (!container) return;
       const sel = window.getSelection();
 
-      // Collapsed click → reopen an existing highlight's menu if clicked on one, else ignore.
       if (!sel || sel.isCollapsed || sel.rangeCount === 0 || !sel.toString().trim()) {
-        const cRect = container.getBoundingClientRect();
-        const px = e.clientX - cRect.left;
-        const py = e.clientY - cRect.top;
-        const hit = selectionsRef.current.find((s) =>
-          s.rects.some((r) => px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h)
-        );
-        if (hit) {
-          const pos = getRectsMenuPosition(hit.rects);
-          setMenuAnchor({ x: pos.x, y: pos.y, pathId: hit.id, kind: "selection" });
-        }
         return;
       }
 
@@ -121,10 +131,31 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
 
       const text = sel.toString().trim();
       const cRect = container.getBoundingClientRect();
-      const rects = Array.from(range.getClientRects())
+      const rawRects = Array.from(range.getClientRects())
         .map((r) => ({ x: r.left - cRect.left, y: r.top - cRect.top, w: r.width, h: r.height }))
         .filter((r) => r.w > 0 && r.h > 0);
-      if (rects.length === 0) return;
+      if (rawRects.length === 0) return;
+
+      // Browser returns a separate rect for each text node / span.
+      // We must merge them by line so the highlight path is continuous per line.
+      const lines: { [y: string]: { x: number; y: number; w: number; h: number }[] } = {};
+      rawRects.forEach(r => {
+        // Group rects that share roughly the same Y coordinate (within 5px)
+        const lineY = Object.keys(lines).find(yStr => Math.abs(parseFloat(yStr) - r.y) < 5);
+        if (lineY) {
+          lines[lineY].push(r);
+        } else {
+          lines[r.y.toString()] = [r];
+        }
+      });
+
+      const rects = Object.values(lines).map(lineRects => {
+        const minX = Math.min(...lineRects.map(r => r.x));
+        const maxX = Math.max(...lineRects.map(r => r.x + r.w));
+        const minY = Math.min(...lineRects.map(r => r.y));
+        const maxH = Math.max(...lineRects.map(r => r.h));
+        return { x: minX, y: minY, w: maxX - minX, h: maxH };
+      });
 
       const id = Date.now().toString();
       
@@ -162,6 +193,11 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    if (menuAnchor) {
+      setMenuAnchor(null);
+      return;
+    }
+
     if (selectionMode === "precise") return; // native selection handles this mode
     // Only left click / main touch
     if (e.button !== 0 && e.pointerType === "mouse") return;
@@ -298,8 +334,8 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       style={{
         position: "relative",
-        userSelect: selectionMode === "precise" ? "text" : "none",
-        WebkitUserSelect: selectionMode === "precise" ? "text" : "none",
+        userSelect: (selectionMode === "precise" && !menuAnchor) ? "text" : "none",
+        WebkitUserSelect: (selectionMode === "precise" && !menuAnchor) ? "text" : "none",
         touchAction: "none", // Prevent scrolling while highlighting on touch devices
         display: "block", // to wrap the text tightly
         zIndex: !!menuAnchor ? 10 : 1, // elevate above other paragraphs
@@ -341,21 +377,23 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
 
           const isBlurred = isHighlightActive && !isPartOfActiveHighlight;
           
-          const pressedPath = pressedPathId ? paths.find(p => p.id === pressedPathId) : null;
-          const isPartOfPressed = pressedPath?.highlightedIndices?.has(i);
-          
-          const isPartOfAnySelection = selections.some(s => s.highlightedIndices?.has(i));
+          let isPartOfPressed = false;
+          if (pressedPathId) {
+            const pressedPath = paths.find(p => p.id === pressedPathId);
+            if (pressedPath) {
+              isPartOfPressed = pressedPath.highlightedIndices?.has(i) ?? false;
+            } else {
+              const pressedSel = selections.find(s => s.id === pressedPathId);
+              if (pressedSel) {
+                isPartOfPressed = pressedSel.highlightedIndices?.has(i) ?? false;
+              }
+            }
+          }
 
           return (
             <motion.span 
               key={i} 
               data-index={i}
-              data-cursor={isPartOfAnySelection ? "pointer" : undefined}
-              onPointerDown={(e) => {
-                if (selectionMode === "marker" && isPartOfAnySelection && !isDrawing) {
-                  e.stopPropagation();
-                }
-              }}
               animate={{
                 filter: isBlurred ? "blur(3px)" : "blur(0px)",
                 opacity: isBlurred ? 0.15 : 1,
@@ -372,32 +410,6 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
         })}
       </span>
 
-      {/* Precise-mode marker rects — same yellow marker, drawn over exact selection rects */}
-      {selections.map((s) => (
-        <React.Fragment key={s.id}>
-          {s.rects.map((r, ri) => (
-            <motion.div
-              key={ri}
-              initial={{ opacity: 0, scaleX: 0.6 }}
-              animate={{ opacity: menuAnchor ? (menuAnchor.pathId === s.id ? 1 : 0.15) : 1, scaleX: 1 }}
-              transition={{ type: "spring", stiffness: 380, damping: 28 }}
-              style={{
-                position: "absolute",
-                left: r.x,
-                top: r.y,
-                width: r.w,
-                height: r.h,
-                background: MARKER_COLOR,
-                borderRadius: 3,
-                transformOrigin: "left center",
-                pointerEvents: "none", // never block starting a new selection
-                zIndex: 0, // behind the text so the text stays readable
-              }}
-            />
-          ))}
-        </React.Fragment>
-      ))}
-
       {/* SVG Canvas overlay */}
       <svg
         style={{
@@ -413,23 +425,23 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
         }}
       >
         <g transform={`skewX(${SKEW_ANGLE})`}>
-          {paths.map((path) => (
-            <React.Fragment key={path.id}>
+          {allMarkers.map((marker) => (
+            <React.Fragment key={marker.id}>
               <motion.path
-                id={`highlight-path-${path.id}`}
-                d={makePathString(path.points)}
+                id={`highlight-${marker.kind}-${marker.id}`}
+                d={marker.d}
                 fill="none"
                 stroke={MARKER_COLOR}
                 strokeLinejoin="round"
                 strokeLinecap="butt"
                 animate={{ 
-                  strokeWidth: pressedPathId === path.id 
+                  strokeWidth: pressedPathId === marker.id 
                     ? "16px" 
-                    : menuAnchor?.pathId === path.id 
+                    : menuAnchor?.pathId === marker.id 
                     ? "28px" 
-                    : hoveredPathId === path.id ? "24px" : "20px",
-                  opacity: menuAnchor ? (menuAnchor.pathId === path.id ? 1 : 0.15) : (hoveredPathId === path.id ? 0.9 : 1),
-                  filter: menuAnchor?.pathId === path.id 
+                    : hoveredPathId === marker.id ? "24px" : "20px",
+                  opacity: menuAnchor ? (menuAnchor.pathId === marker.id ? 1 : 0.15) : (hoveredPathId === marker.id ? 0.9 : 1),
+                  filter: menuAnchor?.pathId === marker.id 
                     ? "drop-shadow(0px 6px 16px rgba(204, 255, 0, 0.6))" 
                     : "drop-shadow(0px 0px 0px rgba(0, 0, 0, 0))"
                 }}
@@ -438,7 +450,7 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
                 style={{
                   pointerEvents: isDrawing ? "none" : "stroke",
                 }}
-                onPointerEnter={() => !isDrawing && setHoveredPathId(path.id)}
+                onPointerEnter={() => !isDrawing && setHoveredPathId(marker.id)}
                 onPointerLeave={() => {
                   setHoveredPathId(null);
                   setPressedPathId(null);
@@ -446,13 +458,15 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
                 onPointerDown={(e) => {
                   if (isDrawing) return;
                   e.stopPropagation();
-                  setPressedPathId(path.id);
+                  setPressedPathId(marker.id);
                 }}
                 onPointerUp={(e) => {
-                  if (pressedPathId === path.id) {
+                  if (pressedPathId === marker.id) {
                     e.stopPropagation();
-                    const pos = getMenuPosition(path.points);
-                    setMenuAnchor({ x: pos.x, y: pos.y, pathId: path.id, kind: "path" });
+                    const pos = marker.kind === "path" 
+                      ? getMenuPosition((marker.item as PathData).points) 
+                      : getRectsMenuPosition((marker.item as SelectionHighlight).rects);
+                    setMenuAnchor({ x: pos.x, y: pos.y, pathId: marker.id, kind: marker.kind });
                     setPressedPathId(null);
                   }
                 }}
@@ -460,16 +474,16 @@ export function TextHighlighter({ text, selectionMode = "marker", onHighlightCom
               />
               {/* Animated drawing shimmer over the path */}
               <AnimatePresence>
-                {(hoveredPathId === path.id || menuAnchor?.pathId === path.id) && (
+                {(hoveredPathId === marker.id || menuAnchor?.pathId === marker.id) && (
                   <motion.path
                     initial={{ pathLength: 0, opacity: 0.8 }}
                     animate={{ pathLength: 1, opacity: 0 }}
                     exit={{ opacity: 0, transition: { duration: 0.1 } }}
                     transition={{ duration: 1.6, ease: "easeOut", repeat: Infinity, repeatDelay: 0.4 }}
-                    d={makePathString(path.points)}
+                    d={marker.d}
                     fill="none"
                     stroke="#ffffff"
-                    strokeWidth={menuAnchor?.pathId === path.id ? "28px" : "24px"}
+                    strokeWidth={menuAnchor?.pathId === marker.id ? "28px" : "24px"}
                     strokeLinejoin="round"
                     strokeLinecap="butt"
                     style={{ pointerEvents: "none", mixBlendMode: "overlay" }}
