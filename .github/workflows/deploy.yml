@@ -39,8 +39,9 @@ jobs:
             fi
 
             cd "$APP_DIR"
-            git pull origin main
-            npm ci --production=false
+            git fetch origin main
+            git reset --hard origin/main
+            npm install --no-audit --no-fund
             npm run build
 
             # Restart or start app with pm2
