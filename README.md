@@ -89,3 +89,4 @@ const ref = useRippleWave({
 - Image displacement is pixel-level and runs on the CPU — use `imageStrength: 0`
   to disable it on performance-sensitive contexts.
 
+
