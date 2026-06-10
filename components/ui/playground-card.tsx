@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useHover } from "@/components/ui/hover-context";
 
@@ -31,8 +31,46 @@ export function PlaygroundCard() {
         transformOrigin: "50% 50%",
         opacity: isDimmed ? 0.5 : 1,
         transition: "opacity 0.2s ease",
+        position: "relative",
       }}
     >
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            style={{
+              position: "absolute",
+              bottom: "100%",
+              left: 0,
+              marginBottom: 16,
+              width: 640,
+              borderRadius: 12,
+              overflow: "hidden",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+              zIndex: 50,
+              pointerEvents: "none",
+              backgroundColor: "var(--background-default, #000)",
+            }}
+          >
+            <video
+              src="/assets/Video inlin chat/Chat highlight.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div
         style={{
           fontFamily: "var(--font-jetbrains-mono), monospace",
