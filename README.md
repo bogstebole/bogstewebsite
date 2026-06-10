@@ -88,3 +88,4 @@ const ref = useRippleWave({
   and layout shifts without needing to re-mount.
 - Image displacement is pixel-level and runs on the CPU — use `imageStrength: 0`
   to disable it on performance-sensitive contexts.
+
