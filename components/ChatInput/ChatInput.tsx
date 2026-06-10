@@ -59,7 +59,7 @@ export const defaultInlineAnimConfig: InlineAnimConfig = {
 export type ChatInputVariant = "default" | "absorb" | "mass" | "baton" | "inline";
 
 export interface ChatInputHandle {
-  focus: () => void;
+  focus: (options?: FocusOptions) => void;
   setValue: (value: string) => void;
   getValue: () => string;
 }
@@ -73,9 +73,12 @@ interface ChatInputProps {
   onAdd?: () => void;
   onCopy?: (value: string) => void;
   onEdit?: (value: string) => void;
+  onCancelEdit?: () => void;
+  isEditing?: boolean;
   placeholder?: string;
   variant?: ChatInputVariant;
   animationConfig?: InlineAnimConfig;
+  style?: React.CSSProperties;
 }
 
 const spring: Transition = {
@@ -145,9 +148,12 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
       onAdd,
       onCopy,
       onEdit,
+      onCancelEdit,
+      isEditing = false,
       placeholder = "Placeholder text...",
       variant = "default",
       animationConfig,
+      style,
     },
     ref
   ) {
@@ -188,7 +194,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
     };
 
     useImperativeHandle(ref, () => ({
-      focus: () => editorRef.current?.focus(),
+      focus: (options) => editorRef.current?.focus(options),
       setValue: (v) => {
         const el = editorRef.current;
         if (el) { el.textContent = v; placeCursorAtEnd(el); }
@@ -403,6 +409,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
           className={styles.wrap}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
+          style={style}
         >
           <motion.div
             className={`${styles.root} ${isGlass ? styles.isGlassRoot : ""}`}
@@ -411,7 +418,9 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
               filter: isAddOpen ? `blur(${ac?.addCards?.inputBlur ?? 2}px)` : "blur(0px)",
             }}
             style={{
-              pointerEvents: isAddOpen ? "none" : "auto"
+              pointerEvents: isAddOpen ? "none" : "auto",
+              width: style?.width === "100%" ? "100%" : undefined,
+              maxWidth: style?.maxWidth,
             }}
             transition={{
               ...bubbleSpring,
@@ -421,10 +430,9 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
               <motion.div
                 className={`${styles.surface} ${isGlass ? styles.glass : ""} ${isRestingHovered ? styles.hovered : ""} ${pulsing ? styles.pulsed : ""}`}
                 style={{
-                  alignItems: attachedImage ? "stretch" : "center",
-                  flexDirection: attachedImage ? "column" : "row",
-                  flexWrap: (!attachedImage && expandedMode) ? "wrap" : "nowrap",
-                  justifyContent: (!attachedImage && expandedMode) ? "flex-end" : "flex-start",
+                  alignItems: "stretch",
+                  flexDirection: "column",
+                  justifyContent: "center",
                 }}
                 transition={bubbleSpring}
                 animate={surfaceControls}
@@ -441,11 +449,15 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                 <AnimatePresence>
                   {attachedImage && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
-                      style={{ overflow: "hidden", width: "100%", flexShrink: 0 }}
+                      initial={{ opacity: 0, scale: 0.5, height: 0 }}
+                      animate={{ opacity: 1, scale: 1, height: 88 }}
+                      exit={{ opacity: 0, scale: 0.5, height: 0 }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 300, 
+                        damping: 28 
+                      }}
+                      style={{ overflow: "hidden", width: "100%", flexShrink: 0, transformOrigin: "center" }}
                     >
                       <div style={{ height: 80, backgroundColor: isGlass ? 'transparent' : '#FFFFFF', borderRadius: '16px', boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: 8, marginBottom: 8 }}>
                         <div className={styles.attachedImgWrap}>
@@ -500,6 +512,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                 <motion.div
                   ref={editorWrapRef}
                   className={`${styles.editorWrap} ${isGlass ? styles.editorWrapGlass : ""}`}
+                  layout="position"
                   animate={isGlass && isOverflowing
                     ? { maxHeight: isExpanded ? textScrollHeightRef.current : 240 }
                     : undefined
@@ -557,8 +570,29 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                       }}
                       style={{ display: "flex", justifyContent: "center", alignItems: "center", flexShrink: 0, position: "relative" }}
                     >
-                      <AnimatePresence>
-                        {!isAddOpen && (
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        {isEditing ? (
+                          <motion.div
+                            key="cancel-btn"
+                            initial={{ opacity: 0, scale: 0.5, rotate: -90 }}
+                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                            exit={{ opacity: 0, scale: 0.5, rotate: -90 }}
+                            transition={{ duration: 0.14, ease: "easeOut" }}
+                            style={{ position: "absolute", inset: 0 }}
+                          >
+                            <Button
+                              variant="ghost"
+                              icon={<X size={14} aria-hidden />}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onCancelEdit?.();
+                              }}
+                              aria-label="Cancel edit"
+                              title="Cancel edit"
+                              style={{ width: "100%", height: "100%" }}
+                            />
+                          </motion.div>
+                        ) : !isAddOpen ? (
                           <motion.div
                             key="plus-btn"
                             initial={{ opacity: 0, scale: 0.5 }}
@@ -579,7 +613,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                               style={{ width: "100%", height: "100%" }}
                             />
                           </motion.div>
-                        )}
+                        ) : null}
                       </AnimatePresence>
                     </motion.div>
                   )}
@@ -616,13 +650,13 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
                     >
                       <Button
                         variant="primary"
-                        icon={<MorphGlyph mode={showStop ? "stop" : "send"} color="#111" />}
+                        icon={<MorphGlyph mode={showStop ? "stop" : isEditing ? "check" : "send"} color="#111" />}
                         onClick={(e) => {
                           e.stopPropagation();
                           if (showStop) onStop?.();
                           else onSubmit(value);
                         }}
-                        aria-label={showStop ? "Stop response" : "Send message"}
+                        aria-label={showStop ? "Stop response" : isEditing ? "Save edits" : "Send message"}
                         style={{ flexShrink: 0, width: 28 }}
                       />
                     </motion.div>

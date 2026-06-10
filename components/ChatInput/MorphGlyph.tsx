@@ -1,14 +1,14 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { CornerDownLeft, Square } from "lucide-react";
+import { Check, CornerDownLeft, Square } from "lucide-react";
 
 /**
- * Glyph slot for the send/stop action. Two static Lucide icons swap
+ * Glyph slot for the send/stop/check action. Static Lucide icons swap
  * with a vertical slide + fade — outgoing slides up and out, incoming
  * slides up from below. Single slot, single transition.
  */
 
 interface MorphGlyphProps {
-  mode: "send" | "stop";
+  mode: "send" | "stop" | "check";
   /** Icon color (stroke + fill). */
   color?: string;
   /** Slide duration in seconds. */
@@ -57,6 +57,14 @@ export function MorphGlyph({
               size={size}
               color={color}
               strokeWidth={1.8}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ) : mode === "check" ? (
+            <Check
+              size={size}
+              color={color}
+              strokeWidth={2.2}
               strokeLinecap="round"
               strokeLinejoin="round"
             />

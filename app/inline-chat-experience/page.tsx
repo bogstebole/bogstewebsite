@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDialKit, DialRoot } from "dialkit";
 import Link from "next/link";
-import { ArrowLeft, Share } from "lucide-react";
+import { ArrowLeft, Share, Highlighter, TextCursor } from "lucide-react";
+import { ReplyThreadPopup } from "@/components/ui/reply-thread-popup";
 import { Logo } from "@/components/ui/logo";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import {
@@ -14,6 +15,8 @@ import {
   defaultInlineAnimConfig,
 } from "@/components/ChatInput/ChatInput";
 import { InlineChatBanner } from "@/components/ui/InlineChatBanner";
+import { TextHighlighter } from "@/components/ui/text-highlighter";
+import { CustomCursor } from "@/components/ui/custom-cursor";
 import { INLINE_CHAT_FEATURE_STATUS } from "@/lib/constants";
 import introStyles from "./IntroChatLanding.module.css";
 import "./ChatExperience.css";
@@ -37,6 +40,11 @@ interface Turn {
   user: string;
   ai: string;
   state: ChatInputState;
+}
+
+interface Highlight {
+  turnId: string;
+  text: string;
 }
 
 const randomId = () =>
@@ -125,8 +133,15 @@ export default function Page() {
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [turns, setTurns] = useState<Turn[]>([]);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [showHighlightsModal, setShowHighlightsModal] = useState(false);
+  const [activeReply, setActiveReply] = useState<{ text: string, rect: DOMRect } | null>(null);
+  const [selectionMode, setSelectionMode] = useState<"marker" | "precise">("marker");
+  const [editingTurnId, setEditingTurnId] = useState<string | null>(null);
   const streamingRef = useRef<number | null>(null);
   const turnCountRef = useRef(0);
+  const editingRef = useRef(false);
+  const editSnapshotRef = useRef<{ id: string; user: string } | null>(null);
   const activeInputRef = useRef<ChatInputHandle>(null);
   const feedRef = useRef<HTMLDivElement>(null);
   const animConfig = defaultInlineAnimConfig;
@@ -154,9 +169,30 @@ export default function Page() {
     });
   };
 
+  const handleEdit = (id: string) => {
+    const turn = turns.find((t) => t.id === id);
+    if (turn) editSnapshotRef.current = { id, user: turn.user };
+    updateTurn(id, { state: "typing" });
+  };
+
+  const handleCancelEdit = (id: string) => {
+    const snap = editSnapshotRef.current;
+    editSnapshotRef.current = null;
+    const patch: Partial<Turn> = { state: "resting" };
+    if (snap && snap.id === id) patch.user = snap.user;
+    updateTurn(id, patch);
+  };
+
   const handleSubmit = (id: string, value: string) => {
     const trimmed = value.trim();
-    updateTurn(id, { user: trimmed, state: "responding" });
+    // An edit is a re-submit of a turn that was already answered — it
+    // already has an input below it, so we must not append another one.
+    editingRef.current = turns.some((turn) => turn.id === id && turn.ai.length > 0);
+    editSnapshotRef.current = null;
+    // While the answer regenerates, hide the trailing input so only the
+    // streaming response is visible; it re-appears once finished.
+    if (editingRef.current) setEditingTurnId(id);
+    updateTurn(id, { user: trimmed, state: "responding", ai: "" });
 
     setTimeout(() => {
       const el = document.getElementById(`turn-${id}`);
@@ -203,6 +239,14 @@ export default function Page() {
     setTurns((t) =>
       t.map((turn) => (turn.id === turnId ? { ...turn, state: "resting" } : turn))
     );
+    // Editing an existing turn regenerates its answer in place — the
+    // trailing input is already present, so don't spawn a duplicate.
+    // Reveal it again now that the response is complete.
+    if (editingRef.current) {
+      editingRef.current = false;
+      setEditingTurnId(null);
+      return;
+    }
     streamingRef.current = window.setTimeout(() => {
       streamingRef.current = null;
       setTurns((t) => [...t, newTurn()]);
@@ -219,6 +263,8 @@ export default function Page() {
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{ __html: `* { cursor: none !important; }` }} />
+      <CustomCursor />
       <AnimatePresence mode="wait">
       {phase === "intro" ? (
         <motion.div
@@ -297,8 +343,12 @@ export default function Page() {
           key="chat"
           className="chatPage"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
+          animate={{
+            opacity: (activeReply || showHighlightsModal) ? 0.4 : 1,
+            filter: (activeReply || showHighlightsModal) ? "blur(3px)" : "blur(0px)",
+            scale: (activeReply || showHighlightsModal) ? 0.9 : 1
+          }}
+          transition={{ type: "spring", stiffness: 260, damping: 30, mass: 0.9 }}
           onAnimationComplete={() => activeInputRef.current?.focus()}
         >
           <div className="topBlur" />
@@ -309,13 +359,43 @@ export default function Page() {
               </Link>
               <span className="chatHeaderTitle">inline chat experience</span>
             </div>
-            <button 
-              className="secondaryBtn iconBtn" 
-              onClick={() => navigator.share?.({ title: "Inline chat experience", url: window.location.href })}
-              aria-label="Share"
-            >
-              <Share size={16} />
-            </button>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <div className="selectModeToggle" role="group" aria-label="Selection mode">
+                <button
+                  type="button"
+                  data-active={selectionMode === "marker"}
+                  onClick={() => setSelectionMode("marker")}
+                  aria-label="Freeform marker"
+                  title="Freeform marker"
+                >
+                  <Highlighter size={15} />
+                </button>
+                <button
+                  type="button"
+                  data-active={selectionMode === "precise"}
+                  onClick={() => setSelectionMode("precise")}
+                  aria-label="Precise text selection"
+                  title="Precise text selection"
+                >
+                  <TextCursor size={15} />
+                </button>
+              </div>
+              {highlights.length > 0 && (
+                <button 
+                  className="secondaryBtn" 
+                  onClick={() => setShowHighlightsModal(true)}
+                >
+                  Highlights ({highlights.length})
+                </button>
+              )}
+              <button 
+                className="secondaryBtn iconBtn" 
+                onClick={() => navigator.share?.({ title: "Inline chat experience", url: window.location.href })}
+                aria-label="Share"
+              >
+                <Share size={16} />
+              </button>
+            </div>
           </header>
           <div className="chatFeed" ref={feedRef}>
             <AnimatePresence>
@@ -323,6 +403,11 @@ export default function Page() {
                 const isActiveInput =
                   i === turns.length - 1 &&
                   (turn.state === "idle" || turn.state === "typing");
+                // Trailing empty input hides while an earlier turn regenerates,
+                // then animates back in once that response finishes.
+                if (editingTurnId !== null && isActiveInput && turn.ai.length === 0) {
+                  return null;
+                }
                 return (
                   <motion.article
                     key={turn.id}
@@ -330,8 +415,9 @@ export default function Page() {
                     className={`chatTurn${isActiveInput ? " activeInput" : ""}`}
                     initial={{ opacity: 0, y: -16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ 
-                      duration: 0.4, 
+                    exit={{ opacity: 0, y: -16 }}
+                    transition={{
+                      duration: 0.4,
                       ease: [0.22, 1, 0.36, 1],
                       delay: i === 0 ? dial["Chat Feed"].delay : 0
                     }}
@@ -345,13 +431,30 @@ export default function Page() {
                         onSubmit={(v) => handleSubmit(turn.id, v)}
                         onStop={() => handleStop(turn.id)}
                         onCopy={(v) => navigator.clipboard.writeText(v)}
-                        onEdit={() => updateTurn(turn.id, { state: "typing" })}
+                        onEdit={() => handleEdit(turn.id)}
+                        onCancelEdit={() => handleCancelEdit(turn.id)}
+                        isEditing={turn.ai.length > 0 && turn.state === "typing"}
                         variant="inline"
                         animationConfig={animConfig}
                         placeholder="Ask me about particle physics…"
                       />
                     </div>
-                    {turn.ai && <p className="aiText">{turn.ai}</p>}
+                    {turn.ai && (
+                      <p className="aiText">
+                        <TextHighlighter
+                          text={turn.ai}
+                          selectionMode={selectionMode}
+                          onHighlightComplete={(text) => {
+                            if (text.trim().length > 0) {
+                              setHighlights(prev => [...prev, { turnId: turn.id, text: text.trim() }]);
+                            }
+                          }}
+                          onReplyInThread={(text, rect) => {
+                            setActiveReply({ text, rect });
+                          }}
+                        />
+                      </p>
+                    )}
                   </motion.article>
                 );
               })}
@@ -360,7 +463,108 @@ export default function Page() {
           <div className="bottomBlur" />
         </motion.div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showHighlightsModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              backdropFilter: "blur(4px)",
+              zIndex: 100,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "24px"
+            }}
+            onClick={() => setShowHighlightsModal(false)}
+          >
+            <motion.div
+              initial={{ y: 20, scale: 0.95 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 20, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundColor: "var(--color-bg-page, #fff)",
+                borderRadius: "24px",
+                padding: "32px",
+                width: "100%",
+                maxWidth: "600px",
+                maxHeight: "80vh",
+                overflowY: "auto",
+                boxShadow: "0 24px 48px rgba(0,0,0,0.1)",
+                border: "1px solid rgba(0,0,0,0.05)"
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                <h2 style={{ margin: 0, fontFamily: "var(--font-geist-mono), monospace", fontSize: "16px", color: "var(--color-text, #111)" }}>Highlights</h2>
+                <button className="secondaryBtn iconBtn" onClick={() => setShowHighlightsModal(false)}>
+                  Close
+                </button>
+              </div>
+              
+              {Array.from(new Set(highlights.map(h => h.turnId))).map((turnId, index) => (
+                <div key={turnId} style={{ marginBottom: "24px" }}>
+                  <h3 style={{ fontSize: "12px", color: "rgba(17,17,17,0.5)", marginBottom: "8px", fontFamily: "var(--font-geist-mono), monospace" }}>
+                    Paragraph {index + 1}
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {highlights.filter(h => h.turnId === turnId).map((h, i) => (
+                      <div 
+                        key={i} 
+                        onClick={() => {
+                          setShowHighlightsModal(false);
+                          setTimeout(() => {
+                            const el = document.getElementById(`turn-${turnId}`);
+                            const feed = document.querySelector('.chatFeed');
+                            const header = document.querySelector('.chatHeader');
+                            if (el && feed) {
+                              const headerHeight = header ? (header as HTMLElement).offsetHeight : 80;
+                              feed.scrollTo({ top: el.offsetTop - headerHeight - 16, behavior: "smooth" });
+                            } else {
+                              el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                            }
+                          }, 100);
+                        }}
+                        style={{ 
+                          padding: "12px 16px", 
+                          backgroundColor: "rgba(204, 255, 0, 0.2)", 
+                          borderRadius: "12px",
+                          fontSize: "14px",
+                          fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
+                          lineHeight: 1.5,
+                          color: "var(--color-text, #111)",
+                          cursor: "pointer",
+                          transition: "background-color 0.2s"
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = "rgba(204, 255, 0, 0.4)"}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = "rgba(204, 255, 0, 0.2)"}
+                      >
+                        {h.text}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {activeReply && (
+          <ReplyThreadPopup 
+            key="thread-popup" 
+            activeReply={activeReply} 
+            onClose={() => setActiveReply(null)} 
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
