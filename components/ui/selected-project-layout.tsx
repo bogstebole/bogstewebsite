@@ -283,7 +283,7 @@ export function SelectedProjectLayout({
                 {description}
               </div>
 
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", marginBottom: 16 }}>
                 {tags.map((label) => (
                   <ProjectTag key={label} label={label} variant="glass" />
                 ))}
@@ -292,7 +292,7 @@ export function SelectedProjectLayout({
 
               {showDownloadButton && (
                 <GlassButton
-                  size="s"
+                  size="l"
                   onClick={() => window.open(NOTES_APP_STORE_URL, "_blank")}
                 >
                   Download the app
@@ -300,7 +300,7 @@ export function SelectedProjectLayout({
               )}
 
               {/* Grid content */}
-              <div style={{ width: "100%", boxSizing: "border-box", ...gridStyle }}>
+              <div style={{ width: "100%", marginTop: 24, boxSizing: "border-box", ...gridStyle }}>
                 {children}
               </div>
             </motion.div>
