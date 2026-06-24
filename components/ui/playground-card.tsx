@@ -4,10 +4,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useHover } from "@/components/ui/hover-context";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 export function PlaygroundCard() {
   const router = useRouter();
   const { hoveredKey, setHoveredKey } = useHover();
+  const { isMobile } = useBreakpoint();
 
   const isHovered = hoveredKey === "playground";
   const isDimmed = hoveredKey !== null && hoveredKey !== "playground";
@@ -16,8 +18,8 @@ export function PlaygroundCard() {
     <motion.div
       role="button"
       tabIndex={0}
-      onMouseEnter={() => setHoveredKey("playground")}
-      onMouseLeave={() => { setHoveredKey(null); }}
+      onMouseEnter={() => { if (!isMobile) setHoveredKey("playground"); }}
+      onMouseLeave={() => { if (!isMobile) setHoveredKey(null); }}
       onClick={() => router.push("/inline-chat-experience")}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push("/inline-chat-experience"); }}
       transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
@@ -35,7 +37,7 @@ export function PlaygroundCard() {
       }}
     >
       <AnimatePresence>
-        {isHovered && (
+        {!isMobile && isHovered && (
           <motion.div
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
