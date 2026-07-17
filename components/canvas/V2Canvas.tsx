@@ -13,7 +13,9 @@ import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
 import { EnvelopeMobileSheet } from "@/components/ui/envelope-mobile-sheet";
 import { SectionProjectDetail } from "@/components/ui/section-project-detail";
 import { SectionProjectTabBar, SECTION_PROJECT_ORDER, type SectionProjectKey } from "@/components/ui/section-project-tab-bar";
-import { SelectedProjectsSection } from "@/components/elements/selected-projects-section";
+import { HeroSection } from "@/components/elements/hero-section";
+import { HeroProjectDetail } from "@/components/ui/hero-project-detail";
+import { HeroProjectTabBar, HERO_PROJECT_ORDER, type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
 import { WritingsSection } from "@/components/elements/writings-section";
 import { PlaygroundSection } from "@/components/elements/playground-section";
 import { HoverProvider } from "@/components/ui/hover-context";
@@ -114,10 +116,6 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const [isEnvelopeClosing, setIsEnvelopeClosing] = useState(false);
   const [envelopeOriginRect, setEnvelopeOriginRect] = useState<DOMRect | null>(null);
   const envelopeRef = useRef<HTMLDivElement>(null);
-  const [isNotesExpanded, setIsNotesExpanded] = useState(false);
-  const [isNotesClosing, setIsNotesClosing] = useState(false);
-  const [isStickyExpanded, setIsStickyExpanded] = useState(false);
-  const [isStickyClosing, setIsStickyClosing] = useState(false);
   const [isDetailFullyOpen, setIsDetailFullyOpen] = useState(false);
   const handleProjectClick = (key: string) => {
     const el = entryRefs.current[key];
@@ -133,7 +131,24 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const isSectionProject = (key: string | null): key is SectionProjectKey =>
     SECTION_PROJECT_KEYS.includes(key as SectionProjectKey);
 
+  const isHeroProject = (key: string | null): key is HeroProjectKey =>
+    HERO_PROJECT_ORDER.includes(key as HeroProjectKey);
+
   const handleSectionTabSwitch = (key: SectionProjectKey) => {
+    if (key === activeProject) return;
+    setActiveProject(key);
+    setOriginRect(null);
+    setIsClosing(false);
+  };
+
+  const handleHeroProjectClick = (key: HeroProjectKey) => {
+    setActiveProject(key);
+    setOriginRect(null);
+    setIsClosing(false);
+    setIsDetailFullyOpen(false);
+  };
+
+  const handleHeroTabSwitch = (key: HeroProjectKey) => {
     if (key === activeProject) return;
     setActiveProject(key);
     setOriginRect(null);
@@ -176,42 +191,16 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
     setIsEnvelopeClosing(false);
   };
 
-  const handleNotesExpand = () => {
-    setIsNotesExpanded(true);
-    setIsNotesClosing(false);
-  };
-  const handleNotesCloseStart = () => setIsNotesClosing(true);
-  const handleNotesClose = () => {
-    setIsNotesExpanded(false);
-    setIsNotesClosing(false);
-  };
-
-
-  const handleStickyExpand = () => {
-    setIsStickyExpanded(true);
-    setIsStickyClosing(false);
-  };
-
-  const handleStickyCloseStart = () => setIsStickyClosing(true);
-
-  const handleStickyClose = () => {
-    setIsStickyExpanded(false);
-    setIsStickyClosing(false);
-  };
-
   useEffect(() => { setMounted(true); }, []);
 
   // Lock body scroll when detail is open
   useEffect(() => {
-    document.body.style.overflow = activeProject || envelopeOpen || isNotesExpanded || isStickyExpanded ? "hidden" : "";
+    document.body.style.overflow = activeProject || envelopeOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [activeProject, envelopeOpen, isNotesExpanded, isStickyExpanded]);
+  }, [activeProject, envelopeOpen]);
 
 
   // Un-blur background as soon as close begins
-  // NOTE: isStickyExpanded is intentionally excluded — scaling the container while
-  // the sticky FLIP animation runs shifts the source card mid-flight and causes
-  // Framer Motion to loop recalculate, producing the "pulsating" effect.
   const shouldBlur =
     (activeProject !== null && !isClosing) ||
     (envelopeOpen && !isEnvelopeClosing);
@@ -355,15 +344,10 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
           </p>
         </div>
 
-        {/* ── Selected projects ── */}
-        <SelectedProjectsSection
-          onNotesExpand={handleNotesExpand}
-          onNotesCloseStart={handleNotesCloseStart}
-          onNotesClose={handleNotesClose}
-          onStickyExpand={handleStickyExpand}
-          onStickyCloseStart={handleStickyCloseStart}
-          onStickyClose={handleStickyClose}
-          isStickyExpanded={isStickyExpanded || isStickyClosing}
+        {/* ── Hero — selected projects ── */}
+        <HeroSection
+          activeProject={activeProject}
+          onProjectClick={handleHeroProjectClick}
         />
 
         {/* ── Projects divider (hidden) ── */}
@@ -407,6 +391,16 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
       {/* ── Section project detail overlay (single instance for all 5, enables tab slide transitions) ── */}
       {isSectionProject(activeProject) && (
         <SectionProjectDetail
+          activeProject={activeProject}
+          onCloseStart={handleCloseStart}
+          onClose={handleClose}
+          onOpenComplete={() => setIsDetailFullyOpen(true)}
+        />
+      )}
+
+      {/* ── Hero project detail overlay (single instance for all 3, enables tab slide transitions) ── */}
+      {isHeroProject(activeProject) && (
+        <HeroProjectDetail
           activeProject={activeProject}
           onCloseStart={handleCloseStart}
           onClose={handleClose}
@@ -462,6 +456,37 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
               <SectionProjectTabBar
                 active={activeProject}
                 onChange={handleSectionTabSwitch}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {/* ── Hero project tab bar (portalled to body to escape blur/scale stacking context) ── */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {!isMobile && isHeroProject(activeProject) && isDetailFullyOpen && (
+            <motion.div
+              key="hero-tab-bar"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -8 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              style={{
+                position: "fixed",
+                top: "5vh",
+                bottom: 0,
+                left: "calc(50% - 610px)",
+                display: "flex",
+                alignItems: "center",
+                zIndex: 10002,
+                pointerEvents: "none",
+              }}
+            >
+              <HeroProjectTabBar
+                active={activeProject}
+                onChange={handleHeroTabSwitch}
               />
             </motion.div>
           )}
