@@ -34,6 +34,15 @@ const RECEIPT_ASSETS = [
   { type: "image" as const, src: "/assets/Vorli/vorli 5.PNG" },
 ];
 
+const RUNTRONOME_ASSETS = [
+  { type: "video" as const, src: "/assets/Hero/runtronome.mp4" },
+  { type: "image" as const, src: "/assets/Runtronome/workout-idle.png" },
+  { type: "image" as const, src: "/assets/Runtronome/workout-running.png" },
+  { type: "image" as const, src: "/assets/Runtronome/step-picker.png" },
+  { type: "image" as const, src: "/assets/Runtronome/plans.png" },
+  { type: "image" as const, src: "/assets/Runtronome/garmin-sync.png" },
+];
+
 type ProjectConfig = {
   title: string;
   icon: string;
@@ -148,13 +157,7 @@ export function HeroProjectDetail({ activeProject, onCloseStart, onClose, onOpen
         return renderAssetGrid(RECEIPT_ASSETS);
 
       case "heroRuntronome":
-        return (
-          <motion.div variants={CONTENT_ITEM} style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-            <div style={{ width: isMobile ? 240 : 300, borderRadius: 24, overflow: "hidden", backgroundColor: "var(--color-bg-skeleton)", flexShrink: 0 }}>
-              <video src="/assets/Hero/runtronome.mp4" autoPlay loop muted playsInline style={{ width: "100%", height: "auto", display: "block" }} />
-            </div>
-          </motion.div>
-        );
+        return renderAssetGrid(RUNTRONOME_ASSETS);
     }
   };
 
