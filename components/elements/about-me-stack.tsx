@@ -6,7 +6,7 @@ import { AboutMePageTwo } from "./about-me-page-two";
 import { AboutMePageThree } from "./about-me-page-three";
 import { AboutMePageFour } from "./about-me-page-four";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 interface AboutMeStackProps {
   paperWidth: number;

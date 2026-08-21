@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { geistSans, geistMono, inter, silkscreen, jetbrainsMono, specialElite } from "@/lib/fonts";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { InspectorMount } from "@/components/dev/InspectorMount";
 import "./globals.css";
 import "dialkit/styles.css";
 export const metadata: Metadata = {
@@ -48,6 +49,7 @@ export default function RootLayout({
       >
         <ThemeToggle />
         {children}
+        {process.env.NODE_ENV !== "production" && <InspectorMount />}
       </body>
     </html>
   );

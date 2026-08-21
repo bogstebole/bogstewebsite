@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 // import { Water } from "@paper-design/shaders-react"; // POOL_HIDDEN
 import { Logo } from "@/components/ui/logo";
 import { ProjectSection, SiteFooter } from "@/components/elements/project-section";

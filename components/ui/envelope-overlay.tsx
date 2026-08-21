@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, useMotionValue, useAnimate } from "framer-motion";
+import { motion, useMotionValue, useAnimate } from "motion/react";
 import { NotesToSelf } from "@/components/elements/notes-to-self";
 import { AboutMeStack } from "@/components/elements/about-me-stack";
 

@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence, LayoutGroup, useAnimation } from "framer-motion";
-import type { PanInfo } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup, useAnimation } from "motion/react";
+import type { PanInfo } from "motion/react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useRippleWave } from "@/useRippleWave";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
@@ -37,12 +37,17 @@ const STICKY_ASSETS = [
   { src: "/assets/Sticky/Reorder.png", alt: "Reorder tasks" },
 ];
 
+const VORLI_VIDEO = "/assets/Hero/receipt-recording.mp4";
+
 const VORLI_SCREENSHOTS = [
-  { src: "/assets/Vorli/vorli 1.PNG", alt: "Vorli screenshot 1" },
-  { src: "/assets/Vorli/vorli 2.PNG", alt: "Vorli screenshot 2" },
-  { src: "/assets/Vorli/vorli 3.PNG", alt: "Vorli screenshot 3" },
-  { src: "/assets/Vorli/vorli 4.PNG", alt: "Vorli screenshot 4" },
-  { src: "/assets/Vorli/vorli 5.PNG", alt: "Vorli screenshot 5" },
+  { src: "/assets/Vorli/vorli-1.webp", alt: "Monthly balance and spending breakdown" },
+  { src: "/assets/Vorli/vorli-2.webp", alt: "Scanned receipt detail with line items" },
+  { src: "/assets/Vorli/vorli-3.webp", alt: "Yearly dashboard of spending per month" },
+  { src: "/assets/Vorli/vorli-4.webp", alt: "Planning menu" },
+  { src: "/assets/Vorli/vorli-5.webp", alt: "Wishlist with savings projections" },
+  { src: "/assets/Vorli/vorli-6.webp", alt: "Manual expense entry" },
+  { src: "/assets/Vorli/vorli-7.webp", alt: "Fixed monthly costs" },
+  { src: "/assets/Vorli/vorli-8.webp", alt: "Receipt search with category filters" },
 ];
 
 const USELESS_NOTES_ASSETS = [
@@ -475,7 +480,7 @@ export function SelectedProjectsSection({
       case "vorli":
         return [
           <motion.div key="video" variants={GRID_ITEM_VARIANTS} style={{ borderRadius: borderR, overflow: "hidden", backgroundColor: "var(--color-bg-surface)" }}>
-            <video src={encodeURI("/assets/Vorli/vorli video.MP4")} autoPlay loop muted playsInline style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+            <video src={VORLI_VIDEO} autoPlay loop muted playsInline style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
           </motion.div>,
           ...VORLI_SCREENSHOTS.map((s) => (
             <motion.div key={s.src} variants={GRID_ITEM_VARIANTS} style={{ borderRadius: borderR, overflow: "hidden", backgroundColor: "var(--color-bg-surface)" }}>

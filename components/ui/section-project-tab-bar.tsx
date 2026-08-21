@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import styles from "@/components/ui/GlassButton.module.css";
 
 export type SectionProjectKey = "zoun" | "weatherWear" | "pauschalTracker" | "fynn" | "contentSnare";

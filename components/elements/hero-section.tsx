@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { CARD_SPRING } from "@/components/ui/project-card";
 import { type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
