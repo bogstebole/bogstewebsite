@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { ProjectDetailLayout, CONTENT_ITEM } from "./project-detail-layout";
 import { SECTION_PROJECT_ORDER, type SectionProjectKey } from "./section-project-tab-bar";

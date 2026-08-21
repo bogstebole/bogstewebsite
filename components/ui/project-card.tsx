@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import type { MotionProps, useAnimation } from "framer-motion";
+import { motion } from "motion/react";
+import type { MotionProps, useAnimation } from "motion/react";
 import { ProjectTag } from "@/components/ui/project-tag";
 
 // 5-layer depth shadow matching Figma spec

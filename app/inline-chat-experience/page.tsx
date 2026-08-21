@@ -1,22 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useDialKit, DialRoot } from "dialkit";
 import Link from "next/link";
 import { ArrowLeft, Share, Highlighter, TextCursor } from "lucide-react";
-import { ReplyThreadPopup } from "@/components/ui/reply-thread-popup";
-import { Logo } from "@/components/ui/logo";
-import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import {
   ChatInput,
+  TextHighlighter,
+  ReplyThreadPopup,
+  CustomCursor,
+  defaultInlineAnimConfig,
   type ChatInputState,
   type ChatInputHandle,
-  defaultInlineAnimConfig,
-} from "@/components/ChatInput/ChatInput";
+} from "inline-chat-kit";
+import "inline-chat-kit/styles.css";
+import { Logo } from "@/components/ui/logo";
+import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { InlineChatBanner } from "@/components/ui/InlineChatBanner";
-import { TextHighlighter } from "@/components/ui/text-highlighter";
-import { CustomCursor } from "@/components/ui/custom-cursor";
 import { INLINE_CHAT_FEATURE_STATUS } from "@/lib/constants";
 import introStyles from "./IntroChatLanding.module.css";
 import "./ChatExperience.css";

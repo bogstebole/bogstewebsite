@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
-import { motion, useAnimation, AnimatePresence } from "framer-motion";
+import { motion, useAnimation, AnimatePresence } from "motion/react";
 import { QRCodeSVG } from "qrcode.react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
