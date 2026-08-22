@@ -10,12 +10,17 @@ interface VorliReceiptDetailProps {
 
 const TAGS = ["iOS", "AI Financial Assistant", "In testing"];
 
+const VIDEO_SRC = "/assets/Hero/receipt-recording.mp4";
+
 const SCREENSHOTS = [
-  { src: "/assets/Vorli/vorli 1.PNG", alt: "Vorli screenshot 1" },
-  { src: "/assets/Vorli/vorli 2.PNG", alt: "Vorli screenshot 2" },
-  { src: "/assets/Vorli/vorli 3.PNG", alt: "Vorli screenshot 3" },
-  { src: "/assets/Vorli/vorli 4.PNG", alt: "Vorli screenshot 4" },
-  { src: "/assets/Vorli/vorli 5.PNG", alt: "Vorli screenshot 5" },
+  { src: "/assets/Vorli/vorli-1.webp", alt: "Monthly balance and spending breakdown" },
+  { src: "/assets/Vorli/vorli-2.webp", alt: "Scanned receipt detail with line items" },
+  { src: "/assets/Vorli/vorli-3.webp", alt: "Yearly dashboard of spending per month" },
+  { src: "/assets/Vorli/vorli-4.webp", alt: "Planning menu" },
+  { src: "/assets/Vorli/vorli-5.webp", alt: "Wishlist with savings projections" },
+  { src: "/assets/Vorli/vorli-6.webp", alt: "Manual expense entry" },
+  { src: "/assets/Vorli/vorli-7.webp", alt: "Fixed monthly costs" },
+  { src: "/assets/Vorli/vorli-8.webp", alt: "Receipt search with category filters" },
 ];
 
 export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetailProps) {
@@ -44,7 +49,7 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
         // Mobile: single-column stack (video first, then screenshots)
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <video
-            src={encodeURI("/assets/Vorli/vorli video.MP4")}
+            src={VIDEO_SRC}
             autoPlay loop muted playsInline
             style={{ width: "100%", height: "auto", borderRadius: 8 }}
           />
@@ -58,7 +63,7 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
         // Desktop: 3-column grid (video + 5 screenshots = 2 rows of 3)
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
           <video
-            src={encodeURI("/assets/Vorli/vorli video.MP4")}
+            src={VIDEO_SRC}
             autoPlay loop muted playsInline
             style={{ width: "100%", height: "auto", borderRadius: 8 }}
           />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { createPortal } from "react-dom";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { ProjectTag } from "@/components/ui/project-tag";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { ProjectDetailLayout, CONTENT_ITEM } from "./project-detail-layout";
 import { HERO_PROJECT_ORDER, type HeroProjectKey } from "./hero-project-tab-bar";
@@ -26,12 +26,15 @@ const NOTES_ASSETS = [
 ];
 
 const RECEIPT_ASSETS = [
-  { type: "video" as const, src: "/assets/Vorli/vorli video.MP4" },
-  { type: "image" as const, src: "/assets/Vorli/vorli 1.PNG" },
-  { type: "image" as const, src: "/assets/Vorli/vorli 2.PNG" },
-  { type: "image" as const, src: "/assets/Vorli/vorli 3.PNG" },
-  { type: "image" as const, src: "/assets/Vorli/vorli 4.PNG" },
-  { type: "image" as const, src: "/assets/Vorli/vorli 5.PNG" },
+  { type: "video" as const, src: "/assets/Hero/receipt-recording.mp4" },
+  { type: "image" as const, src: "/assets/Vorli/vorli-1.webp" },
+  { type: "image" as const, src: "/assets/Vorli/vorli-2.webp" },
+  { type: "image" as const, src: "/assets/Vorli/vorli-3.webp" },
+  { type: "image" as const, src: "/assets/Vorli/vorli-4.webp" },
+  { type: "image" as const, src: "/assets/Vorli/vorli-5.webp" },
+  { type: "image" as const, src: "/assets/Vorli/vorli-6.webp" },
+  { type: "image" as const, src: "/assets/Vorli/vorli-7.webp" },
+  { type: "image" as const, src: "/assets/Vorli/vorli-8.webp" },
 ];
 
 const RUNTRONOME_ASSETS = [

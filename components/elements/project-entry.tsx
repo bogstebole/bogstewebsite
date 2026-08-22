@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useEffect } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimation } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { ProjectTag } from "@/components/ui/project-tag";

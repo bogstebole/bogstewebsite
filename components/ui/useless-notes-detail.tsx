@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useAnimation, type Variants } from "framer-motion";
+import { motion, useAnimation, type Variants } from "motion/react";
 import GlassButton from "./Glassmorphic Button Breakdown";
 
 const USELESS_NOTES_ASSETS = [
