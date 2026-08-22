@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { motion, useAnimation, type Variants } from "framer-motion";
+import { motion, useAnimation, type Variants } from "motion/react";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { ProjectTag } from "@/components/ui/project-tag";
 import { UselessNotesDetail } from "./useless-notes-detail";
