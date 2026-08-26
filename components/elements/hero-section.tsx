@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { CARD_SPRING } from "@/components/ui/project-card";
 import { type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
@@ -12,7 +13,7 @@ interface HeroSectionProps {
 
 type HeroCard = {
   key: HeroProjectKey;
-  icon: string;
+  icon?: string;
   iconRotate?: string;
   title: string;
   subtitle: string;
@@ -50,15 +51,36 @@ const HERO_CARDS: HeroCard[] = [
 
 const PHONE_WIDTH = 171;
 const PHONE_HEIGHT = 372;
+const CARD_PADDING_X = 30;
+const HERO_GAP = 18;
+
+// The inline chat card sits below the row and spans the width the three cards occupy.
+const HERO_ROW_WIDTH =
+  (PHONE_WIDTH + CARD_PADDING_X * 2) * HERO_CARDS.length + HERO_GAP * (HERO_CARDS.length - 1);
+
+const INLINE_CHAT_VIDEO_WIDTH = 1120;
+const INLINE_CHAT_VIDEO_HEIGHT = 680;
+
+const INLINE_CHAT_CARD: Omit<HeroCard, "key"> = {
+  title: "Inline Chat Input",
+  subtitle: "UI showcase",
+  status: "Experiment",
+  media: { type: "video", src: "/assets/Video inlin chat/showcase2.mp4" },
+};
 
 function HeroProjectCard({
   card,
   interactive,
   onClick,
+  frame,
+  style,
 }: {
-  card: HeroCard;
+  card: Omit<HeroCard, "key">;
   interactive: boolean;
   onClick: () => void;
+  /** Overrides the default phone-shaped media frame. */
+  frame?: React.CSSProperties;
+  style?: React.CSSProperties;
 }) {
   return (
     <motion.div
@@ -75,28 +97,31 @@ function HeroProjectCard({
         borderRadius: 48,
         paddingTop: 36,
         paddingBottom: 30,
-        paddingLeft: 30,
-        paddingRight: 30,
+        paddingLeft: CARD_PADDING_X,
+        paddingRight: CARD_PADDING_X,
         flexShrink: 0,
         cursor: interactive ? "pointer" : "default",
         scrollSnapAlign: "center",
+        ...style,
       }}
     >
       {/* Header: icon + title + subtitle + status badge */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={card.icon}
-          alt={card.title}
-          style={{
-            width: 20,
-            height: 20,
-            objectFit: "cover",
-            flexShrink: 0,
-            rotate: card.iconRotate,
-            transformOrigin: "50% 50%",
-          }}
-        />
+        {card.icon && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={card.icon}
+            alt={card.title}
+            style={{
+              width: 20,
+              height: 20,
+              objectFit: "cover",
+              flexShrink: 0,
+              rotate: card.iconRotate,
+              transformOrigin: "50% 50%",
+            }}
+          />
+        )}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
           <span
             style={{
@@ -149,7 +174,7 @@ function HeroProjectCard({
         </div>
       </div>
 
-      {/* Phone frame */}
+      {/* Media frame — phone-shaped unless the card overrides it */}
       <div
         style={{
           width: PHONE_WIDTH,
@@ -160,6 +185,7 @@ function HeroProjectCard({
           border: "1px solid var(--color-border-soft)",
           flexShrink: 0,
           position: "relative",
+          ...frame,
         }}
       >
         {card.media.type === "video" ? (
@@ -186,6 +212,7 @@ function HeroProjectCard({
 
 export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps) {
   const { isMobile } = useBreakpoint();
+  const router = useRouter();
   const interactive = activeProject === null;
 
   return (
@@ -194,31 +221,64 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
         marginTop: 60,
         width: "100%",
         display: "flex",
-        gap: 18,
+        flexDirection: "column",
         alignItems: "center",
-        ...(isMobile
-          ? {
-              overflowX: "auto",
-              scrollSnapType: "x mandatory",
-              paddingInline: 24,
-              boxSizing: "border-box",
-            }
-          : {
-              justifyContent: "center",
-              flexWrap: "wrap",
-              paddingInline: 24,
-              boxSizing: "border-box",
-            }),
+        gap: HERO_GAP,
       }}
     >
-      {HERO_CARDS.map((card) => (
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          gap: HERO_GAP,
+          alignItems: "center",
+          ...(isMobile
+            ? {
+                overflowX: "auto",
+                scrollSnapType: "x mandatory",
+                paddingInline: 24,
+                boxSizing: "border-box",
+              }
+            : {
+                justifyContent: "center",
+                flexWrap: "wrap",
+                paddingInline: 24,
+                boxSizing: "border-box",
+              }),
+        }}
+      >
+        {HERO_CARDS.map((card) => (
+          <HeroProjectCard
+            key={card.key}
+            card={card}
+            interactive={interactive}
+            onClick={() => onProjectClick(card.key)}
+          />
+        ))}
+      </div>
+
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          paddingInline: 24,
+          boxSizing: "border-box",
+        }}
+      >
         <HeroProjectCard
-          key={card.key}
-          card={card}
+          card={INLINE_CHAT_CARD}
           interactive={interactive}
-          onClick={() => onProjectClick(card.key)}
+          onClick={() => router.push("/inline-chat-experience")}
+          style={isMobile ? { width: "100%", boxSizing: "border-box" } : undefined}
+          frame={{
+            width: isMobile ? "100%" : HERO_ROW_WIDTH - CARD_PADDING_X * 2,
+            height: "auto",
+            maxWidth: "100%",
+            aspectRatio: `${INLINE_CHAT_VIDEO_WIDTH} / ${INLINE_CHAT_VIDEO_HEIGHT}`,
+          }}
         />
-      ))}
+      </div>
     </div>
   );
 }
