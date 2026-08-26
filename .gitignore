@@ -44,3 +44,6 @@ next-env.d.ts
 /components/dev/
 /vendor/*
 !/vendor/inline-chat-kit.tgz
+
+# raw source recordings — the compressed cuts that ship live in public/
+/assets/assets for new hero section/*.mp4
