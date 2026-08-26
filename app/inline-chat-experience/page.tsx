@@ -13,6 +13,7 @@ import {
   defaultInlineAnimConfig,
   type ChatInputState,
   type ChatInputHandle,
+  type SendContext,
 } from "inline-chat-kit";
 import "inline-chat-kit/styles.css";
 import { Logo } from "@/components/ui/logo";
@@ -35,6 +36,38 @@ const HIGGS_RESPONSE = [
   "Its mass sits at roughly 125 GeV/c², about 133 times heavier than a proton.",
   "So 'how big is it' has only one honest answer: it has no size, only mass and quantum numbers.",
 ];
+
+/**
+ * Reply producer for the thread popup, which the kit now requires.
+ *
+ * The site has no AI endpoint — the main thread answers from the two canned
+ * responses above — so this streams a canned answer hung off the quoted
+ * passage. The signature is the one the kit expects, so pointing this at a
+ * real endpoint later replaces the body, not the shape.
+ */
+const THREAD_RESPONSES = [AI_RESPONSE, HIGGS_RESPONSE];
+let threadReplyCount = 0;
+
+async function* streamThreadReply(
+  message: string,
+  quotedText: string,
+  { signal }: SendContext
+): AsyncGenerator<string> {
+  const quoted = quotedText.trim();
+  const preview = quoted.length > 80 ? `${quoted.slice(0, 77)}…` : quoted;
+  const body = THREAD_RESPONSES[threadReplyCount % THREAD_RESPONSES.length].join(" ");
+  threadReplyCount += 1;
+
+  const full = preview ? `On “${preview}” — ${body}` : body;
+
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
+  for (const chunk of full.match(/\S+\s*/g) ?? []) {
+    if (signal.aborted) return;
+    yield chunk;
+    await new Promise((resolve) => setTimeout(resolve, 28));
+  }
+}
 
 interface Turn {
   id: string;
@@ -558,10 +591,11 @@ export default function Page() {
 
       <AnimatePresence>
         {activeReply && (
-          <ReplyThreadPopup 
-            key="thread-popup" 
-            activeReply={activeReply} 
-            onClose={() => setActiveReply(null)} 
+          <ReplyThreadPopup
+            key="thread-popup"
+            activeReply={activeReply}
+            onClose={() => setActiveReply(null)}
+            onSendMessage={streamThreadReply}
           />
         )}
       </AnimatePresence>
