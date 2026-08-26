@@ -17,7 +17,6 @@ import { HeroSection } from "@/components/elements/hero-section";
 import { HeroProjectDetail } from "@/components/ui/hero-project-detail";
 import { HeroProjectTabBar, HERO_PROJECT_ORDER, type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
 import { WritingsSection } from "@/components/elements/writings-section";
-import { PlaygroundSection } from "@/components/elements/playground-section";
 import { HoverProvider } from "@/components/ui/hover-context";
 import type { SubstackPost } from "@/lib/substack";
 
@@ -364,11 +363,6 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
             entryRefs={entryRefs}
             style={{ marginTop: isMobile ? 20 : 32 }}
           />
-        </div>
-
-        {/* ── Playground section ── */}
-        <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0 }}>
-          <PlaygroundSection />
         </div>
 
         {/* ── Latest writing section ── */}
