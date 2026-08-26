@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local-only dev tooling — must never reach main
+/components/dev/
+/vendor/*
+!/vendor/inline-chat-kit.tgz
