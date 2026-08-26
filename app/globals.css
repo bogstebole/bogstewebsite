@@ -7,6 +7,16 @@
   --font-sf-mono: "SF Mono", "SFMono-Regular", var(--font-geist-mono), monospace;
 }
 
+/* Point inline-chat-kit at the fonts next/font actually loaded.
+   Must sit on `body`, not `:root`: next/font defines --font-geist-* on body,
+   and the kit's own stylesheet defines --font-geist-sans: var(--ick-font-sans)
+   at :root — so declaring these at :root makes the two reference each other
+   and both resolve to nothing. */
+body {
+  --ick-font-sans: var(--font-geist-sans);
+  --ick-font-mono: var(--font-geist-mono);
+}
+
 /* ══════════════════════════════════════════════════════════
    Design Tokens
    ══════════════════════════════════════════════════════════
