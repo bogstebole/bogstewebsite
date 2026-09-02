@@ -296,7 +296,16 @@ export default function Page() {
   };
 
   return (
-    <>
+    /* The kit follows the operating system unless it is told otherwise, and
+       this page is light-only — so on a machine set to dark it painted its
+       ink at `245 245 245` over a white background and everything it drew
+       became invisible. Measured on the page: `--ick-ink-rgb` white, body
+       background `rgb(255,255,255)`.
+
+       `ick-theme` plus `data-theme="light"` pins it. Scoped to this subtree
+       rather than to `<html>`, so nothing else on the site is affected, and
+       `display: contents` keeps the wrapper out of the layout. */
+    <div className="ick-theme" data-theme="light" style={{ display: "contents" }}>
       <style dangerouslySetInnerHTML={{ __html: `* { cursor: none !important; }` }} />
       <CustomCursor />
       <AnimatePresence mode="wait">
@@ -599,6 +608,6 @@ export default function Page() {
           />
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }
