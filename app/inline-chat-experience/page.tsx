@@ -8,6 +8,7 @@ import { Bookmark, Share, Highlighter, TextCursor, Sun, Moon } from "lucide-reac
 import {
   Button,
   ChatHeader,
+  headerIconSize,
   ChatTurnRow,
   Context,
   announce,
@@ -630,7 +631,7 @@ export default function InlineChatExperiencePage() {
                 aria-label="Freeform marker"
                 title="Freeform marker"
               >
-                <Highlighter size={15} />
+                <Highlighter size={headerIconSize.m} />
               </button>
               <button
                 type="button"
@@ -639,7 +640,7 @@ export default function InlineChatExperiencePage() {
                 aria-label="Precise text selection"
                 title="Precise text selection"
               >
-                <TextCursor size={15} />
+                <TextCursor size={headerIconSize.m} />
               </button>
             </div>
           </ChatHeader>
