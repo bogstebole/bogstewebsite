@@ -18,6 +18,8 @@ type HeroCard = {
   title: string;
   subtitle: string;
   status: string;
+  /** Secondary chip, for what the card is about to become rather than what it is. */
+  note?: string;
   media: { type: "video" | "image"; src: string };
 };
 
@@ -80,6 +82,7 @@ const INSPECTOR_CARD: Omit<HeroCard, "key"> = {
   title: "Visual QA Inspector",
   subtitle: "Design review tool",
   status: "Experiment",
+  note: "Demo soon",
   media: { type: "video", src: "/assets/Video inspector/inspector-showcase.mp4" },
 };
 
@@ -207,29 +210,60 @@ function HeroProjectCard({
             {card.subtitle}
           </span>
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "var(--color-bg-skeleton)",
-            borderRadius: 4,
-            paddingInline: 6,
-            paddingBlock: 2,
-          }}
-        >
-          <span
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+          <div
             style={{
-              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-              fontSize: 10,
-              lineHeight: 1.3,
-              letterSpacing: "-0.04em",
-              color: "var(--color-text-label)",
-              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "var(--color-bg-skeleton)",
+              borderRadius: 4,
+              paddingInline: 6,
+              paddingBlock: 2,
             }}
           >
-            {card.status}
-          </span>
+            <span
+              style={{
+                fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+                fontSize: 10,
+                lineHeight: 1.3,
+                letterSpacing: "-0.04em",
+                color: "var(--color-text-label)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {card.status}
+            </span>
+          </div>
+
+          {/* Outlined rather than filled: the status is what the thing is, the
+              note is what it is about to become. */}
+          {card.note && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "1px solid var(--color-border-soft)",
+                borderRadius: 4,
+                paddingInline: 6,
+                paddingBlock: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: '"JetBrains Mono", system-ui, sans-serif',
+                  fontSize: 10,
+                  lineHeight: 1.3,
+                  letterSpacing: "-0.04em",
+                  color: "var(--color-text-muted)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {card.note}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
