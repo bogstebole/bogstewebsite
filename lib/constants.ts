@@ -179,3 +179,7 @@ export const ENVELOPE_MESSAGES: string[] = [
   "No notes. Genuinely.\nYou're killing it.",
   "This message was randomly selected just for you.\nCoincidence? Probably. But still.",
 ];
+
+/** Useless Notes on the App Store — the download button and its QR code point here. */
+export const NOTES_APP_STORE_URL =
+  "https://apps.apple.com/us/app/useless-notes/id6757185511";

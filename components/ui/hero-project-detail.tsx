@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { ProjectDetailLayout, CONTENT_ITEM } from "./project-detail-layout";
+import { NOTES_APP_STORE_URL } from "@/lib/constants";
 import { HERO_PROJECT_ORDER, type HeroProjectKey } from "./hero-project-tab-bar";
 
 interface HeroProjectDetailProps {
@@ -52,6 +53,7 @@ type ProjectConfig = {
   iconRotate?: string;
   tags: string[];
   appStore?: boolean;
+  downloadUrl?: string;
   shortDescription: React.ReactNode;
   longDescription: string;
 };
@@ -62,6 +64,7 @@ const CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
     icon: "/images/notes.png",
     tags: ["iOS", "Canvas"],
     appStore: true,
+    downloadUrl: NOTES_APP_STORE_URL,
     shortDescription: (
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Notes</span>
@@ -175,6 +178,7 @@ export function HeroProjectDetail({ activeProject, onCloseStart, onClose, onOpen
       iconRotate={config.iconRotate}
       tags={config.tags}
       appStore={config.appStore}
+      downloadUrl={config.downloadUrl}
       shortDescription={config.shortDescription}
       longDescription={config.longDescription}
       contentKey={activeProject}
