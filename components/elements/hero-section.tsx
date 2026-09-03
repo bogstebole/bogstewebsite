@@ -54,12 +54,20 @@ const PHONE_HEIGHT = 372;
 const CARD_PADDING_X = 30;
 const HERO_GAP = 18;
 
-// The inline chat card sits below the row and spans the width the three cards occupy.
-const HERO_ROW_WIDTH =
-  (PHONE_WIDTH + CARD_PADDING_X * 2) * HERO_CARDS.length + HERO_GAP * (HERO_CARDS.length - 1);
+// One column grid carries both card shapes. An app card is a single column; a
+// showcase card spans three — and 3 * 231 + 2 * 18 lands on exactly the 729 the
+// showcase card already was, so neither shape has to be reproportioned to fit.
+const HERO_COL = PHONE_WIDTH + CARD_PADDING_X * 2;
+const SHOWCASE_SPAN = 3;
+const SHOWCASE_WIDTH = HERO_COL * SHOWCASE_SPAN + HERO_GAP * (SHOWCASE_SPAN - 1);
+// The widest row — app + app + showcase — sets the grid's full width.
+const BENTO_WIDTH = HERO_COL * 2 + HERO_GAP * 2 + SHOWCASE_WIDTH;
 
-const INLINE_CHAT_VIDEO_WIDTH = 1120;
-const INLINE_CHAT_VIDEO_HEIGHT = 680;
+// Widths are expressed against that total so the whole grid scales as one piece
+// and every tile holds its ratio. Card padding stays fixed, so below BENTO_WIDTH
+// the tiles drift a little off their exact ratio — negligible on a desktop, and
+// the mobile branch below never gets here.
+const col = (px: number) => `${((px / BENTO_WIDTH) * 100).toFixed(4)}%`;
 
 const INLINE_CHAT_CARD: Omit<HeroCard, "key"> = {
   title: "Inline Chat Input",
@@ -67,6 +75,57 @@ const INLINE_CHAT_CARD: Omit<HeroCard, "key"> = {
   status: "Experiment",
   media: { type: "video", src: "/assets/Video inlin chat/showcase2.mp4" },
 };
+
+const INSPECTOR_CARD: Omit<HeroCard, "key"> = {
+  title: "Visual QA Inspector",
+  subtitle: "Design review tool",
+  status: "Experiment",
+  media: { type: "video", src: "/assets/Video inspector/inspector-showcase.mp4" },
+};
+
+/**
+ * Interaction details that loop next to the showcase cards. They carry no
+ * title, badge or click target — the recording is the whole point, so a tile
+ * is just the frame around it.
+ */
+type MediaClip = { src: string; ratio: string };
+
+const DETAIL_CLIPS: MediaClip[] = [
+  { src: "/assets/Showcase/project-tab-switch.mp4", ratio: "480 / 480" },
+  { src: "/assets/Showcase/input-interaction.mp4", ratio: "744 / 276" },
+  { src: "/assets/Showcase/add-button.mp4", ratio: "460 / 352" },
+];
+
+/** A tile is either a project card that opens a detail, or a showcase that routes away. */
+type HeroTile =
+  | { kind: "app"; card: HeroCard }
+  | { kind: "showcase"; card: Omit<HeroCard, "key">; href: string; ratio: string }
+  | { kind: "clips"; clips: MediaClip[] };
+
+const INLINE_CHAT_TILE: HeroTile = {
+  kind: "showcase",
+  card: INLINE_CHAT_CARD,
+  href: "/inline-chat-experience",
+  ratio: "1120 / 680",
+};
+
+const INSPECTOR_TILE: HeroTile = {
+  kind: "showcase",
+  card: INSPECTOR_CARD,
+  href: "/inspector-experience",
+  ratio: "1280 / 800",
+};
+
+const CLIPS_TILE: HeroTile = { kind: "clips", clips: DETAIL_CLIPS };
+
+const SHOWCASE_TILES = [INLINE_CHAT_TILE, INSPECTOR_TILE];
+
+// Four columns over five. Swapping the two showcase tiles is the single edit that
+// decides which experiment is visible without scrolling.
+const HERO_ROWS: HeroTile[][] = [
+  [{ kind: "app", card: HERO_CARDS[0] }, INLINE_CHAT_TILE, CLIPS_TILE],
+  [{ kind: "app", card: HERO_CARDS[1] }, { kind: "app", card: HERO_CARDS[2] }, INSPECTOR_TILE],
+];
 
 function HeroProjectCard({
   card,
@@ -177,8 +236,8 @@ function HeroProjectCard({
       {/* Media frame — phone-shaped unless the card overrides it */}
       <div
         style={{
-          width: PHONE_WIDTH,
-          height: PHONE_HEIGHT,
+          width: "100%",
+          aspectRatio: `${PHONE_WIDTH} / ${PHONE_HEIGHT}`,
           borderRadius: 18,
           overflow: "hidden",
           backgroundColor: "var(--color-bg-page)",
@@ -210,10 +269,144 @@ function HeroProjectCard({
   );
 }
 
+function ClipTile({ clip }: { clip: MediaClip }) {
+  return (
+    <div
+      style={{
+        backgroundColor: "var(--color-bg-container)",
+        borderRadius: 36,
+        padding: 14,
+        width: "100%",
+        boxSizing: "border-box",
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          aspectRatio: clip.ratio,
+          borderRadius: 22,
+          overflow: "hidden",
+          backgroundColor: "var(--color-bg-page)",
+          border: "1px solid var(--color-border-soft)",
+          boxSizing: "border-box",
+        }}
+      >
+        <video
+          src={encodeURI(clip.src)}
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps) {
   const { isMobile } = useBreakpoint();
   const router = useRouter();
   const interactive = activeProject === null;
+
+  const clipColumn = (clips: MediaClip[], key: string, width: string) => (
+    <div
+      key={key}
+      style={{
+        width,
+        boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        rowGap: HERO_GAP,
+      }}
+    >
+      {clips.map((c) => (
+        <ClipTile key={c.src} clip={c} />
+      ))}
+    </div>
+  );
+
+  const tile = (t: HeroTile, key: string, width: string) =>
+    t.kind === "clips" ? (
+      clipColumn(t.clips, key, width)
+    ) : t.kind === "app" ? (
+      <HeroProjectCard
+        key={key}
+        card={t.card}
+        interactive={interactive}
+        onClick={() => onProjectClick(t.card.key)}
+        style={{ width, boxSizing: "border-box" }}
+      />
+    ) : (
+      <HeroProjectCard
+        key={key}
+        card={t.card}
+        interactive={interactive}
+        onClick={() => router.push(t.href)}
+        style={{ width, boxSizing: "border-box" }}
+        frame={{ aspectRatio: t.ratio }}
+      />
+    );
+
+  if (isMobile) {
+    return (
+      <div
+        style={{
+          marginTop: 60,
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: HERO_GAP,
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            gap: HERO_GAP,
+            alignItems: "center",
+            overflowX: "auto",
+            scrollSnapType: "x mandatory",
+            paddingInline: 24,
+            boxSizing: "border-box",
+          }}
+        >
+          {HERO_CARDS.map((card) => (
+            <HeroProjectCard
+              key={card.key}
+              card={card}
+              interactive={interactive}
+              onClick={() => onProjectClick(card.key)}
+              style={{ width: HERO_COL, boxSizing: "border-box" }}
+            />
+          ))}
+        </div>
+
+        {SHOWCASE_TILES.map((t) => (
+          <div
+            key={t.href}
+            style={{ width: "100%", paddingInline: 24, boxSizing: "border-box" }}
+          >
+            <HeroProjectCard
+              card={t.card}
+              interactive={interactive}
+              onClick={() => router.push(t.href)}
+              style={{ width: "100%", boxSizing: "border-box" }}
+              frame={{ aspectRatio: t.ratio }}
+            />
+          </div>
+        ))}
+
+        {DETAIL_CLIPS.map((c) => (
+          <div key={c.src} style={{ width: "100%", paddingInline: 24, boxSizing: "border-box" }}>
+            <ClipTile clip={c} />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -221,63 +414,30 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
         marginTop: 60,
         width: "100%",
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: HERO_GAP,
+        justifyContent: "center",
+        paddingInline: 24,
+        boxSizing: "border-box",
       }}
     >
       <div
         style={{
           width: "100%",
+          maxWidth: BENTO_WIDTH,
           display: "flex",
-          gap: HERO_GAP,
-          alignItems: "center",
-          ...(isMobile
-            ? {
-                overflowX: "auto",
-                scrollSnapType: "x mandatory",
-                paddingInline: 24,
-                boxSizing: "border-box",
-              }
-            : {
-                justifyContent: "center",
-                flexWrap: "wrap",
-                paddingInline: 24,
-                boxSizing: "border-box",
-              }),
+          flexDirection: "column",
+          rowGap: HERO_GAP,
         }}
       >
-        {HERO_CARDS.map((card) => (
-          <HeroProjectCard
-            key={card.key}
-            card={card}
-            interactive={interactive}
-            onClick={() => onProjectClick(card.key)}
-          />
+        {HERO_ROWS.map((row, i) => (
+          <div
+            key={i}
+            style={{ display: "flex", columnGap: col(HERO_GAP), alignItems: "flex-start" }}
+          >
+            {row.map((t, j) =>
+              tile(t, `${i}-${j}`, t.kind === "showcase" ? col(SHOWCASE_WIDTH) : col(HERO_COL))
+            )}
+          </div>
         ))}
-      </div>
-
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          paddingInline: 24,
-          boxSizing: "border-box",
-        }}
-      >
-        <HeroProjectCard
-          card={INLINE_CHAT_CARD}
-          interactive={interactive}
-          onClick={() => router.push("/inline-chat-experience")}
-          style={isMobile ? { width: "100%", boxSizing: "border-box" } : undefined}
-          frame={{
-            width: isMobile ? "100%" : HERO_ROW_WIDTH - CARD_PADDING_X * 2,
-            height: "auto",
-            maxWidth: "100%",
-            aspectRatio: `${INLINE_CHAT_VIDEO_WIDTH} / ${INLINE_CHAT_VIDEO_HEIGHT}`,
-          }}
-        />
       </div>
     </div>
   );
