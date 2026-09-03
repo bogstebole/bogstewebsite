@@ -3,6 +3,11 @@
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
+import { useRegisterOverlay } from "@/components/ui/overlay-state";
+
+/** Inner elements sit at MODAL_RADIUS - MODAL_PADDING; see the card style below. */
+export const MODAL_PADDING = 32;
+export const MODAL_RADIUS = 48;
 
 const X_ICON = (
   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -27,6 +32,9 @@ interface ModalShellProps {
  * portals up alongside it.
  */
 export function ModalShell({ open, onClose, children, maxWidth }: ModalShellProps) {
+  // Lets the canvas behind pull back the same way it does for a detail panel.
+  useRegisterOverlay(open);
+
   if (typeof document === "undefined") return null;
 
   return createPortal(
@@ -59,14 +67,20 @@ export function ModalShell({ open, onClose, children, maxWidth }: ModalShellProp
             onClick={(e) => e.stopPropagation()}
             style={{
               background: "var(--color-bg-modal)",
-              borderRadius: 24,
-              padding: 64,
+              // Same corner as a bento card, and the pair holds the nesting
+              // rule the grid already follows: an inner 16 plus 32 of padding
+              // is what makes 48 look like one radius rather than two.
+              borderRadius: MODAL_RADIUS,
+              padding: MODAL_PADDING,
+              maxHeight: "calc(100dvh - 48px)",
+              overflowY: "auto",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               gap: 20,
               position: "relative",
               maxWidth,
+              width: maxWidth ? "100%" : undefined,
               boxSizing: "border-box",
               boxShadow:
                 "0 237px 66px 0 rgba(0, 0, 0, 0.00), 0 152px 61px 0 rgba(0, 0, 0, 0.01), 0 85px 51px 0 rgba(0, 0, 0, 0.05), 0 38px 38px 0 rgba(0, 0, 0, 0.09), 0 9px 21px 0 rgba(0, 0, 0, 0.10)",

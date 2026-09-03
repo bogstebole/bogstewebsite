@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { ComingSoonModal } from "@/components/ui/coming-soon-modal";
+import { ClipDetailModal, type ClipDetail } from "@/components/ui/clip-detail-modal";
 import { CARD_SPRING } from "@/components/ui/project-card";
 import { type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
 
@@ -82,30 +83,76 @@ const INLINE_CHAT_CARD: Omit<HeroCard, "key"> = {
 
 const INSPECTOR_CARD: Omit<HeroCard, "key"> = {
   title: "Visual QA Inspector",
-  subtitle: "Visual editor for vibecoding",
+  subtitle: "Visual editor",
   status: "Experiment",
   note: "Demo soon",
   media: { type: "video", src: "/assets/Video inspector/inspector-showcase.mp4" },
 };
 
 /**
- * Interaction details that loop next to the showcase cards. They carry no
- * title, badge or click target — the recording is the whole point, so a tile
- * is just the frame around it.
+ * Interaction details that loop next to the showcase cards. Each tile opens
+ * into the same recording with room to read it, plus the lines that actually
+ * do the work — lifted from the source, not written to look like it.
  */
-type MediaClip = { src: string; ratio: string };
+const DETAIL_CLIPS: ClipDetail[] = [
+  {
+    src: "/assets/Showcase/project-tab-switch.mp4",
+    ratio: "720 / 720",
+    title: "Project tab switcher",
+    description:
+      "Three projects, one panel. The pill is a single element travelling between tabs rather than three fading in and out, so the switch reads as one thing moving. It stretches from whichever edge it left and squashes back on arrival — that overshoot is what makes it feel liquid instead of mechanical.",
+    codeSource: "components/ui/hero-project-tab-bar.tsx",
+    code: `<motion.div
+  layoutId="active-hero-tab-indicator"   // one pill, shared by every tab
+  animate={{ scaleY: [1, 1.4, 1] }}      // squash on arrival
+  style={{ transformOrigin }}            // set from the direction it came
+  transition={{
+    scaleY: { duration: 0.35, ease: "easeOut" },
+    layout: { type: "spring", stiffness: 350, damping: 25, mass: 1 },
+  }}
+/>`,
+  },
+  {
+    src: "/assets/Showcase/input-interaction.mp4",
+    ratio: "1116 / 416",
+    title: "Actions that step aside",
+    description:
+      "The actions don't sit there waiting to be used. The composer measures the text against the room it has left, and once the line is 92% full they step out so the text can take the whole row — then come back underneath once it wraps. Returning needs the line to fall to 75%, not 92%: the gap between those two numbers is what keeps them from flickering while you type around the edge.",
+    codeSource: "inline-chat-kit — src/ChatInput/ChatInput.tsx",
+    code: `const textW  = measureSpan.offsetWidth;
+const availW = editor.clientWidth - 16;
 
-const DETAIL_CLIPS: MediaClip[] = [
-  { src: "/assets/Showcase/project-tab-switch.mp4", ratio: "480 / 480" },
-  { src: "/assets/Showcase/input-interaction.mp4", ratio: "744 / 276" },
-  { src: "/assets/Showcase/add-button.mp4", ratio: "460 / 352" },
+if (isMultiline || textW >= availW * wrap.nearThreshold) {
+  setShowButtons(false);  // 0.92 — the text is crowding them
+} else if (!wrappedNow && textW < availW * wrap.exitThreshold) {
+  setShowButtons(true);   // 0.75 — clear again, bring them back
+}`,
+  },
+  {
+    src: "/assets/Showcase/add-button.mp4",
+    ratio: "916 / 702",
+    title: "Fan-out menu",
+    description:
+      "An exploration of what a dropdown could be when it doesn't have to be a list. Each card carries its own angle, springs out on a stagger, and leans toward the pointer on hover. It doesn't scale — past a handful of items a fan is worse than a list — but for a few simple choices it's a nicer thing to open.",
+    codeSource: "inline-chat-kit — src/ChatInput/AddCardsOverlay.tsx",
+    code: `const angles = [angle1, angle2, angle3];   // 0, -25, -50
+
+<motion.button
+  animate={{ rotate: angles[i], width: 160 }}
+  whileHover={{ width: 160 + hoverPull }}   // leans toward the pointer
+  transition={{
+    delay: i * staggerDelay,
+    type: "spring", stiffness: 800, damping: 41,
+  }}
+/>`,
+  },
 ];
 
 /** A tile is either a project card that opens a detail, or a showcase that routes away. */
 type HeroTile =
   | { kind: "app"; card: HeroCard }
   | { kind: "showcase"; card: Omit<HeroCard, "key">; ratio: string; href?: string; comingSoon?: string }
-  | { kind: "clips"; clips: MediaClip[] };
+  | { kind: "clips"; clips: ClipDetail[] };
 
 const INLINE_CHAT_TILE: HeroTile = {
   kind: "showcase",
@@ -306,10 +353,24 @@ function HeroProjectCard({
   );
 }
 
-function ClipTile({ clip }: { clip: MediaClip }) {
+function ClipTile({ clip, onOpen }: { clip: ClipDetail; onOpen: () => void }) {
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.985 }}
+      transition={CARD_SPRING}
+      onClick={onOpen}
+      role="button"
+      tabIndex={0}
+      aria-label={clip.title}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
       style={{
+        cursor: "pointer",
         backgroundColor: "var(--color-bg-container)",
         borderRadius: 36,
         padding: 14,
@@ -338,7 +399,7 @@ function ClipTile({ clip }: { clip: MediaClip }) {
           style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -347,13 +408,14 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
   const router = useRouter();
   const interactive = activeProject === null;
   const [soon, setSoon] = useState<{ title: string; message: string } | null>(null);
+  const [clip, setClip] = useState<ClipDetail | null>(null);
 
   const openTile = (t: Extract<HeroTile, { kind: "showcase" }>) => () => {
     if (t.href) router.push(t.href);
     else if (t.comingSoon) setSoon({ title: t.card.title, message: t.comingSoon });
   };
 
-  const clipColumn = (clips: MediaClip[], key: string, width: string) => (
+  const clipColumn = (clips: ClipDetail[], key: string, width: string) => (
     <div
       key={key}
       style={{
@@ -365,7 +427,7 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
       }}
     >
       {clips.map((c) => (
-        <ClipTile key={c.src} clip={c} />
+        <ClipTile key={c.src} clip={c} onOpen={() => setClip(c)} />
       ))}
     </div>
   );
@@ -445,7 +507,7 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
 
         {DETAIL_CLIPS.map((c) => (
           <div key={c.src} style={{ width: "100%", paddingInline: 24, boxSizing: "border-box" }}>
-            <ClipTile clip={c} />
+            <ClipTile clip={c} onOpen={() => setClip(c)} />
           </div>
         ))}
       </div>
@@ -456,6 +518,8 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
         title={soon?.title ?? ""}
         message={soon?.message ?? ""}
       />
+
+      <ClipDetailModal clip={clip} onClose={() => setClip(null)} />
       </>
     );
   }
@@ -500,6 +564,8 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
         title={soon?.title ?? ""}
         message={soon?.message ?? ""}
       />
+
+      <ClipDetailModal clip={clip} onClose={() => setClip(null)} />
     </>
   );
 }
