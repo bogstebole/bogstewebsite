@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import styles from "@/components/ui/GlassButton.module.css";
 
-export type SectionProjectKey = "zoun" | "weatherWear" | "pauschalTracker" | "fynn" | "contentSnare";
+export type SectionProjectKey = "zoun" | "weatherWear" | "pauschalTracker" | "fynn" | "contentSnare" | "trigify";
 
 export const SECTION_PROJECT_ORDER: SectionProjectKey[] = [
   "zoun",
