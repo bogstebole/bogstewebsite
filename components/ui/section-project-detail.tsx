@@ -47,26 +47,26 @@ const CS_ASSETS = [
   { src: "/assets/Content snare/success.png", alt: "Success" },
 ];
 
-const TRIGIFY_HERO = { src: "/assets/Trigify/jarvis-landing.png", alt: "Jarvis — contextual prompt surface" };
+const TRIGIFY_HERO = { src: "/assets/Trigify/jarvis-landing.webp", alt: "Jarvis — contextual prompt surface" };
 
 const TRIGIFY_PAIRS: { src: string; alt: string }[][] = [
   [
-    { src: "/assets/Trigify/search-create.png", alt: "Create a search — name and source" },
-    { src: "/assets/Trigify/search-jarvis-questions.png", alt: "Jarvis asking for the ICP before building" },
+    { src: "/assets/Trigify/search-create.webp", alt: "Create a search — name and source" },
+    { src: "/assets/Trigify/search-jarvis-questions.webp", alt: "Jarvis asking for the ICP before building" },
   ],
   [
-    { src: "/assets/Trigify/search-created.png", alt: "Search created, workflow suggested" },
-    { src: "/assets/Trigify/listening-all-searches.png", alt: "Listening — saved searches" },
+    { src: "/assets/Trigify/search-created.webp", alt: "Search created, workflow suggested" },
+    { src: "/assets/Trigify/listening-all-searches.webp", alt: "Listening — saved searches" },
   ],
   [
-    { src: "/assets/Trigify/workflow-triggers.png", alt: "Workflow — choosing a trigger" },
-    { src: "/assets/Trigify/workflow-lead-generation.png", alt: "Workflow — branching on sentiment" },
+    { src: "/assets/Trigify/workflow-triggers.webp", alt: "Workflow — choosing a trigger" },
+    { src: "/assets/Trigify/workflow-lead-generation.webp", alt: "Workflow — branching on sentiment" },
   ],
 ];
 
 const TRIGIFY_WIDE: { src: string; alt: string }[] = [
-  { src: "/assets/Trigify/signals-account.png", alt: "Signals — an account entering its buying window" },
-  { src: "/assets/Trigify/workflows-empty.png", alt: "Workflows — empty state with templates" },
+  { src: "/assets/Trigify/signals-account.webp", alt: "Signals — an account entering its buying window" },
+  { src: "/assets/Trigify/workflows-empty.webp", alt: "Workflows — empty state with templates" },
 ];
 
 const PAUSCHAL_SCREENSHOTS = [

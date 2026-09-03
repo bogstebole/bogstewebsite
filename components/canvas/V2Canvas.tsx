@@ -410,7 +410,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
 
       {/* ── Project floating card — all projects except Vorli, Zoun, WeatherWear, and PauschalTracker ── */}
       <AnimatePresence>
-        {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear" && activeProject !== "pauschalTracker" && activeProject !== "fynn" && activeProject !== "contentSnare"
+        {activeProject && activeProject !== "vorli" && activeProject !== "zoun" && activeProject !== "weatherWear" && activeProject !== "pauschalTracker" && activeProject !== "fynn" && activeProject !== "contentSnare" && activeProject !== "trigify"
           && !!originRect && (
             <ProjectFloatingCard
               key={activeProject}

@@ -12,6 +12,7 @@ export const SECTION_PROJECT_ORDER: SectionProjectKey[] = [
   "pauschalTracker",
   "fynn",
   "contentSnare",
+  "trigify",
 ];
 
 const TABS: Array<{ key: SectionProjectKey; icon: string }> = [
@@ -20,6 +21,7 @@ const TABS: Array<{ key: SectionProjectKey; icon: string }> = [
   { key: "pauschalTracker", icon: "/images/pauschal-tracker.png" },
   { key: "fynn", icon: "/images/fynn.png" },
   { key: "contentSnare", icon: "/images/content-snare.png" },
+  { key: "trigify", icon: "/images/trigify.svg" },
 ];
 
 interface SectionProjectTabBarProps {
