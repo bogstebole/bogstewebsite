@@ -2,7 +2,9 @@
 
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { ComingSoonModal } from "@/components/ui/coming-soon-modal";
 import { CARD_SPRING } from "@/components/ui/project-card";
 import { type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
 
@@ -102,7 +104,7 @@ const DETAIL_CLIPS: MediaClip[] = [
 /** A tile is either a project card that opens a detail, or a showcase that routes away. */
 type HeroTile =
   | { kind: "app"; card: HeroCard }
-  | { kind: "showcase"; card: Omit<HeroCard, "key">; href: string; ratio: string }
+  | { kind: "showcase"; card: Omit<HeroCard, "key">; ratio: string; href?: string; comingSoon?: string }
   | { kind: "clips"; clips: MediaClip[] };
 
 const INLINE_CHAT_TILE: HeroTile = {
@@ -115,8 +117,9 @@ const INLINE_CHAT_TILE: HeroTile = {
 const INSPECTOR_TILE: HeroTile = {
   kind: "showcase",
   card: INSPECTOR_CARD,
-  href: "/inspector-experience",
   ratio: "1280 / 800",
+  comingSoon:
+    "It's a design review tool I built for myself while working on this site. I'm turning it into something you can open and try right here — it isn't ready yet.",
 };
 
 const CLIPS_TILE: HeroTile = { kind: "clips", clips: DETAIL_CLIPS };
@@ -343,6 +346,12 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
   const { isMobile } = useBreakpoint();
   const router = useRouter();
   const interactive = activeProject === null;
+  const [soon, setSoon] = useState<{ title: string; message: string } | null>(null);
+
+  const openTile = (t: Extract<HeroTile, { kind: "showcase" }>) => () => {
+    if (t.href) router.push(t.href);
+    else if (t.comingSoon) setSoon({ title: t.card.title, message: t.comingSoon });
+  };
 
   const clipColumn = (clips: MediaClip[], key: string, width: string) => (
     <div
@@ -377,7 +386,7 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
         key={key}
         card={t.card}
         interactive={interactive}
-        onClick={() => router.push(t.href)}
+        onClick={openTile(t)}
         style={{ width, boxSizing: "border-box" }}
         frame={{ aspectRatio: t.ratio }}
       />
@@ -385,6 +394,7 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
 
   if (isMobile) {
     return (
+      <>
       <div
         style={{
           marginTop: 60,
@@ -420,13 +430,13 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
 
         {SHOWCASE_TILES.map((t) => (
           <div
-            key={t.href}
+            key={t.card.title}
             style={{ width: "100%", paddingInline: 24, boxSizing: "border-box" }}
           >
             <HeroProjectCard
               card={t.card}
               interactive={interactive}
-              onClick={() => router.push(t.href)}
+              onClick={openTile(t)}
               style={{ width: "100%", boxSizing: "border-box" }}
               frame={{ aspectRatio: t.ratio }}
             />
@@ -439,10 +449,19 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
           </div>
         ))}
       </div>
+
+      <ComingSoonModal
+        open={soon !== null}
+        onClose={() => setSoon(null)}
+        title={soon?.title ?? ""}
+        message={soon?.message ?? ""}
+      />
+      </>
     );
   }
 
   return (
+    <>
     <div
       style={{
         marginTop: 60,
@@ -474,5 +493,13 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
         ))}
       </div>
     </div>
+
+      <ComingSoonModal
+        open={soon !== null}
+        onClose={() => setSoon(null)}
+        title={soon?.title ?? ""}
+        message={soon?.message ?? ""}
+      />
+    </>
   );
 }
