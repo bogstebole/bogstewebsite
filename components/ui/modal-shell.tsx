@@ -3,7 +3,11 @@
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { useRegisterOverlay } from "@/components/ui/overlay-state";
+
+/** Inner elements sit at MODAL_RADIUS - MODAL_PADDING; see the card style below. */
+export const MODAL_PADDING = 32;
+export const MODAL_RADIUS = 48;
 
 const X_ICON = (
   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -28,7 +32,9 @@ interface ModalShellProps {
  * portals up alongside it.
  */
 export function ModalShell({ open, onClose, children, maxWidth }: ModalShellProps) {
-  const { isMobile } = useBreakpoint();
+  // Lets the canvas behind pull back the same way it does for a detail panel.
+  useRegisterOverlay(open);
+
   if (typeof document === "undefined") return null;
 
   return createPortal(
@@ -61,10 +67,11 @@ export function ModalShell({ open, onClose, children, maxWidth }: ModalShellProp
             onClick={(e) => e.stopPropagation()}
             style={{
               background: "var(--color-bg-modal)",
-              borderRadius: 24,
-              // 64 all round leaves a 220px QR wider than a 390px phone; the
-              // card has to give the padding back before the content shrinks.
-              padding: isMobile ? 24 : 64,
+              // Same corner as a bento card, and the pair holds the nesting
+              // rule the grid already follows: an inner 16 plus 32 of padding
+              // is what makes 48 look like one radius rather than two.
+              borderRadius: MODAL_RADIUS,
+              padding: MODAL_PADDING,
               maxHeight: "calc(100dvh - 48px)",
               overflowY: "auto",
               display: "flex",

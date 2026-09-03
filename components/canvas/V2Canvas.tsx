@@ -18,6 +18,7 @@ import { HeroProjectDetail } from "@/components/ui/hero-project-detail";
 import { HeroProjectTabBar, HERO_PROJECT_ORDER, type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
 import { WritingsSection } from "@/components/elements/writings-section";
 import { HoverProvider } from "@/components/ui/hover-context";
+import { useOverlayOpen } from "@/components/ui/overlay-state";
 import type { SubstackPost } from "@/lib/substack";
 
 
@@ -192,17 +193,22 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
 
   useEffect(() => { setMounted(true); }, []);
 
+  // Anything portalled over the page — a modal, a sheet — pulls the canvas
+  // back and takes the scroll, the same as a detail panel does.
+  const overlayOpen = useOverlayOpen();
+
   // Lock body scroll when detail is open
   useEffect(() => {
-    document.body.style.overflow = activeProject || envelopeOpen ? "hidden" : "";
+    document.body.style.overflow = activeProject || envelopeOpen || overlayOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [activeProject, envelopeOpen]);
+  }, [activeProject, envelopeOpen, overlayOpen]);
 
 
   // Un-blur background as soon as close begins
   const shouldBlur =
     (activeProject !== null && !isClosing) ||
-    (envelopeOpen && !isEnvelopeClosing);
+    (envelopeOpen && !isEnvelopeClosing) ||
+    overlayOpen;
   const blurAnim = shouldBlur
     ? { scale: 0.93, filter: "blur(10px)", pointerEvents: "none" as const }
     : { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const };

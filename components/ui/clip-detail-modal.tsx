@@ -1,10 +1,12 @@
 "use client";
 
-import { ModalShell } from "@/components/ui/modal-shell";
+import { ModalShell, MODAL_PADDING, MODAL_RADIUS } from "@/components/ui/modal-shell";
 
 export interface ClipDetail {
   src: string;
   ratio: string;
+  /** Native pixel width; the modal never draws the clip larger than this. */
+  width: number;
   title: string;
   description: string;
   /** A few real lines from the thing itself, not a rewrite of it. */
@@ -27,8 +29,13 @@ export function ClipDetailModal({ clip, onClose }: ClipDetailModalProps) {
           <div
             style={{
               width: "100%",
+              // Capped at what was recorded. Re-capturing these at 3x to fill
+              // the modal costs frames where it matters — the tab switch fell
+              // from 71fps to 37 — so the clip is shown at size instead.
+              maxWidth: clip.width,
+              margin: "0 auto",
               aspectRatio: clip.ratio,
-              borderRadius: 16,
+              borderRadius: MODAL_RADIUS - MODAL_PADDING,
               overflow: "hidden",
               backgroundColor: "var(--color-bg-page)",
               border: "1px solid var(--color-border-soft)",
@@ -85,7 +92,7 @@ export function ClipDetailModal({ clip, onClose }: ClipDetailModalProps) {
               style={{
                 margin: 0,
                 padding: 14,
-                borderRadius: 12,
+                borderRadius: MODAL_RADIUS - MODAL_PADDING,
                 backgroundColor: "var(--color-bg-page)",
                 border: "1px solid var(--color-border-soft)",
                 boxSizing: "border-box",

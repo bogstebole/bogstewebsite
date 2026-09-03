@@ -97,6 +97,7 @@ const INSPECTOR_CARD: Omit<HeroCard, "key"> = {
 const DETAIL_CLIPS: ClipDetail[] = [
   {
     src: "/assets/Showcase/project-tab-switch.mp4",
+    width: 480,
     ratio: "480 / 480",
     title: "Project tab switcher",
     description:
@@ -114,6 +115,7 @@ const DETAIL_CLIPS: ClipDetail[] = [
   },
   {
     src: "/assets/Showcase/input-interaction.mp4",
+    width: 744,
     ratio: "744 / 276",
     title: "Actions that step aside",
     description:
@@ -130,6 +132,7 @@ if (isMultiline || textW >= availW * wrap.nearThreshold) {
   },
   {
     src: "/assets/Showcase/add-button.mp4",
+    width: 460,
     ratio: "460 / 352",
     title: "Fan-out menu",
     description:
