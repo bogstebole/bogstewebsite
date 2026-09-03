@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { ProjectTag } from "@/components/ui/project-tag";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
+import { AppDownloadButton } from "@/components/ui/app-download-button";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 interface ProjectDetailLayoutProps {
@@ -16,6 +17,10 @@ interface ProjectDetailLayoutProps {
   iconRotate?: string;
   tags?: string[];
   appStore?: boolean;
+  /** Store link; when set, the panel offers the app for download. */
+  downloadUrl?: string;
+  downloadAppName?: string;
+  downloadAppIcon?: string;
   shortDescription?: React.ReactNode;
   longDescription?: React.ReactNode;
   children: React.ReactNode;
@@ -74,6 +79,9 @@ export function ProjectDetailLayout({
   iconRotate,
   tags,
   appStore,
+  downloadUrl,
+  downloadAppName,
+  downloadAppIcon,
   shortDescription,
   longDescription,
   children,
@@ -302,6 +310,14 @@ export function ProjectDetailLayout({
                         {appStore && <AppStoreBadge active />}
                       </div>
                     )}
+
+                    {downloadUrl && (
+                      <AppDownloadButton
+                        url={downloadUrl}
+                        appName={downloadAppName ?? (typeof title === "string" ? title : "the app")}
+                        appIcon={downloadAppIcon ?? icon}
+                      />
+                    )}
                   </div>
                 )}
 
@@ -471,6 +487,16 @@ export function ProjectDetailLayout({
                                 <ProjectTag key={tag} label={tag} variant="light" />
                               ))}
                               {appStore && <AppStoreBadge active />}
+                            </div>
+                          )}
+
+                          {downloadUrl && (
+                            <div style={{ alignSelf: "flex-start" }}>
+                              <AppDownloadButton
+                                url={downloadUrl}
+                                appName={downloadAppName ?? (typeof title === "string" ? title : "the app")}
+                                appIcon={downloadAppIcon ?? icon}
+                              />
                             </div>
                           )}
                         </div>
