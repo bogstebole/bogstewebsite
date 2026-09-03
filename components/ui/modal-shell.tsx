@@ -21,6 +21,12 @@ interface ModalShellProps {
   children: React.ReactNode;
   /** Horizontal room for the content; the QR sets the default. */
   maxWidth?: number;
+  /**
+   * Renders a header row instead of floating the close button over the
+   * content. Give one whenever the card has a heading of its own — the
+   * corner button reads as unplaced without something on the line beside it.
+   */
+  title?: string;
 }
 
 /**
@@ -31,7 +37,7 @@ interface ModalShellProps {
  * stacked above the project detail's 10000-10002 band and the tab bar that
  * portals up alongside it.
  */
-export function ModalShell({ open, onClose, children, maxWidth }: ModalShellProps) {
+export function ModalShell({ open, onClose, children, maxWidth, title }: ModalShellProps) {
   // Lets the canvas behind pull back the same way it does for a detail panel.
   useRegisterOverlay(open);
 
@@ -86,11 +92,38 @@ export function ModalShell({ open, onClose, children, maxWidth }: ModalShellProp
                 "0 237px 66px 0 rgba(0, 0, 0, 0.00), 0 152px 61px 0 rgba(0, 0, 0, 0.01), 0 85px 51px 0 rgba(0, 0, 0, 0.05), 0 38px 38px 0 rgba(0, 0, 0, 0.09), 0 9px 21px 0 rgba(0, 0, 0, 0.10)",
             }}
           >
-            <div style={{ position: "absolute", top: 16, right: 16 }}>
-              <GlassButton size="s" onClick={onClose} aria-label="Close">
-                {X_ICON}
-              </GlassButton>
-            </div>
+            {title ? (
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 16,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "var(--font-geist-sans), sans-serif",
+                    fontSize: 20,
+                    fontWeight: 500,
+                    lineHeight: 1.3,
+                    color: "var(--color-text-heading)",
+                  }}
+                >
+                  {title}
+                </span>
+                <GlassButton size="s" onClick={onClose} aria-label="Close">
+                  {X_ICON}
+                </GlassButton>
+              </div>
+            ) : (
+              <div style={{ position: "absolute", top: 16, right: 16 }}>
+                <GlassButton size="s" onClick={onClose} aria-label="Close">
+                  {X_ICON}
+                </GlassButton>
+              </div>
+            )}
 
             {children}
           </motion.div>

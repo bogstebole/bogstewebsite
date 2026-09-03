@@ -21,7 +21,7 @@ interface ClipDetailModalProps {
 /** The looping tile, opened up: the same recording with room to read it. */
 export function ClipDetailModal({ clip, onClose }: ClipDetailModalProps) {
   return (
-    <ModalShell open={clip !== null} onClose={onClose} maxWidth={700}>
+    <ModalShell open={clip !== null} onClose={onClose} maxWidth={700} title={clip?.title}>
       {clip && (
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 20 }}>
           <div
@@ -46,29 +46,16 @@ export function ClipDetailModal({ clip, onClose }: ClipDetailModalProps) {
             />
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <span
-              style={{
-                fontFamily: "var(--font-geist-sans), sans-serif",
-                fontSize: 20,
-                fontWeight: 500,
-                lineHeight: 1.3,
-                color: "var(--color-text-heading)",
-              }}
-            >
-              {clip.title}
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-geist-sans), sans-serif",
-                fontSize: 14,
-                lineHeight: "21px",
-                color: "var(--color-text-tertiary)",
-              }}
-            >
-              {clip.description}
-            </span>
-          </div>
+          <span
+            style={{
+              fontFamily: "var(--font-geist-sans), sans-serif",
+              fontSize: 14,
+              lineHeight: "21px",
+              color: "var(--color-text-tertiary)",
+            }}
+          >
+            {clip.description}
+          </span>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span
