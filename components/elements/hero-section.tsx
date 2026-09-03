@@ -82,7 +82,7 @@ const INLINE_CHAT_CARD: Omit<HeroCard, "key"> = {
 
 const INSPECTOR_CARD: Omit<HeroCard, "key"> = {
   title: "Visual QA Inspector",
-  subtitle: "Design review tool",
+  subtitle: "Visual editor for vibecoding",
   status: "Experiment",
   note: "Demo soon",
   media: { type: "video", src: "/assets/Video inspector/inspector-showcase.mp4" },
@@ -119,7 +119,7 @@ const INSPECTOR_TILE: HeroTile = {
   card: INSPECTOR_CARD,
   ratio: "1280 / 800",
   comingSoon:
-    "It's a design review tool I built for myself while working on this site. I'm turning it into something you can open and try right here — it isn't ready yet.",
+    "A visual editor for designers who are vibecoding. Instead of describing a change to your agent, you make it yourself and copy the config out — the agent then applies every change in one pass. The side panel works much like Figma's, with extras for the things only the web can do.",
 };
 
 const CLIPS_TILE: HeroTile = { kind: "clips", clips: DETAIL_CLIPS };
