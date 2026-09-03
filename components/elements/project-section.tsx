@@ -189,6 +189,13 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             label="Content Snare"
             tags={["Web", "Productivity", "B2B, B2C"]}
           />
+
+          <ProjectEntry
+            {...entryProps("trigify")}
+            icon={<ProjectIcon src="/images/trigify.svg" alt="Trigify" rotate="-6.2deg" width={12} height={12} />}
+            label="Trigify"
+            tags={["Web", "GTM Intelligence", "B2B"]}
+          />
         </div>
       </div>
 

@@ -47,6 +47,28 @@ const CS_ASSETS = [
   { src: "/assets/Content snare/success.png", alt: "Success" },
 ];
 
+const TRIGIFY_HERO = { src: "/assets/Trigify/jarvis-landing.webp", alt: "Jarvis — contextual prompt surface" };
+
+const TRIGIFY_PAIRS: { src: string; alt: string }[][] = [
+  [
+    { src: "/assets/Trigify/search-create.webp", alt: "Create a search — name and source" },
+    { src: "/assets/Trigify/search-jarvis-questions.webp", alt: "Jarvis asking for the ICP before building" },
+  ],
+  [
+    { src: "/assets/Trigify/search-created.webp", alt: "Search created, workflow suggested" },
+    { src: "/assets/Trigify/listening-all-searches.webp", alt: "Listening — saved searches" },
+  ],
+  [
+    { src: "/assets/Trigify/workflow-triggers.webp", alt: "Workflow — choosing a trigger" },
+    { src: "/assets/Trigify/workflow-lead-generation.webp", alt: "Workflow — branching on sentiment" },
+  ],
+];
+
+const TRIGIFY_WIDE: { src: string; alt: string }[] = [
+  { src: "/assets/Trigify/signals-account.webp", alt: "Signals — an account entering its buying window" },
+  { src: "/assets/Trigify/workflows-empty.webp", alt: "Workflows — empty state with templates" },
+];
+
 const PAUSCHAL_SCREENSHOTS = [
   { src: "/assets/Pauschal tracker/1.png", alt: "Pauschal Tracker — dashboard" },
   { src: "/assets/Pauschal tracker/2.png", alt: "Pauschal Tracker — invoices" },
@@ -137,6 +159,21 @@ const CONFIGS: Record<SectionProjectKey, ProjectConfig> = {
       </>
     ),
     longDescription: "ContentSnare is an Australian productivity platform that helps businesses collect content and information from clients through structured request forms. They came to us needing a full redesign of their end-user request experience — not a blank-slate redesign, but one built directly on top of existing user feedback they had already collected. Discovery started with a planned workshop that went off-script, but the unstructured conversation turned out to surface exactly the insights we needed. The core friction points were clear: users missed submit buttons, got confused by terminology like \"reject\" and \"submit for review,\" struggled with rigid section structures, and couldn't easily navigate or understand their progress through a form. We restructured field information hierarchically so critical details stood out, and replaced text-heavy status indicators with visual cues — cleaning up the interface without breaking familiar patterns. The sidebar was rebuilt to separate progress tracking from navigation, with color coding and icons that communicate field states without adding visual noise. The comment system got a straightforward but effective fix: alignment and background color now instantly distinguish who said what and in what context. On the creator side, we improved the dashboard layout, filter organization, and tackled the recurring request feature — a deceptively simple concept that required multiple steps to implement properly. Collaboration was fast and direct, coming straight from an owner-developer, which kept decisions quick even if it occasionally meant realigning after missed updates. The main lesson: rigid process isn't a prerequisite for good outcomes — the quality came from collaboration and adaptability, not structure. Results are still being measured as the features roll out, with future iterations tied to actual usage patterns rather than assumptions.",
+  },
+  trigify: {
+    title: "Trigify",
+    icon: "/images/trigify.svg",
+    iconRotate: "-6.2deg",
+    tags: ["Web", "GTM Intelligence", "B2B"],
+    shortDescription: (
+      <>
+        <span style={{ color: "var(--color-text-heading)" }}>Trigify</span>
+        <span style={{ color: "var(--color-text-subdued)" }}>
+          {" \u2014 A GTM signal platform rebuilt around a copilot that reads context and does the setup, so work starts at the first useful action instead of an empty configuration screen."}
+        </span>
+      </>
+    ),
+    longDescription: "Trigify is a GTM signal platform that monitors LinkedIn, X, Reddit, GitHub and half a dozen other sources, then turns what it finds into workflows a revenue team can act on. Four surfaces had to land close together \u2014 Listening, Workflows, Signals, and Jarvis, the AI copilot running through all of them \u2014 and the hardest question was never any single screen but whether Jarvis belonged to the platform or to the page. We settled on contextual: a copilot that reads where you are and proposes the actions that make sense there, rather than a general chat bolted to the side. That decision shaped everything downstream. Search creation became a conversation, with Jarvis asking for the ICP, what to capture and where leads should land, then building the search itself \u2014 the four-step form stays visible behind it, so nothing feels hidden or taken away. Signals moved furthest from where it started: instead of a chronological feed and a settings page carrying a hundred toggles, the landing page offers four things to track, and the view splits into today\u2019s actions and the accounts behind them, with Jarvis drafting the emails and wiring the workflow before being asked to. The workflow builder was the stubborn one. A flowchart tells you a workflow exists but not what it does, so the work went into the states a node can be in \u2014 placeholder, needs configuration, hover to edit \u2014 and into making a node\u2019s landing position obvious before it is added rather than after. Smaller calls followed the same reasoning: the send button in the chat stepped back once it was clear almost nobody clicks it, and progress inside a workflow card stopped borrowing the button component, because something mid-run should not look pressable. Inline editing is still a compromise \u2014 you open one node, close it, open the next \u2014 and that one is not solved yet. It shipped recently, so there are no numbers to report; the next pass follows what people actually do with the copilot rather than what we assumed they would.",
   },
 };
 
@@ -363,6 +400,60 @@ export function SectionProjectDetail({ activeProject, onCloseStart, onClose, onO
                 style={{ borderRadius: 8, display: "block", width: "100%", height: "auto" }} />
             </motion.div>
           </>
+        );
+
+      case "trigify":
+        return (
+          <motion.div
+            variants={FYNN_CONTAINER}
+            style={{
+              backgroundColor: "#FF2D8A",
+              borderRadius: 24,
+              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              padding: 12,
+              width: "100%",
+              marginTop: 12,
+            }}
+          >
+            <motion.div variants={CONTENT_ITEM} style={{ borderRadius: 8, overflow: "hidden" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={encodeURI(TRIGIFY_HERO.src)} alt={TRIGIFY_HERO.alt}
+                style={{ display: "block", width: "100%", height: "auto" }} />
+            </motion.div>
+
+            {TRIGIFY_PAIRS.map((pair, i) =>
+              isMobile ? (
+                pair.map((item) => (
+                  <motion.div key={item.src} variants={CONTENT_ITEM} style={{ borderRadius: 8, overflow: "hidden" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={encodeURI(item.src)} alt={item.alt}
+                      style={{ display: "block", width: "100%", height: "auto" }} />
+                  </motion.div>
+                ))
+              ) : (
+                <motion.div key={i} variants={IMAGES_STAGGER} style={{ display: "flex", gap: 8 }}>
+                  {pair.map((item) => (
+                    <motion.div key={item.src} variants={CONTENT_ITEM} style={{ flex: 1, borderRadius: 8, overflow: "hidden" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={encodeURI(item.src)} alt={item.alt}
+                        style={{ display: "block", width: "100%", height: "auto" }} />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )
+            )}
+
+            {TRIGIFY_WIDE.map((item) => (
+              <motion.div key={item.src} variants={CONTENT_ITEM} style={{ borderRadius: 8, overflow: "hidden" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={encodeURI(item.src)} alt={item.alt}
+                  style={{ display: "block", width: "100%", height: "auto" }} />
+              </motion.div>
+            ))}
+          </motion.div>
         );
     }
   };
