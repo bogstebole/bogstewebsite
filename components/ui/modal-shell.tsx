@@ -3,6 +3,7 @@
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 const X_ICON = (
   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -27,6 +28,7 @@ interface ModalShellProps {
  * portals up alongside it.
  */
 export function ModalShell({ open, onClose, children, maxWidth }: ModalShellProps) {
+  const { isMobile } = useBreakpoint();
   if (typeof document === "undefined") return null;
 
   return createPortal(
@@ -60,13 +62,18 @@ export function ModalShell({ open, onClose, children, maxWidth }: ModalShellProp
             style={{
               background: "var(--color-bg-modal)",
               borderRadius: 24,
-              padding: 64,
+              // 64 all round leaves a 220px QR wider than a 390px phone; the
+              // card has to give the padding back before the content shrinks.
+              padding: isMobile ? 24 : 64,
+              maxHeight: "calc(100dvh - 48px)",
+              overflowY: "auto",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               gap: 20,
               position: "relative",
               maxWidth,
+              width: maxWidth ? "100%" : undefined,
               boxSizing: "border-box",
               boxShadow:
                 "0 237px 66px 0 rgba(0, 0, 0, 0.00), 0 152px 61px 0 rgba(0, 0, 0, 0.01), 0 85px 51px 0 rgba(0, 0, 0, 0.05), 0 38px 38px 0 rgba(0, 0, 0, 0.09), 0 9px 21px 0 rgba(0, 0, 0, 0.10)",
