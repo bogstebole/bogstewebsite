@@ -97,8 +97,7 @@ const INSPECTOR_CARD: Omit<HeroCard, "key"> = {
 const DETAIL_CLIPS: ClipDetail[] = [
   {
     src: "/assets/Showcase/project-tab-switch.mp4",
-    width: 480,
-    ratio: "480 / 480",
+    ratio: "720 / 720",
     title: "Project tab switcher",
     description:
       "Three projects, one panel. The pill is a single element travelling between tabs rather than three fading in and out, so the switch reads as one thing moving. It stretches from whichever edge it left and squashes back on arrival — that overshoot is what makes it feel liquid instead of mechanical.",
@@ -115,8 +114,7 @@ const DETAIL_CLIPS: ClipDetail[] = [
   },
   {
     src: "/assets/Showcase/input-interaction.mp4",
-    width: 744,
-    ratio: "744 / 276",
+    ratio: "1116 / 416",
     title: "Actions that step aside",
     description:
       "The actions don't sit there waiting to be used. The composer measures the text against the room it has left, and once the line is 92% full they step out so the text can take the whole row — then come back underneath once it wraps. Returning needs the line to fall to 75%, not 92%: the gap between those two numbers is what keeps them from flickering while you type around the edge.",
@@ -132,8 +130,7 @@ if (isMultiline || textW >= availW * wrap.nearThreshold) {
   },
   {
     src: "/assets/Showcase/add-button.mp4",
-    width: 460,
-    ratio: "460 / 352",
+    ratio: "916 / 702",
     title: "Fan-out menu",
     description:
       "An exploration of what a dropdown could be when it doesn't have to be a list. Each card carries its own angle, springs out on a stagger, and leans toward the pointer on hover. It doesn't scale — past a handful of items a fan is worse than a list — but for a few simple choices it's a nicer thing to open.",
