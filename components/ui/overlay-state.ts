@@ -8,7 +8,7 @@ import { useEffect, useSyncExternalStore } from "react";
  * A module store rather than context: the modals that need to report in are
  * portalled to body, so they sit outside whatever provider the page renders,
  * and the canvas that has to react to them is above that portal rather than
- * below it. A count, not a flag — two overlays can be open at once, and the
+ * below it. A count, not a flag, because two overlays can be open at once, and the
  * first one to close must not un-dim the page for the other.
  */
 let openCount = 0;

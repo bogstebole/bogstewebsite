@@ -14,9 +14,9 @@ interface SectionProjectDetailProps {
 }
 
 const ZOUN_SCREENSHOTS = [
-  { src: "/assets/Zoun/home.png", alt: "Zoun — globe view" },
-  { src: "/assets/Zoun/compare.png", alt: "Zoun — compare time zones" },
-  { src: "/assets/Zoun/search.png", alt: "Zoun — select country" },
+  { src: "/assets/Zoun/home.png", alt: "Zoun: globe view" },
+  { src: "/assets/Zoun/compare.png", alt: "Zoun: compare time zones" },
+  { src: "/assets/Zoun/search.png", alt: "Zoun: select country" },
 ];
 
 const FYNN_LEFT: { src: string; alt: string }[] = [
@@ -30,13 +30,13 @@ const FYNN_RIGHT: { src: string; alt: string }[] = [
 ];
 
 const FYNN_SPECS_LEFT: { src: string; alt: string }[] = [
-  { src: "/assets/Fynn/Design System Specs Assets/specs-overview.png", alt: "Design system — overview" },
-  { src: "/assets/Fynn/Design System Specs Assets/specs-building-blocks.png", alt: "Design system — building blocks" },
+  { src: "/assets/Fynn/Design System Specs Assets/specs-overview.png", alt: "Design system: overview" },
+  { src: "/assets/Fynn/Design System Specs Assets/specs-building-blocks.png", alt: "Design system: building blocks" },
 ];
 
 const FYNN_SPECS_RIGHT: { src: string; alt: string }[] = [
-  { src: "/assets/Fynn/Design System Specs Assets/specs-type.png", alt: "Design system — type specs" },
-  { src: "/assets/Fynn/Design System Specs Assets/specs-behaviour.png", alt: "Design system — behaviour" },
+  { src: "/assets/Fynn/Design System Specs Assets/specs-type.png", alt: "Design system: type specs" },
+  { src: "/assets/Fynn/Design System Specs Assets/specs-behaviour.png", alt: "Design system: behaviour" },
 ];
 
 const CS_ASSETS = [
@@ -47,34 +47,34 @@ const CS_ASSETS = [
   { src: "/assets/Content snare/success.png", alt: "Success" },
 ];
 
-const TRIGIFY_HERO = { src: "/assets/Trigify/jarvis-landing.webp", alt: "Jarvis — contextual prompt surface" };
+const TRIGIFY_HERO = { src: "/assets/Trigify/jarvis-landing.webp", alt: "Jarvis: contextual prompt surface" };
 
 const TRIGIFY_PAIRS: { src: string; alt: string }[][] = [
   [
-    { src: "/assets/Trigify/search-create.webp", alt: "Create a search — name and source" },
+    { src: "/assets/Trigify/search-create.webp", alt: "Create a search: name and source" },
     { src: "/assets/Trigify/search-jarvis-questions.webp", alt: "Jarvis asking for the ICP before building" },
   ],
   [
     { src: "/assets/Trigify/search-created.webp", alt: "Search created, workflow suggested" },
-    { src: "/assets/Trigify/listening-all-searches.webp", alt: "Listening — saved searches" },
+    { src: "/assets/Trigify/listening-all-searches.webp", alt: "Listening: saved searches" },
   ],
   [
-    { src: "/assets/Trigify/workflow-triggers.webp", alt: "Workflow — choosing a trigger" },
-    { src: "/assets/Trigify/workflow-lead-generation.webp", alt: "Workflow — branching on sentiment" },
+    { src: "/assets/Trigify/workflow-triggers.webp", alt: "Workflow: choosing a trigger" },
+    { src: "/assets/Trigify/workflow-lead-generation.webp", alt: "Workflow: branching on sentiment" },
   ],
 ];
 
 const TRIGIFY_WIDE: { src: string; alt: string }[] = [
-  { src: "/assets/Trigify/signals-account.webp", alt: "Signals — an account entering its buying window" },
-  { src: "/assets/Trigify/workflows-empty.webp", alt: "Workflows — empty state with templates" },
+  { src: "/assets/Trigify/signals-account.webp", alt: "Signals: an account entering its buying window" },
+  { src: "/assets/Trigify/workflows-empty.webp", alt: "Workflows: empty state with templates" },
 ];
 
 const PAUSCHAL_SCREENSHOTS = [
-  { src: "/assets/Pauschal tracker/1.png", alt: "Pauschal Tracker — dashboard" },
-  { src: "/assets/Pauschal tracker/2.png", alt: "Pauschal Tracker — invoices" },
-  { src: "/assets/Pauschal tracker/3.png", alt: "Pauschal Tracker — earnings" },
-  { src: "/assets/Pauschal tracker/4.png", alt: "Pauschal Tracker — overview" },
-  { src: "/assets/Pauschal tracker/5.png", alt: "Pauschal Tracker — settings" },
+  { src: "/assets/Pauschal tracker/1.png", alt: "Pauschal Tracker: dashboard" },
+  { src: "/assets/Pauschal tracker/2.png", alt: "Pauschal Tracker: invoices" },
+  { src: "/assets/Pauschal tracker/3.png", alt: "Pauschal Tracker: earnings" },
+  { src: "/assets/Pauschal tracker/4.png", alt: "Pauschal Tracker: overview" },
+  { src: "/assets/Pauschal tracker/5.png", alt: "Pauschal Tracker: settings" },
 ];
 
 type ProjectConfig = {
@@ -95,7 +95,7 @@ const CONFIGS: Record<SectionProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Zoun</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {" — Time zones should feel spatial and immediate, not like reading a spreadsheet."}
+          {": Time zones should feel spatial and immediate, not like reading a spreadsheet."}
         </span>
       </>
     ),
@@ -109,11 +109,11 @@ const CONFIGS: Record<SectionProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Wear</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {" — A weather app that shows what to wear instead of temperatures."}
+          {": A weather app that shows what to wear instead of temperatures."}
         </span>
       </>
     ),
-    longDescription: "Wear reimagines the weather app as a styling tool, showing an invisible figure dressed for the current conditions. The design language is 3D cartoon figures with a matte vinyl aesthetic, rendered per weather state alongside a hand-drawn environment and a body language cue — three expressive layers per condition rather than a simple outfit swap. Mapping outfits to the full iOS weather condition set turned out to be the core design challenge: 30+ states across sky, rain, winter, wind, and severe categories, each requiring a distinct combination of environment illustration, figure pose, and attire. The project is still in production with the 3D asset pipeline as the main bottleneck.",
+    longDescription: "Wear reimagines the weather app as a styling tool, showing an invisible figure dressed for the current conditions. The design language is 3D cartoon figures with a matte vinyl aesthetic, rendered per weather state alongside a hand-drawn environment and a body language cue, three expressive layers per condition rather than a simple outfit swap. Mapping outfits to the full iOS weather condition set turned out to be the core design challenge: 30+ states across sky, rain, winter, wind, and severe categories, each requiring a distinct combination of environment illustration, figure pose, and attire. The project is still in production with the 3D asset pipeline as the main bottleneck.",
   },
   pauschalTracker: {
     title: "Pauschal Tracker",
@@ -124,7 +124,7 @@ const CONFIGS: Record<SectionProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Pauschal Tracker</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {" — Personal SaaS for tracking freelance earning limits, invoices, and bank transactions."}
+          {": Personal SaaS for tracking freelance earning limits, invoices, and bank transactions."}
         </span>
       </>
     ),
@@ -139,11 +139,11 @@ const CONFIGS: Record<SectionProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Fynn.io</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {" — Task completion time cut in half. Development speed doubled, this is how we transformed Fynn's senior living management system."}
+          {": Task completion time cut in half. Development speed doubled, this is how we transformed Fynn's senior living management system."}
         </span>
       </>
     ),
-    longDescription: "Fynn is a U.S.-based senior living care management platform that came to us with a fragmented system built on Ionic, Angular, and Bootstrap — all mixing in ways they shouldn't. The goal was to redesign the core \"Activities of Daily Living\" feature, build a scalable design system, and set the product up for future growth. With no existing Ionic UI kit in Figma, we built one from scratch, establishing root-level tokens for color, typography, and spacing that matched Ionic's structure and made sense to developers immediately. Discovery started with lo-fi wireframes, moved through hi-fi prototypes, and was validated through in-person user testing — which revealed how users physically interacted with devices, directly shaping final decisions. We established a clear workflow from Jira stories through design, refinement, visual QA, and release, with a custom annotation system in Figma that made handoffs clean and reduced back-and-forth. The design system was organized into three layers — foundations, native Ionic components, and custom components — keeping the Figma file navigable as the project scaled. A pattern rulebook covering navigation, filters, drawers, and grid behavior reduced dev meetings and increased team efficiency by 13%. For the resident profile redesign, we moved from a single overloaded page to a tabbed layout with a drawer pattern for complex forms, keeping resident context visible throughout interactions. The drawer approach was a pragmatic call — not perfect, but fast to implement with existing components, and initial user feedback confirmed it worked. The Bulk ADL feature launch cut task completion time by 50%, and the design system accelerated development speed across all ongoing projects. The main lesson: lock in the technical stack before touching the design system — the Ionic vs. Angular split created avoidable complexity throughout. Moving forward, the priority is consolidating to a single framework, deepening design-dev collaboration, and expanding the system for new features.",
+    longDescription: "Fynn is a U.S.-based senior living care management platform that came to us with a fragmented system built on Ionic, Angular, and Bootstrap, all mixing in ways they shouldn't. The goal was to redesign the core \"Activities of Daily Living\" feature, build a scalable design system, and set the product up for future growth. With no existing Ionic UI kit in Figma, we built one from scratch, establishing root-level tokens for color, typography, and spacing that matched Ionic's structure and made sense to developers immediately. Discovery started with lo-fi wireframes, moved through hi-fi prototypes, and was validated through in-person user testing, which revealed how users physically interacted with devices, directly shaping final decisions. We established a clear workflow from Jira stories through design, refinement, visual QA, and release, with a custom annotation system in Figma that made handoffs clean and reduced back-and-forth. The design system was organized into three layers (foundations, native Ionic components, and custom components), which kept the Figma file navigable as the project scaled. A pattern rulebook covering navigation, filters, drawers, and grid behavior reduced dev meetings and increased team efficiency by 13%. For the resident profile redesign, we moved from a single overloaded page to a tabbed layout with a drawer pattern for complex forms, keeping resident context visible throughout interactions. The drawer approach was a pragmatic call: not perfect, but fast to implement with existing components, and initial user feedback confirmed it worked. The Bulk ADL feature launch cut task completion time by 50%, and the design system accelerated development speed across all ongoing projects. The main lesson: lock in the technical stack before touching the design system, because the Ionic vs. Angular split created avoidable complexity throughout. Moving forward, the priority is consolidating to a single framework, deepening design-dev collaboration, and expanding the system for new features.",
   },
   contentSnare: {
     title: "Content Snare",
@@ -154,11 +154,11 @@ const CONFIGS: Record<SectionProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Content Snare</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {" — Enhanced system led to faster request completion and reduced support tickets through clearer navigation and simplified user experience."}
+          {": Enhanced system led to faster request completion and reduced support tickets through clearer navigation and simplified user experience."}
         </span>
       </>
     ),
-    longDescription: "ContentSnare is an Australian productivity platform that helps businesses collect content and information from clients through structured request forms. They came to us needing a full redesign of their end-user request experience — not a blank-slate redesign, but one built directly on top of existing user feedback they had already collected. Discovery started with a planned workshop that went off-script, but the unstructured conversation turned out to surface exactly the insights we needed. The core friction points were clear: users missed submit buttons, got confused by terminology like \"reject\" and \"submit for review,\" struggled with rigid section structures, and couldn't easily navigate or understand their progress through a form. We restructured field information hierarchically so critical details stood out, and replaced text-heavy status indicators with visual cues — cleaning up the interface without breaking familiar patterns. The sidebar was rebuilt to separate progress tracking from navigation, with color coding and icons that communicate field states without adding visual noise. The comment system got a straightforward but effective fix: alignment and background color now instantly distinguish who said what and in what context. On the creator side, we improved the dashboard layout, filter organization, and tackled the recurring request feature — a deceptively simple concept that required multiple steps to implement properly. Collaboration was fast and direct, coming straight from an owner-developer, which kept decisions quick even if it occasionally meant realigning after missed updates. The main lesson: rigid process isn't a prerequisite for good outcomes — the quality came from collaboration and adaptability, not structure. Results are still being measured as the features roll out, with future iterations tied to actual usage patterns rather than assumptions.",
+    longDescription: "ContentSnare is an Australian productivity platform that helps businesses collect content and information from clients through structured request forms. They came to us needing a full redesign of their end-user request experience, not a blank-slate redesign but one built directly on top of existing user feedback they had already collected. Discovery started with a planned workshop that went off-script, but the unstructured conversation turned out to surface exactly the insights we needed. The core friction points were clear: users missed submit buttons, got confused by terminology like \"reject\" and \"submit for review,\" struggled with rigid section structures, and couldn't easily navigate or understand their progress through a form. We restructured field information hierarchically so critical details stood out, and replaced text-heavy status indicators with visual cues, cleaning up the interface without breaking familiar patterns. The sidebar was rebuilt to separate progress tracking from navigation, with color coding and icons that communicate field states without adding visual noise. The comment system got a straightforward but effective fix: alignment and background color now instantly distinguish who said what and in what context. On the creator side, we improved the dashboard layout, filter organization, and tackled the recurring request feature, a deceptively simple concept that required multiple steps to implement properly. Collaboration was fast and direct, coming straight from an owner-developer, which kept decisions quick even if it occasionally meant realigning after missed updates. The main lesson: rigid process isn't a prerequisite for good outcomes. The quality came from collaboration and adaptability, not structure. Results are still being measured as the features roll out, with future iterations tied to actual usage patterns rather than assumptions.",
   },
   trigify: {
     title: "Trigify",
@@ -169,11 +169,11 @@ const CONFIGS: Record<SectionProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Trigify</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {" \u2014 A GTM signal platform rebuilt around a copilot that reads context and does the setup, so work starts at the first useful action instead of an empty configuration screen."}
+          {": A GTM signal platform rebuilt around a copilot that reads context and does the setup, so work starts at the first useful action instead of an empty configuration screen."}
         </span>
       </>
     ),
-    longDescription: "Trigify is a GTM signal platform that monitors LinkedIn, X, Reddit, GitHub and half a dozen other sources, then turns what it finds into workflows a revenue team can act on. Four surfaces had to land close together \u2014 Listening, Workflows, Signals, and Jarvis, the AI copilot running through all of them \u2014 and the hardest question was never any single screen but whether Jarvis belonged to the platform or to the page. We settled on contextual: a copilot that reads where you are and proposes the actions that make sense there, rather than a general chat bolted to the side. That decision shaped everything downstream. Search creation became a conversation, with Jarvis asking for the ICP, what to capture and where leads should land, then building the search itself \u2014 the four-step form stays visible behind it, so nothing feels hidden or taken away. Signals moved furthest from where it started: instead of a chronological feed and a settings page carrying a hundred toggles, the landing page offers four things to track, and the view splits into today\u2019s actions and the accounts behind them, with Jarvis drafting the emails and wiring the workflow before being asked to. The workflow builder was the stubborn one. A flowchart tells you a workflow exists but not what it does, so the work went into the states a node can be in \u2014 placeholder, needs configuration, hover to edit \u2014 and into making a node\u2019s landing position obvious before it is added rather than after. Smaller calls followed the same reasoning: the send button in the chat stepped back once it was clear almost nobody clicks it, and progress inside a workflow card stopped borrowing the button component, because something mid-run should not look pressable. Inline editing is still a compromise \u2014 you open one node, close it, open the next \u2014 and that one is not solved yet. It shipped recently, so there are no numbers to report; the next pass follows what people actually do with the copilot rather than what we assumed they would.",
+    longDescription: "Trigify is a GTM signal platform that monitors LinkedIn, X, Reddit, GitHub and half a dozen other sources, then turns what it finds into workflows a revenue team can act on. Four surfaces had to land close together: Listening, Workflows, Signals, and Jarvis, the AI copilot running through all of them. The hardest question was never any single screen but whether Jarvis belonged to the platform or to the page. We settled on contextual: a copilot that reads where you are and proposes the actions that make sense there, rather than a general chat bolted to the side. That decision shaped everything downstream. Search creation became a conversation, with Jarvis asking for the ICP, what to capture and where leads should land, then building the search itself. The four-step form stays visible behind it, so nothing feels hidden or taken away. Signals moved furthest from where it started: instead of a chronological feed and a settings page carrying a hundred toggles, the landing page offers four things to track, and the view splits into today\u2019s actions and the accounts behind them, with Jarvis drafting the emails and wiring the workflow before being asked to. The workflow builder was the stubborn one. A flowchart tells you a workflow exists but not what it does, so the work went into the states a node can be in (placeholder, needs configuration, hover to edit) and into making a node\u2019s landing position obvious before it is added rather than after. Smaller calls followed the same reasoning: the send button in the chat stepped back once it was clear almost nobody clicks it, and progress inside a workflow card stopped borrowing the button component, because something mid-run should not look pressable. Inline editing is still a compromise: you open one node, close it, open the next, and that one is not solved yet. It shipped recently, so there are no numbers to report; the next pass follows what people actually do with the copilot rather than what we assumed they would.",
   },
 };
 
@@ -291,7 +291,7 @@ export function SectionProjectDetail({ activeProject, onCloseStart, onClose, onO
             }}
           >
             {isMobile ? (
-              [...[{ src: "/assets/Fynn/Billing dashboard - Rent roll.png", alt: "Billing dashboard — rent roll" }],
+              [...[{ src: "/assets/Fynn/Billing dashboard - Rent roll.png", alt: "Billing dashboard: rent roll" }],
                 ...FYNN_LEFT, ...FYNN_RIGHT,
                 { src: "/assets/Fynn/Resident care.png", alt: "Resident care" },
                 ...FYNN_SPECS_LEFT, ...FYNN_SPECS_RIGHT,
@@ -306,7 +306,7 @@ export function SectionProjectDetail({ activeProject, onCloseStart, onClose, onO
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <motion.div variants={CONTENT_ITEM} style={{ borderRadius: 8, overflow: "hidden" }}>
-                  <img src={encodeURI("/assets/Fynn/Billing dashboard - Rent roll.png")} alt="Billing dashboard — rent roll"
+                  <img src={encodeURI("/assets/Fynn/Billing dashboard - Rent roll.png")} alt="Billing dashboard: rent roll"
                     style={{ display: "block", width: "100%", height: "auto" }} />
                 </motion.div>
                 <motion.div variants={IMAGES_STAGGER} style={{ display: "flex", gap: 8 }}>

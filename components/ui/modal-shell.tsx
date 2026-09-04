@@ -4,10 +4,14 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { useRegisterOverlay } from "@/components/ui/overlay-state";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 /** Inner elements sit at MODAL_RADIUS - MODAL_PADDING; see the card style below. */
 export const MODAL_PADDING = 32;
 export const MODAL_RADIUS = 48;
+
+/** The detail panel and the envelope arrive on this spring; sheets should match. */
+const SHEET_SPRING = { type: "spring" as const, stiffness: 340, damping: 34 };
 
 const X_ICON = (
   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -19,18 +23,18 @@ interface ModalShellProps {
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  /** Horizontal room for the content; the QR sets the default. */
+  /** Horizontal room for the content on desktop; the QR sets the default. */
   maxWidth?: number;
   /**
    * Renders a header row instead of floating the close button over the
-   * content. Give one whenever the card has a heading of its own — the
+   * content. Give one whenever the card has a heading of its own, because the
    * corner button reads as unplaced without something on the line beside it.
    */
   title?: string;
 }
 
 /**
- * The blurred backdrop and floating card the site's small modals share.
+ * A centred card on a desktop, a bottom sheet on a phone.
  *
  * Portalled to body because the panels these open from sit inside blurred,
  * scaled stacking contexts that a fixed overlay cannot escape on its own, and
@@ -40,94 +44,144 @@ interface ModalShellProps {
 export function ModalShell({ open, onClose, children, maxWidth, title }: ModalShellProps) {
   // Lets the canvas behind pull back the same way it does for a detail panel.
   useRegisterOverlay(open);
+  const { isMobile } = useBreakpoint();
 
   if (typeof document === "undefined") return null;
+
+  const header = title ? (
+    <div
+      style={{
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 16,
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "var(--font-geist-sans), sans-serif",
+          fontSize: 20,
+          fontWeight: 500,
+          lineHeight: 1.3,
+          color: "var(--color-text-heading)",
+        }}
+      >
+        {title}
+      </span>
+      <GlassButton size="s" onClick={onClose} aria-label="Close">
+        {X_ICON}
+      </GlassButton>
+    </div>
+  ) : (
+    <div style={{ position: "absolute", top: 16, right: 16 }}>
+      <GlassButton size="s" onClick={onClose} aria-label="Close">
+        {X_ICON}
+      </GlassButton>
+    </div>
+  );
 
   return createPortal(
     <AnimatePresence>
       {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          onClick={onClose}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 10010,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-            boxSizing: "border-box",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-          }}
-        >
+        <>
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 8 }}
-            transition={{ type: "spring", stiffness: 360, damping: 28 }}
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: isMobile ? 0.25 : 0.2 }}
+            onClick={onClose}
             style={{
-              background: "var(--color-bg-modal)",
-              // Same corner as a bento card, and the pair holds the nesting
-              // rule the grid already follows: an inner 16 plus 32 of padding
-              // is what makes 48 look like one radius rather than two.
-              borderRadius: MODAL_RADIUS,
-              padding: MODAL_PADDING,
-              maxHeight: "calc(100dvh - 48px)",
-              overflowY: "auto",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 20,
-              position: "relative",
-              maxWidth,
-              width: maxWidth ? "100%" : undefined,
-              boxSizing: "border-box",
-              boxShadow:
-                "0 237px 66px 0 rgba(0, 0, 0, 0.00), 0 152px 61px 0 rgba(0, 0, 0, 0.01), 0 85px 51px 0 rgba(0, 0, 0, 0.05), 0 38px 38px 0 rgba(0, 0, 0, 0.09), 0 9px 21px 0 rgba(0, 0, 0, 0.10)",
+              position: "fixed",
+              inset: 0,
+              zIndex: 10010,
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              ...(isMobile
+                ? { backgroundColor: "var(--color-bg-backdrop)" }
+                : {
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 24,
+                    boxSizing: "border-box",
+                  }),
             }}
           >
-            {title ? (
-              <div
+            {!isMobile && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 8 }}
+                transition={{ type: "spring", stiffness: 360, damping: 28 }}
+                onClick={(e) => e.stopPropagation()}
                 style={{
-                  width: "100%",
+                  background: "var(--color-bg-modal)",
+                  // Same corner as a bento card, and the pair holds the nesting
+                  // rule the grid already follows: an inner 16 plus 32 of padding
+                  // is what makes 48 look like one radius rather than two.
+                  borderRadius: MODAL_RADIUS,
+                  padding: MODAL_PADDING,
+                  maxHeight: "calc(100dvh - 48px)",
+                  overflowY: "auto",
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 16,
+                  gap: 20,
+                  position: "relative",
+                  maxWidth,
+                  width: maxWidth ? "100%" : undefined,
+                  boxSizing: "border-box",
+                  boxShadow:
+                    "0 237px 66px 0 rgba(0, 0, 0, 0.00), 0 152px 61px 0 rgba(0, 0, 0, 0.01), 0 85px 51px 0 rgba(0, 0, 0, 0.05), 0 38px 38px 0 rgba(0, 0, 0, 0.09), 0 9px 21px 0 rgba(0, 0, 0, 0.10)",
                 }}
               >
-                <span
-                  style={{
-                    fontFamily: "var(--font-geist-sans), sans-serif",
-                    fontSize: 20,
-                    fontWeight: 500,
-                    lineHeight: 1.3,
-                    color: "var(--color-text-heading)",
-                  }}
-                >
-                  {title}
-                </span>
-                <GlassButton size="s" onClick={onClose} aria-label="Close">
-                  {X_ICON}
-                </GlassButton>
-              </div>
-            ) : (
-              <div style={{ position: "absolute", top: 16, right: 16 }}>
-                <GlassButton size="s" onClick={onClose} aria-label="Close">
-                  {X_ICON}
-                </GlassButton>
-              </div>
+                {header}
+                {children}
+              </motion.div>
             )}
-
-            {children}
           </motion.div>
-        </motion.div>
+
+          {isMobile && (
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={SHEET_SPRING}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundColor: "var(--color-bg-sheet-mobile)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                borderTopLeftRadius: 32,
+                borderTopRightRadius: 32,
+                boxShadow: "0px -8px 24px rgba(0,0,0,0.05)",
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                width: "100%",
+                zIndex: 10011,
+                boxSizing: "border-box",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 16,
+                // Hugs its content: a QR code should not open a full-height
+                // sheet just because a clip detail needs the room.
+                maxHeight: "90dvh",
+                overflowY: "auto",
+                paddingTop: 16,
+                paddingInline: 16,
+                paddingBottom: "calc(24px + env(safe-area-inset-bottom))",
+              }}
+            >
+              {header}
+              {children}
+            </motion.div>
+          )}
+        </>
       )}
     </AnimatePresence>,
     document.body

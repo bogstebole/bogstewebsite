@@ -69,7 +69,7 @@ const CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Notes</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {" — A conceptual app about information overload, built on an infinite canvas."}
+          {": A conceptual app about information overload, built on an infinite canvas."}
         </span>
       </>
     ),
@@ -84,11 +84,11 @@ const CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Receipt tracker</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {" — AI-powered expense tracking that reads your finances so you don’t have to."}
+          {": AI-powered expense tracking that reads your finances so you don’t have to."}
         </span>
       </>
     ),
-    longDescription: "Most financial apps share the same assumption: if you can see your data, you'll change your behavior. I built this because that assumption never worked for me. Existing tools asked me to think about money the way they were designed — not the way I actually do. It puts AI at the center: it auto-categorizes spending, scans receipts, and reads your financial picture so you can just ask what matters. Not 'show me a chart' — more like 'should I be worried about this month?'",
+    longDescription: "Most financial apps share the same assumption: if you can see your data, you'll change your behavior. I built this because that assumption never worked for me. Existing tools asked me to think about money the way they were designed, not the way I actually do. It puts AI at the center: it auto-categorizes spending, scans receipts, and reads your financial picture so you can just ask what matters. Not 'show me a chart', more like 'should I be worried about this month?'",
   },
   heroRuntronome: {
     title: "Runtronome",
@@ -98,11 +98,11 @@ const CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Runtronome</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {" — A running assistant that turns pacing into something you hear, not something you check."}
+          {": A running assistant that turns pacing into something you hear, not something you check."}
         </span>
       </>
     ),
-    longDescription: "Runtronome is a running assistant built around cadence. It guides structured workouts — warm-ups, hill repeats, intervals — with a metronome locked to your target steps per minute, so you stay on pace without looking at a screen mid-run. Currently in internal beta.",
+    longDescription: "Runtronome is a running assistant built around cadence. It guides structured workouts (warm-ups, hill repeats, intervals) with a metronome locked to your target steps per minute, so you stay on pace without looking at a screen mid-run. Currently in internal beta.",
   },
 };
 
