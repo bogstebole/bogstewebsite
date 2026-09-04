@@ -60,17 +60,17 @@ const CARD_PADDING_X = 30;
 const HERO_GAP = 18;
 
 // One column grid carries both card shapes. An app card is a single column; a
-// showcase card spans three — and 3 * 231 + 2 * 18 lands on exactly the 729 the
+// showcase card spans three, and 3 * 231 + 2 * 18 lands on exactly the 729 the
 // showcase card already was, so neither shape has to be reproportioned to fit.
 const HERO_COL = PHONE_WIDTH + CARD_PADDING_X * 2;
 const SHOWCASE_SPAN = 3;
 const SHOWCASE_WIDTH = HERO_COL * SHOWCASE_SPAN + HERO_GAP * (SHOWCASE_SPAN - 1);
-// The widest row — app + app + showcase — sets the grid's full width.
+// The widest row (app + app + showcase) sets the grid's full width.
 const BENTO_WIDTH = HERO_COL * 2 + HERO_GAP * 2 + SHOWCASE_WIDTH;
 
 // Widths are expressed against that total so the whole grid scales as one piece
 // and every tile holds its ratio. Card padding stays fixed, so below BENTO_WIDTH
-// the tiles drift a little off their exact ratio — negligible on a desktop, and
+// the tiles drift a little off their exact ratio, which is negligible on a desktop, and
 // the mobile branch below never gets here.
 const col = (px: number) => `${((px / BENTO_WIDTH) * 100).toFixed(4)}%`;
 
@@ -92,7 +92,7 @@ const INSPECTOR_CARD: Omit<HeroCard, "key"> = {
 /**
  * Interaction details that loop next to the showcase cards. Each tile opens
  * into the same recording with room to read it, plus the lines that actually
- * do the work — lifted from the source, not written to look like it.
+ * do the work, lifted from the source, not written to look like it.
  */
 const DETAIL_CLIPS: ClipDetail[] = [
   {
@@ -100,7 +100,7 @@ const DETAIL_CLIPS: ClipDetail[] = [
     ratio: "720 / 720",
     title: "Project tab switcher",
     description:
-      "Three projects, one panel. The pill is a single element travelling between tabs rather than three fading in and out, so the switch reads as one thing moving. It stretches from whichever edge it left and squashes back on arrival — that overshoot is what makes it feel liquid instead of mechanical.",
+      "Three projects, one panel. The pill is a single element travelling between tabs rather than three fading in and out, so the switch reads as one thing moving. It stretches from whichever edge it left and squashes back on arrival, and that overshoot is what makes it feel liquid instead of mechanical.",
     codeSource: "components/ui/hero-project-tab-bar.tsx",
     code: `<motion.div
   layoutId="active-hero-tab-indicator"   // one pill, shared by every tab
@@ -117,15 +117,15 @@ const DETAIL_CLIPS: ClipDetail[] = [
     ratio: "1116 / 416",
     title: "Actions that step aside",
     description:
-      "The actions don't sit there waiting to be used. The composer measures the text against the room it has left, and once the line is 92% full they step out so the text can take the whole row — then come back underneath once it wraps. Returning needs the line to fall to 75%, not 92%: the gap between those two numbers is what keeps them from flickering while you type around the edge.",
-    codeSource: "inline-chat-kit — src/ChatInput/ChatInput.tsx",
+      "The actions don't sit there waiting to be used. The composer measures the text against the room it has left, and once the line is 92% full they step out so the text can take the whole row, then come back underneath once it wraps. Returning needs the line to fall to 75%, not 92%: the gap between those two numbers is what keeps them from flickering while you type around the edge.",
+    codeSource: "inline-chat-kit, src/ChatInput/ChatInput.tsx",
     code: `const textW  = measureSpan.offsetWidth;
 const availW = editor.clientWidth - 16;
 
 if (isMultiline || textW >= availW * wrap.nearThreshold) {
-  setShowButtons(false);  // 0.92 — the text is crowding them
+  setShowButtons(false);  // 0.92: the text is crowding them
 } else if (!wrappedNow && textW < availW * wrap.exitThreshold) {
-  setShowButtons(true);   // 0.75 — clear again, bring them back
+  setShowButtons(true);   // 0.75: clear again, bring them back
 }`,
   },
   {
@@ -133,8 +133,8 @@ if (isMultiline || textW >= availW * wrap.nearThreshold) {
     ratio: "916 / 702",
     title: "Fan-out menu",
     description:
-      "An exploration of what a dropdown could be when it doesn't have to be a list. Each card carries its own angle, springs out on a stagger, and leans toward the pointer on hover. It doesn't scale — past a handful of items a fan is worse than a list — but for a few simple choices it's a nicer thing to open.",
-    codeSource: "inline-chat-kit — src/ChatInput/AddCardsOverlay.tsx",
+      "An exploration of what a dropdown could be when it doesn't have to be a list. Each card carries its own angle, springs out on a stagger, and leans toward the pointer on hover. It doesn't scale, since past a handful of items a fan is worse than a list, but for a few simple choices it's a nicer thing to open.",
+    codeSource: "inline-chat-kit, src/ChatInput/AddCardsOverlay.tsx",
     code: `const angles = [angle1, angle2, angle3];   // 0, -25, -50
 
 <motion.button
@@ -166,7 +166,7 @@ const INSPECTOR_TILE: HeroTile = {
   card: INSPECTOR_CARD,
   ratio: "1280 / 800",
   comingSoon:
-    "A visual editor for designers who are vibecoding. Instead of describing a change to your agent, you make it yourself and copy the config out — the agent then applies every change in one pass. The side panel works much like Figma's, with extras for the things only the web can do.",
+    "A visual editor for designers who are vibecoding. Instead of describing a change to your agent, you make it yourself and copy the config out, and the agent then applies every change in one pass. The side panel works much like Figma's, with extras for the things only the web can do.",
 };
 
 const CLIPS_TILE: HeroTile = { kind: "clips", clips: DETAIL_CLIPS };
@@ -317,7 +317,7 @@ function HeroProjectCard({
         </div>
       </div>
 
-      {/* Media frame — phone-shaped unless the card overrides it */}
+      {/* Media frame, phone-shaped unless the card overrides it */}
       <div
         style={{
           width: "100%",

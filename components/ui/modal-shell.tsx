@@ -27,7 +27,7 @@ interface ModalShellProps {
   maxWidth?: number;
   /**
    * Renders a header row instead of floating the close button over the
-   * content. Give one whenever the card has a heading of its own — the
+   * content. Give one whenever the card has a heading of its own, because the
    * corner button reads as unplaced without something on the line beside it.
    */
   title?: string;

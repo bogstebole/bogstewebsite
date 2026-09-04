@@ -19,7 +19,7 @@ interface AppDownloadButtonProps {
 /**
  * One button, two jobs. A phone can install straight from the store, so it goes
  * there. A desktop cannot, so it hands over a code to scan with the phone that
- * can — the same split the selected-projects layout has always used.
+ * can, the same split the selected-projects layout has always used.
  */
 export function AppDownloadButton({
   url,
