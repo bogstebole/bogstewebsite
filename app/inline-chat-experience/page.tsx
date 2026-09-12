@@ -681,11 +681,27 @@ export default function InlineChatExperiencePage() {
                chrome sits. */
             endOffset={120}
           >
-            {isEmpty && (
+            {/* ── The openers, and how they leave ──────────────────────────
+                Unmounted outright, they took 304px out of the layout in a
+                single frame and everything below them leapt — measured with a
+                per-frame trace: the composer's own box went from y=404 to
+                y=100 between two frames, with the scroll untouched and the
+                content height unchanged. It was not a scroll at all; it was
+                the block above simply ceasing to exist.
+
+                So it collapses instead. `marginBottom` goes with the height
+                because the conversation's 48px gap survives a child of zero
+                height, and 48px of snap is still a snap. */}
+            <AnimatePresence initial={false}>
+              {isEmpty && (
+                <motion.div
+                  key="opening"
+                  className="opening"
+                  style={{ overflow: "hidden" }}
+                  exit={{ opacity: 0, height: 0, marginBottom: -48 }}
+                  transition={{ duration: 0.26, ease: [0.32, 0.72, 0, 1] }}
+                >
               <EmptyState
-                /* The opening block and the composer under it share one
-                   column, so they read as one thing. See `.opening`. */
-                className="opening"
                 title="Ask me about particle physics"
                 description="The Standard Model, the Higgs, and what a boson actually is."
                 /* One opener per branch of `scriptedApi`, so everything the
@@ -705,7 +721,9 @@ export default function InlineChatExperiencePage() {
                    they did not write. */
                 onSuggestion={(text) => handleSubmit(turns[0].id, text)}
               />
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <AnimatePresence>
               {turns.map((turn, i) => (
