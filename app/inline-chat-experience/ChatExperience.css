@@ -31,15 +31,28 @@
    all of which the component owns — and the gap is `--ick-conversation-gap`,
    which already defaults to the 48px this used to say.
 
-   The padding stays. `padding-bottom: 99vh` is what lets a turn be pulled to
-   the top of the screen, and it is also the reason `Conversation` follows the
-   end of the *content* rather than the bottom of the container: scrolling to
-   the bottom here would park the answer above the fold in front of a blank
-   screen. The negative inline margins are the bleed that lets a marker stroke
-   overflow the column without being clipped. */
+   The top padding stays — it is what `anchorOffset` is matched against, so a
+   turn brought to the top lands below the header rather than under it. The
+   room *below* the conversation is the kit's now; see the note on the rule.
+   The negative inline margins are the bleed that lets a marker stroke overflow
+   the column without being clipped. */
 .chatFeed {
   padding-top: 100px;
-  padding-bottom: 99vh;
+  /* No `padding-bottom` here, and that is deliberate twice over.
+
+     Padding on a scroll container is a floor under its own height —
+     `box-sizing: border-box` will not let any box be shorter than its own
+     padding — so the `99vh` that used to be on this line made the scroller
+     stand taller than the page that holds it. Measured in a 800px window:
+     892px of scroller, 92px of it clipped away with whatever was drawn
+     inside, while the follow logic read `clientHeight` 892 and believed a
+     line at 850 was on screen.
+
+     And it is no longer needed. From `inline-chat-kit@0.54.0` the kit
+     measures the room an anchored turn needs and writes
+     `--ick-conversation-tail` on the content wrapper itself, where it
+     lengthens the scroll without changing the size of the thing doing the
+     scrolling. */
   padding-left: 32px;
   padding-right: 32px;
   margin-left: -32px;
