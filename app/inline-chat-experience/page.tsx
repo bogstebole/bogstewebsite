@@ -366,6 +366,27 @@ export default function InlineChatExperiencePage() {
     [submit]
   );
 
+  /* ── Letting go of the anchor ────────────────────────────────────────────
+     Held while the answer is arriving, released when it settles.
+
+     Held for ever — which is what recording it on submit and never clearing
+     it amounts to — pins the question to the top of the view permanently, and
+     the composer is the *last* turn, so it ends up below the fold with
+     nowhere visible to type. It did not show before `inline-chat-kit@0.54.0`
+     because the conversation had no room under it to scroll into, so the
+     anchor could not do much; that version measures the room itself, and the
+     anchor started working exactly as asked.
+
+     Derived rather than cleared in an effect: an effect would set state
+     during render's shadow and this is a function of the turn's own state.
+     Released on `resting` and not on `typing`, or it would let go while
+     somebody was still editing the question. */
+  const anchoredTurn = anchorTurnId
+    ? (turns.find((turn) => turn.id === anchorTurnId) ?? null)
+    : null;
+  const heldAnchor =
+    anchoredTurn && anchoredTurn.state !== "resting" ? anchorTurnId : null;
+
   /* Nothing asked yet: one turn, and it is still blank. */
   const isEmpty = turns.length === 1 && !turns[0].user && !turns[0].ai;
 
@@ -647,17 +668,40 @@ export default function InlineChatExperiencePage() {
           <Conversation
             ref={feedRef}
             viewportClassName="chatFeed"
-            anchorId={anchorTurnId ? `turn-${anchorTurnId}` : undefined}
+            anchorId={heldAnchor ? `turn-${heldAnchor}` : undefined}
             /* Matches the viewport's own `padding-top`, so a turn brought to
                the top lands where the first one already sits rather than
                under the fixed header. */
             anchorOffset={100}
+            /* Room under the composer once an answer settles. New in 0.54.0:
+               `endOffset` used to count the viewport's own padding twice, so
+               leaving it unset still left about a hundred pixels of air. It
+               means what it says now, and unset means flush against the
+               bottom edge — which on a phone is where the browser's own
+               chrome sits. */
+            endOffset={120}
           >
-            {isEmpty && (
+            {/* ── The openers, and how they leave ──────────────────────────
+                Unmounted outright, they took 304px out of the layout in a
+                single frame and everything below them leapt — measured with a
+                per-frame trace: the composer's own box went from y=404 to
+                y=100 between two frames, with the scroll untouched and the
+                content height unchanged. It was not a scroll at all; it was
+                the block above simply ceasing to exist.
+
+                So it collapses instead. `marginBottom` goes with the height
+                because the conversation's 48px gap survives a child of zero
+                height, and 48px of snap is still a snap. */}
+            <AnimatePresence initial={false}>
+              {isEmpty && (
+                <motion.div
+                  key="opening"
+                  className="opening"
+                  style={{ overflow: "hidden" }}
+                  exit={{ opacity: 0, height: 0, marginBottom: -48 }}
+                  transition={{ duration: 0.26, ease: [0.32, 0.72, 0, 1] }}
+                >
               <EmptyState
-                /* The opening block and the composer under it share one
-                   column, so they read as one thing. See `.opening`. */
-                className="opening"
                 title="Ask me about particle physics"
                 description="The Standard Model, the Higgs, and what a boson actually is."
                 /* One opener per branch of `scriptedApi`, so everything the
@@ -677,7 +721,9 @@ export default function InlineChatExperiencePage() {
                    they did not write. */
                 onSuggestion={(text) => handleSubmit(turns[0].id, text)}
               />
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <AnimatePresence>
               {turns.map((turn, i) => (

@@ -31,15 +31,28 @@
    all of which the component owns — and the gap is `--ick-conversation-gap`,
    which already defaults to the 48px this used to say.
 
-   The padding stays. `padding-bottom: 99vh` is what lets a turn be pulled to
-   the top of the screen, and it is also the reason `Conversation` follows the
-   end of the *content* rather than the bottom of the container: scrolling to
-   the bottom here would park the answer above the fold in front of a blank
-   screen. The negative inline margins are the bleed that lets a marker stroke
-   overflow the column without being clipped. */
+   The top padding stays — it is what `anchorOffset` is matched against, so a
+   turn brought to the top lands below the header rather than under it. The
+   room *below* the conversation is the kit's now; see the note on the rule.
+   The negative inline margins are the bleed that lets a marker stroke overflow
+   the column without being clipped. */
 .chatFeed {
   padding-top: 100px;
-  padding-bottom: 99vh;
+  /* No `padding-bottom` here, and that is deliberate twice over.
+
+     Padding on a scroll container is a floor under its own height —
+     `box-sizing: border-box` will not let any box be shorter than its own
+     padding — so the `99vh` that used to be on this line made the scroller
+     stand taller than the page that holds it. Measured in a 800px window:
+     892px of scroller, 92px of it clipped away with whatever was drawn
+     inside, while the follow logic read `clientHeight` 892 and believed a
+     line at 850 was on screen.
+
+     And it is no longer needed. From `inline-chat-kit@0.54.0` the kit
+     measures the room an anchored turn needs and writes
+     `--ick-conversation-tail` on the content wrapper itself, where it
+     lengthens the scroll without changing the size of the thing doing the
+     scrolling. */
   padding-left: 32px;
   padding-right: 32px;
   margin-left: -32px;
@@ -169,6 +182,26 @@
   background: var(--ick-tray-thumb);
   color: var(--ick-ink);
   box-shadow: var(--ick-shadow-1);
+}
+
+/* What `--bg` is.
+   
+   `.topBlur` and `.bottomBlur` were copied from the kit's playground, where
+   `--bg` is defined in `index.css` — a file that was not copied with them. So
+   `var(--bg)` resolved to nothing here, which makes the whole `background`
+   declaration invalid at computed-value time and drops it: the strips had
+   `backdrop-filter` and no colour, and the conversation showed through the
+   header.
+
+   It only became obvious with `inline-chat-kit@0.54.0`, because that is when
+   messages started actually travelling to the top — before it there was
+   rarely anything passing under the header to show through.
+
+   Pointed at this site's own page colour rather than the kit's `--ick-page`:
+   the strips fade the page out, and the page here is white while the kit's
+   is a 97% mix. */
+:root {
+  --bg: var(--color-bg-page);
 }
 
 .topBlur {
