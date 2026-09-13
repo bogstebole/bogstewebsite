@@ -116,12 +116,6 @@ export interface InteractionZone {
   label: string;
 }
 
-export interface InlineChatFeatureStatus {
-  works: string[];
-  notWorking: string[];
-  soon: string[];
-}
-
 /**
  * What this demo can actually do, checked rather than remembered.
  *
@@ -134,37 +128,6 @@ export interface InlineChatFeatureStatus {
  * Everything under `notWorking` is simulated on purpose — this page has no
  * model behind it and says so above. `soon` is tier I of the kit's roadmap.
  */
-export const INLINE_CHAT_FEATURE_STATUS: InlineChatFeatureStatus = {
-  works: [
-    "Send, stop, edit",
-    "Multiline input",
-    "Attach an image",
-    "Dictate a message",
-    "Copy an answer",
-    "Rate an answer",
-    "Regenerate and compare",
-    "Highlight a passage",
-    "Reply in a thread",
-    "Answer questions inline",
-    "Approve a tool call",
-    "Open a plan in a pane",
-    "Reasoning and tools",
-    "Sources and citations",
-    "Light and dark",
-  ],
-  notWorking: [
-    "Real model answers",
-    "Real speech to text",
-  ],
-  soon: [
-    "Mobile",
-    "A fixed composer",
-    "Queue a message",
-    "Saved conversations",
-  ],
-};
-
-/** Shuffled cringy motivational messages revealed inside the envelope widget */
 export const ENVELOPE_MESSAGES: string[] = [
   "You have a great fuckin' day...",
   "Someone out there thinks you're doing great.\nIt might just be me, but still.",
