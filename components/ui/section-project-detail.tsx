@@ -62,6 +62,10 @@ const TRIGIFY_PAIRS: { src: string; alt: string }[][] = [
     { src: "/assets/Trigify/workflow-triggers.webp", alt: "Workflow: choosing a trigger" },
     { src: "/assets/Trigify/workflow-lead-generation.webp", alt: "Workflow: branching on sentiment" },
   ],
+  [
+    { src: "/assets/Trigify/login.webp", alt: "Log in: Google, LinkedIn or email" },
+    { src: "/assets/Trigify/developer-docs.webp", alt: "Developer docs: API key authentication" },
+  ],
 ];
 
 const TRIGIFY_WIDE: { src: string; alt: string }[] = [
