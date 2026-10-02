@@ -26,6 +26,8 @@ const NOTES_ASSETS = [
   { type: "image" as const, src: "/assets/Useless Notes/5Uslsnts.png" },
 ];
 
+const DAYSIDE_VIDEO = "/assets/Dayside/dayside.mp4";
+
 const RECEIPT_ASSETS = [
   { type: "video" as const, src: "/assets/Hero/receipt-recording.mp4" },
   { type: "image" as const, src: "/assets/Vorli/vorli-1.webp" },
@@ -74,6 +76,20 @@ const CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
       </>
     ),
     longDescription: "It's a conceptual work that visually shows how we clutter our mental space. The main \"canvas\" gets more \"useless\" over time, totally packed with notes and links, and the \"find\" mode is kind of the opposite, showing how we can only find things when we really need them. It's a reflection on the whole concept of how we deal with information overload today.",
+  },
+  heroDayside: {
+    title: "Dayside",
+    icon: "/images/globe.png",
+    tags: ["macOS", "Friends' time zones", "Waiting approval"],
+    shortDescription: (
+      <>
+        <span style={{ color: "var(--color-text-heading)" }}>Dayside</span>
+        <span style={{ color: "var(--color-text-subdued)" }}>
+          {": Friends' time zones on a real, living globe, right in your menu bar."}
+        </span>
+      </>
+    ),
+    longDescription: "Click the globe in the menu bar and Dayside grows out of the notch. Every contact rises from their city as a beam of light, labelled with their name and local time, while sunlight sweeps across the planet in real time, so you can see at a glance who's having breakfast, who's at work and who's fast asleep. Click anyone to see their local time, how far ahead or behind you they are, whether it's a good moment to reach them, their sunrise and sunset, and when your working hours overlap. Scrub the time ruler through the day and watch night roll across the globe as every contact's clock updates with it, which turns planning a call across time zones into a few seconds of dragging. The Earth is rendered live from NASA satellite imagery, with drifting clouds, city lights on the night side and the exact position of the sun. Contacts never leave your Mac: no accounts, no tracking, no ads.",
   },
   heroReceipt: {
     title: "Receipt tracker",
@@ -158,6 +174,17 @@ export function HeroProjectDetail({ activeProject, onCloseStart, onClose, onOpen
     switch (activeProject) {
       case "heroNotes":
         return renderAssetGrid(NOTES_ASSETS);
+
+      case "heroDayside":
+        // A Mac app records as a whole desktop, so it gets the full width rather than a grid cell.
+        return (
+          <motion.div
+            variants={CONTENT_ITEM}
+            style={{ borderRadius: isMobile ? 12 : 32, overflow: "hidden", backgroundColor: "var(--color-bg-skeleton)", width: "100%" }}
+          >
+            <video src={DAYSIDE_VIDEO} autoPlay loop muted playsInline style={{ width: "100%", height: "auto", display: "block" }} />
+          </motion.div>
+        );
 
       case "heroReceipt":
         return renderAssetGrid(RECEIPT_ASSETS);

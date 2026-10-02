@@ -54,25 +54,47 @@ const HERO_CARDS: HeroCard[] = [
   },
 ];
 
+/** A Mac app, so it records as a landscape desktop rather than a phone screen. */
+const DAYSIDE_CARD: HeroCard = {
+  key: "heroDayside",
+  icon: "/images/globe.png",
+  title: "Dayside",
+  subtitle: "Friends' time zones",
+  status: "Waiting approval",
+  media: { type: "video", src: "/assets/Dayside/dayside.mp4" },
+};
+
+const DAYSIDE_RATIO = "2712 / 2010";
+
 const PHONE_WIDTH = 171;
 const PHONE_HEIGHT = 372;
+const PHONE_RATIO = `${PHONE_WIDTH} / ${PHONE_HEIGHT}`;
 const CARD_PADDING_X = 30;
+const CLIP_PADDING = 14;
 const HERO_GAP = 18;
+const HERO_MARGIN_X = 32;
+// Past this the rows only get taller, so the grid stops growing and centres.
+const HERO_MAX_WIDTH = 1200;
 
-// One column grid carries both card shapes. An app card is a single column; a
-// showcase card spans three, and 3 * 231 + 2 * 18 lands on exactly the 729 the
-// showcase card already was, so neither shape has to be reproportioned to fit.
+// Mobile scrolls the app cards sideways at a fixed width.
 const HERO_COL = PHONE_WIDTH + CARD_PADDING_X * 2;
-const SHOWCASE_SPAN = 3;
-const SHOWCASE_WIDTH = HERO_COL * SHOWCASE_SPAN + HERO_GAP * (SHOWCASE_SPAN - 1);
-// The widest row (app + app + showcase) sets the grid's full width.
-const BENTO_WIDTH = HERO_COL * 2 + HERO_GAP * 2 + SHOWCASE_WIDTH;
 
-// Widths are expressed against that total so the whole grid scales as one piece
-// and every tile holds its ratio. Card padding stays fixed, so below BENTO_WIDTH
-// the tiles drift a little off their exact ratio, which is negligible on a desktop, and
-// the mobile branch below never gets here.
-const col = (px: number) => `${((px / BENTO_WIDTH) * 100).toFixed(4)}%`;
+/** "w / h" as a number, so a tile can claim width in proportion to its media. */
+const ratioOf = (r: string) => {
+  const [w, h] = r.split("/").map(Number);
+  return w / h;
+};
+
+// Every desktop row is justified. A tile starts from its fixed horizontal padding
+// and takes the rest of the row in proportion to its media ratio, so all media in
+// a row end up the same height and the row fills the width edge to edge.
+const justify = (ratio: string, paddingX: number): React.CSSProperties => ({
+  flexGrow: ratioOf(ratio),
+  flexShrink: 1,
+  flexBasis: paddingX * 2,
+  minWidth: 0,
+  boxSizing: "border-box",
+});
 
 const INLINE_CHAT_CARD: Omit<HeroCard, "key"> = {
   title: "Inline Chat Input",
@@ -150,9 +172,9 @@ if (isMultiline || textW >= availW * wrap.nearThreshold) {
 
 /** A tile is either a project card that opens a detail, or a showcase that routes away. */
 type HeroTile =
-  | { kind: "app"; card: HeroCard }
+  | { kind: "app"; card: HeroCard; ratio: string }
   | { kind: "showcase"; card: Omit<HeroCard, "key">; ratio: string; href?: string; comingSoon?: string }
-  | { kind: "clips"; clips: ClipDetail[] };
+  | { kind: "clip"; clip: ClipDetail };
 
 const INLINE_CHAT_TILE: HeroTile = {
   kind: "showcase",
@@ -169,15 +191,16 @@ const INSPECTOR_TILE: HeroTile = {
     "A visual editor for designers who are vibecoding. Instead of describing a change to your agent, you make it yourself and copy the config out, and the agent then applies every change in one pass. The side panel works much like Figma's, with extras for the things only the web can do.",
 };
 
-const CLIPS_TILE: HeroTile = { kind: "clips", clips: DETAIL_CLIPS };
-
 const SHOWCASE_TILES = [INLINE_CHAT_TILE, INSPECTOR_TILE];
 
-// Four columns over five. Swapping the two showcase tiles is the single edit that
-// decides which experiment is visible without scrolling.
+// One row per kind of work: shipped apps, experiments, then interaction details.
 const HERO_ROWS: HeroTile[][] = [
-  [{ kind: "app", card: HERO_CARDS[0] }, INLINE_CHAT_TILE, CLIPS_TILE],
-  [{ kind: "app", card: HERO_CARDS[1] }, { kind: "app", card: HERO_CARDS[2] }, INSPECTOR_TILE],
+  [
+    ...HERO_CARDS.map((card): HeroTile => ({ kind: "app", card, ratio: PHONE_RATIO })),
+    { kind: "app", card: DAYSIDE_CARD, ratio: DAYSIDE_RATIO },
+  ],
+  SHOWCASE_TILES,
+  DETAIL_CLIPS.map((clip): HeroTile => ({ kind: "clip", clip })),
 ];
 
 function HeroProjectCard({
@@ -353,7 +376,15 @@ function HeroProjectCard({
   );
 }
 
-function ClipTile({ clip, onOpen }: { clip: ClipDetail; onOpen: () => void }) {
+function ClipTile({
+  clip,
+  onOpen,
+  style,
+}: {
+  clip: ClipDetail;
+  onOpen: () => void;
+  style?: React.CSSProperties;
+}) {
   return (
     <motion.div
       whileHover={{ y: -4 }}
@@ -373,10 +404,11 @@ function ClipTile({ clip, onOpen }: { clip: ClipDetail; onOpen: () => void }) {
         cursor: "pointer",
         backgroundColor: "var(--color-bg-container)",
         borderRadius: 36,
-        padding: 14,
+        padding: CLIP_PADDING,
         width: "100%",
         boxSizing: "border-box",
         flexShrink: 0,
+        ...style,
       }}
     >
       <div
@@ -415,33 +447,22 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
     else if (t.comingSoon) setSoon({ title: t.card.title, message: t.comingSoon });
   };
 
-  const clipColumn = (clips: ClipDetail[], key: string, width: string) => (
-    <div
-      key={key}
-      style={{
-        width,
-        boxSizing: "border-box",
-        display: "flex",
-        flexDirection: "column",
-        rowGap: HERO_GAP,
-      }}
-    >
-      {clips.map((c) => (
-        <ClipTile key={c.src} clip={c} onOpen={() => setClip(c)} />
-      ))}
-    </div>
-  );
-
-  const tile = (t: HeroTile, key: string, width: string) =>
-    t.kind === "clips" ? (
-      clipColumn(t.clips, key, width)
+  const tile = (t: HeroTile, key: string) =>
+    t.kind === "clip" ? (
+      <ClipTile
+        key={key}
+        clip={t.clip}
+        onOpen={() => setClip(t.clip)}
+        style={justify(t.clip.ratio, CLIP_PADDING)}
+      />
     ) : t.kind === "app" ? (
       <HeroProjectCard
         key={key}
         card={t.card}
         interactive={interactive}
         onClick={() => onProjectClick(t.card.key)}
-        style={{ width, boxSizing: "border-box" }}
+        style={justify(t.ratio, CARD_PADDING_X)}
+        frame={{ aspectRatio: t.ratio }}
       />
     ) : (
       <HeroProjectCard
@@ -449,7 +470,7 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
         card={t.card}
         interactive={interactive}
         onClick={openTile(t)}
-        style={{ width, boxSizing: "border-box" }}
+        style={justify(t.ratio, CARD_PADDING_X)}
         frame={{ aspectRatio: t.ratio }}
       />
     );
@@ -488,6 +509,16 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
               style={{ width: HERO_COL, boxSizing: "border-box" }}
             />
           ))}
+        </div>
+
+        <div style={{ width: "100%", paddingInline: 24, boxSizing: "border-box" }}>
+          <HeroProjectCard
+            card={DAYSIDE_CARD}
+            interactive={interactive}
+            onClick={() => onProjectClick(DAYSIDE_CARD.key)}
+            style={{ width: "100%", boxSizing: "border-box" }}
+            frame={{ aspectRatio: DAYSIDE_RATIO }}
+          />
         </div>
 
         {SHOWCASE_TILES.map((t) => (
@@ -530,32 +561,20 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
       style={{
         marginTop: 60,
         width: "100%",
+        maxWidth: HERO_MAX_WIDTH + HERO_MARGIN_X * 2,
+        marginInline: "auto",
         display: "flex",
-        justifyContent: "center",
-        paddingInline: 24,
+        flexDirection: "column",
+        rowGap: HERO_GAP,
+        paddingInline: HERO_MARGIN_X,
         boxSizing: "border-box",
       }}
     >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: BENTO_WIDTH,
-          display: "flex",
-          flexDirection: "column",
-          rowGap: HERO_GAP,
-        }}
-      >
-        {HERO_ROWS.map((row, i) => (
-          <div
-            key={i}
-            style={{ display: "flex", columnGap: col(HERO_GAP), alignItems: "flex-start" }}
-          >
-            {row.map((t, j) =>
-              tile(t, `${i}-${j}`, t.kind === "showcase" ? col(SHOWCASE_WIDTH) : col(HERO_COL))
-            )}
-          </div>
-        ))}
-      </div>
+      {HERO_ROWS.map((row, i) => (
+        <div key={i} style={{ display: "flex", columnGap: HERO_GAP }}>
+          {row.map((t, j) => tile(t, `${i}-${j}`))}
+        </div>
+      ))}
     </div>
 
       <ComingSoonModal

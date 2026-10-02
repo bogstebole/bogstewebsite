@@ -4,16 +4,18 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import styles from "@/components/ui/GlassButton.module.css";
 
-export type HeroProjectKey = "heroNotes" | "heroReceipt" | "heroRuntronome";
+export type HeroProjectKey = "heroNotes" | "heroDayside" | "heroReceipt" | "heroRuntronome";
 
 export const HERO_PROJECT_ORDER: HeroProjectKey[] = [
   "heroNotes",
+  "heroDayside",
   "heroReceipt",
   "heroRuntronome",
 ];
 
 const TABS: Array<{ key: HeroProjectKey; icon: string }> = [
   { key: "heroNotes", icon: "/images/notes.png" },
+  { key: "heroDayside", icon: "/images/globe.png" },
   { key: "heroReceipt", icon: "/images/receipt.png" },
   { key: "heroRuntronome", icon: "/images/runtronome.png" },
 ];
