@@ -147,15 +147,6 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
           <div style={labelStyle}>Personal_</div>
 
           <ProjectEntry
-            {...entryProps("zoun")}
-            icon={<ProjectIcon src="/images/globe.png" alt="Zoun" grayscale={false} opacity={1} />}
-            label="Zoun"
-            tags={["iOS", "Time Zone Tracker"]}
-            inProgress
-            clickable
-          />
-
-          <ProjectEntry
             {...entryProps("weatherWear")}
             icon={<ProjectIcon src="/images/puffer.png" alt="Weather Wear" grayscale opacity={0.6} />}
             label="Weather Wear"

@@ -13,12 +13,6 @@ interface SectionProjectDetailProps {
   onOpenComplete?: () => void;
 }
 
-const ZOUN_SCREENSHOTS = [
-  { src: "/assets/Zoun/home.png", alt: "Zoun: globe view" },
-  { src: "/assets/Zoun/compare.png", alt: "Zoun: compare time zones" },
-  { src: "/assets/Zoun/search.png", alt: "Zoun: select country" },
-];
-
 const FYNN_LEFT: { src: string; alt: string }[] = [
   { src: "/assets/Fynn/edit profile.png", alt: "Edit profile" },
   { src: "/assets/Fynn/Incidents.png", alt: "Incidents" },
@@ -91,20 +85,6 @@ type ProjectConfig = {
 };
 
 const CONFIGS: Record<SectionProjectKey, ProjectConfig> = {
-  zoun: {
-    title: "Zoun",
-    icon: "/images/globe.png",
-    tags: ["iOS", "Time Zone Tracker", "In progress.."],
-    shortDescription: (
-      <>
-        <span style={{ color: "var(--color-text-heading)" }}>Zoun</span>
-        <span style={{ color: "var(--color-text-subdued)" }}>
-          {": Time zones should feel spatial and immediate, not like reading a spreadsheet."}
-        </span>
-      </>
-    ),
-    longDescription: "Zoun is a personal iOS app built around the idea that comparing time zones across a global team should feel spatial and immediate, not like reading a spreadsheet. Existing world clock tools get the job done but look dated, and that gap was enough reason to build something better. The concept centers on a photorealistic 3D globe that reflects real-time daylight conditions, with contacts pinned to their locations and a list view below showing local times, UTC offsets, and day/night status at a glance. A time scrubber lets you simulate what everyone's clock looks like at any given hour, which is useful for scheduling calls across multiple zones. Built in SwiftUI, with an MVP already running using MapKit as a placeholder renderer. The final globe is still being evaluated between Metal, RealityKit, and SpriteKit, since MapKit does not deliver the visual fidelity the concept needs, and getting that right is the blocker between concept and release. Planned additions include calendar integrations for booking directly into Google Meet or similar. The app is intended for public release once the visuals meet the standard the concept sets.",
-  },
   weatherWear: {
     title: "Wear",
     icon: "/images/puffer.png",
@@ -219,27 +199,6 @@ export function SectionProjectDetail({ activeProject, onCloseStart, onClose, onO
 
   const renderChildren = () => {
     switch (activeProject) {
-      case "zoun":
-        return isMobile ? (
-          <motion.div variants={IMAGES_STAGGER} style={{ display: "grid", gap: 8, gridTemplateColumns: "1fr 1fr", width: "100%" }}>
-            {ZOUN_SCREENSHOTS.map((s) => (
-              <motion.div key={s.src} variants={CONTENT_ITEM} style={{ borderRadius: 12, overflow: "hidden" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.src} alt={s.alt} style={{ display: "block", height: "auto", objectFit: "cover", width: "100%" }} />
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          <motion.div variants={IMAGES_STAGGER} style={{ display: "flex", gap: 8 }}>
-            {ZOUN_SCREENSHOTS.map((s) => (
-              <motion.div key={s.src} variants={CONTENT_ITEM} style={{ borderRadius: 12, flex: 1, overflow: "hidden" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.src} alt={s.alt} style={{ display: "block", height: "auto", objectFit: "cover", width: "100%" }} />
-              </motion.div>
-            ))}
-          </motion.div>
-        );
-
       case "weatherWear":
         return (
           <motion.div variants={CONTENT_ITEM} style={{ display: "flex", justifyContent: "center", width: "100%" }}>
