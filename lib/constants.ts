@@ -146,3 +146,9 @@ export const ENVELOPE_MESSAGES: string[] = [
 /** Useless Notes on the App Store — the download button and its QR code point here. */
 export const NOTES_APP_STORE_URL =
   "https://apps.apple.com/us/app/useless-notes/id6757185511";
+
+/** Dayside on the Mac App Store. Null until Apple approves it; the page shows "coming soon" meanwhile. */
+export const DAYSIDE_APP_STORE_URL: string | null = null;
+
+/** Where Dayside support and feedback emails go. */
+export const DAYSIDE_SUPPORT_EMAIL = "bogstedsgn@gmail.com";
