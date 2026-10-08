@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { geistSans, geistMono, inter, silkscreen, jetbrainsMono, specialElite } from "@/lib/fonts";
+import { preload } from "react-dom";
+import { geistSans, geistMono, inter, silkscreen, jetbrainsMono, specialElite, preloadedFonts } from "@/lib/fonts";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import "./fonts.css";
 import "./globals.css";
 import "dialkit/styles.css";
 export const metadata: Metadata = {
@@ -38,6 +40,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  for (const href of preloadedFonts) preload(href, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
