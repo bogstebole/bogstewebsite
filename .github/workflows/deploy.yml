@@ -42,7 +42,20 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             npm install --no-audit --no-fund
-            npm run build
+
+            # Stale Turbopack cache from an older Next version can break the build
+            rm -rf .next/cache
+
+            # A failed build leaves .next half written while the old server keeps
+            # running, so restore the backup to keep the live site serving assets
+            if ! npm run build; then
+              echo "Build failed, restoring previous .next"
+              if [ -d "$BACKUP_DIR/.next_$TIMESTAMP" ]; then
+                rm -rf .next
+                cp -r "$BACKUP_DIR/.next_$TIMESTAMP" .next
+              fi
+              exit 1
+            fi
 
             # Restart or start app with pm2
             if pm2 list | grep -q "website"; then
