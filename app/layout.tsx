@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { geistSans, geistMono, inter, silkscreen, jetbrainsMono, specialElite } from "@/lib/fonts";
+import { geistSans, geistMono, inter, silkscreen, jetbrainsMono, specialElite, preloadedFonts } from "@/lib/fonts";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import "./fonts.css";
 import "./globals.css";
 import "dialkit/styles.css";
 export const metadata: Metadata = {
@@ -42,6 +43,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {preloadedFonts.map((href) => (
+          <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
+        ))}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${silkscreen.variable} ${jetbrainsMono.variable} ${specialElite.variable} antialiased`}
