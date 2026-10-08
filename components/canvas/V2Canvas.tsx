@@ -395,6 +395,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
           onCloseStart={handleCloseStart}
           onClose={handleClose}
           onOpenComplete={() => setIsDetailFullyOpen(true)}
+          onNavigate={handleSectionTabSwitch}
         />
       )}
 
@@ -405,6 +406,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
           onCloseStart={handleCloseStart}
           onClose={handleClose}
           onOpenComplete={() => setIsDetailFullyOpen(true)}
+          onNavigate={handleHeroTabSwitch}
         />
       )}
 

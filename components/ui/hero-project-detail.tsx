@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { ProjectDetailLayout, CONTENT_ITEM } from "./project-detail-layout";
+import { ProjectDetailLayout, CONTENT_ITEM, type AdjacentProject } from "./project-detail-layout";
 import { NOTES_APP_STORE_URL } from "@/lib/constants";
 import { HERO_PROJECT_ORDER, type HeroProjectKey } from "./hero-project-tab-bar";
 
@@ -12,6 +12,7 @@ interface HeroProjectDetailProps {
   onCloseStart: () => void;
   onClose: () => void;
   onOpenComplete?: () => void;
+  onNavigate?: (key: HeroProjectKey) => void;
 }
 
 const NOTES_ASSETS = [
@@ -131,7 +132,7 @@ const IMAGES_STAGGER = {
   },
 };
 
-export function HeroProjectDetail({ activeProject, onCloseStart, onClose, onOpenComplete }: HeroProjectDetailProps) {
+export function HeroProjectDetail({ activeProject, onCloseStart, onClose, onOpenComplete, onNavigate }: HeroProjectDetailProps) {
   const { isMobile } = useBreakpoint();
   const [prevProject, setPrevProject] = useState<HeroProjectKey>(activeProject);
   const [slideDirection, setSlideDirection] = useState(0);
@@ -196,6 +197,12 @@ export function HeroProjectDetail({ activeProject, onCloseStart, onClose, onOpen
 
   const config = CONFIGS[activeProject];
 
+  const activeIdx = HERO_PROJECT_ORDER.indexOf(activeProject);
+  const adjacent = (key: HeroProjectKey | undefined): AdjacentProject | undefined =>
+    key && onNavigate
+      ? { title: CONFIGS[key].title, icon: CONFIGS[key].icon, iconRotate: CONFIGS[key].iconRotate, onSelect: () => onNavigate(key) }
+      : undefined;
+
   return (
     <ProjectDetailLayout
       onCloseStart={onCloseStart}
@@ -211,6 +218,8 @@ export function HeroProjectDetail({ activeProject, onCloseStart, onClose, onOpen
       contentKey={activeProject}
       slideDirection={slideDirection}
       onOpenComplete={onOpenComplete}
+      prevProject={adjacent(HERO_PROJECT_ORDER[activeIdx - 1])}
+      nextProject={adjacent(HERO_PROJECT_ORDER[activeIdx + 1])}
     >
       {renderChildren()}
     </ProjectDetailLayout>
