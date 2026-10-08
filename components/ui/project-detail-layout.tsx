@@ -1,13 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { createPortal } from "react-dom";
 import GlassButton from "@/components/ui/Glassmorphic Button Breakdown";
 import { ProjectTag } from "@/components/ui/project-tag";
 import { AppStoreBadge } from "@/components/elements/app-store-badge";
 import { AppDownloadButton } from "@/components/ui/app-download-button";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
+
+/** A neighbouring project, reached by scrolling past either end of the panel. */
+export interface AdjacentProject {
+  title: string;
+  icon: string;
+  iconRotate?: string;
+  onSelect: () => void;
+}
 
 interface ProjectDetailLayoutProps {
   onCloseStart: () => void;
@@ -28,6 +36,8 @@ interface ProjectDetailLayoutProps {
   contentKey?: string;
   slideDirection?: number;
   onOpenComplete?: () => void;
+  prevProject?: AdjacentProject;
+  nextProject?: AdjacentProject;
 }
 
 const EXIT_DURATION = 0.4;
@@ -35,22 +45,39 @@ const sheetSpring = { type: "spring" as const, stiffness: 340, damping: 34 };
 const desktopSpring = { type: "spring" as const, stiffness: 300, damping: 30 };
 const stickySpring = { type: "spring" as const, stiffness: 400, damping: 36 };
 
+// Tab switches slide sideways; scrolling into the next/previous project slides vertically
+type SlideCustom = { dir: number; axis: "x" | "y" };
+
+const slideOffset = ({ dir, axis }: SlideCustom, sign: number) => {
+  const offset = dir === 0 ? 0 : dir * sign * 56;
+  return { x: axis === "x" ? offset : 0, y: axis === "y" ? offset : 0 };
+};
+
 const SLIDE_VARIANTS = {
-  enter: (dir: number) => ({
-    x: dir === 0 ? 0 : dir * 56,
-    opacity: dir === 0 ? 1 : 0,
+  enter: (custom: SlideCustom) => ({
+    ...slideOffset(custom, 1),
+    opacity: custom.dir === 0 ? 1 : 0,
   }),
   center: {
     x: 0,
+    y: 0,
     opacity: 1,
     transition: { type: "spring" as const, stiffness: 280, damping: 28 },
   },
-  exit: (dir: number) => ({
-    x: dir === 0 ? 0 : dir * -56,
+  exit: (custom: SlideCustom) => ({
+    ...slideOffset(custom, -1),
     opacity: 0,
     transition: { duration: 0.15, ease: "easeIn" as const },
   }),
 };
+
+// Scroll-past-the-edge navigation (desktop wheel/trackpad)
+const PULL_THRESHOLD = 220; // px of wheel travel past the edge to switch projects
+const RUBBER_MAX = 40; // how far the content gives while pulling
+const GESTURE_GAP_MS = 160; // a pause this long between wheel events starts a new gesture
+const RELEASE_MS = 280; // letting go this long before the threshold springs the pull back
+const NAV_LOCK_MS = 500; // after a switch, swallow the rest of the gesture for at least this long
+const EDGE_EPS = 2;
 
 const CONTENT_STAGGER = {
   hidden: {},
@@ -89,6 +116,8 @@ export function ProjectDetailLayout({
   contentKey,
   slideDirection,
   onOpenComplete,
+  prevProject,
+  nextProject,
 }: ProjectDetailLayoutProps) {
   const [mounted, setMounted] = useState(false);
   const closingRef = useRef(false);
@@ -118,6 +147,102 @@ export function ProjectDetailLayout({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Signed pull past the panel edge: positive toward the next project, negative toward the previous
+  const pull = useMotionValue(0);
+  const pullSpring = useSpring(pull, { stiffness: 420, damping: 38 });
+  const prevProgress = useTransform(pullSpring, (v) => Math.min(1, Math.max(0, -v / PULL_THRESHOLD)));
+  const rubberY = useTransform(pullSpring, (v) => (-v / PULL_THRESHOLD) * RUBBER_MAX);
+  const reduceMotion = useReducedMotion();
+
+  const [slideAxis, setSlideAxis] = useState<"x" | "y">("x");
+  const [scrollNavFrom, setScrollNavFrom] = useState<string | null>(null);
+  const [prevContentKey, setPrevContentKey] = useState(contentKey);
+  if (contentKey !== prevContentKey) {
+    setSlideAxis(scrollNavFrom !== null && scrollNavFrom === prevContentKey ? "y" : "x");
+    setScrollNavFrom(null);
+    setPrevContentKey(contentKey);
+  }
+
+  const resetScrollRef = useRef(false);
+  const adjacentRef = useRef({ prevProject, nextProject, contentKey });
+  useEffect(() => {
+    adjacentRef.current = { prevProject, nextProject, contentKey };
+  });
+
+  const navigateProject = useCallback((dir: 1 | -1) => {
+    const { prevProject: prev, nextProject: next, contentKey: fromKey } = adjacentRef.current;
+    const target = dir === 1 ? next : prev;
+    if (!target || closingRef.current) return;
+    resetScrollRef.current = true;
+    setScrollNavFrom(fromKey ?? null);
+    target.onSelect();
+  }, []);
+
+  const wheelRef = useRef({ lastAt: 0, armedDir: 0, pull: 0, locked: false, lockUntil: 0, releaseTimer: 0 });
+
+  useEffect(() => {
+    if (!mounted || isMobile) return;
+    const el = panelRef.current;
+    if (!el) return;
+    const s = wheelRef.current;
+
+    const release = () => {
+      s.pull = 0;
+      pull.set(0);
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (closingRef.current || e.deltaY === 0 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      const now = performance.now();
+      const gestureStart = now - s.lastAt > GESTURE_GAP_MS;
+      s.lastAt = now;
+
+      // After a switch, eat the rest of the gesture (and trackpad momentum) so it can't scroll the new project
+      if (s.locked) {
+        if (gestureStart && now > s.lockUntil) {
+          s.locked = false;
+        } else {
+          e.preventDefault();
+          return;
+        }
+      }
+
+      const dir = e.deltaY > 0 ? 1 : -1;
+      const { prevProject: prev, nextProject: next } = adjacentRef.current;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - EDGE_EPS;
+      const atTop = el.scrollTop <= EDGE_EPS;
+      const canPull = dir === 1 ? atBottom && !!next : atTop && !!prev;
+
+      // Only a gesture that starts at the edge pulls, so momentum from reaching the end never switches on its own
+      if (gestureStart) s.armedDir = canPull ? dir : 0;
+      if (!canPull || s.armedDir !== dir) {
+        if (s.pull !== 0) release();
+        return;
+      }
+
+      const delta = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * el.clientHeight : e.deltaY;
+      s.pull = Math.max(-PULL_THRESHOLD, Math.min(PULL_THRESHOLD, s.pull + delta));
+      pull.set(s.pull);
+
+      window.clearTimeout(s.releaseTimer);
+      if (Math.abs(s.pull) >= PULL_THRESHOLD) {
+        s.locked = true;
+        s.lockUntil = now + NAV_LOCK_MS;
+        s.armedDir = 0;
+        release();
+        navigateProject(dir);
+        return;
+      }
+      s.releaseTimer = window.setTimeout(release, RELEASE_MS);
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      window.clearTimeout(s.releaseTimer);
+    };
+  }, [mounted, isMobile, pull, navigateProject]);
 
   const initiateClose = useCallback(async () => {
     if (closingRef.current) return;
@@ -384,6 +509,8 @@ export function ProjectDetailLayout({
       <style>{`
         .layout-scroll::-webkit-scrollbar { display: none; }
         .layout-scroll { scrollbar-width: none; }
+        .layout-next { background-color: transparent; transition: background-color 0.2s ease; }
+        .layout-next:hover { background-color: var(--color-bg-container); }
       `}</style>
 
       {/* Backdrop */}
@@ -432,11 +559,60 @@ export function ProjectDetailLayout({
           }}
         >
 
+          {/* Previous project hint, revealed by pulling up past the top (mirrors the next-project footer) */}
+          {prevProject && (
+            <motion.div
+              aria-hidden
+              style={{
+                position: "absolute",
+                top: 12,
+                left: 0,
+                right: 0,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 8,
+                textAlign: "center",
+                opacity: prevProgress,
+                pointerEvents: "none",
+              }}
+            >
+              <motion.svg
+                width="14"
+                height="8"
+                viewBox="0 0 14 8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                animate={reduceMotion ? undefined : { y: [0, -5, 0] }}
+                transition={{ duration: 1.6, ease: "easeInOut", repeat: Infinity }}
+                style={{ color: "var(--color-text-muted)", display: "block" }}
+              >
+                <path d="M1 7l6-6 6 6" />
+              </motion.svg>
+              <span style={{ color: "var(--color-text-muted)", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>
+                Keep scrolling
+              </span>
+              <span style={{ color: "var(--color-text-heading)", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: 16, letterSpacing: "-0.01em", lineHeight: 1, whiteSpace: "nowrap" }}>
+                {prevProject.title}
+              </span>
+            </motion.div>
+          )}
+
           {/* Main Content — stagger on open, slide on tab switch */}
-          <AnimatePresence mode="wait" custom={slideDirection ?? 0}>
+          <AnimatePresence
+            mode="wait"
+            custom={{ dir: slideDirection ?? 0, axis: slideAxis }}
+            onExitComplete={() => {
+              if (resetScrollRef.current && panelRef.current) panelRef.current.scrollTop = 0;
+              resetScrollRef.current = false;
+            }}
+          >
             <motion.div
               key={contentKey ?? "default"}
-              custom={slideDirection ?? 0}
+              custom={{ dir: slideDirection ?? 0, axis: slideAxis }}
               variants={SLIDE_VARIANTS}
               initial="enter"
               animate="center"
@@ -449,7 +625,7 @@ export function ProjectDetailLayout({
                 variants={CONTENT_STAGGER}
                 initial="hidden"
                 animate="visible"
-                style={{ display: "flex", flexDirection: "column", gap: 48, paddingBottom: 32, position: "relative", zIndex: 1 }}
+                style={{ display: "flex", flexDirection: "column", gap: 48, paddingBottom: 32, position: "relative", zIndex: 1, y: rubberY }}
               >
                 {/* Header: icon (left) + close (right) */}
                 <motion.div variants={CONTENT_ITEM} style={{ flexShrink: 0 }}>
@@ -514,6 +690,54 @@ export function ProjectDetailLayout({
                 <motion.div variants={CHILDREN_STAGGER} style={{ display: "flex", flexDirection: "column", gap: 24, flex: 1, fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 14 }}>
                   {children}
                 </motion.div>
+
+                {/* Next project: keep scrolling past the end (or click) to move on */}
+                {nextProject && (
+                  <motion.div variants={CONTENT_ITEM} style={{ display: "flex", justifyContent: "center", paddingTop: 16 }}>
+                    <motion.button
+                      type="button"
+                      className="layout-next"
+                      onClick={() => navigateProject(1)}
+                      whileTap={{ scale: 0.97 }}
+                      aria-label={`Next project: ${nextProject.title}`}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 14,
+                        padding: "20px 32px",
+                        border: "none",
+                        borderRadius: 24,
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, textAlign: "center" }}>
+                        <span style={{ color: "var(--color-text-muted)", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>
+                          Keep scrolling
+                        </span>
+                        <span style={{ color: "var(--color-text-heading)", fontFamily: '"JetBrains Mono", system-ui, sans-serif', fontSize: 16, letterSpacing: "-0.01em", lineHeight: 1, whiteSpace: "nowrap" }}>
+                          {nextProject.title}
+                        </span>
+                      </div>
+                      <motion.svg
+                        width="14"
+                        height="8"
+                        viewBox="0 0 14 8"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden
+                        animate={reduceMotion ? undefined : { y: [0, 5, 0] }}
+                        transition={{ duration: 1.6, ease: "easeInOut", repeat: Infinity }}
+                        style={{ color: "var(--color-text-muted)", display: "block" }}
+                      >
+                        <path d="M1 1l6 6 6-6" />
+                      </motion.svg>
+                    </motion.button>
+                  </motion.div>
+                )}
               </motion.div>
             </motion.div>
           </AnimatePresence>
