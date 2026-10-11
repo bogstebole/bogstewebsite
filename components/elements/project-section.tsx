@@ -187,6 +187,20 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             label="Trigify"
             tags={["Web", "GTM Intelligence", "B2B"]}
           />
+
+          <ProjectEntry
+            {...entryProps("bankMigration")}
+            icon={<ProjectIcon src="/images/bank-migration.svg" alt="UAE Bank · Migration" rotate="-4.5deg" width={12} height={12} />}
+            label="UAE Bank · Migration"
+            tags={["Sketch to Figma", "Banking", "Undisclosed"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("bankAudit")}
+            icon={<ProjectIcon src="/images/bank-audit.svg" alt="UAE Bank · Audit" rotate="8.2deg" width={12} height={12} />}
+            label="UAE Bank · Audit"
+            tags={["Design System", "Banking", "Undisclosed"]}
+          />
         </div>
       </div>
 

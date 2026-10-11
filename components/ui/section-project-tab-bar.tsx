@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import styles from "@/components/ui/GlassButton.module.css";
 
-export type SectionProjectKey = "weatherWear" | "pauschalTracker" | "fynn" | "contentSnare" | "trigify";
+export type SectionProjectKey = "weatherWear" | "pauschalTracker" | "fynn" | "contentSnare" | "trigify" | "bankMigration" | "bankAudit";
 
 export const SECTION_PROJECT_ORDER: SectionProjectKey[] = [
   "weatherWear",
@@ -12,6 +12,8 @@ export const SECTION_PROJECT_ORDER: SectionProjectKey[] = [
   "fynn",
   "contentSnare",
   "trigify",
+  "bankMigration",
+  "bankAudit",
 ];
 
 const TABS: Array<{ key: SectionProjectKey; icon: string }> = [
@@ -20,6 +22,8 @@ const TABS: Array<{ key: SectionProjectKey; icon: string }> = [
   { key: "fynn", icon: "/images/fynn.png" },
   { key: "contentSnare", icon: "/images/content-snare.png" },
   { key: "trigify", icon: "/images/trigify.svg" },
+  { key: "bankMigration", icon: "/images/bank-migration.svg" },
+  { key: "bankAudit", icon: "/images/bank-audit.svg" },
 ];
 
 interface SectionProjectTabBarProps {
