@@ -16,6 +16,7 @@ import { ProjectDetail } from "@/components/ui/project-detail";
 import { ProjectTabBar, isProjectKey, type ProjectKey } from "@/components/ui/project-tab-bar";
 import { HeroSection, SHOWCASE_TILES } from "@/components/elements/hero-section";
 import { ComingSoonModal } from "@/components/ui/coming-soon-modal";
+import { ProgressiveBlur } from "@/components/ui/progressive-blur";
 import { WritingsSection } from "@/components/elements/writings-section";
 import { HoverProvider } from "@/components/ui/hover-context";
 import { useOverlayOpen } from "@/components/ui/overlay-state";
@@ -49,13 +50,16 @@ const TYPEWRITER_PHRASES = [
   "Or whatever the industry says",
 ];
 
-// From this width up the page splits in two: a sticky left rail holding the
-// intro, projects, writing and footer, and the hero grid filling the rest.
+// From this width up the page splits in two: a left rail holding the intro,
+// projects, writing and footer, and the hero grid filling the rest. Each side
+// scrolls on its own, so the wheel only moves whichever one the pointer is over.
 const SPLIT_MIN_WIDTH = 1200;
 const RAIL_WIDTH = "25%";
 const RAIL_MIN_WIDTH = 300;
 // Matches the hero grid's own top margin so both columns start on one line.
 const SPLIT_TOP = 60;
+// Room at the end of the rail so its last line can scroll clear of the footer.
+const RAIL_FOOTER_CLEARANCE = 132;
 
 type TypewriterPhase = "typing" | "pause" | "deleting" | "next";
 
@@ -201,24 +205,6 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   };
 
   useEffect(() => { setMounted(true); }, []);
-
-  // A rail taller than the viewport scrolls with the page until its last line
-  // is on screen and holds there; a shorter one holds from the top.
-  useEffect(() => {
-    const rail = railRef.current;
-    if (!rail) return;
-    const pin = () => {
-      rail.style.top = `${Math.min(0, window.innerHeight - rail.offsetHeight)}px`;
-    };
-    pin();
-    const observer = new ResizeObserver(pin);
-    observer.observe(rail);
-    window.addEventListener("resize", pin);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", pin);
-    };
-  }, [isSplit]);
 
   // Anything portalled over the page — a modal, a sheet — pulls the canvas
   // back and takes the scroll, the same as a detail panel does.
@@ -382,6 +368,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
       envelopeRef={envelopeRef}
       onEnvelopeClick={handleEnvelopeClick}
       isEnvelopeOpen={envelopeOpen || isEnvelopeClosing}
+      divider={!isSplit}
     />
   );
 
@@ -420,30 +407,80 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
       >
         {isSplit ? (
           <>
-            {/* ── Left rail — intro, projects, writing, footer ── */}
+            {/* ── Left rail — intro, projects, writing, with the footer held at the bottom ── */}
             <div
-              ref={railRef}
               style={{
                 flex: `0 0 ${RAIL_WIDTH}`,
                 minWidth: RAIL_MIN_WIDTH,
-                minHeight: "100vh",
-                position: "sticky",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                paddingTop: SPLIT_TOP,
-                paddingBottom: 32,
-                paddingLeft: 32,
+                height: "100vh",
+                position: "relative",
               }}
             >
-              {intro}
-              {projects}
-              {writing}
-              <div style={{ width: "100%", marginTop: "auto", paddingTop: 32 }}>{footer}</div>
+              <div
+                ref={railRef}
+                style={{
+                  height: "100%",
+                  overflowY: "auto",
+                  overscrollBehavior: "contain",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  paddingTop: SPLIT_TOP,
+                  paddingBottom: RAIL_FOOTER_CLEARANCE,
+                  paddingLeft: 32,
+                }}
+              >
+                {intro}
+                {projects}
+                {writing}
+              </div>
+
+              {/* Footer: the rail scrolls underneath and blurs out as it reaches it */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  paddingTop: 56,
+                  paddingBottom: 24,
+                  paddingLeft: 32,
+                  pointerEvents: "none",
+                }}
+              >
+                <ProgressiveBlur />
+                <div
+                  aria-hidden
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "linear-gradient(to bottom, transparent, color-mix(in srgb, var(--color-bg-page) 80%, transparent) 70%)",
+                  }}
+                />
+                {/* The footer sits outside the scroller, so hand its wheel back to the rail */}
+                <div
+                  onWheel={(e) => railRef.current?.scrollBy({ top: e.deltaY })}
+                  style={{ position: "relative", pointerEvents: "auto" }}
+                >
+                  {footer}
+                </div>
+              </div>
             </div>
 
             {/* ── Right — hero grid ── */}
-            <div style={{ flex: 1, minWidth: 0, paddingBottom: SPLIT_TOP }}>{hero}</div>
+            <div
+              style={{
+                flex: 1,
+                minWidth: 0,
+                height: "100vh",
+                overflowY: "auto",
+                overscrollBehavior: "contain",
+                paddingBottom: SPLIT_TOP,
+              }}
+            >
+              {hero}
+            </div>
           </>
         ) : (
           <>
