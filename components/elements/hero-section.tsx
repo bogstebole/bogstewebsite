@@ -151,6 +151,13 @@ if (isMultiline || textW >= availW * wrap.nearThreshold) {
 }`,
   },
   {
+    src: "/assets/Vorli/dashboard-months.mp4",
+    ratio: "880 / 800",
+    title: "Month switcher",
+    description:
+      "The month sits in a pill above the total. Move to another one and the number, the chart and the pill travel together, while the dots beside the pill show how far back you have gone. Once you leave the current month a tab appears on the right edge and takes you straight back to it.",
+  },
+  {
     src: "/assets/Showcase/add-button.mp4",
     ratio: "916 / 702",
     title: "Fan-out menu",
@@ -167,6 +174,20 @@ if (isMultiline || textW >= availW * wrap.nearThreshold) {
     type: "spring", stiffness: 800, damping: 41,
   }}
 />`,
+  },
+  {
+    src: "/assets/Dayside/dayside-widget.mp4",
+    ratio: "1120 / 852",
+    title: "Dayside widget",
+    description:
+      "Booking a call, written as a sentence: a date, at a time, with you. Each part is a tab, and the active one fuses with the panel beneath it, so the calendar, the time slots and the form each open from the word they belong to.",
+  },
+  {
+    src: "/assets/Showcase/latching-buttons.mp4",
+    ratio: "1180 / 878",
+    title: "Latching buttons",
+    description:
+      "Toggle buttons that behave like physical ones. Press one and it stays down and lit, press it again and it rises back up. Only one can be held at a time, so pressing another releases the one that was down.",
   },
 ];
 
@@ -194,13 +215,15 @@ const INSPECTOR_TILE: HeroTile = {
 const SHOWCASE_TILES = [INLINE_CHAT_TILE, INSPECTOR_TILE];
 
 // One row per kind of work: shipped apps, experiments, then interaction details.
+// The details run over two rows, split so both end up a similar height.
 const HERO_ROWS: HeroTile[][] = [
   [
     ...HERO_CARDS.map((card): HeroTile => ({ kind: "app", card, ratio: PHONE_RATIO })),
     { kind: "app", card: DAYSIDE_CARD, ratio: DAYSIDE_RATIO },
   ],
   SHOWCASE_TILES,
-  DETAIL_CLIPS.map((clip): HeroTile => ({ kind: "clip", clip })),
+  DETAIL_CLIPS.slice(0, 3).map((clip): HeroTile => ({ kind: "clip", clip })),
+  DETAIL_CLIPS.slice(3).map((clip): HeroTile => ({ kind: "clip", clip })),
 ];
 
 function HeroProjectCard({

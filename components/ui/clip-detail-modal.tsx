@@ -7,10 +7,10 @@ export interface ClipDetail {
   ratio: string;
   title: string;
   description: string;
-  /** A few real lines from the thing itself, not a rewrite of it. */
-  code: string;
+  /** A few real lines from the thing itself, not a rewrite of it. Left out when the source lives elsewhere. */
+  code?: string;
   /** Where those lines live, so the snippet can be checked. */
-  codeSource: string;
+  codeSource?: string;
 }
 
 interface ClipDetailModalProps {
@@ -57,6 +57,7 @@ export function ClipDetailModal({ clip, onClose }: ClipDetailModalProps) {
             {clip.description}
           </span>
 
+          {clip.code && (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <span
               style={{
@@ -87,6 +88,7 @@ export function ClipDetailModal({ clip, onClose }: ClipDetailModalProps) {
               <code>{clip.code}</code>
             </pre>
           </div>
+          )}
         </div>
       )}
     </ModalShell>
