@@ -26,6 +26,8 @@ interface SiteFooterProps {
   envelopeRef?: React.RefObject<HTMLDivElement | null>;
   onEnvelopeClick?: () => void;
   isEnvelopeOpen?: boolean;
+  /** Draw the segmented rule above the row. Off where the footer floats over content. */
+  divider?: boolean;
 }
 
 function ProjectIcon({
@@ -255,16 +257,18 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
   );
 }
 
-export function SiteFooter({ envelopeRef, onEnvelopeClick, isEnvelopeOpen }: SiteFooterProps) {
+export function SiteFooter({ envelopeRef, onEnvelopeClick, isEnvelopeOpen, divider = true }: SiteFooterProps) {
   return (
     <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
 
       {/* Segmented divider */}
-      <div style={{ alignItems: "start", display: "flex", gap: 2, height: "fit-content", opacity: 0.2, width: "100%" }}>
-        {Array.from({ length: 56 }).map((_, i) => (
-          <div key={i} style={{ backgroundColor: "var(--color-divider)", flex: 1, height: "1px" }} />
-        ))}
-      </div>
+      {divider && (
+        <div style={{ alignItems: "start", display: "flex", gap: 2, height: "fit-content", opacity: 0.2, width: "100%" }}>
+          {Array.from({ length: 56 }).map((_, i) => (
+            <div key={i} style={{ backgroundColor: "var(--color-divider)", flex: 1, height: "1px" }} />
+          ))}
+        </div>
+      )}
 
       {/* Footer row */}
       <div style={{ alignItems: "center", display: "flex", padding: "0 24px", gap: 24, justifyContent: "space-between", width: "100%" }}>
