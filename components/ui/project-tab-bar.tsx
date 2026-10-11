@@ -1,41 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { motion } from "motion/react";
 import styles from "@/components/ui/GlassButton.module.css";
 
-export type SectionProjectKey = "weatherWear" | "pauschalTracker" | "fynn" | "contentSnare" | "trigify";
+export type HeroProjectKey = "heroNotes" | "heroReceipt" | "heroRuntronome" | "heroDayside";
+export type SectionProjectKey = "weatherWear" | "pauschalTracker" | "fynn" | "contentSnare" | "trigify" | "bankMigration" | "bankAudit";
+/** Every project that opens in the detail panel. */
+export type ProjectKey = HeroProjectKey | SectionProjectKey;
 
-export const SECTION_PROJECT_ORDER: SectionProjectKey[] = [
-  "weatherWear",
-  "pauschalTracker",
-  "fynn",
-  "contentSnare",
-  "trigify",
+// Same order as the Personal_ and Client_ lists, so the tabs read the way the list does.
+const TABS: Array<{ key: ProjectKey; icon: string; group: "personal" | "client" }> = [
+  { key: "heroNotes", icon: "/images/notes.png", group: "personal" },
+  { key: "heroReceipt", icon: "/images/receipt.png", group: "personal" },
+  { key: "heroRuntronome", icon: "/images/runtronome.png", group: "personal" },
+  { key: "heroDayside", icon: "/images/globe.png", group: "personal" },
+  { key: "weatherWear", icon: "/images/puffer.png", group: "personal" },
+  { key: "pauschalTracker", icon: "/images/pauschal-tracker.png", group: "personal" },
+  { key: "fynn", icon: "/images/fynn.png", group: "client" },
+  { key: "contentSnare", icon: "/images/content-snare.png", group: "client" },
+  { key: "trigify", icon: "/images/trigify.svg", group: "client" },
+  { key: "bankMigration", icon: "/images/bank-migration.svg", group: "client" },
+  { key: "bankAudit", icon: "/images/bank-audit.svg", group: "client" },
 ];
 
-const TABS: Array<{ key: SectionProjectKey; icon: string }> = [
-  { key: "weatherWear", icon: "/images/puffer.png" },
-  { key: "pauschalTracker", icon: "/images/pauschal-tracker.png" },
-  { key: "fynn", icon: "/images/fynn.png" },
-  { key: "contentSnare", icon: "/images/content-snare.png" },
-  { key: "trigify", icon: "/images/trigify.svg" },
-];
+export const PROJECT_ORDER: ProjectKey[] = TABS.map((tab) => tab.key);
 
-interface SectionProjectTabBarProps {
-  active: SectionProjectKey;
-  onChange: (key: SectionProjectKey) => void;
+export const isProjectKey = (key: string | null): key is ProjectKey =>
+  PROJECT_ORDER.includes(key as ProjectKey);
+
+interface ProjectTabBarProps {
+  active: ProjectKey;
+  onChange: (key: ProjectKey) => void;
 }
 
-export function SectionProjectTabBar({ active, onChange }: SectionProjectTabBarProps) {
-  const [hovered, setHovered] = useState<SectionProjectKey | null>(null);
+export function ProjectTabBar({ active, onChange }: ProjectTabBarProps) {
+  const [hovered, setHovered] = useState<ProjectKey | null>(null);
 
-  const [prevActive, setPrevActive] = useState<SectionProjectKey>(active);
+  const [prevActive, setPrevActive] = useState<ProjectKey>(active);
   const [transformOrigin, setTransformOrigin] = useState("center");
 
   if (active !== prevActive) {
-    const prevIndex = SECTION_PROJECT_ORDER.indexOf(prevActive);
-    const currentIndex = SECTION_PROJECT_ORDER.indexOf(active);
+    const prevIndex = PROJECT_ORDER.indexOf(prevActive);
+    const currentIndex = PROJECT_ORDER.indexOf(active);
     const origin = currentIndex > prevIndex ? "top" : currentIndex < prevIndex ? "bottom" : "center";
     setTransformOrigin(origin);
     setPrevActive(active);
@@ -63,11 +70,16 @@ export function SectionProjectTabBar({ active, onChange }: SectionProjectTabBarP
         pointerEvents: "auto",
       }}
     >
-      {TABS.map((tab) => {
+      {TABS.map((tab, i) => {
         const isActive = tab.key === active;
+        const startsGroup = i > 0 && TABS[i - 1].group !== tab.group;
         return (
+          <Fragment key={tab.key}>
+          {/* A hairline where Personal_ ends and Client_ begins */}
+          {startsGroup && (
+            <div style={{ width: 16, height: 1, marginBlock: 6, backgroundColor: "var(--color-border-soft)", flexShrink: 0 }} />
+          )}
           <button
-            key={tab.key}
             onClick={isActive ? undefined : () => onChange(tab.key)}
             onMouseEnter={() => { if (!isActive) setHovered(tab.key); }}
             onMouseLeave={() => setHovered(null)}
@@ -89,7 +101,7 @@ export function SectionProjectTabBar({ active, onChange }: SectionProjectTabBarP
           >
             {isActive && (
               <motion.div
-                layoutId="active-section-tab-indicator"
+                layoutId="active-project-tab-indicator"
                 className={`${styles.glassBtn} ${styles.sizeM}`}
                 animate={{
                   scaleY: [1, dial.stretchAmount, 1],
@@ -135,6 +147,7 @@ export function SectionProjectTabBar({ active, onChange }: SectionProjectTabBarP
               }}
             />
           </button>
+          </Fragment>
         );
       })}
     </div>

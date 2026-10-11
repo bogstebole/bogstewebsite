@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MessageSquare, SquareMousePointer } from "lucide-react";
 
 import { ProjectEntry } from "@/components/elements/project-entry";
 import { EnvelopeWidget } from "@/components/elements/EnvelopeWidget";
@@ -16,6 +17,8 @@ interface ProjectSectionProps {
   returningProject: string | null;
   onProjectClick: (key: string) => void;
   entryRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
+  /** Stack Personal_ above Client_ even on desktop, for a narrow column. */
+  stacked?: boolean;
   style?: React.CSSProperties;
 }
 
@@ -99,9 +102,10 @@ function SocialIconButton({
   );
 }
 
-export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, style }: ProjectSectionProps) {
+export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, stacked, style }: ProjectSectionProps) {
   const { hoveredKey, setHoveredKey } = useHover();
   const { isMobile } = useBreakpoint();
+  const isStacked = isMobile || !!stacked;
 
   const entryProps = (key: string) => ({
     entryKey: key,
@@ -135,16 +139,59 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         style={{
           alignItems: "start",
           display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          gap: isMobile ? 24 : 8,
+          flexDirection: isStacked ? "column" : "row",
+          gap: isStacked ? 24 : 8,
           padding: "0 24px",
           marginTop: 32,
           width: "100%",
         }}
       >
         {/* ── Personal_ column ── */}
-        <div style={{ flexShrink: 0, width: isMobile ? "100%" : "50%" }}>
+        <div style={{ flexShrink: 0, width: isStacked ? "100%" : "50%" }}>
           <div style={labelStyle}>Personal_</div>
+
+          <ProjectEntry
+            {...entryProps("heroNotes")}
+            icon={<ProjectIcon src="/images/notes.png" alt="Notes" />}
+            label="Notes"
+            tags={["iOS", "Canvas"]}
+            appStore
+          />
+
+          <ProjectEntry
+            {...entryProps("heroReceipt")}
+            icon={<ProjectIcon src="/images/receipt.png" alt="Receipt tracker" rotate="359.41deg" />}
+            label="Receipt tracker"
+            tags={["iOS", "AI Financial Assistant", "Waiting approval"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("heroRuntronome")}
+            icon={<ProjectIcon src="/images/runtronome.png" alt="Runtronome" />}
+            label="Runtronome"
+            tags={["iOS", "Running assistant", "Internal beta"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("heroDayside")}
+            icon={<ProjectIcon src="/images/globe.png" alt="Dayside" />}
+            label="Dayside"
+            tags={["macOS", "Friends' time zones", "Waiting approval"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("showcaseInlineChat")}
+            icon={<MessageSquare size={12} color={primaryColor} style={{ flexShrink: 0, opacity: 0.6 }} />}
+            label="Inline Chat Input"
+            tags={["Web", "UI showcase", "Experiment"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("showcaseInspector")}
+            icon={<SquareMousePointer size={12} color={primaryColor} style={{ flexShrink: 0, opacity: 0.6 }} />}
+            label="Visual QA Inspector"
+            tags={["Web", "Visual editor", "Experiment"]}
+          />
 
           <ProjectEntry
             {...entryProps("weatherWear")}
@@ -164,7 +211,7 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         </div>
 
         {/* ── Client_ column ── */}
-        <div style={{ flexShrink: 0, width: isMobile ? "100%" : "50%" }}>
+        <div style={{ flexShrink: 0, width: isStacked ? "100%" : "50%" }}>
           <div style={labelStyle}>Client_</div>
 
           <ProjectEntry
@@ -186,6 +233,20 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             icon={<ProjectIcon src="/images/trigify.svg" alt="Trigify" rotate="-6.2deg" width={12} height={12} />}
             label="Trigify"
             tags={["Web", "GTM Intelligence", "B2B"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("bankMigration")}
+            icon={<ProjectIcon src="/images/bank-migration.svg" alt="UAE Bank · Migration" rotate="-4.5deg" width={12} height={12} />}
+            label="UAE Bank · Migration"
+            tags={["Sketch to Figma", "Banking", "Undisclosed"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("bankAudit")}
+            icon={<ProjectIcon src="/images/bank-audit.svg" alt="UAE Bank · Audit" rotate="8.2deg" width={12} height={12} />}
+            label="UAE Bank · Audit"
+            tags={["Design System", "Banking", "Undisclosed"]}
           />
         </div>
       </div>
