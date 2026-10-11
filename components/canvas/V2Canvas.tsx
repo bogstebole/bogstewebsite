@@ -12,12 +12,10 @@ import { ProjectFloatingCard } from "@/components/ui/project-floating-card";
 import { VorliReceiptDetail } from "@/components/ui/vorli-receipt-detail";
 import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
 import { EnvelopeMobileSheet } from "@/components/ui/envelope-mobile-sheet";
-import { SectionProjectDetail } from "@/components/ui/section-project-detail";
-import { SectionProjectTabBar, SECTION_PROJECT_ORDER, type SectionProjectKey } from "@/components/ui/section-project-tab-bar";
+import { ProjectDetail } from "@/components/ui/project-detail";
+import { ProjectTabBar, isProjectKey, type ProjectKey } from "@/components/ui/project-tab-bar";
 import { HeroSection, SHOWCASE_TILES } from "@/components/elements/hero-section";
 import { ComingSoonModal } from "@/components/ui/coming-soon-modal";
-import { HeroProjectDetail } from "@/components/ui/hero-project-detail";
-import { HeroProjectTabBar, HERO_PROJECT_ORDER, type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
 import { WritingsSection } from "@/components/elements/writings-section";
 import { HoverProvider } from "@/components/ui/hover-context";
 import { useOverlayOpen } from "@/components/ui/overlay-state";
@@ -131,10 +129,17 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const [isDetailFullyOpen, setIsDetailFullyOpen] = useState(false);
   const router = useRouter();
   const [soon, setSoon] = useState<{ title: string; message: string } | null>(null);
+  const openProject = (key: ProjectKey) => {
+    setActiveProject(key);
+    setOriginRect(null);
+    setIsClosing(false);
+    setIsDetailFullyOpen(false);
+  };
+
   const handleProjectClick = (key: string) => {
-    // Entries that mirror a card in the grid do what the card does.
-    if (isHeroProject(key)) {
-      handleHeroProjectClick(key);
+    // Entries with a detail panel open it; the two showcases do what their card does.
+    if (isProjectKey(key)) {
+      openProject(key);
       return;
     }
     const showcase = SHOWCASE_TILES.find((t) => t.key === key);
@@ -152,28 +157,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
     }
   };
 
-  const SECTION_PROJECT_KEYS: SectionProjectKey[] = SECTION_PROJECT_ORDER;
-  const isSectionProject = (key: string | null): key is SectionProjectKey =>
-    SECTION_PROJECT_KEYS.includes(key as SectionProjectKey);
-
-  const isHeroProject = (key: string | null): key is HeroProjectKey =>
-    HERO_PROJECT_ORDER.includes(key as HeroProjectKey);
-
-  const handleSectionTabSwitch = (key: SectionProjectKey) => {
-    if (key === activeProject) return;
-    setActiveProject(key);
-    setOriginRect(null);
-    setIsClosing(false);
-  };
-
-  const handleHeroProjectClick = (key: HeroProjectKey) => {
-    setActiveProject(key);
-    setOriginRect(null);
-    setIsClosing(false);
-    setIsDetailFullyOpen(false);
-  };
-
-  const handleHeroTabSwitch = (key: HeroProjectKey) => {
+  const handleTabSwitch = (key: ProjectKey) => {
     if (key === activeProject) return;
     setActiveProject(key);
     setOriginRect(null);
@@ -367,7 +351,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const hero = (
     <HeroSection
       activeProject={activeProject}
-      onProjectClick={handleHeroProjectClick}
+      onProjectClick={openProject}
     />
   );
 
@@ -472,25 +456,14 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
         )}
       </motion.div>
 
-      {/* ── Section project detail overlay (single instance for all 5, enables tab slide transitions) ── */}
-      {isSectionProject(activeProject) && (
-        <SectionProjectDetail
+      {/* ── Project detail overlay (one instance for every project, so any tab switch can slide) ── */}
+      {isProjectKey(activeProject) && (
+        <ProjectDetail
           activeProject={activeProject}
           onCloseStart={handleCloseStart}
           onClose={handleClose}
           onOpenComplete={() => setIsDetailFullyOpen(true)}
-          onNavigate={handleSectionTabSwitch}
-        />
-      )}
-
-      {/* ── Hero project detail overlay (single instance for all 3, enables tab slide transitions) ── */}
-      {isHeroProject(activeProject) && (
-        <HeroProjectDetail
-          activeProject={activeProject}
-          onCloseStart={handleCloseStart}
-          onClose={handleClose}
-          onOpenComplete={() => setIsDetailFullyOpen(true)}
-          onNavigate={handleHeroTabSwitch}
+          onNavigate={handleTabSwitch}
         />
       )}
 
@@ -518,12 +491,12 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
         />
       )}
 
-      {/* ── Section project tab bar (portalled to body to escape blur/scale stacking context) ── */}
+      {/* ── Project tab bar (portalled to body to escape blur/scale stacking context) ── */}
       {mounted && createPortal(
         <AnimatePresence>
-          {!isMobile && isSectionProject(activeProject) && isDetailFullyOpen && (
+          {!isMobile && isProjectKey(activeProject) && isDetailFullyOpen && (
             <motion.div
-              key="section-tab-bar"
+              key="project-tab-bar"
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -8 }}
@@ -539,40 +512,9 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
                 pointerEvents: "none",
               }}
             >
-              <SectionProjectTabBar
+              <ProjectTabBar
                 active={activeProject}
-                onChange={handleSectionTabSwitch}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
-
-      {/* ── Hero project tab bar (portalled to body to escape blur/scale stacking context) ── */}
-      {mounted && createPortal(
-        <AnimatePresence>
-          {!isMobile && isHeroProject(activeProject) && isDetailFullyOpen && (
-            <motion.div
-              key="hero-tab-bar"
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              style={{
-                position: "fixed",
-                top: "5vh",
-                bottom: 0,
-                left: "calc(50% - 610px)",
-                display: "flex",
-                alignItems: "center",
-                zIndex: 10002,
-                pointerEvents: "none",
-              }}
-            >
-              <HeroProjectTabBar
-                active={activeProject}
-                onChange={handleHeroTabSwitch}
+                onChange={handleTabSwitch}
               />
             </motion.div>
           )}

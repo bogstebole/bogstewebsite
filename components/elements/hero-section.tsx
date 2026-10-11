@@ -7,7 +7,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { ComingSoonModal } from "@/components/ui/coming-soon-modal";
 import { ClipDetailModal, type ClipDetail } from "@/components/ui/clip-detail-modal";
 import { CARD_SPRING } from "@/components/ui/project-card";
-import { type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
+import { type HeroProjectKey } from "@/components/ui/project-tab-bar";
 import { useHover } from "@/components/ui/hover-context";
 
 interface HeroSectionProps {
@@ -124,9 +124,9 @@ const DETAIL_CLIPS: ClipDetail[] = [
     title: "Project tab switcher",
     description:
       "Three projects, one panel. The pill is a single element travelling between tabs rather than three fading in and out, so the switch reads as one thing moving. It stretches from whichever edge it left and squashes back on arrival, and that overshoot is what makes it feel liquid instead of mechanical.",
-    codeSource: "components/ui/hero-project-tab-bar.tsx",
+    codeSource: "components/ui/project-tab-bar.tsx",
     code: `<motion.div
-  layoutId="active-hero-tab-indicator"   // one pill, shared by every tab
+  layoutId="active-project-tab-indicator" // one pill, shared by every tab
   animate={{ scaleY: [1, 1.4, 1] }}      // squash on arrival
   style={{ transformOrigin }}            // set from the direction it came
   transition={{

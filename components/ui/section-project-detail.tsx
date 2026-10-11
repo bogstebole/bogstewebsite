@@ -1,18 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "motion/react";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { ProjectDetailLayout, CONTENT_ITEM, type AdjacentProject } from "./project-detail-layout";
-import { SECTION_PROJECT_ORDER, type SectionProjectKey } from "./section-project-tab-bar";
-
-interface SectionProjectDetailProps {
-  activeProject: SectionProjectKey;
-  onCloseStart: () => void;
-  onClose: () => void;
-  onOpenComplete?: () => void;
-  onNavigate?: (key: SectionProjectKey) => void;
-}
+import { CONTENT_ITEM } from "./project-detail-layout";
+import { type SectionProjectKey } from "./project-tab-bar";
 
 const FYNN_LEFT: { src: string; alt: string }[] = [
   { src: "/assets/Fynn/edit profile.png", alt: "Edit profile" },
@@ -110,7 +100,7 @@ type ProjectConfig = {
   longDescription: string;
 };
 
-const CONFIGS: Record<SectionProjectKey, ProjectConfig> = {
+export const SECTION_PROJECT_CONFIGS: Record<SectionProjectKey, ProjectConfig> = {
   weatherWear: {
     title: "Wear",
     icon: "/images/puffer.png",
@@ -241,18 +231,8 @@ const FYNN_CONTAINER = {
   },
 };
 
-export function SectionProjectDetail({ activeProject, onCloseStart, onClose, onOpenComplete, onNavigate }: SectionProjectDetailProps) {
-  const { isMobile } = useBreakpoint();
-  const [prevProject, setPrevProject] = useState<SectionProjectKey>(activeProject);
-  const [slideDirection, setSlideDirection] = useState(0);
-
-  if (activeProject !== prevProject) {
-    const prevIdx = SECTION_PROJECT_ORDER.indexOf(prevProject);
-    const currIdx = SECTION_PROJECT_ORDER.indexOf(activeProject);
-    setSlideDirection(currIdx > prevIdx ? 1 : -1);
-    setPrevProject(activeProject);
-  }
-
+/** The media for one section project, laid out for the shared detail panel. */
+export function SectionProjectContent({ project, isMobile }: { project: SectionProjectKey; isMobile: boolean }) {
   const renderRows = (backgroundColor: string, rows: { src: string; alt: string }[][]) => (
     <motion.div
       variants={FYNN_CONTAINER}
@@ -293,7 +273,7 @@ export function SectionProjectDetail({ activeProject, onCloseStart, onClose, onO
   );
 
   const renderChildren = () => {
-    switch (activeProject) {
+    switch (project) {
       case "weatherWear":
         return (
           <motion.div variants={CONTENT_ITEM} style={{ display: "flex", justifyContent: "center", width: "100%" }}>
@@ -522,31 +502,5 @@ export function SectionProjectDetail({ activeProject, onCloseStart, onClose, onO
     }
   };
 
-  const config = CONFIGS[activeProject];
-
-  const activeIdx = SECTION_PROJECT_ORDER.indexOf(activeProject);
-  const adjacent = (key: SectionProjectKey | undefined): AdjacentProject | undefined =>
-    key && onNavigate
-      ? { title: CONFIGS[key].title, icon: CONFIGS[key].icon, iconRotate: CONFIGS[key].iconRotate, onSelect: () => onNavigate(key) }
-      : undefined;
-
-  return (
-    <ProjectDetailLayout
-      onCloseStart={onCloseStart}
-      onClose={onClose}
-      title={config.title}
-      icon={config.icon}
-      iconRotate={config.iconRotate}
-      tags={config.tags}
-      shortDescription={config.shortDescription}
-      longDescription={config.longDescription}
-      contentKey={activeProject}
-      slideDirection={slideDirection}
-      onOpenComplete={onOpenComplete}
-      prevProject={adjacent(SECTION_PROJECT_ORDER[activeIdx - 1])}
-      nextProject={adjacent(SECTION_PROJECT_ORDER[activeIdx + 1])}
-    >
-      {renderChildren()}
-    </ProjectDetailLayout>
-  );
+  return <>{renderChildren()}</>;
 }

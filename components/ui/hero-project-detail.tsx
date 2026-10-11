@@ -1,19 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "motion/react";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { ProjectDetailLayout, CONTENT_ITEM, type AdjacentProject } from "./project-detail-layout";
+import { CONTENT_ITEM } from "./project-detail-layout";
 import { NOTES_APP_STORE_URL } from "@/lib/constants";
-import { HERO_PROJECT_ORDER, type HeroProjectKey } from "./hero-project-tab-bar";
-
-interface HeroProjectDetailProps {
-  activeProject: HeroProjectKey;
-  onCloseStart: () => void;
-  onClose: () => void;
-  onOpenComplete?: () => void;
-  onNavigate?: (key: HeroProjectKey) => void;
-}
+import { type HeroProjectKey } from "./project-tab-bar";
 
 const NOTES_ASSETS = [
   { type: "video" as const, src: "/assets/Useless Notes/Onboarding.mp4" },
@@ -61,7 +51,7 @@ type ProjectConfig = {
   longDescription: string;
 };
 
-const CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
+export const HERO_PROJECT_CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
   heroNotes: {
     title: "Notes",
     icon: "/images/notes.png",
@@ -132,18 +122,8 @@ const IMAGES_STAGGER = {
   },
 };
 
-export function HeroProjectDetail({ activeProject, onCloseStart, onClose, onOpenComplete, onNavigate }: HeroProjectDetailProps) {
-  const { isMobile } = useBreakpoint();
-  const [prevProject, setPrevProject] = useState<HeroProjectKey>(activeProject);
-  const [slideDirection, setSlideDirection] = useState(0);
-
-  if (activeProject !== prevProject) {
-    const prevIdx = HERO_PROJECT_ORDER.indexOf(prevProject);
-    const currIdx = HERO_PROJECT_ORDER.indexOf(activeProject);
-    setSlideDirection(currIdx > prevIdx ? 1 : -1);
-    setPrevProject(activeProject);
-  }
-
+/** The media for one hero project, laid out for the shared detail panel. */
+export function HeroProjectContent({ project, isMobile }: { project: HeroProjectKey; isMobile: boolean }) {
   const renderAssetGrid = (assets: Array<{ type: "video" | "image"; src: string }>) => (
     <motion.div
       variants={IMAGES_STAGGER}
@@ -172,7 +152,7 @@ export function HeroProjectDetail({ activeProject, onCloseStart, onClose, onOpen
   );
 
   const renderChildren = () => {
-    switch (activeProject) {
+    switch (project) {
       case "heroNotes":
         return renderAssetGrid(NOTES_ASSETS);
 
@@ -195,33 +175,5 @@ export function HeroProjectDetail({ activeProject, onCloseStart, onClose, onOpen
     }
   };
 
-  const config = CONFIGS[activeProject];
-
-  const activeIdx = HERO_PROJECT_ORDER.indexOf(activeProject);
-  const adjacent = (key: HeroProjectKey | undefined): AdjacentProject | undefined =>
-    key && onNavigate
-      ? { title: CONFIGS[key].title, icon: CONFIGS[key].icon, iconRotate: CONFIGS[key].iconRotate, onSelect: () => onNavigate(key) }
-      : undefined;
-
-  return (
-    <ProjectDetailLayout
-      onCloseStart={onCloseStart}
-      onClose={onClose}
-      title={config.title}
-      icon={config.icon}
-      iconRotate={config.iconRotate}
-      tags={config.tags}
-      appStore={config.appStore}
-      downloadUrl={config.downloadUrl}
-      shortDescription={config.shortDescription}
-      longDescription={config.longDescription}
-      contentKey={activeProject}
-      slideDirection={slideDirection}
-      onOpenComplete={onOpenComplete}
-      prevProject={adjacent(HERO_PROJECT_ORDER[activeIdx - 1])}
-      nextProject={adjacent(HERO_PROJECT_ORDER[activeIdx + 1])}
-    >
-      {renderChildren()}
-    </ProjectDetailLayout>
-  );
+  return <>{renderChildren()}</>;
 }
