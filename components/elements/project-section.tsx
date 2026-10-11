@@ -16,6 +16,8 @@ interface ProjectSectionProps {
   returningProject: string | null;
   onProjectClick: (key: string) => void;
   entryRefs: React.RefObject<Record<string, HTMLDivElement | null>>;
+  /** Stack Personal_ above Client_ even on desktop, for a narrow column. */
+  stacked?: boolean;
   style?: React.CSSProperties;
 }
 
@@ -99,9 +101,10 @@ function SocialIconButton({
   );
 }
 
-export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, style }: ProjectSectionProps) {
+export function ProjectSection({ primaryColor, primary40, isDark, activeProject, returningProject, onProjectClick, entryRefs, stacked, style }: ProjectSectionProps) {
   const { hoveredKey, setHoveredKey } = useHover();
   const { isMobile } = useBreakpoint();
+  const isStacked = isMobile || !!stacked;
 
   const entryProps = (key: string) => ({
     entryKey: key,
@@ -135,15 +138,15 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         style={{
           alignItems: "start",
           display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          gap: isMobile ? 24 : 8,
+          flexDirection: isStacked ? "column" : "row",
+          gap: isStacked ? 24 : 8,
           padding: "0 24px",
           marginTop: 32,
           width: "100%",
         }}
       >
         {/* ── Personal_ column ── */}
-        <div style={{ flexShrink: 0, width: isMobile ? "100%" : "50%" }}>
+        <div style={{ flexShrink: 0, width: isStacked ? "100%" : "50%" }}>
           <div style={labelStyle}>Personal_</div>
 
           <ProjectEntry
@@ -164,7 +167,7 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         </div>
 
         {/* ── Client_ column ── */}
-        <div style={{ flexShrink: 0, width: isMobile ? "100%" : "50%" }}>
+        <div style={{ flexShrink: 0, width: isStacked ? "100%" : "50%" }}>
           <div style={labelStyle}>Client_</div>
 
           <ProjectEntry

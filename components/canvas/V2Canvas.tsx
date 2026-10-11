@@ -49,6 +49,14 @@ const TYPEWRITER_PHRASES = [
   "Or whatever the industry says",
 ];
 
+// From this width up the page splits in two: a sticky left rail holding the
+// intro, projects, writing and footer, and the hero grid filling the rest.
+const SPLIT_MIN_WIDTH = 1200;
+const RAIL_WIDTH = "25%";
+const RAIL_MIN_WIDTH = 300;
+// Matches the hero grid's own top margin so both columns start on one line.
+const SPLIT_TOP = 60;
+
 type TypewriterPhase = "typing" | "pause" | "deleting" | "next";
 
 function useTypewriter() {
@@ -105,7 +113,8 @@ function useTypewriter() {
 
 export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const { displayText, isIdle } = useTypewriter();
-  const { isMobile, isTablet } = useBreakpoint();
+  const { isMobile, isTablet, width } = useBreakpoint();
+  const isSplit = width >= SPLIT_MIN_WIDTH;
   const [activeProject, setActiveProject] = useState<string | null>(null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -116,6 +125,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const [isEnvelopeClosing, setIsEnvelopeClosing] = useState(false);
   const [envelopeOriginRect, setEnvelopeOriginRect] = useState<DOMRect | null>(null);
   const envelopeRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
   const [isDetailFullyOpen, setIsDetailFullyOpen] = useState(false);
   const handleProjectClick = (key: string) => {
     const el = entryRefs.current[key];
@@ -193,6 +203,24 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
 
   useEffect(() => { setMounted(true); }, []);
 
+  // A rail taller than the viewport scrolls with the page until its last line
+  // is on screen and holds there; a shorter one holds from the top.
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const pin = () => {
+      rail.style.top = `${Math.min(0, window.innerHeight - rail.offsetHeight)}px`;
+    };
+    pin();
+    const observer = new ResizeObserver(pin);
+    observer.observe(rail);
+    window.addEventListener("resize", pin);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", pin);
+    };
+  }, [isSplit]);
+
   // Anything portalled over the page — a modal, a sheet — pulls the canvas
   // back and takes the scroll, the same as a detail panel does.
   const overlayOpen = useOverlayOpen();
@@ -213,6 +241,150 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
     ? { scale: 0.93, filter: "blur(10px)", pointerEvents: "none" as const }
     : { scale: 1, filter: "blur(0px)", pointerEvents: "auto" as const };
   const blurTransition = { type: "tween" as const, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] };
+
+  const sectionWrap: React.CSSProperties = isSplit
+    ? { width: "100%" }
+    : { width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0 };
+
+  const intro = (
+    <div
+      style={{
+        paddingTop: isSplit ? 0 : isMobile ? 32 : isTablet ? 56 : 80,
+        paddingLeft: isSplit || isMobile ? 24 : 0,
+        paddingRight: isSplit || isMobile ? 24 : 0,
+        width: "100%",
+        maxWidth: isSplit ? undefined : 600,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: isSplit ? "flex-start" : "center",
+      }}
+    >
+      <Logo />
+
+      {/* Name block */}
+      <div style={{ marginTop: 16, textAlign: isSplit ? "left" : "center" }}>
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontWeight: 400,
+            fontSize: 15,
+            lineHeight: "18px",
+            letterSpacing: "-0.02em",
+            color: "var(--color-text-primary)",
+          }}
+        >
+          Hey You
+        </div>
+        <div
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontWeight: 500,
+            fontSize: isMobile ? 18 : 20,
+            lineHeight: isMobile ? "22px" : "24px",
+            letterSpacing: "-0.02em",
+            color: "var(--color-text-primary)",
+          }}
+        >
+          I&apos;m Bogdan
+        </div>
+        <div
+          style={{
+            marginTop: 4,
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontWeight: 400,
+            fontSize: 12,
+            lineHeight: "16px",
+            letterSpacing: "-0.02em",
+            color: "var(--color-text-tertiary)",
+          }}
+        >
+          {getBuildVersion()}
+        </div>
+      </div>
+
+      {/* Role row */}
+      <div
+        style={{
+          marginTop: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          fontFamily: "var(--font-geist-sans), sans-serif",
+          fontWeight: 400,
+          fontSize: 14,
+          lineHeight: "18px",
+        }}
+      >
+        <span style={{ color: "var(--color-text-muted)" }}>
+          {displayText}
+          <span
+            style={{
+              color: "var(--color-text-secondary)",
+              animation: isIdle ? "blink 1s step-end infinite" : "none",
+            }}
+          >
+            |
+          </span>
+        </span>
+      </div>
+
+      {/* Body text */}
+      <p
+        style={{
+          marginTop: 12,
+          paddingLeft: isMobile ? 16 : 0,
+          paddingRight: isMobile ? 16 : 0,
+          fontFamily: "var(--font-geist-sans), sans-serif",
+          fontWeight: 400,
+          fontSize: 14,
+          lineHeight: "18px",
+          color: "var(--color-text-secondary)",
+          textAlign: isSplit ? "left" : "center",
+          whiteSpace: "pre-wrap",
+          width: isMobile || isSplit ? "100%" : "80%",
+        }}
+      >
+        I build things that feel considered, from iOS apps to interactive web experiences. Ten years in, mostly 0-to-1 B2B SaaS products built from scratch or completely reimagined. I'm most interested in products where craft is treated as a requirement, not an afterthought.
+      </p>
+    </div>
+  );
+
+  const hero = (
+    <HeroSection
+      activeProject={activeProject}
+      onProjectClick={handleHeroProjectClick}
+    />
+  );
+
+  const projects = (
+    <div style={sectionWrap}>
+      <ProjectSection
+        primaryColor="var(--color-text-card)"
+        primary40="var(--color-text-muted)"
+        isDark={false}
+        activeProject={activeProject}
+        returningProject={returningProject}
+        onProjectClick={handleProjectClick}
+        entryRefs={entryRefs}
+        stacked={isSplit}
+        style={{ marginTop: isMobile || isSplit ? 20 : 32 }}
+      />
+    </div>
+  );
+
+  const writing = latestPost && (
+    <div style={sectionWrap}>
+      <WritingsSection post={latestPost} />
+    </div>
+  );
+
+  const footer = (
+    <SiteFooter
+      envelopeRef={envelopeRef}
+      onEnvelopeClick={handleEnvelopeClick}
+      isEnvelopeOpen={envelopeOpen || isEnvelopeClosing}
+    />
+  );
 
   return (
     <HoverProvider>
@@ -242,150 +414,47 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
         style={{
           width: "100%",
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          flexDirection: isSplit ? "row" : "column",
+          alignItems: isSplit ? "flex-start" : "center",
           transformOrigin: "50% 50%",
         }}
       >
-        {/* ── Intro text block ── */}
-        <div
-          style={{
-            paddingTop: isMobile ? 32 : isTablet ? 56 : 80,
-            paddingLeft: isMobile ? 24 : 0,
-            paddingRight: isMobile ? 24 : 0,
-            width: "100%",
-            maxWidth: 600,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Logo />
-
-          {/* Name block */}
-          <div style={{ marginTop: 16, textAlign: "center" }}>
+        {isSplit ? (
+          <>
+            {/* ── Left rail — intro, projects, writing, footer ── */}
             <div
+              ref={railRef}
               style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontWeight: 400,
-                fontSize: 15,
-                lineHeight: "18px",
-                letterSpacing: "-0.02em",
-                color: "var(--color-text-primary)",
+                flex: `0 0 ${RAIL_WIDTH}`,
+                minWidth: RAIL_MIN_WIDTH,
+                minHeight: "100vh",
+                position: "sticky",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                paddingTop: SPLIT_TOP,
+                paddingBottom: 32,
+                paddingLeft: 32,
               }}
             >
-              Hey You
+              {intro}
+              {projects}
+              {writing}
+              <div style={{ width: "100%", marginTop: "auto", paddingTop: 32 }}>{footer}</div>
             </div>
-            <div
-              style={{
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontWeight: 500,
-                fontSize: isMobile ? 18 : 20,
-                lineHeight: isMobile ? "22px" : "24px",
-                letterSpacing: "-0.02em",
-                color: "var(--color-text-primary)",
-              }}
-            >
-              I&apos;m Bogdan
-            </div>
-            <div
-              style={{
-                marginTop: 4,
-                fontFamily: "var(--font-jetbrains-mono), monospace",
-                fontWeight: 400,
-                fontSize: 12,
-                lineHeight: "16px",
-                letterSpacing: "-0.02em",
-                color: "var(--color-text-tertiary)",
-              }}
-            >
-              {getBuildVersion()}
-            </div>
-          </div>
 
-          {/* Role row */}
-          <div
-            style={{
-              marginTop: 16,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              fontFamily: "var(--font-geist-sans), sans-serif",
-              fontWeight: 400,
-              fontSize: 14,
-              lineHeight: "18px",
-            }}
-          >
-            <span style={{ color: "var(--color-text-muted)" }}>
-              {displayText}
-              <span
-                style={{
-                  color: "var(--color-text-secondary)",
-                  animation: isIdle ? "blink 1s step-end infinite" : "none",
-                }}
-              >
-                |
-              </span>
-            </span>
-          </div>
-
-          {/* Body text */}
-          <p
-            style={{
-              marginTop: 12,
-              paddingLeft: isMobile ? 16 : 0,
-              paddingRight: isMobile ? 16 : 0,
-              fontFamily: "var(--font-geist-sans), sans-serif",
-              fontWeight: 400,
-              fontSize: 14,
-              lineHeight: "18px",
-              color: "var(--color-text-secondary)",
-              textAlign: "center",
-              whiteSpace: "pre-wrap",
-              width: isMobile ? "100%" : "80%",
-            }}
-          >
-            I build things that feel considered, from iOS apps to interactive web experiences. Ten years in, mostly 0-to-1 B2B SaaS products built from scratch or completely reimagined. I'm most interested in products where craft is treated as a requirement, not an afterthought.
-          </p>
-        </div>
-
-        {/* ── Hero — selected projects ── */}
-        <HeroSection
-          activeProject={activeProject}
-          onProjectClick={handleHeroProjectClick}
-        />
-
-        {/* ── Projects divider (hidden) ── */}
-
-        {/* ── Project section ── */}
-        <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0 }}>
-          <ProjectSection
-            primaryColor="var(--color-text-card)"
-            primary40="var(--color-text-muted)"
-            isDark={false}
-            activeProject={activeProject}
-            returningProject={returningProject}
-            onProjectClick={handleProjectClick}
-            entryRefs={entryRefs}
-            style={{ marginTop: isMobile ? 20 : 32 }}
-          />
-        </div>
-
-        {/* ── Latest writing section ── */}
-        {latestPost && (
-          <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0 }}>
-            <WritingsSection post={latestPost} />
-          </div>
+            {/* ── Right — hero grid ── */}
+            <div style={{ flex: 1, minWidth: 0, paddingBottom: SPLIT_TOP }}>{hero}</div>
+          </>
+        ) : (
+          <>
+            {intro}
+            {hero}
+            {projects}
+            {writing}
+            <div style={{ ...sectionWrap, marginBottom: isMobile ? 60 : 120, marginTop: 32 }}>{footer}</div>
+          </>
         )}
-
-        {/* ── Footer section ── */}
-        <div style={{ width: "100%", maxWidth: 600, paddingLeft: isMobile ? 24 : 0, paddingRight: isMobile ? 24 : 0, marginBottom: isMobile ? 60 : 120, marginTop: 32 }}>
-          <SiteFooter
-            envelopeRef={envelopeRef}
-            onEnvelopeClick={handleEnvelopeClick}
-            isEnvelopeOpen={envelopeOpen || isEnvelopeClosing}
-          />
-        </div>
       </motion.div>
 
       {/* ── Section project detail overlay (single instance for all 5, enables tab slide transitions) ── */}
