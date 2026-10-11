@@ -8,6 +8,7 @@ import { ComingSoonModal } from "@/components/ui/coming-soon-modal";
 import { ClipDetailModal, type ClipDetail } from "@/components/ui/clip-detail-modal";
 import { CARD_SPRING } from "@/components/ui/project-card";
 import { type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
+import { useHover } from "@/components/ui/hover-context";
 
 interface HeroSectionProps {
   activeProject: string | null;
@@ -191,28 +192,50 @@ if (isMultiline || textW >= availW * wrap.nearThreshold) {
   },
 ];
 
+export type ShowcaseKey = "showcaseInlineChat" | "showcaseInspector";
+
+export type ShowcaseTile = {
+  kind: "showcase";
+  key: ShowcaseKey;
+  card: Omit<HeroCard, "key">;
+  ratio: string;
+  href?: string;
+  comingSoon?: string;
+};
+
 /** A tile is either a project card that opens a detail, or a showcase that routes away. */
 type HeroTile =
   | { kind: "app"; card: HeroCard; ratio: string }
-  | { kind: "showcase"; card: Omit<HeroCard, "key">; ratio: string; href?: string; comingSoon?: string }
+  | ShowcaseTile
   | { kind: "clip"; clip: ClipDetail };
 
-const INLINE_CHAT_TILE: HeroTile = {
+const INLINE_CHAT_TILE: ShowcaseTile = {
   kind: "showcase",
+  key: "showcaseInlineChat",
   card: INLINE_CHAT_CARD,
   href: "/inline-chat-experience",
   ratio: "1120 / 680",
 };
 
-const INSPECTOR_TILE: HeroTile = {
+const INSPECTOR_TILE: ShowcaseTile = {
   kind: "showcase",
+  key: "showcaseInspector",
   card: INSPECTOR_CARD,
   ratio: "1280 / 800",
   comingSoon:
     "A visual editor for designers who are vibecoding. Instead of describing a change to your agent, you make it yourself and copy the config out, and the agent then applies every change in one pass. The side panel works much like Figma's, with extras for the things only the web can do.",
 };
 
-const SHOWCASE_TILES = [INLINE_CHAT_TILE, INSPECTOR_TILE];
+export const SHOWCASE_TILES: ShowcaseTile[] = [INLINE_CHAT_TILE, INSPECTOR_TILE];
+
+// The cards the project list can point at. Hovering one of these in the list
+// dims every other tile in the grid.
+const SPOTLIGHT_KEYS = new Set<string>([
+  ...HERO_CARDS.map((c) => c.key),
+  DAYSIDE_CARD.key,
+  ...SHOWCASE_TILES.map((t) => t.key),
+]);
+const DIMMED_OPACITY = 0.2;
 
 // One row per kind of work: shipped apps, experiments, then interaction details.
 // The details run over two rows, split so both end up a similar height.
@@ -230,12 +253,15 @@ function HeroProjectCard({
   card,
   interactive,
   onClick,
+  dimmed,
   frame,
   style,
 }: {
   card: Omit<HeroCard, "key">;
   interactive: boolean;
   onClick: () => void;
+  /** Faded back because the project list is pointing at another card. */
+  dimmed?: boolean;
   /** Overrides the default phone-shaped media frame. */
   frame?: React.CSSProperties;
   style?: React.CSSProperties;
@@ -260,6 +286,8 @@ function HeroProjectCard({
         flexShrink: 0,
         cursor: interactive ? "pointer" : "default",
         scrollSnapAlign: "center",
+        opacity: dimmed ? DIMMED_OPACITY : 1,
+        transition: "opacity 0.2s ease",
         ...style,
       }}
     >
@@ -402,10 +430,12 @@ function HeroProjectCard({
 function ClipTile({
   clip,
   onOpen,
+  dimmed,
   style,
 }: {
   clip: ClipDetail;
   onOpen: () => void;
+  dimmed?: boolean;
   style?: React.CSSProperties;
 }) {
   return (
@@ -431,6 +461,8 @@ function ClipTile({
         width: "100%",
         boxSizing: "border-box",
         flexShrink: 0,
+        opacity: dimmed ? DIMMED_OPACITY : 1,
+        transition: "opacity 0.2s ease",
         ...style,
       }}
     >
@@ -465,7 +497,12 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
   const [soon, setSoon] = useState<{ title: string; message: string } | null>(null);
   const [clip, setClip] = useState<ClipDetail | null>(null);
 
-  const openTile = (t: Extract<HeroTile, { kind: "showcase" }>) => () => {
+  // A project hovered in the list keeps its own card lit and fades the rest.
+  const { hoveredKey } = useHover();
+  const spotlight = hoveredKey !== null && SPOTLIGHT_KEYS.has(hoveredKey) ? hoveredKey : null;
+  const isDimmed = (key?: string) => spotlight !== null && key !== spotlight;
+
+  const openTile = (t: ShowcaseTile) => () => {
     if (t.href) router.push(t.href);
     else if (t.comingSoon) setSoon({ title: t.card.title, message: t.comingSoon });
   };
@@ -476,6 +513,7 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
         key={key}
         clip={t.clip}
         onOpen={() => setClip(t.clip)}
+        dimmed={isDimmed()}
         style={justify(t.clip.ratio, CLIP_PADDING)}
       />
     ) : t.kind === "app" ? (
@@ -484,6 +522,7 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
         card={t.card}
         interactive={interactive}
         onClick={() => onProjectClick(t.card.key)}
+        dimmed={isDimmed(t.card.key)}
         style={justify(t.ratio, CARD_PADDING_X)}
         frame={{ aspectRatio: t.ratio }}
       />
@@ -493,6 +532,7 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
         card={t.card}
         interactive={interactive}
         onClick={openTile(t)}
+        dimmed={isDimmed(t.key)}
         style={justify(t.ratio, CARD_PADDING_X)}
         frame={{ aspectRatio: t.ratio }}
       />

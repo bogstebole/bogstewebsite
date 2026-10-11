@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { motion, AnimatePresence } from "motion/react";
 // import { Water } from "@paper-design/shaders-react"; // POOL_HIDDEN
@@ -13,7 +14,8 @@ import { EnvelopeOverlay } from "@/components/ui/envelope-overlay";
 import { EnvelopeMobileSheet } from "@/components/ui/envelope-mobile-sheet";
 import { SectionProjectDetail } from "@/components/ui/section-project-detail";
 import { SectionProjectTabBar, SECTION_PROJECT_ORDER, type SectionProjectKey } from "@/components/ui/section-project-tab-bar";
-import { HeroSection } from "@/components/elements/hero-section";
+import { HeroSection, SHOWCASE_TILES } from "@/components/elements/hero-section";
+import { ComingSoonModal } from "@/components/ui/coming-soon-modal";
 import { HeroProjectDetail } from "@/components/ui/hero-project-detail";
 import { HeroProjectTabBar, HERO_PROJECT_ORDER, type HeroProjectKey } from "@/components/ui/hero-project-tab-bar";
 import { WritingsSection } from "@/components/elements/writings-section";
@@ -127,7 +129,20 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const envelopeRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
   const [isDetailFullyOpen, setIsDetailFullyOpen] = useState(false);
+  const router = useRouter();
+  const [soon, setSoon] = useState<{ title: string; message: string } | null>(null);
   const handleProjectClick = (key: string) => {
+    // Entries that mirror a card in the grid do what the card does.
+    if (isHeroProject(key)) {
+      handleHeroProjectClick(key);
+      return;
+    }
+    const showcase = SHOWCASE_TILES.find((t) => t.key === key);
+    if (showcase) {
+      if (showcase.href) router.push(showcase.href);
+      else if (showcase.comingSoon) setSoon({ title: showcase.card.title, message: showcase.comingSoon });
+      return;
+    }
     const el = entryRefs.current[key];
     if (el) {
       setOriginRect(el.getBoundingClientRect());
@@ -564,6 +579,14 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
         </AnimatePresence>,
         document.body
       )}
+
+      {/* ── Coming soon, opened from the project list ── */}
+      <ComingSoonModal
+        open={soon !== null}
+        onClose={() => setSoon(null)}
+        title={soon?.title ?? ""}
+        message={soon?.message ?? ""}
+      />
 
       {/* ── Envelope — mobile bottom sheet ── */}
       {envelopeOpen && isMobile && (

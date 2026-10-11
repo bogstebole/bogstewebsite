@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MessageSquare, SquareMousePointer } from "lucide-react";
 
 import { ProjectEntry } from "@/components/elements/project-entry";
 import { EnvelopeWidget } from "@/components/elements/EnvelopeWidget";
@@ -148,6 +149,49 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
         {/* ── Personal_ column ── */}
         <div style={{ flexShrink: 0, width: isStacked ? "100%" : "50%" }}>
           <div style={labelStyle}>Personal_</div>
+
+          <ProjectEntry
+            {...entryProps("heroNotes")}
+            icon={<ProjectIcon src="/images/notes.png" alt="Notes" />}
+            label="Notes"
+            tags={["iOS", "Canvas"]}
+            appStore
+          />
+
+          <ProjectEntry
+            {...entryProps("heroReceipt")}
+            icon={<ProjectIcon src="/images/receipt.png" alt="Receipt tracker" rotate="359.41deg" />}
+            label="Receipt tracker"
+            tags={["iOS", "AI Financial Assistant", "Waiting approval"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("heroRuntronome")}
+            icon={<ProjectIcon src="/images/runtronome.png" alt="Runtronome" />}
+            label="Runtronome"
+            tags={["iOS", "Running assistant", "Internal beta"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("heroDayside")}
+            icon={<ProjectIcon src="/images/globe.png" alt="Dayside" />}
+            label="Dayside"
+            tags={["macOS", "Friends' time zones", "Waiting approval"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("showcaseInlineChat")}
+            icon={<MessageSquare size={12} color={primaryColor} style={{ flexShrink: 0, opacity: 0.6 }} />}
+            label="Inline Chat Input"
+            tags={["Web", "UI showcase", "Experiment"]}
+          />
+
+          <ProjectEntry
+            {...entryProps("showcaseInspector")}
+            icon={<SquareMousePointer size={12} color={primaryColor} style={{ flexShrink: 0, opacity: 0.6 }} />}
+            label="Visual QA Inspector"
+            tags={["Web", "Visual editor", "Experiment"]}
+          />
 
           <ProjectEntry
             {...entryProps("weatherWear")}
