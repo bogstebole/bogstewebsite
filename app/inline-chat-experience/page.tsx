@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ChatExperienceDemo } from "inline-chat-kit/demo";
 import "inline-chat-kit/styles.css";
 import { Logo } from "@/components/ui/logo";
+import { useReviewBase } from "@/hooks/useReviewBase";
 
 /**
  * The inline chat experience, which this page does not define.
@@ -41,11 +42,14 @@ export default function InlineChatExperiencePage() {
      does nothing. */
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
+  // "Back" returns to whichever copy of the site this page was reached from.
+  const home = useReviewBase() || "/";
+
   return (
     <ChatExperienceDemo
       logo={<Logo />}
-      back={<Link href="/">Back to home</Link>}
-      backHref="/"
+      back={<Link href={home}>Back to home</Link>}
+      backHref={home}
       backLabel="Back to home"
       theme={theme}
       onThemeChange={setTheme}

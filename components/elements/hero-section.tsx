@@ -9,6 +9,7 @@ import { ClipDetailModal, type ClipDetail } from "@/components/ui/clip-detail-mo
 import { CARD_SPRING } from "@/components/ui/project-card";
 import { type HeroProjectKey } from "@/components/ui/project-tab-bar";
 import { useHover } from "@/components/ui/hover-context";
+import { useReviewBase } from "@/hooks/useReviewBase";
 
 interface HeroSectionProps {
   activeProject: string | null;
@@ -493,6 +494,7 @@ function ClipTile({
 export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps) {
   const { isMobile } = useBreakpoint();
   const router = useRouter();
+  const reviewBase = useReviewBase();
   const interactive = activeProject === null;
   const [soon, setSoon] = useState<{ title: string; message: string } | null>(null);
   const [clip, setClip] = useState<ClipDetail | null>(null);
@@ -503,7 +505,7 @@ export function HeroSection({ activeProject, onProjectClick }: HeroSectionProps)
   const isDimmed = (key?: string) => spotlight !== null && key !== spotlight;
 
   const openTile = (t: ShowcaseTile) => () => {
-    if (t.href) router.push(t.href);
+    if (t.href) router.push(reviewBase + t.href);
     else if (t.comingSoon) setSoon({ title: t.card.title, message: t.comingSoon });
   };
 
