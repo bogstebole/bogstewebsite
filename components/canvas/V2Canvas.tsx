@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { useReviewBase } from "@/hooks/useReviewBase";
 import { motion, AnimatePresence } from "motion/react";
 // import { Water } from "@paper-design/shaders-react"; // POOL_HIDDEN
 import { Logo } from "@/components/ui/logo";
@@ -132,6 +133,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const railRef = useRef<HTMLDivElement>(null);
   const [isDetailFullyOpen, setIsDetailFullyOpen] = useState(false);
   const router = useRouter();
+  const reviewBase = useReviewBase();
   const [soon, setSoon] = useState<{ title: string; message: string } | null>(null);
   const openProject = (key: ProjectKey) => {
     setActiveProject(key);
@@ -148,7 +150,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
     }
     const showcase = SHOWCASE_TILES.find((t) => t.key === key);
     if (showcase) {
-      if (showcase.href) router.push(showcase.href);
+      if (showcase.href) router.push(reviewBase + showcase.href);
       else if (showcase.comingSoon) setSoon({ title: showcase.card.title, message: showcase.comingSoon });
       return;
     }
