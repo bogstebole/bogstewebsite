@@ -3,6 +3,7 @@
 import { Fragment, useState } from "react";
 import { motion } from "motion/react";
 import styles from "@/components/ui/GlassButton.module.css";
+import { HIDDEN_PROJECTS } from "@/lib/case-studies";
 
 export type HeroProjectKey = "heroNotes" | "heroReceipt" | "heroRuntronome" | "heroDayside";
 export type SectionProjectKey = "weatherWear" | "pauschalTracker" | "fynn" | "contentSnare" | "trigify" | "bankMigration" | "bankAudit";
@@ -10,7 +11,7 @@ export type SectionProjectKey = "weatherWear" | "pauschalTracker" | "fynn" | "co
 export type ProjectKey = HeroProjectKey | SectionProjectKey;
 
 // Same order as the Personal_ and Client_ lists, so the tabs read the way the list does.
-const TABS: Array<{ key: ProjectKey; icon: string; group: "personal" | "client" }> = [
+const ALL_TABS: Array<{ key: ProjectKey; icon: string; group: "personal" | "client" }> = [
   { key: "heroNotes", icon: "/images/notes.png", group: "personal" },
   { key: "heroReceipt", icon: "/images/receipt.png", group: "personal" },
   { key: "heroRuntronome", icon: "/images/runtronome.png", group: "personal" },
@@ -23,6 +24,8 @@ const TABS: Array<{ key: ProjectKey; icon: string; group: "personal" | "client" 
   { key: "bankMigration", icon: "/images/bank-migration.svg", group: "client" },
   { key: "bankAudit", icon: "/images/bank-audit.svg", group: "client" },
 ];
+
+const TABS = ALL_TABS.filter((tab) => !HIDDEN_PROJECTS.has(tab.key));
 
 export const PROJECT_ORDER: ProjectKey[] = TABS.map((tab) => tab.key);
 

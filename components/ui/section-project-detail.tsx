@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { CONTENT_ITEM } from "./project-detail-layout";
+import { summaryOf } from "@/lib/case-studies";
 import { type SectionProjectKey } from "./project-tab-bar";
 
 const FYNN_LEFT: { src: string; alt: string }[] = [
@@ -109,7 +110,7 @@ export const SECTION_PROJECT_CONFIGS: Record<SectionProjectKey, ProjectConfig> =
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Wear</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": A weather app that shows what to wear instead of temperatures."}
+          {`: ${summaryOf("weatherWear")}`}
         </span>
       </>
     ),
@@ -124,7 +125,7 @@ export const SECTION_PROJECT_CONFIGS: Record<SectionProjectKey, ProjectConfig> =
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Pauschal Tracker</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": Personal SaaS for tracking freelance earning limits, invoices, and bank transactions."}
+          {`: ${summaryOf("pauschalTracker")}`}
         </span>
       </>
     ),
@@ -139,7 +140,7 @@ export const SECTION_PROJECT_CONFIGS: Record<SectionProjectKey, ProjectConfig> =
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Fynn.io</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": Task completion time cut in half. Development speed doubled, this is how we transformed Fynn's senior living management system."}
+          {`: ${summaryOf("fynn")}`}
         </span>
       </>
     ),
@@ -154,7 +155,7 @@ export const SECTION_PROJECT_CONFIGS: Record<SectionProjectKey, ProjectConfig> =
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Content Snare</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": Enhanced system led to faster request completion and reduced support tickets through clearer navigation and simplified user experience."}
+          {`: ${summaryOf("contentSnare")}`}
         </span>
       </>
     ),
@@ -169,7 +170,7 @@ export const SECTION_PROJECT_CONFIGS: Record<SectionProjectKey, ProjectConfig> =
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Trigify</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": A GTM signal platform rebuilt around a copilot that reads context and does the setup, so work starts at the first useful action instead of an empty configuration screen."}
+          {`: ${summaryOf("trigify")}`}
         </span>
       </>
     ),
@@ -184,7 +185,7 @@ export const SECTION_PROJECT_CONFIGS: Record<SectionProjectKey, ProjectConfig> =
       <>
         <span style={{ color: "var(--color-text-heading)" }}>UAE Bank · Migration</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": A bank's design team moved from Sketch to Figma and came out with a token-based design system they built, documented and now govern themselves."}
+          {`: ${summaryOf("bankMigration")}`}
         </span>
       </>
     ),
@@ -199,7 +200,7 @@ export const SECTION_PROJECT_CONFIGS: Record<SectionProjectKey, ProjectConfig> =
       <>
         <span style={{ color: "var(--color-text-heading)" }}>UAE Bank · Audit</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": A web design system that had grown faster than anyone could maintain it, audited and cut from 120 components to 47, with universal names and tokens in place of hex codes."}
+          {`: ${summaryOf("bankAudit")}`}
         </span>
       </>
     ),

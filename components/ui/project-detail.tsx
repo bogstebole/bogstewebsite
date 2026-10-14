@@ -13,6 +13,7 @@ interface ProjectDetailProps {
   onClose: () => void;
   onOpenComplete?: () => void;
   onNavigate?: (key: ProjectKey) => void;
+  closeRequest?: number;
 }
 
 type ProjectConfig = {
@@ -34,7 +35,7 @@ const isHeroProject = (key: ProjectKey): key is HeroProjectKey => key in HERO_PR
  * One panel for every project, however it was opened. A single instance is what
  * lets a tab switch slide between any two of them instead of closing and reopening.
  */
-export function ProjectDetail({ activeProject, onCloseStart, onClose, onOpenComplete, onNavigate }: ProjectDetailProps) {
+export function ProjectDetail({ activeProject, onCloseStart, onClose, onOpenComplete, onNavigate, closeRequest }: ProjectDetailProps) {
   const { isMobile } = useBreakpoint();
   const [prevProject, setPrevProject] = useState<ProjectKey>(activeProject);
   const [slideDirection, setSlideDirection] = useState(0);
@@ -71,6 +72,7 @@ export function ProjectDetail({ activeProject, onCloseStart, onClose, onOpenComp
       onOpenComplete={onOpenComplete}
       prevProject={adjacent(PROJECT_ORDER[activeIdx - 1])}
       nextProject={adjacent(PROJECT_ORDER[activeIdx + 1])}
+      closeRequest={closeRequest}
     >
       {isHeroProject(activeProject) ? (
         <HeroProjectContent project={activeProject} isMobile={isMobile} />

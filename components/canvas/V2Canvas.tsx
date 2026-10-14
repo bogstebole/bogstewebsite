@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useReviewBase } from "@/hooks/useReviewBase";
+import { SITE_NAME, caseStudyPath, caseStudyTitle, projectFromPath } from "@/lib/case-studies";
 import { motion, AnimatePresence } from "motion/react";
 // import { Water } from "@paper-design/shaders-react"; // POOL_HIDDEN
 import { Logo } from "@/components/ui/logo";
@@ -116,11 +117,11 @@ function useTypewriter() {
 }
 
 
-export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
+export function V2Canvas({ latestPost, initialProject }: { latestPost: SubstackPost | null; initialProject?: ProjectKey }) {
   const { displayText, isIdle } = useTypewriter();
   const { isMobile, isTablet, width } = useBreakpoint();
   const isSplit = width >= SPLIT_MIN_WIDTH;
-  const [activeProject, setActiveProject] = useState<string | null>(null);
+  const [activeProject, setActiveProject] = useState<string | null>(initialProject ?? null);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isClosing, setIsClosing] = useState(false);
   const [returningProject, setReturningProject] = useState<string | null>(null);
@@ -135,11 +136,25 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
   const router = useRouter();
   const reviewBase = useReviewBase();
   const [soon, setSoon] = useState<{ title: string; message: string } | null>(null);
-  const openProject = (key: ProjectKey) => {
+
+  // Each case study has its own address, /work/<slug>. Opening one pushes it,
+  // so Back closes the panel and Forward opens it again; moving between case
+  // studies inside the panel only replaces it, so Back still closes.
+  const [closeRequest, setCloseRequest] = useState(0);
+  const panelClosingRef = useRef(false);
+  const closedByHistoryRef = useRef(false);
+  const homePath = reviewBase || "/";
+
+  const showProject = (key: ProjectKey) => {
     setActiveProject(key);
     setOriginRect(null);
     setIsClosing(false);
     setIsDetailFullyOpen(false);
+  };
+
+  const openProject = (key: ProjectKey) => {
+    showProject(key);
+    window.history.pushState({ caseStudyPushed: true }, "", caseStudyPath(key, reviewBase));
   };
 
   const handleProjectClick = (key: string) => {
@@ -168,15 +183,63 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
     setActiveProject(key);
     setOriginRect(null);
     setIsClosing(false);
+    const pushed = window.history.state?.caseStudyPushed === true;
+    window.history.replaceState({ caseStudyPushed: pushed }, "", caseStudyPath(key, reviewBase));
   };
+
+  // Back and Forward move the panel: a case study address opens (or switches
+  // to) that project, any other address closes it with the usual animation.
+  const onPopStateRef = useRef(() => {});
+  useEffect(() => {
+    onPopStateRef.current = () => {
+      const key = projectFromPath(window.location.pathname, reviewBase);
+      if (key) {
+        if (key !== activeProject) showProject(key);
+      } else if (isProjectKey(activeProject) && !panelClosingRef.current) {
+        closedByHistoryRef.current = true;
+        setCloseRequest((n) => n + 1);
+      }
+    };
+  });
+  // The tab title follows the open case study, as it would on a fresh load of its address
+  const hadProjectRef = useRef(false);
+  useEffect(() => {
+    if (isProjectKey(activeProject)) {
+      document.title = caseStudyTitle(activeProject);
+      hadProjectRef.current = true;
+    } else if (hadProjectRef.current) {
+      document.title = SITE_NAME;
+    }
+  }, [activeProject]);
+
+  // Subscribed once: the router re-renders synchronously on Back, and a
+  // listener swapped out mid-event would miss the very event it is for.
+  useEffect(() => {
+    const onPopState = () => onPopStateRef.current();
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   // Called when the close sequence begins — un-blur background immediately
   const handleCloseStart = () => {
     setIsClosing(true);
     setIsDetailFullyOpen(false);
+    if (!isProjectKey(activeProject)) return;
+    panelClosingRef.current = true;
+    if (closedByHistoryRef.current) {
+      // Back already moved the address
+      closedByHistoryRef.current = false;
+    } else if (window.history.state?.caseStudyPushed === true) {
+      // Opened from the page: step back to where it was opened from
+      window.history.back();
+    } else {
+      // Landed straight on the case study: there is nothing to go back to
+      window.history.replaceState(null, "", homePath);
+    }
   };
 
   const handleClose = () => {
+    panelClosingRef.current = false;
     const closingKey = activeProject;
     setActiveProject(null);
     setOriginRect(null);
@@ -503,6 +566,7 @@ export function V2Canvas({ latestPost }: { latestPost: SubstackPost | null }) {
           onClose={handleClose}
           onOpenComplete={() => setIsDetailFullyOpen(true)}
           onNavigate={handleTabSwitch}
+          closeRequest={closeRequest}
         />
       )}
 
