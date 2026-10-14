@@ -8,6 +8,7 @@ import { EnvelopeWidget } from "@/components/elements/EnvelopeWidget";
 import glassStyles from "@/components/ui/GlassButton.module.css";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useHover } from "@/components/ui/hover-context";
+import { HIDDEN_PROJECTS } from "@/lib/case-studies";
 
 interface ProjectSectionProps {
   primaryColor: string;
@@ -195,21 +196,25 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             tags={["Web", "Visual editor", "Experiment"]}
           />
 
-          <ProjectEntry
-            {...entryProps("weatherWear")}
-            icon={<ProjectIcon src="/images/puffer.png" alt="Weather Wear" grayscale opacity={0.6} />}
-            label="Weather Wear"
-            tags={["iOS", "Weather Through Clothes"]}
-            inProgress
-            clickable
-          />
+          {!HIDDEN_PROJECTS.has("weatherWear") && (
+            <ProjectEntry
+              {...entryProps("weatherWear")}
+              icon={<ProjectIcon src="/images/puffer.png" alt="Weather Wear" grayscale opacity={0.6} />}
+              label="Weather Wear"
+              tags={["iOS", "Weather Through Clothes"]}
+              inProgress
+              clickable
+            />
+          )}
 
-          <ProjectEntry
-            {...entryProps("pauschalTracker")}
-            icon={<ProjectIcon src="/images/pauschal-tracker.png" alt="Pauschal Tracker" rotate="7.68deg" />}
-            label="Pauschal Tracker"
-            tags={["Web", "Earning limit tracker", "Personal Usage"]}
-          />
+          {!HIDDEN_PROJECTS.has("pauschalTracker") && (
+            <ProjectEntry
+              {...entryProps("pauschalTracker")}
+              icon={<ProjectIcon src="/images/pauschal-tracker.png" alt="Pauschal Tracker" rotate="7.68deg" />}
+              label="Pauschal Tracker"
+              tags={["Web", "Earning limit tracker", "Personal Usage"]}
+            />
+          )}
         </div>
 
         {/* ── Client_ column ── */}

@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { CONTENT_ITEM } from "./project-detail-layout";
+import { summaryOf } from "@/lib/case-studies";
 import { NOTES_APP_STORE_URL } from "@/lib/constants";
 import { type HeroProjectKey } from "./project-tab-bar";
 
@@ -62,7 +63,7 @@ export const HERO_PROJECT_CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Notes</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": A conceptual app about information overload, built on an infinite canvas."}
+          {`: ${summaryOf("heroNotes")}`}
         </span>
       </>
     ),
@@ -76,7 +77,7 @@ export const HERO_PROJECT_CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Dayside</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": Friends' time zones on a real, living globe, right in your menu bar."}
+          {`: ${summaryOf("heroDayside")}`}
         </span>
       </>
     ),
@@ -91,7 +92,7 @@ export const HERO_PROJECT_CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Receipt tracker</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": AI-powered expense tracking that reads your finances so you don’t have to."}
+          {`: ${summaryOf("heroReceipt")}`}
         </span>
       </>
     ),
@@ -105,7 +106,7 @@ export const HERO_PROJECT_CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Runtronome</span>
         <span style={{ color: "var(--color-text-subdued)" }}>
-          {": A running assistant that turns pacing into something you hear, not something you check."}
+          {`: ${summaryOf("heroRuntronome")}`}
         </span>
       </>
     ),

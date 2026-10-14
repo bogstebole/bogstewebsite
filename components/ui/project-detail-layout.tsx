@@ -38,6 +38,8 @@ interface ProjectDetailLayoutProps {
   onOpenComplete?: () => void;
   prevProject?: AdjacentProject;
   nextProject?: AdjacentProject;
+  /** Bump to close the panel from outside, with the same animation as the close button. */
+  closeRequest?: number;
 }
 
 const EXIT_DURATION = 0.4;
@@ -118,6 +120,7 @@ export function ProjectDetailLayout({
   onOpenComplete,
   prevProject,
   nextProject,
+  closeRequest = 0,
 }: ProjectDetailLayoutProps) {
   const [mounted, setMounted] = useState(false);
   const closingRef = useRef(false);
@@ -252,6 +255,14 @@ export function ProjectDetailLayout({
     await wait(400); // Wait for animations to finish
     onClose();
   }, [onCloseStart, onClose]);
+
+  // Only a request made while this panel is open closes it; an older one must
+  // not shut a panel that has just opened.
+  const closeRequestAtMount = useRef(closeRequest);
+  useEffect(() => {
+    if (closeRequest !== closeRequestAtMount.current) void initiateClose();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only a new request closes
+  }, [closeRequest]);
 
   // Handle Escape key
   useEffect(() => {
