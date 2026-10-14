@@ -23,6 +23,7 @@ type ProjectConfig = {
   tags: string[];
   appStore?: boolean;
   downloadUrl?: string;
+  downloadPlatform?: "ios" | "mac";
   shortDescription: React.ReactNode;
   longDescription: string;
 };
@@ -65,6 +66,7 @@ export function ProjectDetail({ activeProject, onCloseStart, onClose, onOpenComp
       tags={config.tags}
       appStore={config.appStore}
       downloadUrl={config.downloadUrl}
+      downloadPlatform={config.downloadPlatform}
       shortDescription={config.shortDescription}
       longDescription={config.longDescription}
       contentKey={activeProject}

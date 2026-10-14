@@ -14,21 +14,33 @@ interface AppDownloadButtonProps {
   /** Dropped into the middle of the QR code. */
   appIcon?: string;
   label?: string;
+  /** A Mac app installs on the computer the visitor is already using, so it skips the QR code. */
+  platform?: "ios" | "mac";
 }
 
 /**
  * One button, two jobs. A phone can install straight from the store, so it goes
  * there. A desktop cannot, so it hands over a code to scan with the phone that
- * can, the same split the selected-projects layout has always used.
+ * can, the same split the selected-projects layout has always used. A Mac app
+ * turns that around: the desktop is where it installs, so the store opens directly.
  */
 export function AppDownloadButton({
   url,
   appName,
   appIcon,
   label = "Download the app",
+  platform = "ios",
 }: AppDownloadButtonProps) {
   const { isMobile } = useBreakpoint();
   const [showQR, setShowQR] = useState(false);
+
+  if (platform === "mac") {
+    return (
+      <GlassButton size={isMobile ? "l" : "s"} onClick={() => window.open(url, "_blank", "noopener,noreferrer")}>
+        {label}
+      </GlassButton>
+    );
+  }
 
   if (isMobile) {
     return (
