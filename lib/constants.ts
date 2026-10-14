@@ -147,8 +147,9 @@ export const ENVELOPE_MESSAGES: string[] = [
 export const NOTES_APP_STORE_URL =
   "https://apps.apple.com/us/app/useless-notes/id6757185511";
 
-/** Dayside on the Mac App Store. Null until Apple approves it; the page shows "coming soon" meanwhile. */
-export const DAYSIDE_APP_STORE_URL: string | null = null;
+/** Dayside on the Mac App Store. Its download buttons open this directly, since it only runs on a Mac. */
+export const DAYSIDE_APP_STORE_URL: string | null =
+  "https://apps.apple.com/us/app/dayside-world-clock-globe/id6818457402?mt=12";
 
 /** Where Dayside support and feedback emails go. */
 export const DAYSIDE_SUPPORT_EMAIL = "bogstedsgn@gmail.com";

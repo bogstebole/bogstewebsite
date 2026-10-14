@@ -29,6 +29,8 @@ interface ProjectDetailLayoutProps {
   downloadUrl?: string;
   downloadAppName?: string;
   downloadAppIcon?: string;
+  /** Which store the download button points at; a Mac app opens it directly instead of showing a QR code. */
+  downloadPlatform?: "ios" | "mac";
   shortDescription?: React.ReactNode;
   longDescription?: React.ReactNode;
   children: React.ReactNode;
@@ -111,6 +113,7 @@ export function ProjectDetailLayout({
   downloadUrl,
   downloadAppName,
   downloadAppIcon,
+  downloadPlatform,
   shortDescription,
   longDescription,
   children,
@@ -452,6 +455,7 @@ export function ProjectDetailLayout({
                         url={downloadUrl}
                         appName={downloadAppName ?? (typeof title === "string" ? title : "the app")}
                         appIcon={downloadAppIcon ?? icon}
+                        platform={downloadPlatform}
                       />
                     )}
                   </div>
@@ -683,6 +687,7 @@ export function ProjectDetailLayout({
                                 url={downloadUrl}
                                 appName={downloadAppName ?? (typeof title === "string" ? title : "the app")}
                                 appIcon={downloadAppIcon ?? icon}
+                                platform={downloadPlatform}
                               />
                             </div>
                           )}

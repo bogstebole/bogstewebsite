@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { CONTENT_ITEM } from "./project-detail-layout";
 import { summaryOf } from "@/lib/case-studies";
-import { NOTES_APP_STORE_URL } from "@/lib/constants";
+import { DAYSIDE_APP_STORE_URL, NOTES_APP_STORE_URL } from "@/lib/constants";
 import { type HeroProjectKey } from "./project-tab-bar";
 
 const NOTES_ASSETS = [
@@ -18,7 +18,7 @@ const NOTES_ASSETS = [
   { type: "image" as const, src: "/assets/Useless Notes/5Uslsnts.png" },
 ];
 
-const DAYSIDE_VIDEO = "/assets/Dayside/dayside.mp4";
+const DAYSIDE_VIDEO = "/assets/Dayside/dayside-showcase.mp4";
 
 const RECEIPT_ASSETS = [
   { type: "video" as const, src: "/assets/Hero/receipt-recording.mp4" },
@@ -48,6 +48,7 @@ type ProjectConfig = {
   tags: string[];
   appStore?: boolean;
   downloadUrl?: string;
+  downloadPlatform?: "ios" | "mac";
   shortDescription: React.ReactNode;
   longDescription: string;
 };
@@ -72,7 +73,10 @@ export const HERO_PROJECT_CONFIGS: Record<HeroProjectKey, ProjectConfig> = {
   heroDayside: {
     title: "Dayside",
     icon: "/images/globe.png",
-    tags: ["macOS", "Friends' time zones", "Waiting approval"],
+    tags: ["macOS", "Friends' time zones"],
+    appStore: true,
+    downloadUrl: DAYSIDE_APP_STORE_URL ?? undefined,
+    downloadPlatform: "mac",
     shortDescription: (
       <>
         <span style={{ color: "var(--color-text-heading)" }}>Dayside</span>

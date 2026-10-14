@@ -179,7 +179,8 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             {...entryProps("heroDayside")}
             icon={<ProjectIcon src="/images/globe.png" alt="Dayside" />}
             label="Dayside"
-            tags={["macOS", "Friends' time zones", "Waiting approval"]}
+            tags={["macOS", "Friends' time zones"]}
+            appStore
           />
 
           <ProjectEntry

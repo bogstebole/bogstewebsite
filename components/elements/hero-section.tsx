@@ -62,11 +62,11 @@ const DAYSIDE_CARD: HeroCard = {
   icon: "/images/globe.png",
   title: "Dayside",
   subtitle: "Friends' time zones",
-  status: "Waiting approval",
-  media: { type: "video", src: "/assets/Dayside/dayside.mp4" },
+  status: "On app store",
+  media: { type: "video", src: "/assets/Dayside/dayside-showcase.mp4" },
 };
 
-const DAYSIDE_RATIO = "2712 / 2010";
+const DAYSIDE_RATIO = "1520 / 1424";
 
 const PHONE_WIDTH = 171;
 const PHONE_HEIGHT = 372;
