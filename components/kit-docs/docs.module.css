@@ -1,0 +1,766 @@
+/* The inline-chat-kit docs.
+
+   Drawn entirely on the kit's own `--ick-` tokens, in the voice of the page
+   that used to stand here: mono for names and headings, sans for reading,
+   ink at three strengths and nothing louder. A preview on the page and the
+   page around it answer to the same `data-theme`, so they cannot disagree. */
+
+.shell {
+  --docs-header: 56px;
+  --docs-sidebar: 232px;
+  --docs-toc: 196px;
+  --docs-gutter: 24px;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--ick-page);
+  color: var(--ick-ink);
+  font-family: var(--ick-font-sans);
+  color-scheme: light;
+}
+
+/* Scrollbars and form controls follow the theme too. */
+:global(:root[data-theme="dark"]) .shell {
+  color-scheme: dark;
+}
+
+/* ── Header ── */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--docs-header);
+  background: color-mix(in srgb, var(--ick-page) 82%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ick-border);
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 var(--docs-gutter);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brandLogo {
+  display: flex;
+  zoom: 0.66;
+  border-radius: 16px;
+}
+
+.brandName {
+  font-family: var(--ick-font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--ick-ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.version {
+  font-family: var(--ick-font-mono);
+  font-size: 11px;
+  line-height: 18px;
+  padding: 0 6px;
+  border-radius: 99px;
+  color: var(--ick-ink-soft);
+  background: var(--ick-surface-active);
+}
+
+.headerNav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.headerLink {
+  font-family: var(--ick-font-mono);
+  font-size: 12px;
+  color: var(--ick-ink-soft);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 99px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.demoLink {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  margin-left: 6px;
+  padding: 0 14px;
+  border-radius: 99px;
+  font-family: var(--ick-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--ick-page);
+  background: var(--ick-ink);
+  transition: opacity 0.15s, transform 0.12s var(--ick-ease, ease-out);
+}
+
+.demoLink:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .headerLink:hover {
+    color: var(--ick-ink);
+    background: var(--ick-surface-active);
+  }
+  .demoLink:hover {
+    opacity: 0.86;
+  }
+}
+
+.menuButton {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-left: -6px;
+  border: 0;
+  border-radius: 99px;
+  background: transparent;
+  color: var(--ick-ink);
+  cursor: pointer;
+}
+
+.headerLink:focus-visible,
+.demoLink:focus-visible,
+.menuButton:focus-visible,
+.brandName:focus-visible,
+.brandLogo:focus-visible,
+.navLink:focus-visible,
+.previewTab:focus-visible,
+.replay:focus-visible,
+.pagerLink:focus-visible {
+  outline: 2px solid var(--ick-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── Body: sidebar · page · on this page ── */
+
+.body {
+  display: grid;
+  grid-template-columns: var(--docs-sidebar) minmax(0, 1fr) var(--docs-toc);
+  gap: 48px;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 var(--docs-gutter);
+}
+
+.sidebar {
+  position: sticky;
+  top: var(--docs-header);
+  height: calc(100dvh - var(--docs-header));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 28px 8px 48px 0;
+  scrollbar-width: thin;
+}
+
+.navGroup + .navGroup {
+  margin-top: 22px;
+}
+
+.navGroupTitle {
+  display: block;
+  margin-bottom: 6px;
+  padding: 0 10px;
+  font-family: var(--ick-font-mono);
+  font-size: 11px;
+  letter-spacing: -0.01em;
+  color: var(--ick-ink-faint);
+}
+
+.navGroup ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navLink {
+  display: block;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ick-ink-soft);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navLink[aria-current="page"] {
+  color: var(--ick-ink);
+  background: var(--ick-surface-active);
+  font-weight: 500;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .navLink:hover {
+    color: var(--ick-ink);
+  }
+}
+
+.scrim {
+  display: none;
+}
+
+.main {
+  min-width: 0;
+  padding: 40px 0 96px;
+}
+
+/* ── On this page ── */
+
+.toc {
+  position: sticky;
+  top: var(--docs-header);
+  align-self: start;
+  max-height: calc(100dvh - var(--docs-header));
+  overflow-y: auto;
+  padding: 44px 0 48px;
+}
+
+.tocTitle {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--ick-font-mono);
+  font-size: 11px;
+  color: var(--ick-ink-faint);
+}
+
+.toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc li[data-level="3"] {
+  padding-left: 12px;
+}
+
+.toc a {
+  display: block;
+  padding: 3px 0;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--ick-ink-soft);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.toc a[aria-current="location"],
+.toc a:hover {
+  color: var(--ick-ink);
+}
+
+/* ── The page ──
+
+   Prose rules stop at a preview's edge (`:not(.preview *)`): a live example
+   is the kit's styling, and a paragraph margin or link underline from the
+   page around it would make it look different here than in an app. */
+
+.article {
+  max-width: 720px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ick-ink-soft);
+}
+
+.article p:not(.preview *) {
+  margin: 14px 0 0;
+}
+
+.article ul:not(.preview *),
+.article ol:not(.preview *) {
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+
+/* This site's base styles take bullets off every list (Tailwind's preflight).
+   Prose wants them back, and so does an answer's markdown inside a preview,
+   which the kit leaves to the browser default the preflight removed. */
+.article ul:not(.preview *),
+.preview :global([class*="ick-tokens-"]) ul {
+  list-style: disc;
+}
+
+.article ol:not(.preview *),
+.preview :global([class*="ick-tokens-"]) ol {
+  list-style: decimal;
+}
+
+.article li:not(.preview *) + li {
+  margin-top: 4px;
+}
+
+.article strong:not(.preview *) {
+  color: var(--ick-ink);
+  font-weight: 500;
+}
+
+.article a:not(.preview *) {
+  color: var(--ick-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ick-border);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s;
+}
+
+.article a:not(.preview *):hover {
+  text-decoration-color: currentColor;
+}
+
+.article :not(pre) > code:not(.preview *) {
+  font-family: var(--ick-font-mono);
+  font-size: 0.86em;
+  padding: 1px 5px;
+  border-radius: 6px;
+  color: var(--ick-ink);
+  background: var(--ick-surface-active);
+}
+
+.docHeader {
+  padding-bottom: 8px;
+}
+
+.docTitle {
+  margin: 0;
+  font-family: var(--ick-font-mono);
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 32px;
+  letter-spacing: -0.03em;
+  color: var(--ick-ink);
+}
+
+.docDescription {
+  margin: 10px 0 0;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--ick-ink-soft);
+  text-wrap: pretty;
+}
+
+.docHeader > :not(.docTitle):not(.docDescription) {
+  margin-top: 20px;
+}
+
+.h2,
+.h3 {
+  scroll-margin-top: calc(var(--docs-header) + 24px);
+  font-family: var(--ick-font-mono);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--ick-ink);
+}
+
+.h2 {
+  margin: 56px 0 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ick-border);
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.h3 {
+  margin: 32px 0 0;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.h2 a,
+.h3 a {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+.h2 + p,
+.h3 + p {
+  margin-top: 12px;
+}
+
+.code {
+  margin-top: 16px;
+}
+
+/* ── Preview ── */
+
+.preview {
+  margin-top: 20px;
+  border: 1px solid var(--ick-border);
+  border-radius: 16px;
+  background: var(--ick-surface);
+  overflow: hidden;
+}
+
+.h2 + .preview,
+.h3 + .preview {
+  margin-top: 16px;
+}
+
+.previewBar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 40px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--ick-border);
+}
+
+.previewTab {
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 99px;
+  background: transparent;
+  font-family: var(--ick-font-mono);
+  font-size: 12px;
+  color: var(--ick-ink-faint);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.previewTab[data-active] {
+  color: var(--ick-ink);
+  background: var(--ick-surface-active);
+}
+
+.replay {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-left: auto;
+  border: 0;
+  border-radius: 99px;
+  background: transparent;
+  color: var(--ick-ink-faint);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.3s var(--ick-ease, ease-out);
+}
+
+.replay:active {
+  transform: rotate(-120deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .previewTab:hover,
+  .replay:hover {
+    color: var(--ick-ink);
+  }
+}
+
+.previewStage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 260px;
+  padding: 40px 32px;
+  background-color: var(--ick-page);
+  background-image: radial-gradient(rgb(var(--ick-ink-rgb) / 0.07) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.previewStage[hidden] {
+  display: none;
+}
+
+.previewStage[data-align="start"] {
+  align-items: flex-start;
+}
+
+.previewStage[data-bleed] {
+  padding: 0;
+  align-items: stretch;
+}
+
+.previewInner {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.previewStage[data-align="start"] .previewInner {
+  justify-content: flex-start;
+}
+
+.previewStage[data-bleed] .previewInner {
+  display: block;
+}
+
+.previewCode {
+  max-height: 520px;
+  overflow: auto;
+}
+
+.previewCode > * {
+  border-radius: 0 !important;
+}
+
+/* ── Props ── */
+
+.tableWrap {
+  margin-top: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--ick-border);
+  border-radius: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.table th {
+  padding: 9px 14px;
+  text-align: left;
+  font-family: var(--ick-font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ick-ink-faint);
+  border-bottom: 1px solid var(--ick-border);
+}
+
+.table td {
+  padding: 12px 14px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--ick-border);
+}
+
+.table tr:last-child td {
+  border-bottom: 0;
+}
+
+.table td:first-child {
+  white-space: nowrap;
+}
+
+.table td.wrap {
+  white-space: normal;
+}
+
+.propName {
+  font-family: var(--ick-font-mono);
+  font-size: 12.5px;
+  color: var(--ick-ink);
+  background: none !important;
+  padding: 0 !important;
+}
+
+.propType {
+  font-family: var(--ick-font-mono);
+  font-size: 12px;
+  color: var(--ick-ink);
+  background: var(--ick-surface-active);
+  padding: 1px 5px;
+  border-radius: 5px;
+  word-break: break-word;
+}
+
+.propDescription {
+  margin-top: 6px;
+  color: var(--ick-ink-soft);
+}
+
+.required {
+  margin-left: 2px;
+  color: var(--ick-ink-faint);
+}
+
+.none {
+  color: var(--ick-ink-faint);
+}
+
+/* ── Notes ── */
+
+.callout {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--ick-surface-active);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.callout > div > :first-child {
+  margin-top: 0;
+}
+
+.calloutTitle {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--ick-font-mono);
+  font-size: 12px;
+}
+
+.usage {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.usage > div {
+  padding: 14px 16px;
+  border: 1px solid var(--ick-border);
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.usage ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.usageLabel {
+  font-family: var(--ick-font-mono);
+  font-size: 11px;
+  color: var(--ick-ink-faint);
+}
+
+/* ── Pager ── */
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 720px;
+  margin-top: 72px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ick-border);
+}
+
+.pagerLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 99px;
+  font-family: var(--ick-font-mono);
+  font-size: 12px;
+  color: var(--ick-ink-soft);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pagerLink:hover {
+    color: var(--ick-ink);
+    background: var(--ick-surface-active);
+  }
+}
+
+/* ── Narrower screens ── */
+
+@media (max-width: 1180px) {
+  .body {
+    grid-template-columns: var(--docs-sidebar) minmax(0, 1fr);
+  }
+  .toc {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .shell {
+    --docs-gutter: 16px;
+  }
+
+  .menuButton {
+    display: inline-flex;
+  }
+
+  .headerLink {
+    display: none;
+  }
+
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: var(--docs-header);
+    left: 0;
+    bottom: 0;
+    z-index: 25;
+    width: min(280px, 84vw);
+    height: auto;
+    padding: 20px 16px 48px;
+    background: var(--ick-page);
+    border-right: 1px solid var(--ick-border);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.28s cubic-bezier(0.23, 1, 0.32, 1), visibility 0s linear 0.28s;
+  }
+
+  .sidebar[data-open] {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.28s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .scrim {
+    display: block;
+    position: fixed;
+    inset: var(--docs-header) 0 0 0;
+    z-index: 24;
+    background: var(--ick-scrim, rgb(0 0 0 / 0.2));
+  }
+
+  .main {
+    padding-top: 28px;
+  }
+
+  .previewStage {
+    padding: 28px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .version,
+  .brandLogo {
+    display: none;
+  }
+  .headerInner {
+    gap: 8px;
+  }
+  .brandName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar[data-open],
+  .replay,
+  .demoLink {
+    transition: none;
+  }
+}

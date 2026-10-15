@@ -36,6 +36,8 @@ interface MouseState {
 
 export function ThemeToggle() {
   const pathname = usePathname();
+  // The inline-chat-kit docs and demo carry their own theme switch.
+  const hidden = /^(\/dive)?\/inline-chat-experience(\/|$)/.test(pathname);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hitZoneRef = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
@@ -50,7 +52,7 @@ export function ThemeToggle() {
   const lastTriggerTimeRef = useRef(0);
 
   useEffect(() => {
-    if (pathname === "/inline-chat-experience") return;
+    if (hidden) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -273,9 +275,9 @@ export function ThemeToggle() {
       hitZone?.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("resize", onResize);
     };
-  }, [pathname]);
+  }, [pathname, hidden]);
 
-  if (pathname === "/inline-chat-experience") return null;
+  if (hidden) return null;
 
   return (
     <>
