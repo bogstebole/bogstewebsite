@@ -55,7 +55,8 @@ export default function ApprovalBasic() {
       )}
 
       {decision === "denied" && (
-        <p style={{ margin: 0, fontSize: "var(--ick-answer-size)", lineHeight: "var(--ick-answer-leading)", color: "var(--ick-ink)" }}>
+        // The answer's prose sits on the kit's answer column, as ChatTurnRow places it.
+        <p style={{ margin: 0, marginInline: "var(--ick-answer-column)", fontSize: "var(--ick-answer-size)", lineHeight: "var(--ick-answer-leading)", color: "var(--ick-ink)" }}>
           Understood. I’ll leave <code>Shots/</code> alone.
         </p>
       )}

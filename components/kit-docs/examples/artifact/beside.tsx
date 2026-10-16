@@ -94,7 +94,8 @@ export default function ArtifactBeside() {
         <Conversation scrollButton={false}>
           <div style={{ display: "flex", flexDirection: "column", gap: 16, color: "var(--ick-ink)" }}>
             <Bubble>Can you put together a plan for my first 5k? I can run four days a week.</Bubble>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: "var(--ick-answer-leading)" }}>
+            {/* The answer's prose sits on the kit's answer column, as ChatTurnRow places it. */}
+            <p style={{ margin: 0, marginInline: "var(--ick-answer-column)", fontSize: 14, lineHeight: "var(--ick-answer-leading)" }}>
               Here is an eight-week plan, and a small script for working out your pace.
             </p>
             {DOCS.map((doc) => (

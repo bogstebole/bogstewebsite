@@ -92,15 +92,20 @@ export default function BrandScope() {
           fontFamily: "var(--ick-font-sans)",
         }}
       >
-        {/* A sent message: resting, so there is nothing to type and nothing to send. */}
-        <ChatInput
-          state="resting"
-          value="Will it rain in Belgrade this weekend?"
-          onChange={() => {}}
-          onSubmit={() => {}}
-        />
+        {/* A sent message: resting, so there is nothing to type and nothing to send.
+            Its copy and edit appear under it on hover, so it keeps room for them,
+            the way a turn does in a conversation. */}
+        <div style={{ paddingBottom: 32 }}>
+          <ChatInput
+            state="resting"
+            value="Will it rain in Belgrade this weekend?"
+            onChange={() => {}}
+            onSubmit={() => {}}
+          />
+        </div>
 
-        <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6 }}>
+        {/* The answer's prose sits on the kit's answer column, as ChatTurnRow places it. */}
+        <p style={{ margin: 0, marginInline: "var(--ick-answer-column)", fontSize: 15, lineHeight: 1.6 }}>
           Saturday stays clear at around 24°C, and{" "}
           <InlineCitation index={1} source={{ id: "radar", title: "Balkans precipitation radar" }}>
             Sunday has a 40% chance of a short shower

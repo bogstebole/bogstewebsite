@@ -173,7 +173,12 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 28px 8px 48px 0;
-  scrollbar-width: thin;
+  /* Scrolls, without a bar: the list is short enough to read as a page. */
+  scrollbar-width: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .navGroup + .navGroup {

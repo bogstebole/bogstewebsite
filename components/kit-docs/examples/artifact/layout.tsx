@@ -70,7 +70,8 @@ export default function ArtifactChatLayout() {
                 Can you put together a plan for my first 5k?
               </p>
             </div>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: "var(--ick-answer-leading)" }}>
+            {/* The answer's prose sits on the kit's answer column, as ChatTurnRow places it. */}
+            <p style={{ margin: 0, marginInline: "var(--ick-answer-column)", fontSize: 14, lineHeight: "var(--ick-answer-leading)" }}>
               Eight weeks, four runs a week, building to 5 km without stopping.
             </p>
             <ArtifactCard
