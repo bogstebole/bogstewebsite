@@ -272,6 +272,38 @@
   color: var(--ick-ink);
 }
 
+/* ── This page for agents: a quiet row above the title ── */
+
+.pageActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  max-width: 720px;
+  margin: -16px 0 8px;
+}
+
+.pageActions a {
+  padding: 3px 8px;
+  border-radius: 99px;
+  font-family: var(--ick-font-mono);
+  font-size: 11px;
+  color: var(--ick-ink-faint);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pageActions a:hover {
+    color: var(--ick-ink);
+    background: var(--ick-surface-active);
+  }
+}
+
+.pageActions a:focus-visible {
+  outline: 2px solid var(--ick-focus-ring);
+  outline-offset: 2px;
+}
+
 /* ── The page ──
 
    Prose rules stop at a preview's edge (`:not(.preview *)`): a live example
@@ -512,6 +544,10 @@
 .previewCode {
   max-height: 520px;
   overflow: auto;
+}
+
+.previewCode[hidden] {
+  display: none;
 }
 
 .previewCode > * {
