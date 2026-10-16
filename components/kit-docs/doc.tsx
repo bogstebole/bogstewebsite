@@ -59,7 +59,11 @@ export function Callout({ title, children }: { title?: string; children: ReactNo
 
 /** A code sample, drawn by the kit's own `CodeBlock`. */
 export function Code({ code, lang = "tsx", label }: { code: string; lang?: string; label?: string }) {
-  return <CodeBlock className={styles.code} code={code.trim()} lang={lang} label={label} />;
+  return (
+    <div data-md-lang={lang}>
+      <CodeBlock className={styles.code} code={code.trim()} lang={lang} label={label} />
+    </div>
+  );
 }
 
 /** `import { Tool } from "inline-chat-kit";`, the first line anybody copies. */
@@ -135,7 +139,7 @@ export function PropsTable({
   const hasDefault = rows.some((row) => row.default);
   return (
     <div className={styles.tableWrap}>
-      <table className={styles.table}>
+      <table className={styles.table} data-md-props>
         <thead>
           <tr>
             <th>{nameLabel}</th>
@@ -147,18 +151,22 @@ export function PropsTable({
           {rows.map((row) => (
             <tr key={row.name}>
               <td>
-                <code className={styles.propName}>
+                <code className={styles.propName} data-md-name>
                   {row.name}
                   {row.required && <span className={styles.required} aria-label="required">*</span>}
                 </code>
               </td>
               <td>
-                <code className={styles.propType}>{row.type}</code>
-                <div className={styles.propDescription}>{row.description}</div>
+                <code className={styles.propType} data-md-type>
+                  {row.type}
+                </code>
+                <div className={styles.propDescription} data-md-description>
+                  {row.description}
+                </div>
               </td>
               {hasDefault && (
                 <td>
-                  {row.default ? <code className={styles.propType}>{row.default}</code> : <span className={styles.none}>none</span>}
+                  {row.default ? <code className={styles.propType} data-md-default>{row.default}</code> : <span className={styles.none}>none</span>}
                 </td>
               )}
             </tr>
@@ -202,7 +210,9 @@ export function UsageNotes({ use, avoid }: { use: ReactNode[]; avoid?: ReactNode
   return (
     <div className={styles.usage}>
       <div>
-        <span className={styles.usageLabel}>Use it for</span>
+        <span className={styles.usageLabel} data-md-label>
+          Use it for
+        </span>
         <ul>
           {use.map((item, i) => (
             <li key={i}>{item}</li>
@@ -211,7 +221,9 @@ export function UsageNotes({ use, avoid }: { use: ReactNode[]; avoid?: ReactNode
       </div>
       {avoid && avoid.length > 0 && (
         <div>
-          <span className={styles.usageLabel}>Not for</span>
+          <span className={styles.usageLabel} data-md-label>
+            Not for
+          </span>
           <ul>
             {avoid.map((item, i) => (
               <li key={i}>{item}</li>

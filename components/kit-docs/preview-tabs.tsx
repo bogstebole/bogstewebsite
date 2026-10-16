@@ -86,6 +86,7 @@ export function PreviewTabs({
         id={`${id}-preview`}
         aria-labelledby={`${id}-preview-tab`}
         hidden={tab !== "preview"}
+        data-md-skip
         className={styles.previewStage}
         data-align={align}
         data-bleed={bleed || undefined}
@@ -96,11 +97,18 @@ export function PreviewTabs({
         </div>
       </div>
 
-      {tab === "code" && (
-        <div role="tabpanel" id={`${id}-code`} aria-labelledby={`${id}-code-tab`} className={styles.previewCode}>
-          <CodeBlock code={code} lang="tsx" label={filename} />
-        </div>
-      )}
+      {/* Always in the page, hidden until asked for: a reader who never opens
+          the tab and an agent reading the HTML both get the example's source. */}
+      <div
+        role="tabpanel"
+        id={`${id}-code`}
+        aria-labelledby={`${id}-code-tab`}
+        hidden={tab !== "code"}
+        className={styles.previewCode}
+        data-md-lang="tsx"
+      >
+        <CodeBlock code={code} lang="tsx" label={filename} />
+      </div>
     </div>
   );
 }

@@ -18,6 +18,8 @@
     "lucide-react": "^0.564.0",
     "motion": "^12.40.0",
     "next": "16.4.0",
+    "node-html-markdown": "^2.0.0",
+    "node-html-parser": "^9.0.4",
     "qrcode.react": "^4.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
