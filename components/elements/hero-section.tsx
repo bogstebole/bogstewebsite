@@ -318,6 +318,7 @@ function HeroProjectCard({
             style={{
               fontFamily: "var(--font-geist-sans), sans-serif",
               fontSize: 14,
+              fontWeight: 500,
               lineHeight: 1.3,
               letterSpacing: "-0.02em",
               color: "var(--color-text-card)",

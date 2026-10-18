@@ -39,11 +39,11 @@ export function SubstackCard({ title, date, time, href }: Props) {
     >
       <div
         style={{
-          fontFamily: "var(--font-jetbrains-mono), monospace",
-          fontWeight: 400,
-          fontSize: 12,
+          fontFamily: "var(--font-geist-sans), sans-serif",
+          fontWeight: 500,
+          fontSize: 14,
           lineHeight: 1.3,
-          letterSpacing: "-0.04em",
+          letterSpacing: "-0.02em",
           color: "var(--color-text-card)",
           overflow: "hidden",
           display: "-webkit-box",

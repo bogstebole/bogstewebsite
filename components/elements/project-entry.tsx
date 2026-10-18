@@ -107,10 +107,11 @@ export const ProjectEntry = forwardRef<HTMLDivElement, ProjectEntryProps>(
             style={{
               color: primaryColor,
               display: "inline-block",
-              fontFamily: '"JetBrains Mono", system-ui, sans-serif',
-              fontSize: 12,
-              letterSpacing: "-0.01em",
-              lineHeight: "16px",
+              fontFamily: "var(--font-geist-sans), sans-serif",
+              fontSize: 14,
+              fontWeight: 500,
+              letterSpacing: "-0.02em",
+              lineHeight: "18px",
             }}
           >
             {label}
