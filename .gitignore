@@ -47,3 +47,21 @@ next-env.d.ts
 
 # raw source recordings — the compressed cuts that ship live in public/
 /assets/assets for new hero section/*.mp4
+
+# Claude Code's per-machine state: its worktrees and local settings.
+.claude/worktrees/
+.claude/settings.local.json
+
+# Copies the filesystem makes beside a file being edited ("doc 2.tsx",
+# "nav 2.ts"). 179 of them appeared at once in October; none belongs in git.
+# Code and text only: an image or a video named "Step 2.png" is a real asset.
+* [0-9].ts
+* [0-9].tsx
+* [0-9].js
+* [0-9].mjs
+* [0-9].css
+* [0-9].md
+* [0-9].json
+
+# Local-only notes. Never pushed.
+/private/
