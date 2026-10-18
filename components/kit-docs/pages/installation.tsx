@@ -14,6 +14,11 @@ export default function InstallationPage() {
         description="One package, three peers you probably already have, and a stylesheet imported once."
       />
 
+      <Callout title="Not ready to use yet">
+        inline-chat-kit is still being built: the API can change, and some features are in progress. See{" "}
+        <DocLink to="status">Status</DocLink> for what is unfinished and what is missing.
+      </Callout>
+
       <H2 id="install">Install the package</H2>
       <Code lang="bash" label="terminal" code="npm install inline-chat-kit motion lucide-react" />
       <p>

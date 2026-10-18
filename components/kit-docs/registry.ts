@@ -16,6 +16,7 @@ export interface DocPageModule {
  */
 export const DOCS_REGISTRY: Record<string, () => Promise<DocPageModule>> = {
   "": () => import("./pages/introduction"),
+  status: () => import("./pages/status"),
   installation: () => import("./pages/installation"),
   usage: () => import("./pages/usage"),
   theming: () => import("./pages/theming"),
