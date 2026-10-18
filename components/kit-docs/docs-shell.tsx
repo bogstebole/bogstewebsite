@@ -108,14 +108,6 @@ export function DocsShell({ version, children }: { version: string; children: Re
             >
               GitHub
             </a>
-            <a
-              className={styles.headerLink}
-              href="https://www.npmjs.com/package/inline-chat-kit"
-              target="_blank"
-              rel="noreferrer"
-            >
-              npm
-            </a>
             <Button
               variant="ghost"
               size="s"

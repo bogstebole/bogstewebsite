@@ -17,6 +17,11 @@ export default function IntroductionPage() {
         description="An inline AI chat experience for React. The input is the message: when you send, the pill you typed into morphs into the bubble that holds your text, and the answer streams in below it. No separate composer, no jump cut."
       />
 
+      <Callout title="Not ready to use yet">
+        inline-chat-kit is still being built: the API can change, and some features are in progress. See{" "}
+        <DocLink to="status">Status</DocLink> for what is unfinished and what is missing.
+      </Callout>
+
       <ComponentPreview file="introduction/morph.tsx" minHeight={220}>
         <Morph />
       </ComponentPreview>

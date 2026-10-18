@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
   const body = `# inline-chat-kit
 
-> An inline AI chat experience for React. The input is the message: when you send, the pill you typed into morphs into the bubble that holds your text, and the answer streams in below it. Install with \`npm install inline-chat-kit motion lucide-react\` and import \`inline-chat-kit/styles.css\` once.
+> An inline AI chat experience for React. The input is the message: when you send, the pill you typed into morphs into the bubble that holds your text, and the answer streams in below it. Not ready to use in a product yet: the API can change before 1.0 and some features are in progress — see the Status page below.
 
 Every page below is also a web page at the same address without \`.md\`. The whole documentation in one file: ${origin}/inline-chat-experience/llms-full.txt. The npm package ships its README, getting-started.md, theming.md and typed declarations with doc comments.
 
@@ -31,7 +31,6 @@ ${sections.join("\n\n")}
 ## Optional
 
 - [Live demo](${origin}/inline-chat-experience/demo): every part of the kit in one scripted conversation, no backend.
-- [npm](https://www.npmjs.com/package/inline-chat-kit)
 - [Source](https://github.com/bogstebole/chat-experience)
 `;
   return markdownResponse(body, "text/plain");

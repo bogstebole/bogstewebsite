@@ -22,6 +22,7 @@ export const DOCS_NAV: DocNavGroup[] = [
     title: "Getting started",
     items: [
       { path: "", title: "Introduction" },
+      { path: "status", title: "Status" },
       { path: "installation", title: "Installation" },
       { path: "usage", title: "Wiring a model" },
       { path: "theming", title: "Theming" },
