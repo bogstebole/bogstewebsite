@@ -58,7 +58,7 @@ body {
   --color-text-body:         #212121;
   --color-text-card:         #434343;
   --color-text-glass:        rgba(0, 0, 0, 0.62);
-  --color-text-tag:          rgba(0, 0, 0, 0.40);
+  --color-text-tag:          rgba(0, 0, 0, 0.70);   /* 10px chip text: 7:1 on its chip, was 2.8 */
   --color-text-tag-inverted: #EBEBEB;
   --color-text-label:        #666666;
 
@@ -110,7 +110,7 @@ body {
   --color-text-body:         #DDDDDD;
   --color-text-card:         #BBBBBB;
   --color-text-glass:        rgba(255, 255, 255, 0.70);
-  --color-text-tag:          rgba(255, 255, 255, 0.40);
+  --color-text-tag:          rgba(255, 255, 255, 0.70);
   --color-text-tag-inverted: #1A1A1A;
   --color-text-label:        #999999;
 

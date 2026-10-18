@@ -186,8 +186,8 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
           <ProjectEntry
             {...entryProps("showcaseInlineChat")}
             icon={<MessageSquare size={12} color={primaryColor} style={{ flexShrink: 0, opacity: 0.6 }} />}
-            label="Inline Chat Input"
-            tags={["Web", "UI showcase", "Experiment"]}
+            label="Inline Chat Kit"
+            tags={["Web", "AI chat components", "Component library"]}
           />
 
           <ProjectEntry

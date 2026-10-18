@@ -25,6 +25,8 @@ type HeroCard = {
   status: string;
   /** Secondary chip, for what the card is about to become rather than what it is. */
   note?: string;
+  /** Live on the App Store: the status chip carries the store's mark. */
+  appStore?: boolean;
   media: { type: "video" | "image"; src: string };
 };
 
@@ -34,7 +36,8 @@ const HERO_CARDS: HeroCard[] = [
     icon: "/images/notes.png",
     title: "Notes",
     subtitle: "Canvas based notes",
-    status: "On app store",
+    status: "On App Store",
+    appStore: true,
     media: { type: "video", src: "/assets/Useless Notes/Da bomb.MP4" },
   },
   {
@@ -62,7 +65,8 @@ const DAYSIDE_CARD: HeroCard = {
   icon: "/images/globe.png",
   title: "Dayside",
   subtitle: "Friends' time zones",
-  status: "On app store",
+  status: "On App Store",
+  appStore: true,
   media: { type: "video", src: "/assets/Dayside/dayside-showcase.mp4" },
 };
 
@@ -99,9 +103,9 @@ const justify = (ratio: string, paddingX: number): React.CSSProperties => ({
 });
 
 const INLINE_CHAT_CARD: Omit<HeroCard, "key"> = {
-  title: "Inline Chat Input",
-  subtitle: "UI showcase",
-  status: "Experiment",
+  title: "Inline Chat Kit",
+  subtitle: "AI chat components",
+  status: "Component library",
   media: { type: "video", src: "/assets/Video inlin chat/showcase2.mp4" },
 };
 
@@ -341,19 +345,31 @@ function HeroProjectCard({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              gap: 4,
               backgroundColor: "var(--color-bg-skeleton)",
               borderRadius: 4,
-              paddingInline: 6,
+              paddingLeft: card.appStore ? 3 : 6,
+              paddingRight: 6,
               paddingBlock: 2,
             }}
           >
+            {card.appStore && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src="/images/app-store-icon.png"
+                alt=""
+                style={{ width: 13, height: 13, objectFit: "cover", flexShrink: 0, rotate: "6.64deg" }}
+              />
+            )}
+            {/* Tertiary ink, not the label grey: 10px text needs 4.5:1, and the
+                grey gave 4.2 on this chip (7.4 now, 7.1 in dark). */}
             <span
               style={{
                 fontFamily: '"JetBrains Mono", system-ui, sans-serif',
                 fontSize: 10,
                 lineHeight: 1.3,
                 letterSpacing: "-0.04em",
-                color: "var(--color-text-label)",
+                color: "var(--color-text-tertiary)",
                 whiteSpace: "nowrap",
               }}
             >
@@ -381,7 +397,7 @@ function HeroProjectCard({
                   fontSize: 10,
                   lineHeight: 1.3,
                   letterSpacing: "-0.04em",
-                  color: "var(--color-text-muted)",
+                  color: "var(--color-text-tertiary)",
                   whiteSpace: "nowrap",
                 }}
               >
