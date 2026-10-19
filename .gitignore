@@ -65,3 +65,11 @@ next-env.d.ts
 
 # Local-only notes. Never pushed.
 /private/
+
+# Notes and instructions for working on the site, kept on this machine:
+# the project notes, the PRD, and the agent instruction files (Next writes
+# AGENTS.md itself on every `next dev`).
+/memory/
+/PRD.md
+/AGENTS.md
+/CLAUDE.md
