@@ -165,7 +165,8 @@ export function ProjectSection({ primaryColor, primary40, isDark, activeProject,
             {...entryProps("heroReceipt")}
             icon={<ProjectIcon src="/images/receipt.png" alt="Receipt tracker" rotate="359.41deg" />}
             label="Receipt tracker"
-            tags={["iOS", "AI Financial Assistant", "Waiting approval"]}
+            tags={["iOS", "Finance tracker"]}
+            appStore
           />
 
           <ProjectEntry

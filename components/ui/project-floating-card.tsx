@@ -43,7 +43,7 @@ const PROJECT_TAGS: Record<string, { tags: string[]; appStore?: boolean }> = {
   uselessNotes: { tags: ["iOS", "Canvas"], appStore: true },
   fynn: { tags: ["Web", "HealthTech", "B2B"] },
   contentSnare: { tags: ["Web", "Productivity", "B2B, B2C"] },
-  vorli: { tags: ["iOS", "AI Financial Assistant", "Personal Usage"] },
+  vorli: { tags: ["iOS", "Finance tracker"], appStore: true },
   timezoneGlobe: { tags: ["iOS", "Time Zone Tracker"] },
   weatherWear: { tags: ["iOS", "Weather Through Clothes"] },
   svgParticles: { tags: ["Web", "Canvas, Loader Tool", "Personal Usage"] },

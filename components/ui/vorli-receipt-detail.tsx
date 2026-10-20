@@ -2,13 +2,14 @@
 
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { ProjectDetailLayout } from "./project-detail-layout";
+import { VORLI_APP_STORE_URL } from "@/lib/constants";
 
 interface VorliReceiptDetailProps {
   onCloseStart: () => void;
   onClose: () => void;
 }
 
-const TAGS = ["iOS", "AI Financial Assistant", "In testing"];
+const TAGS = ["iOS", "Finance tracker"];
 
 const VIDEO_SRC = "/assets/Hero/receipt-recording.mp4";
 
@@ -34,6 +35,8 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
       icon="/images/receipt.png"
       iconRotate="359.41deg"
       tags={TAGS}
+      appStore
+      downloadUrl={VORLI_APP_STORE_URL}
       shortDescription={
         <>
           <span style={{ color: "var(--color-text-heading)" }}>Vorli</span>
@@ -42,7 +45,7 @@ export function VorliReceiptDetail({ onCloseStart, onClose }: VorliReceiptDetail
           </span>
         </>
       }
-      longDescription="Most financial apps share the same assumption: if you can see your data, you'll change your behavior. I built Vorli because that assumption never worked for me. Existing tools asked me to think about money the way they were designed — not the way I actually do. Vorli puts AI at the center: it auto-categorizes spending, scans receipts, and reads your financial picture so you can just ask what matters. Not 'show me a chart' — more like 'should I be worried about this month?'"
+      longDescription="Most financial apps share the same assumption: if you can see your data, you'll change your behavior. I built Vorli because that assumption never worked for me. Existing tools asked me to think about money the way they were designed, not the way I actually do. So Vorli starts from the receipt: scan the QR code on a Serbian fiscal receipt and every item, price and tax comes in on its own. From there it shows where the month's money went, day by day and by category, which products got more expensive since you last bought them, and whether you're on track for the things you're saving for. Everything stays on your phone: no account, no server, no tracking."
     >
       <div style={{ backgroundColor: "var(--color-bg-surface)", borderRadius: 24, padding: 16 }}>
       {isMobile ? (

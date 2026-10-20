@@ -46,7 +46,8 @@ const HERO_CARDS: HeroCard[] = [
     iconRotate: "359.41deg",
     title: "Receipt tracker",
     subtitle: "Finance tracker",
-    status: "Waiting approval",
+    status: "On App Store",
+    appStore: true,
     media: { type: "video", src: "/assets/Hero/receipt-recording.mp4" },
   },
   {
