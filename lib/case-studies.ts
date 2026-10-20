@@ -22,7 +22,7 @@ const ENTRIES: Record<ProjectKey, Omit<CaseStudy, "key">> = {
   heroReceipt: {
     slug: "receipt-tracker",
     title: "Receipt tracker",
-    summary: "AI-powered expense tracking that reads your finances so you don’t have to.",
+    summary: "Scan a receipt and see where your money goes, item by item.",
   },
   heroRuntronome: {
     slug: "runtronome",

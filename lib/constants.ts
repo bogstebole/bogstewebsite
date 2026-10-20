@@ -147,6 +147,10 @@ export const ENVELOPE_MESSAGES: string[] = [
 export const NOTES_APP_STORE_URL =
   "https://apps.apple.com/us/app/useless-notes/id6757185511";
 
+/** Vorli (the receipt tracker) on the App Store. Released in Serbia only, so the link opens the Serbian store. */
+export const VORLI_APP_STORE_URL =
+  "https://apps.apple.com/rs/app/vorli-track-budget-plan/id6788618062";
+
 /** Dayside on the Mac App Store. Its download buttons open this directly, since it only runs on a Mac. */
 export const DAYSIDE_APP_STORE_URL: string | null =
   "https://apps.apple.com/us/app/dayside-world-clock-globe/id6818457402?mt=12";
