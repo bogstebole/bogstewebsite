@@ -1,0 +1,811 @@
+/* TripUp case study (/tripup).
+   Built on the site's semantic tokens (app/globals.css), so it follows the
+   theme toggle. The one colour of its own is TripUp's brand blue, used the
+   way other case studies use their brand colour: behind the media. */
+
+.page {
+  --tripup-brand: #2563eb;
+  --tripup-brand-text: #2563eb;
+
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px 48px;
+  font-family: var(--font-geist-sans), sans-serif;
+  box-sizing: border-box;
+}
+
+:global(.dark) .page {
+  --tripup-brand-text: #60a5fa;
+}
+
+.header,
+.main,
+.footer {
+  width: 100%;
+  max-width: 960px;
+}
+
+.header {
+  padding-block: 24px;
+}
+
+.main {
+  flex: 1;
+}
+
+/* ── Type ── */
+
+.mono {
+  font-family: "JetBrains Mono", system-ui, sans-serif;
+  font-size: 11px;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-text-heading);
+}
+
+.titleRest {
+  color: var(--color-text-subdued);
+}
+
+.body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--color-text-tertiary);
+}
+
+.tag {
+  font-family: "JetBrains Mono", system-ui, sans-serif;
+  font-size: 11px;
+  line-height: 1.3;
+  letter-spacing: -0.04em;
+  color: var(--color-text-label);
+  background-color: var(--color-bg-container);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* ── Hero ── */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 640px;
+  margin-top: 32px;
+}
+
+.icon {
+  display: block;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-text-heading);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.link {
+  text-decoration: none;
+}
+
+.pending {
+  opacity: 0.55;
+}
+
+.soon {
+  font-family: "JetBrains Mono", system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.heroMedia {
+  margin-top: 48px;
+  border-radius: 32px;
+  overflow: hidden;
+  border: 1px solid var(--color-border-soft);
+  background-color: var(--color-bg-container);
+  aspect-ratio: 16 / 9;
+}
+
+.heroMedia video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Cards (same as the Dayside features) ── */
+
+.cards {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 16px;
+}
+
+.card {
+  background-color: var(--color-bg-container);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-text-heading);
+}
+
+/* ── A numbered list of steps ── */
+
+.storyBlock {
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.story {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: 8px;
+}
+
+.storyStep {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background-color: var(--color-bg-container);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-heading);
+}
+
+.storyNum {
+  font-family: "JetBrains Mono", system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--tripup-brand-text);
+  flex-shrink: 0;
+}
+
+/* ── Contents ── */
+
+.contents {
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contentsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.contentsLink {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-soft);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-heading);
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.contentsLink:hover {
+  background-color: var(--color-bg-container);
+}
+
+.contentsLink .storyNum {
+  color: var(--color-text-muted);
+}
+
+/* ── A section: title, the chain, then what it looked like ── */
+
+.section {
+  margin-top: 96px;
+  scroll-margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 640px;
+}
+
+/* The chain of thought: a rail with one dot per step. */
+.chain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 640px;
+}
+
+.step {
+  position: relative;
+  padding: 0 0 16px 24px;
+  border-left: 1px solid var(--color-border-soft);
+  margin-left: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.step:last-child {
+  border-left-color: transparent;
+  padding-bottom: 0;
+}
+
+.step::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--color-bg-page);
+  border: 1.5px solid var(--color-text-muted);
+  box-sizing: border-box;
+}
+
+.stepText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--color-text-tertiary);
+}
+
+/* What we chose: a filled brand dot and full-strength text. */
+.chose::before {
+  background-color: var(--tripup-brand);
+  border-color: var(--tripup-brand);
+}
+
+.chose .mono {
+  color: var(--tripup-brand-text);
+}
+
+.chose .stepText {
+  color: var(--color-text-heading);
+}
+
+/* What didn't work or was left out: a hollow dot, quieter text. */
+.dropped .stepText,
+.skipped .stepText {
+  color: var(--color-text-subdued);
+}
+
+.problem::before,
+.found::before,
+.tradeoff::before,
+.open::before {
+  background-color: var(--color-text-muted);
+}
+
+/* ── Media: TripUp blue behind the pictures, like the other case studies ── */
+
+.media {
+  background-color: var(--tripup-brand);
+  border-radius: 24px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mediaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 8px;
+  align-items: start;
+}
+
+.mediaPhones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px 8px;
+}
+
+.figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.phone {
+  flex: 0 1 220px;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.figure img,
+.figure video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.caption {
+  font-size: 12px;
+  line-height: 17px;
+  color: rgba(255, 255, 255, 0.86);
+  padding-inline: 2px;
+}
+
+/* A clearly marked slot for a picture or video that doesn't exist yet. */
+.placeholder {
+  aspect-ratio: var(--ratio);
+  width: 100%;
+  border-radius: 8px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.placeholderKind {
+  font-family: "JetBrains Mono", system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.placeholderFile {
+  font-family: "JetBrains Mono", system-ui, sans-serif;
+  font-size: 10px;
+  opacity: 0.7;
+  word-break: break-all;
+}
+
+.placeholderIcon {
+  width: 28px;
+  height: 28px;
+  opacity: 0.85;
+}
+
+/* The hero's slot sits on the page, not on blue. */
+.heroPlaceholder {
+  height: 100%;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-subdued);
+  gap: 10px;
+}
+
+.heroPlaceholder .placeholderKind,
+.heroPlaceholder .placeholderFile {
+  color: var(--color-text-muted);
+}
+
+.heroPlaceholderText {
+  max-width: 420px;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--color-text-tertiary);
+}
+
+/* ── Numbers ── */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 8px;
+}
+
+.stat {
+  background-color: var(--color-bg-container);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-text-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.statLabel {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-subdued);
+}
+
+/* ── A dot matrix ── */
+
+.matrixWrap {
+  overflow-x: auto;
+  border-radius: 24px;
+  background-color: var(--color-bg-container);
+  padding: 16px;
+}
+
+.matrix {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-heading);
+}
+
+.matrix th {
+  font-family: "JetBrains Mono", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 0 4px 12px;
+  vertical-align: bottom;
+}
+
+.matrix th:first-child,
+.matrix td:first-child {
+  text-align: left;
+  padding-left: 0;
+}
+
+.matrix td {
+  text-align: center;
+  padding: 7px 4px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.goalRow td {
+  font-weight: 500;
+}
+
+.goalRow td:first-child {
+  color: var(--tripup-brand-text);
+}
+
+.mark {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.markYes {
+  background-color: var(--color-text-heading);
+}
+
+.markPart {
+  border: 1.5px solid var(--color-text-heading);
+  background: linear-gradient(90deg, var(--color-text-heading) 50%, transparent 50%);
+}
+
+.markNo {
+  border: 1.5px solid var(--color-text-muted);
+  opacity: 0.45;
+}
+
+.markUnknown {
+  width: 8px;
+  height: 1.5px;
+  border-radius: 1px;
+  background-color: var(--color-text-muted);
+}
+
+.goalRow .markYes {
+  background-color: var(--tripup-brand);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-subdued);
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── A before / after bar chart ── */
+
+.chart {
+  background-color: var(--color-bg-container);
+  border-radius: 24px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.chartRow {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 4px 16px;
+  align-items: center;
+}
+
+.chartLabel {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-heading);
+}
+
+.bars {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bar {
+  height: 10px;
+  border-radius: 5px;
+  min-width: 4px;
+}
+
+.barBefore {
+  background-color: var(--color-bg-skeleton);
+}
+
+.barAfter {
+  background-color: var(--tripup-brand);
+}
+
+.barValues {
+  font-family: "JetBrains Mono", system-ui, sans-serif;
+  font-size: 11px;
+  color: var(--color-text-subdued);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The budget line, drawn across every row's bars. */
+.budget {
+  position: absolute;
+  top: -4px;
+  bottom: 14px;
+  width: 0;
+  border-left: 1.5px dashed var(--color-text-muted);
+}
+
+.chartKey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-subdued);
+}
+
+.chartKey span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.swatchBudget {
+  width: 0;
+  height: 12px;
+  border-left: 1.5px dashed var(--color-text-muted);
+  border-radius: 0;
+}
+
+/* ── End ── */
+
+.end {
+  margin-top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 640px;
+}
+
+.backToTop {
+  font-size: 13px;
+  color: var(--color-text-heading);
+}
+
+.footer {
+  margin-top: 80px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-text-muted);
+}
+
+.footerRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.footer a {
+  color: inherit;
+}
+
+/* ── Password gate ── */
+
+.gate {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 420px;
+  margin-top: 15vh;
+}
+
+.gateForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.gateRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.gateInput {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-soft);
+  background-color: var(--color-bg-container);
+  color: var(--color-text-heading);
+  font: inherit;
+  font-size: 16px; /* 16 px keeps iOS from zooming into the field */
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gateInput:focus-visible {
+  border-color: var(--tripup-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tripup-brand) 20%, transparent);
+}
+
+.gateInput[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+
+.gateError {
+  min-height: 18px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: #dc2626;
+}
+
+:global(.dark) .gateError {
+  color: #f87171;
+}
+
+/* ── Phone ── */
+
+@media (max-width: 639px) {
+  .page {
+    padding-inline: 16px;
+  }
+
+  .h1 {
+    font-size: 24px;
+  }
+
+  .section {
+    margin-top: 72px;
+  }
+
+  .media {
+    padding: 8px;
+    border-radius: 20px;
+  }
+
+  .mediaGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .phone {
+    flex: 1 1 130px;
+    max-width: 220px;
+  }
+
+  .chartRow {
+    grid-template-columns: 1fr;
+  }
+
+  .heroMedia {
+    margin-top: 32px;
+    border-radius: 24px;
+    aspect-ratio: 4 / 5;
+  }
+}
