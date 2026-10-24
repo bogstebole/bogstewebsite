@@ -62,7 +62,7 @@ function Links({ links }: { links: TripUpContent["links"] }) {
 }
 
 function CaseStudy({ content }: { content: TripUpContent }) {
-  const { hero, links, inShort, story, sections, end } = content;
+  const { hero, links, sections, end } = content;
   const extras: Record<Extra, React.ReactNode> = {
     coverage: <CoverageMatrix coverage={content.coverage} />,
     "money-stats": <Stats items={content.moneyStats} />,
@@ -95,47 +95,6 @@ function CaseStudy({ content }: { content: TripUpContent }) {
           <Placeholder hero type="video" aspect="16 / 9" file={hero.videoFile} caption={hero.videoCaption} />
         )}
       </div>
-
-      {/* In short */}
-      <section className={styles.cards} aria-label="In short">
-        {inShort.map((c) => (
-          <div key={c.title} className={styles.card}>
-            <h2 className={styles.cardTitle}>{c.title}</h2>
-            <p className={styles.body}>{c.body}</p>
-          </div>
-        ))}
-      </section>
-
-      {/* The brief's story */}
-      <section className={styles.storyBlock} aria-labelledby="story-title">
-        <h2 id="story-title" className={styles.title}>
-          {story.title}
-          <span className={styles.titleRest}>: {story.summary}</span>
-        </h2>
-        <ol className={styles.story}>
-          {story.steps.map((step, i) => (
-            <li key={step} className={styles.storyStep}>
-              <span className={styles.storyNum}>{String(i + 1).padStart(2, "0")}</span>
-              {step}
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* Contents */}
-      <nav className={styles.contents} aria-label="Contents">
-        <span className={styles.label}>{content.contentsLabel}</span>
-        <ol className={styles.contentsList}>
-          {sections.map((s, i) => (
-            <li key={s.id}>
-              <a href={`#${s.id}`} className={styles.contentsLink}>
-                <span className={styles.storyNum}>{String(i + 1).padStart(2, "0")}</span>
-                {s.short}
-              </a>
-            </li>
-          ))}
-        </ol>
-      </nav>
 
       {sections.map((section, i) => (
         <CaseStudySection

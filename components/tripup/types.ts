@@ -44,8 +44,6 @@ export type Extra = "coverage" | "money-stats" | "motion-rules" | "perf";
 
 export interface CaseSection {
   id: string;
-  /** Short name for the contents list. */
-  short: string;
   title: string;
   summary: string;
   steps: Step[];
@@ -90,9 +88,6 @@ export interface TripUpContent {
   };
   /** A href starting with "#todo-" shows as a dimmed button, named "coming soon". */
   links: { label: string; href: string; icon: LinkIcon }[];
-  inShort: { title: string; body: string }[];
-  story: { title: string; summary: string; steps: string[] };
-  contentsLabel: string;
   sections: CaseSection[];
   coverage: Coverage;
   perf: FrameTimes;

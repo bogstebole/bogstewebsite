@@ -83,7 +83,7 @@ try {
 } catch (e) {
   fail(`${contentFile} is not valid JSON: ${e.message}`);
 }
-for (const field of ["hero", "links", "inShort", "story", "sections", "coverage", "perf", "end"]) {
+for (const field of ["hero", "links", "sections", "coverage", "perf", "end"]) {
   if (!(field in content)) fail(`${contentFile} has no "${field}".`);
 }
 

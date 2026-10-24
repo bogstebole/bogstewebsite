@@ -57,13 +57,6 @@
   color: var(--color-text-subdued);
 }
 
-.body {
-  margin: 0;
-  font-size: 14px;
-  line-height: 21px;
-  color: var(--color-text-tertiary);
-}
-
 .tag {
   font-family: "JetBrains Mono", system-ui, sans-serif;
   font-size: 11px;
@@ -149,109 +142,6 @@
   object-fit: cover;
 }
 
-/* ── Cards (same as the Dayside features) ── */
-
-.cards {
-  margin-top: 48px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  gap: 16px;
-}
-
-.card {
-  background-color: var(--color-bg-container);
-  border-radius: 24px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.cardTitle {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.3;
-  color: var(--color-text-heading);
-}
-
-/* ── A numbered list of steps ── */
-
-.storyBlock {
-  margin-top: 64px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.story {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
-  gap: 8px;
-}
-
-.storyStep {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background-color: var(--color-bg-container);
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--color-text-heading);
-}
-
-.storyNum {
-  font-family: "JetBrains Mono", system-ui, sans-serif;
-  font-size: 11px;
-  color: var(--tripup-brand-text);
-  flex-shrink: 0;
-}
-
-/* ── Contents ── */
-
-.contents {
-  margin-top: 64px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.contentsList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.contentsLink {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border-soft);
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--color-text-heading);
-  text-decoration: none;
-  transition: background-color 0.2s ease;
-}
-
-.contentsLink:hover {
-  background-color: var(--color-bg-container);
-}
-
-.contentsLink .storyNum {
-  color: var(--color-text-muted);
-}
-
 /* ── A section: title, the chain, then what it looked like ── */
 
 .section {
@@ -262,20 +152,19 @@
   gap: 24px;
 }
 
-/* The number sits beside the title, on its first line's baseline. */
+/* The number sits beside the title, at its size, on its first line. */
 .sectionHead {
   display: flex;
   align-items: baseline;
-  gap: 16px;
+  gap: 12px;
   max-width: 640px;
 }
 
 .sectionNum {
   flex-shrink: 0;
-  font-size: 44px;
+  font-size: 20px;
   font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.04em;
+  line-height: 1.3;
   font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
 }
