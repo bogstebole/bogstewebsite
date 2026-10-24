@@ -15,7 +15,7 @@ export function PasswordGate() {
         <span className={styles.titleRest}>: this case study is private. Enter the password.</span>
       </h1>
       <form action={action} className={styles.gateForm}>
-        <label htmlFor="tripup-password" className={styles.mono}>
+        <label htmlFor="tripup-password" className={styles.label}>
           Password
         </label>
         <div className={styles.gateRow}>

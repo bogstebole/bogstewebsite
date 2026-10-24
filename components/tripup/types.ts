@@ -72,6 +72,9 @@ export interface FrameTimes {
   rows: { scenario: string; before: number; after: number }[];
 }
 
+/** Which logo a link's button shows: Figma, the web build on Vercel, Android, or iPhone. */
+export type LinkIcon = "figma" | "web" | "android" | "ios";
+
 export interface TripUpContent {
   version: 1;
   hero: {
@@ -85,8 +88,8 @@ export interface TripUpContent {
     videoFile: string;
     videoCaption: string;
   };
-  /** A href starting with "#todo-" shows as a dimmed "soon" button. */
-  links: { label: string; href: string }[];
+  /** A href starting with "#todo-" shows as a dimmed button, named "coming soon". */
+  links: { label: string; href: string; icon: LinkIcon }[];
   inShort: { title: string; body: string }[];
   story: { title: string; summary: string; steps: string[] };
   contentsLabel: string;

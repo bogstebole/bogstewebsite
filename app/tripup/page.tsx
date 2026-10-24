@@ -55,9 +55,7 @@ function Links({ links }: { links: TripUpContent["links"] }) {
   return (
     <div className={styles.links}>
       {links.map((l) => (
-        <OutLink key={l.label} href={l.href}>
-          {l.label}
-        </OutLink>
+        <OutLink key={l.label} href={l.href} label={l.label} icon={l.icon} />
       ))}
     </div>
   );
@@ -73,13 +71,9 @@ function CaseStudy({ content }: { content: TripUpContent }) {
   };
 
   return (
-    <TripUpShell credits={content.credits}>
+    <TripUpShell credits={content.credits} icon={hero.icon}>
       {/* Hero */}
       <section className={styles.hero}>
-        {hero.icon && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={mediaUrl(hero.icon)} alt="" width={48} height={48} className={styles.icon} />
-        )}
         <h1 className={styles.h1}>
           {hero.title}
           <span className={styles.titleRest}>: {hero.summary}</span>
@@ -130,7 +124,7 @@ function CaseStudy({ content }: { content: TripUpContent }) {
 
       {/* Contents */}
       <nav className={styles.contents} aria-label="Contents">
-        <span className={styles.mono}>{content.contentsLabel}</span>
+        <span className={styles.label}>{content.contentsLabel}</span>
         <ol className={styles.contentsList}>
           {sections.map((s, i) => (
             <li key={s.id}>
