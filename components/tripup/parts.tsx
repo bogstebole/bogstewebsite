@@ -185,30 +185,36 @@ function MediaFigure({ item }: { item: MediaItem }) {
   );
 }
 
-/** Pictures two to a row (wide ones take the row), then phone screens three to a row. */
+type MediaRow = { kind: "flat" | "phone" | "thumb"; items: MediaItem[] };
+
+const rowKind = (item: MediaItem): MediaRow["kind"] =>
+  item.size === "phone" || item.size === "thumb" ? item.size : "flat";
+
+/**
+ * In the order they come: pictures two to a row (wide ones take the row),
+ * phone screens three to a row, small screens four to a row.
+ */
 export function Media({ items }: { items: MediaItem[] }) {
-  const flat = items.filter((i) => i.size !== "phone");
-  const phones = items.filter((i) => i.size === "phone");
+  const rows = items.reduce<MediaRow[]>((out, item) => {
+    const last = out.at(-1);
+    if (last?.kind === rowKind(item)) last.items.push(item);
+    else out.push({ kind: rowKind(item), items: [item] });
+    return out;
+  }, []);
   const key = (i: MediaItem) => i.src ?? i.file ?? i.caption;
   return (
     <div className={styles.media}>
-      {flat.length > 0 && (
-        <div className={styles.mediaGrid}>
-          {flat.map((item) => (
-            <MediaFigure key={key(item)} item={item} />
-          ))}
-        </div>
-      )}
-      {phones.length > 0 && (
+      {rows.map((row) => (
         <div
-          className={styles.mediaPhones}
-          style={{ "--phones": Math.min(phones.length, 3) } as React.CSSProperties}
+          key={key(row.items[0])}
+          className={row.kind === "phone" ? styles.mediaPhones : row.kind === "thumb" ? styles.mediaThumbs : styles.mediaGrid}
+          style={row.kind === "phone" ? ({ "--phones": Math.min(row.items.length, 3) } as React.CSSProperties) : undefined}
         >
-          {phones.map((item) => (
+          {row.items.map((item) => (
             <MediaFigure key={key(item)} item={item} />
           ))}
         </div>
-      )}
+      ))}
     </div>
   );
 }
@@ -360,8 +366,9 @@ export function CaseStudySection({
         </h2>
       </div>
       <Chain steps={section.steps} />
-      {extra}
+      {!section.extraLast && extra}
       {section.media && section.media.length > 0 && <Media items={section.media} />}
+      {section.extraLast && extra}
     </section>
   );
 }
