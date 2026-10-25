@@ -126,6 +126,16 @@
   height: 22px;
 }
 
+/* Brand colours. Vercel and Apple are black marks, so they follow the text. */
+.logo-web,
+.logo-ios {
+  fill: var(--color-text-heading);
+}
+
+.logo-android {
+  fill: #3ddc84;
+}
+
 .heroMedia {
   margin-top: 48px;
   border-radius: 32px;
