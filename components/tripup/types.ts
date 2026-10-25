@@ -17,21 +17,37 @@ export interface MediaItem {
   poster?: string;
   /** Width / height, e.g. "390 / 844" for a phone screen. */
   aspect: string;
-  /** "phone" sits in a row of phones; "half" is two per row; "wide" takes the row. */
-  size: "phone" | "half" | "wide";
+  /**
+   * "phone" sits in a row of phones; "half" is two per row; "wide" takes the
+   * row; "thumb" is a small screen in a row of four, its caption the point.
+   */
+  size: "phone" | "half" | "wide" | "thumb";
   width?: number;
   height?: number;
 }
 
-export type StepKind = "problem" | "looked" | "found" | "tried" | "dropped" | "chose" | "skipped" | "tradeoff" | "open";
+export type StepKind =
+  | "question"
+  | "problem"
+  | "looked"
+  | "found"
+  | "tried"
+  | "dropped"
+  | "chose"
+  | "why"
+  | "skipped"
+  | "tradeoff"
+  | "open";
 
 export const STEP_LABEL: Record<StepKind, string> = {
+  question: "Question",
   problem: "Problem",
   looked: "Looked at",
   found: "Found",
   tried: "Tried",
   dropped: "Didn't work",
   chose: "Chose",
+  why: "Why",
   skipped: "Left out",
   tradeoff: "Trade-off",
   open: "Still open",
@@ -51,6 +67,8 @@ export interface CaseSection {
   steps: Step[];
   /** A visual built from data, shown before the media. */
   extra?: Extra;
+  /** Show the extra after the media instead, when the media is the main point. */
+  extraLast?: boolean;
   media?: MediaItem[];
 }
 
