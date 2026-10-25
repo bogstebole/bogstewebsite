@@ -1,6 +1,7 @@
 import Link from "next/link";
 import glass from "@/components/ui/GlassButton.module.css";
 import styles from "./tripup.module.css";
+import { AutoVideo } from "./auto-video";
 import {
   isPendingLink,
   mediaUrl,
@@ -156,15 +157,11 @@ function MediaFigure({ item }: { item: MediaItem }) {
     content = <Placeholder type={item.type} caption={item.caption} file={item.file} aspect={item.aspect} />;
   } else if (item.type === "video") {
     content = (
-      <video
+      <AutoVideo
         src={mediaUrl(item.src)}
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="metadata"
+        poster={item.poster ? mediaUrl(item.poster) : undefined}
+        label={item.caption}
         style={{ aspectRatio: item.aspect }}
-        aria-label={item.caption}
       />
     );
   } else {
