@@ -4,6 +4,7 @@ import { hasTripUpAccess } from "@/lib/tripup-access";
 import { loadTripUpContent } from "@/lib/tripup-content";
 import styles from "@/components/tripup/tripup.module.css";
 import { PasswordGate } from "@/components/tripup/password-gate";
+import { AutoVideo } from "@/components/tripup/auto-video";
 import {
   CaseStudySection,
   CoverageMatrix,
@@ -88,9 +89,14 @@ function CaseStudy({ content }: { content: TripUpContent }) {
         <Links links={links} />
       </section>
 
-      <div className={styles.heroMedia}>
+      <div className={`${styles.heroMedia} ${hero.video && hero.videoAspect ? styles.heroPhone : ""}`}>
         {hero.video ? (
-          <video src={mediaUrl(hero.video)} autoPlay loop muted playsInline aria-label={hero.videoCaption} />
+          <AutoVideo
+            src={mediaUrl(hero.video)}
+            poster={hero.videoPoster ? mediaUrl(hero.videoPoster) : undefined}
+            label={hero.videoCaption}
+            style={hero.videoAspect ? { aspectRatio: hero.videoAspect } : undefined}
+          />
         ) : (
           <Placeholder hero type="video" aspect="16 / 9" file={hero.videoFile} caption={hero.videoCaption} />
         )}

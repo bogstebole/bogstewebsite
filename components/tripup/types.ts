@@ -13,6 +13,8 @@ export interface MediaItem {
   src?: string;
   file?: string;
   caption: string;
+  /** A video's still, shown until it plays: a file in private/tripup/media/. */
+  poster?: string;
   /** Width / height, e.g. "390 / 844" for a phone screen. */
   aspect: string;
   /** "phone" sits in a row of phones; "half" is two per row; "wide" takes the row. */
@@ -83,6 +85,10 @@ export interface TripUpContent {
     tags: string[];
     /** A file in private/tripup/media/; null shows the placeholder. */
     video: string | null;
+    /** The video's still, shown until it plays. */
+    videoPoster?: string;
+    /** Width / height of the video. A phone recording stands on the brand colour. */
+    videoAspect?: string;
     videoFile: string;
     videoCaption: string;
   };

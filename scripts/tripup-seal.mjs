@@ -91,8 +91,12 @@ for (const field of ["hero", "links", "sections", "coverage", "perf", "end"]) {
 const used = new Set();
 if (content.hero.icon) used.add(content.hero.icon);
 if (content.hero.video) used.add(content.hero.video);
+if (content.hero.videoPoster) used.add(content.hero.videoPoster);
 for (const section of content.sections) {
-  for (const item of section.media ?? []) if (item.src) used.add(item.src);
+  for (const item of section.media ?? []) {
+    if (item.src) used.add(item.src);
+    if (item.poster) used.add(item.poster);
+  }
 }
 
 const mediaDir = path.join(SRC, "media");
