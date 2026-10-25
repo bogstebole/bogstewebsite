@@ -286,11 +286,15 @@
   align-items: start;
 }
 
+/* Phones three to a row, edge to edge with the pictures above, so every phone
+   on the page is the same size. Fewer than three keep that size, centred. */
 .mediaPhones {
-  display: flex;
-  flex-wrap: wrap;
+  --phone-gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(var(--phones, 3), calc((100% - 2 * var(--phone-gap)) / 3));
   justify-content: center;
-  gap: 16px 8px;
+  align-items: start;
+  gap: 16px var(--phone-gap);
 }
 
 .figure {
@@ -299,10 +303,6 @@
   flex-direction: column;
   gap: 8px;
   min-width: 0;
-}
-
-.phone {
-  flex: 0 1 220px;
 }
 
 .wide {
@@ -726,9 +726,15 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .phone {
-    flex: 1 1 130px;
-    max-width: 220px;
+  .mediaPhones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* The odd phone out sits centred under the pair, at the same size. */
+  .mediaPhones > .phone:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc((100% - var(--phone-gap)) / 2);
   }
 
   .chartRow {

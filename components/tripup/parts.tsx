@@ -185,7 +185,7 @@ function MediaFigure({ item }: { item: MediaItem }) {
   );
 }
 
-/** Pictures two to a row (wide ones take the row), then phone screens side by side. */
+/** Pictures two to a row (wide ones take the row), then phone screens three to a row. */
 export function Media({ items }: { items: MediaItem[] }) {
   const flat = items.filter((i) => i.size !== "phone");
   const phones = items.filter((i) => i.size === "phone");
@@ -200,7 +200,10 @@ export function Media({ items }: { items: MediaItem[] }) {
         </div>
       )}
       {phones.length > 0 && (
-        <div className={styles.mediaPhones}>
+        <div
+          className={styles.mediaPhones}
+          style={{ "--phones": Math.min(phones.length, 3) } as React.CSSProperties}
+        >
           {phones.map((item) => (
             <MediaFigure key={key(item)} item={item} />
           ))}
