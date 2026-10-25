@@ -162,16 +162,18 @@
   gap: 24px;
 }
 
-/* The number sits beside the title, at its size, on its first line. */
+/* The number sits beside the title, at its size, on its first line. Its
+   column is as wide as the chain's indent (4 + 1 + 24), so the title starts
+   where the step text does. */
 .sectionHead {
   display: flex;
   align-items: baseline;
-  gap: 12px;
   max-width: 640px;
 }
 
 .sectionNum {
   flex-shrink: 0;
+  width: 29px;
   font-size: 20px;
   font-weight: 500;
   line-height: 1.3;
