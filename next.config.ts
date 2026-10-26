@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  // `next dev` opened from a phone on the home network (192.168.x.x), to try
+  // things on a real device. Only affects the dev server.
+  allowedDevOrigins: ["192.168.*.*"],
   // /tripup reads its sealed content from disk at request time (lib/tripup-content.ts),
   // so the files have to ship with those routes.
   outputFileTracingIncludes: {
