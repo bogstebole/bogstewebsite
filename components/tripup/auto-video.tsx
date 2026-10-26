@@ -11,7 +11,7 @@ import styles from "./tripup.module.css";
  * clips doesn't fetch them all at once. With reduced motion it never plays by
  * itself: the poster stays, with controls to play it. An HEVC copy, when there
  * is one, is used wherever the browser can play it; elsewhere `src` is.
- * With `sound`, a button in the corner turns the sound on, from the start.
+ * With `sound`, a button in the corner turns the sound on and off.
  */
 export function AutoVideo({
   src: h264,
@@ -62,13 +62,12 @@ export function AutoVideo({
   const video = <video ref={ref} poster={poster} loop muted playsInline preload="none" aria-label={label} style={style} />;
   if (!sound) return video;
 
-  // Sound on starts the video over, so it's heard from the first word.
+  // Sound on or off where the video is; it never starts over.
   const toggleSound = () => {
     const el = ref.current;
     if (!el) return;
     if (el.muted) {
       if (!el.getAttribute("src")) el.src = hevcSrc && el.canPlayType('video/mp4; codecs="hvc1"') ? hevcSrc : h264;
-      el.currentTime = 0;
       el.muted = false;
       el.play().catch(() => {});
     } else {
