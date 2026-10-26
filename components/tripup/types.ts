@@ -58,15 +58,15 @@ export interface Step {
   text: string;
 }
 
-export type Extra = "coverage" | "money-stats" | "motion-rules" | "perf";
+export type Extra = "coverage" | "money-stats" | "motion-rules" | "perf" | "web-stats";
 
 export interface CaseSection {
   id: string;
   title: string;
   summary: string;
   steps: Step[];
-  /** A visual built from data, shown before the media. */
-  extra?: Extra;
+  /** A visual built from data (or several, in order), shown before the media. */
+  extra?: Extra | Extra[];
   /** Show the extra after the media instead, when the media is the main point. */
   extraLast?: boolean;
   media?: MediaItem[];
@@ -117,6 +117,8 @@ export interface TripUpContent {
   perf: FrameTimes;
   moneyStats: Stat[];
   motionRules: Stat[];
+  /** The web build's longest freezes, before and after. */
+  webStats?: Stat[];
   end: { title: string; summary: string };
   credits: string;
 }

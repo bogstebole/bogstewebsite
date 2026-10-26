@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import { SITE_NAME } from "@/lib/case-studies";
 import { hasTripUpAccess } from "@/lib/tripup-access";
 import { loadTripUpContent } from "@/lib/tripup-content";
@@ -69,6 +70,7 @@ function CaseStudy({ content }: { content: TripUpContent }) {
     "money-stats": <Stats items={content.moneyStats} />,
     "motion-rules": <Stats items={content.motionRules} />,
     perf: <FrameChart perf={content.perf} />,
+    "web-stats": <Stats items={content.webStats ?? []} />,
   };
 
   return (
@@ -107,7 +109,7 @@ function CaseStudy({ content }: { content: TripUpContent }) {
           key={section.id}
           section={section}
           index={i}
-          extra={section.extra ? extras[section.extra] : undefined}
+          extra={section.extra ? [section.extra].flat().map(e => <Fragment key={e}>{extras[e]}</Fragment>) : undefined}
         />
       ))}
 
