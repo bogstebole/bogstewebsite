@@ -95,6 +95,7 @@ function CaseStudy({ content }: { content: TripUpContent }) {
         {hero.video ? (
           <AutoVideo
             src={mediaUrl(hero.video)}
+            hevcSrc={hero.videoHevc ? mediaUrl(hero.videoHevc) : undefined}
             poster={hero.videoPoster ? mediaUrl(hero.videoPoster) : undefined}
             label={hero.videoCaption}
             style={hero.videoAspect ? { aspectRatio: hero.videoAspect } : undefined}

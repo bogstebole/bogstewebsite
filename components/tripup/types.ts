@@ -103,6 +103,8 @@ export interface TripUpContent {
     tags: string[];
     /** A file in private/tripup/media/; null shows the placeholder. */
     video: string | null;
+    /** The same video in HEVC, smaller; played where the browser supports it. */
+    videoHevc?: string;
     /** The video's still, shown until it plays. */
     videoPoster?: string;
     /** Width / height of the video. A phone recording stands on the brand colour. */
