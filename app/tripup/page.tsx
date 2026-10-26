@@ -98,6 +98,7 @@ function CaseStudy({ content }: { content: TripUpContent }) {
             hevcSrc={hero.videoHevc ? mediaUrl(hero.videoHevc) : undefined}
             poster={hero.videoPoster ? mediaUrl(hero.videoPoster) : undefined}
             label={hero.videoCaption}
+            sound
             style={hero.videoAspect ? { aspectRatio: hero.videoAspect } : undefined}
           />
         ) : (

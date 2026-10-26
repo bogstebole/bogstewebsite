@@ -137,6 +137,7 @@
 }
 
 .heroMedia {
+  position: relative;
   margin-top: 48px;
   border-radius: 32px;
   overflow: hidden;
@@ -151,6 +152,18 @@
   height: 100%;
   object-fit: cover;
 }
+/* Sound on or off, in the corner of the hero video. */
+.heroMedia .soundButton {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  --glass-radius: 14px;
+  --glass-fill: rgba(255, 255, 255, 0.72);
+}
+
 
 /* A phone recording stands on the brand colour, like the sections' media,
    as tall as the frame lets it. */
