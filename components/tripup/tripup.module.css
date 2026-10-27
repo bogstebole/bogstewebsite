@@ -101,19 +101,22 @@
   gap: 6px;
 }
 
+/* As wide as its buttons, up to the page's column: on a computer all five
+   stay on one row, a little past the title's narrower measure. */
 .links {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 8px;
+  width: max-content;
+  max-width: min(960px, calc(100vw - 48px));
 }
 
-/* Square, logo only. Two classes, so it wins over the glass button's pill. */
+/* The glass button's medium pill (40), the logo then the name. Tighter at
+   the sides than its default, so all five fit on one row on a computer.
+   Two classes, so it wins over the glass button's padding. */
 .links .link {
-  --glass-radius: 16px;
-  width: 56px;
-  height: 56px;
-  padding: 0;
+  padding: 0 16px 0 12px;
   text-decoration: none;
 }
 
@@ -124,8 +127,9 @@
 .linkLogo {
   position: relative;
   z-index: 1;
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* Brand colours. Vercel and Apple are black marks, so they follow the text. */
@@ -154,17 +158,29 @@
   height: 100%;
   object-fit: cover;
 }
-/* The hero video's bar: play, where it is, sound, full screen. Hidden until
-   it's wanted, and when it shows it sits above the captions burned into the
-   video (they fill about 84-91% of its height), so it never covers one. */
+/* The hero video's controls: the bar along the bottom (play, where it is,
+   full screen) and the sound button in the top-left corner. Hidden until
+   they're wanted, so they don't sit on the captions. The sound button stays
+   while the video is muted, so the sound is easy to find. */
 .videoBar {
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: calc(17% + 4px);
+  bottom: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Two classes, so it wins over the glass button's own position. */
+.heroMedia .videoSound {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+
+.videoBar,
+.videoSound:not([data-muted]) {
   opacity: 0;
   pointer-events: none;
   transition: opacity 150ms var(--tripup-ease-out);
@@ -172,7 +188,8 @@
 
 /* A mouse: while the pointer is over the video. */
 @media (hover: hover) and (pointer: fine) {
-  .heroMedia:hover .videoBar {
+  .heroMedia:hover .videoBar,
+  .heroMedia:hover .videoSound {
     opacity: 1;
     pointer-events: auto;
   }
@@ -180,18 +197,21 @@
 
 /* A touch or a pen, a laptop's touch screen too: for a moment after a tap
    (auto-video.tsx; a mouse never sets it). */
-.videoBar[data-awake] {
+.videoBar[data-awake],
+.videoSound[data-awake] {
   opacity: 1;
   pointer-events: auto;
 }
 
-/* The keyboard: while one of its controls has focus. */
-.videoBar:has(:focus-visible) {
+/* The keyboard: while one of the controls has focus. */
+.videoBar:has(:focus-visible),
+.videoSound:focus-visible {
   opacity: 1;
   pointer-events: auto;
 }
 
-.videoBar .videoButton {
+.videoBar .videoButton,
+.videoSound.videoButton {
   flex-shrink: 0;
   width: 48px;
   height: 48px;
@@ -841,6 +861,17 @@
     padding-inline: 16px;
   }
 
+  /* The title's column is the screen here, and tighter buttons wrap into
+     fewer, fuller rows. */
+  .links {
+    gap: 8px;
+    max-width: 100%;
+  }
+
+  .links .link {
+    padding: 0 12px 0 10px;
+  }
+
   .h1 {
     font-size: 24px;
   }
@@ -882,18 +913,25 @@
   .videoBar {
     left: 8px;
     right: 8px;
-    bottom: calc(17% + 2px);   /* still above the captions */
+    bottom: 8px;
     gap: 6px;
   }
 
+  .heroMedia .videoSound {
+    top: 8px;
+    left: 8px;
+  }
+
   .videoBar .videoButton,
+  .videoSound.videoButton,
   .videoTrack {
     height: 36px;
     --glass-radius: 10px;
     border-radius: 10px;
   }
 
-  .videoBar .videoButton {
+  .videoBar .videoButton,
+  .videoSound.videoButton {
     width: 36px;
   }
 

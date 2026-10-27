@@ -93,13 +93,13 @@ function DriveLogo() {
 }
 
 /**
- * A square glass button that leaves the site, showing only the logo of where
- * it goes; the label is its name and tooltip. A "#todo-" link shows dimmed.
- * With a note, it opens the note first, and the note goes on to the link.
+ * A glass button that leaves the site: the logo of where it goes, then its
+ * name, so it's clear what opens before anyone clicks. A "#todo-" link shows
+ * dimmed. With a note, it opens the note first, and the note goes on to the
+ * link.
  */
 export function OutLink({ href, label, icon, note }: { href: string; label: string; icon: LinkIcon; note?: LinkNote }) {
   const pending = isPendingLink(href);
-  const name = pending ? `${label}, coming soon` : label;
   const className = `${glass.glassBtn} ${glass.sizeM} ${styles.link} ${pending ? styles.pending : ""}`;
   const logo =
     icon === "figma" ? (
@@ -113,20 +113,22 @@ export function OutLink({ href, label, icon, note }: { href: string; label: stri
     );
   if (note && !pending) {
     return (
-      <NoteLink href={href} label={label} note={note} className={className}>
+      <NoteLink href={href} note={note} className={className}>
         {logo}
+        <span className={glass.label}>{label}</span>
       </NoteLink>
     );
   }
   return (
     <a
       href={href}
-      aria-label={name}
-      title={name}
-      {...(pending ? { "aria-disabled": true } : { target: "_blank", rel: "noopener noreferrer" })}
+      {...(pending
+        ? { "aria-disabled": true, "aria-label": `${label}, coming soon`, title: "Coming soon" }
+        : { target: "_blank", rel: "noopener noreferrer" })}
       className={className}
     >
       {logo}
+      <span className={glass.label}>{label}</span>
     </a>
   );
 }

@@ -13,14 +13,15 @@ import styles from "./tripup.module.css";
  * is one, is used wherever the browser can play it; elsewhere `src` is.
  *
  * With `player`, a bar along the bottom plays and pauses it, moves it back or
- * forward, turns the sound on and off and opens it full screen: with its
- * controls on a desktop, in the system player on an iPhone, and with the sound
- * on. None of them starts it over, and once it's paused by hand, scrolling
- * back to it doesn't start it again. The bar stays hidden until it's wanted:
- * while the mouse is over the video, while one of its controls has keyboard
- * focus, or for a moment after a tap on a touch screen. It sits above the
- * captions burned into the video, so it never covers one. With reduced motion
- * the bar is the only set of controls, not the browser's own on top of it.
+ * forward and opens it full screen: with its controls on a desktop, in the
+ * system player on an iPhone, and with the sound on. A button in the top-left
+ * corner turns the sound on and off. None of them starts it over, and once
+ * it's paused by hand, scrolling back to it doesn't start it again. The
+ * controls stay hidden until they're wanted, so they don't sit on the
+ * captions: while the mouse is over the video, while one has keyboard focus,
+ * or for a moment after a tap on a touch screen. Only the sound button stays
+ * while it's muted, so the sound is easy to find. With reduced motion these
+ * are the only controls, not the browser's own on top of them.
  */
 
 // Safari on iPhone can't put an element full screen, only a video, its way.
@@ -194,6 +195,18 @@ export function AutoVideo({
   return (
     <>
       {video}
+      <button
+        type="button"
+        onClick={toggleSound}
+        onPointerDown={wake}
+        aria-label={muted ? "Turn sound on" : "Turn sound off"}
+        aria-pressed={!muted}
+        data-muted={muted ? "" : undefined}
+        data-awake={awake ? "" : undefined}
+        className={`${glass.glassBtn} ${styles.videoButton} ${styles.videoSound}`}
+      >
+        {muted ? <VolumeX size={20} aria-hidden /> : <Volume2 size={20} aria-hidden />}
+      </button>
       <div
         className={styles.videoBar}
         data-awake={awake ? "" : undefined}
@@ -226,15 +239,6 @@ export function AutoVideo({
             {clock(time)} / {clock(duration)}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={toggleSound}
-          aria-label={muted ? "Turn sound on" : "Turn sound off"}
-          aria-pressed={!muted}
-          className={`${glass.glassBtn} ${styles.videoButton}`}
-        >
-          {muted ? <VolumeX size={20} aria-hidden /> : <Volume2 size={20} aria-hidden />}
-        </button>
         <button
           type="button"
           onClick={openFullscreen}

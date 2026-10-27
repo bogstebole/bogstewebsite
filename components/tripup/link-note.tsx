@@ -25,13 +25,11 @@ const OUT = { duration: 0.15, ease: EASE_OUT };
  */
 export function NoteLink({
   href,
-  label,
   note,
   className,
   children,
 }: {
   href: string;
-  label: string;
   note: LinkNote;
   className: string;
   children: React.ReactNode;
@@ -86,8 +84,6 @@ export function NoteLink({
       <button
         ref={button}
         type="button"
-        aria-label={label}
-        title={label}
         aria-haspopup="dialog"
         className={className}
         onClick={() => setOpen(true)}
