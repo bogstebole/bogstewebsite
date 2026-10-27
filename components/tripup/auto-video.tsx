@@ -16,8 +16,11 @@ import styles from "./tripup.module.css";
  * forward, turns the sound on and off and opens it full screen: with its
  * controls on a desktop, in the system player on an iPhone, and with the sound
  * on. None of them starts it over, and once it's paused by hand, scrolling
- * back to it doesn't start it again. While it plays the bar steps aside, so
- * it doesn't cover the captions, and comes back on a move, a tap or a pause.
+ * back to it doesn't start it again. The bar stays hidden until it's wanted:
+ * while the mouse is over the video, while one of its controls has keyboard
+ * focus, or for a moment after a tap on a touch screen. It sits above the
+ * captions burned into the video, so it never covers one. With reduced motion
+ * the bar is the only set of controls, not the browser's own on top of it.
  */
 
 // Safari on iPhone can't put an element full screen, only a video, its way.
@@ -49,14 +52,12 @@ export function AutoVideo({
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [awake, setAwake] = useState(true);
+  // A touch screen has no hover: a tap wakes the bar for a while
+  const [awake, setAwake] = useState(false);
   const sleepTimer = useRef<number | undefined>(undefined);
   const pick = (el: HTMLVideoElement) => (hevcSrc && el.canPlayType('video/mp4; codecs="hvc1"') ? hevcSrc : h264);
 
-  useEffect(() => {
-    sleepTimer.current = window.setTimeout(() => setAwake(false), 2500);
-    return () => window.clearTimeout(sleepTimer.current);
-  }, []);
+  useEffect(() => () => window.clearTimeout(sleepTimer.current), []);
 
   useEffect(() => {
     const video = ref.current;
@@ -72,7 +73,7 @@ export function AutoVideo({
     const syncTime = () => setTime(video.currentTime);
     const syncDuration = () => setDuration(Number.isFinite(video.duration) ? video.duration : 0);
     const leftFullscreen = () => {
-      if (document.fullscreenElement !== video) video.controls = reduced;
+      if (document.fullscreenElement !== video) video.controls = reduced && !player;
     };
     const leftIOSPlayer = () => {
       if (!pausedByHand.current) video.play().catch(() => {});
@@ -93,7 +94,7 @@ export function AutoVideo({
     };
 
     if (reduced) {
-      video.controls = true;
+      video.controls = !player;
       video.preload = "metadata";
       video.src = src;
       return unlisten;
@@ -115,10 +116,11 @@ export function AutoVideo({
       observer.disconnect();
       unlisten();
     };
-  }, [h264, hevcSrc]);
+  }, [h264, hevcSrc, player]);
 
-  // Shows the bar, and hides it again a while after the last move.
-  const wake = () => {
+  // Shows the bar on a touch screen, and hides it again 2.5 s after the last touch.
+  const wake = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") return;   // a mouse has hover (tripup.module.css)
     setAwake(true);
     window.clearTimeout(sleepTimer.current);
     sleepTimer.current = window.setTimeout(() => setAwake(false), 2500);
@@ -134,7 +136,6 @@ export function AutoVideo({
       preload="none"
       aria-label={label}
       style={style}
-      onPointerMove={player ? wake : undefined}
       onPointerDown={player ? wake : undefined}
     />
   );
@@ -195,9 +196,9 @@ export function AutoVideo({
       {video}
       <div
         className={styles.videoBar}
-        data-asleep={playing && !awake ? "" : undefined}
+        data-awake={awake ? "" : undefined}
+        onPointerDown={wake}
         onPointerMove={wake}
-        onFocus={wake}
       >
         <button
           type="button"
