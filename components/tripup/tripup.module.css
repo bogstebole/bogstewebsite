@@ -894,3 +894,100 @@
     height: auto;
   }
 }
+
+/* ── A link's note (link-note.tsx) ──
+   The site's modal card (modal-shell.tsx): its fill, corner, padding and
+   shadow, centred at every width. Portalled to body, so it sets its own face. */
+
+.noteBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  /* Unprefixed only: the build adds the -webkit- copy where it's needed */
+  backdrop-filter: blur(8px);
+}
+
+.noteCard {
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px;
+  border-radius: 48px;
+  background: var(--color-bg-modal);
+  box-shadow:
+    0 237px 66px 0 rgba(0, 0, 0, 0),
+    0 152px 61px 0 rgba(0, 0, 0, 0.01),
+    0 85px 51px 0 rgba(0, 0, 0, 0.05),
+    0 38px 38px 0 rgba(0, 0, 0, 0.09),
+    0 9px 21px 0 rgba(0, 0, 0, 0.1);
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.noteHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.noteTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-text-heading);
+}
+
+.noteText,
+.notePoints {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--color-text-tertiary);
+}
+
+/* The reset takes list bullets away, so they're set again */
+.notePoints {
+  padding-left: 18px;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notePoints li::marker {
+  color: var(--color-text-muted);
+}
+
+/* The way on, full width, and the quieter way to the video under it */
+.noteActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* A phone: a dimmed page behind and a tighter card. */
+@media (max-width: 639px) {
+  .noteBackdrop {
+    padding: 16px;
+    background: var(--color-bg-backdrop);
+  }
+
+  .noteCard {
+    max-height: calc(100dvh - 32px);
+    gap: 16px;
+    padding: 24px;
+    border-radius: 32px;
+  }
+}

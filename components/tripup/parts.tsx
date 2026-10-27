@@ -2,6 +2,7 @@ import Link from "next/link";
 import glass from "@/components/ui/GlassButton.module.css";
 import styles from "./tripup.module.css";
 import { AutoVideo } from "./auto-video";
+import { NoteLink } from "./link-note";
 import {
   isPendingLink,
   mediaUrl,
@@ -10,6 +11,7 @@ import {
   type Coverage,
   type FrameTimes,
   type LinkIcon,
+  type LinkNote,
   type MediaItem,
   type Stat,
   type Step,
@@ -93,27 +95,38 @@ function DriveLogo() {
 /**
  * A square glass button that leaves the site, showing only the logo of where
  * it goes; the label is its name and tooltip. A "#todo-" link shows dimmed.
+ * With a note, it opens the note first, and the note goes on to the link.
  */
-export function OutLink({ href, label, icon }: { href: string; label: string; icon: LinkIcon }) {
+export function OutLink({ href, label, icon, note }: { href: string; label: string; icon: LinkIcon; note?: LinkNote }) {
   const pending = isPendingLink(href);
   const name = pending ? `${label}, coming soon` : label;
+  const className = `${glass.glassBtn} ${glass.sizeM} ${styles.link} ${pending ? styles.pending : ""}`;
+  const logo =
+    icon === "figma" ? (
+      <FigmaLogo />
+    ) : icon === "drive" ? (
+      <DriveLogo />
+    ) : (
+      <svg className={`${styles.linkLogo} ${styles[`logo-${icon}`]}`} viewBox="0 0 24 24" aria-hidden>
+        <path d={LOGO_PATHS[icon]} />
+      </svg>
+    );
+  if (note && !pending) {
+    return (
+      <NoteLink href={href} label={label} note={note} className={className}>
+        {logo}
+      </NoteLink>
+    );
+  }
   return (
     <a
       href={href}
       aria-label={name}
       title={name}
       {...(pending ? { "aria-disabled": true } : { target: "_blank", rel: "noopener noreferrer" })}
-      className={`${glass.glassBtn} ${glass.sizeM} ${styles.link} ${pending ? styles.pending : ""}`}
+      className={className}
     >
-      {icon === "figma" ? (
-        <FigmaLogo />
-      ) : icon === "drive" ? (
-        <DriveLogo />
-      ) : (
-        <svg className={`${styles.linkLogo} ${styles[`logo-${icon}`]}`} viewBox="0 0 24 24" aria-hidden>
-          <path d={LOGO_PATHS[icon]} />
-        </svg>
-      )}
+      {logo}
     </a>
   );
 }

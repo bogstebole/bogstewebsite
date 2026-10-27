@@ -57,7 +57,7 @@ function Links({ links }: { links: TripUpContent["links"] }) {
   return (
     <div className={styles.links}>
       {links.map((l) => (
-        <OutLink key={l.label} href={l.href} label={l.label} icon={l.icon} />
+        <OutLink key={l.label} href={l.href} label={l.label} icon={l.icon} note={l.note} />
       ))}
     </div>
   );
@@ -91,7 +91,8 @@ function CaseStudy({ content }: { content: TripUpContent }) {
         <Links links={links} />
       </section>
 
-      <div className={`${styles.heroMedia} ${hero.video && hero.videoAspect ? styles.heroPhone : ""}`}>
+      {/* "video": where a link's note sends you to watch it */}
+      <div id="video" className={`${styles.heroMedia} ${hero.video && hero.videoAspect ? styles.heroPhone : ""}`}>
         {hero.video ? (
           <AutoVideo
             src={mediaUrl(hero.video)}

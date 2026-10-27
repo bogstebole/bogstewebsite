@@ -93,6 +93,17 @@ export interface FrameTimes {
 /** Which logo a link's button shows: Figma, a file on Google Drive, the web build on Vercel, Android, or iPhone. */
 export type LinkIcon = "figma" | "drive" | "web" | "android" | "ios";
 
+/** A short note a link's button opens instead of leaving the site: what to know first, then the way on. */
+export interface LinkNote {
+  title: string;
+  text?: string;
+  points?: string[];
+  /** The button that goes on to the link's href, in a new tab. */
+  go: string;
+  /** A button that closes the note and plays the hero video. */
+  video?: string;
+}
+
 export interface TripUpContent {
   version: 1;
   hero: {
@@ -113,7 +124,7 @@ export interface TripUpContent {
     videoCaption: string;
   };
   /** A href starting with "#todo-" shows as a dimmed button, named "coming soon". */
-  links: { label: string; href: string; icon: LinkIcon }[];
+  links: { label: string; href: string; icon: LinkIcon; note?: LinkNote }[];
   sections: CaseSection[];
   coverage: Coverage;
   perf: FrameTimes;
