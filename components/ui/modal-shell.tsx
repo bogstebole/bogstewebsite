@@ -13,7 +13,7 @@ export const MODAL_RADIUS = 48;
 /** The detail panel and the envelope arrive on this spring; sheets should match. */
 const SHEET_SPRING = { type: "spring" as const, stiffness: 340, damping: 34 };
 
-const X_ICON = (
+export const X_ICON = (
   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
     <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
   </svg>
