@@ -90,8 +90,8 @@ export interface FrameTimes {
   rows: { scenario: string; before: number; after: number }[];
 }
 
-/** Which logo a link's button shows: Figma, the web build on Vercel, Android, or iPhone. */
-export type LinkIcon = "figma" | "web" | "android" | "ios";
+/** Which logo a link's button shows: Figma, a file on Google Drive, the web build on Vercel, Android, or iPhone. */
+export type LinkIcon = "figma" | "drive" | "web" | "android" | "ios";
 
 export interface TripUpContent {
   version: 1;
