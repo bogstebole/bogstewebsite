@@ -101,19 +101,22 @@
   gap: 6px;
 }
 
+/* As wide as its buttons, up to the page's column: on a computer all five
+   stay on one row, a little past the title's narrower measure. */
 .links {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 8px;
+  width: max-content;
+  max-width: min(960px, calc(100vw - 48px));
 }
 
-/* Square, logo only. Two classes, so it wins over the glass button's pill. */
+/* The glass button's medium pill (40), the logo then the name. Tighter at
+   the sides than its default, so all five fit on one row on a computer.
+   Two classes, so it wins over the glass button's padding. */
 .links .link {
-  --glass-radius: 16px;
-  width: 56px;
-  height: 56px;
-  padding: 0;
+  padding: 0 16px 0 12px;
   text-decoration: none;
 }
 
@@ -124,8 +127,9 @@
 .linkLogo {
   position: relative;
   z-index: 1;
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* Brand colours. Vercel and Apple are black marks, so they follow the text. */
@@ -855,6 +859,17 @@
 @media (max-width: 639px) {
   .page {
     padding-inline: 16px;
+  }
+
+  /* The title's column is the screen here, and tighter buttons wrap into
+     fewer, fuller rows. */
+  .links {
+    gap: 8px;
+    max-width: 100%;
+  }
+
+  .links .link {
+    padding: 0 12px 0 10px;
   }
 
   .h1 {
