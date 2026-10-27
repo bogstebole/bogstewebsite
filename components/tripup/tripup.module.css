@@ -6,6 +6,8 @@
 .page {
   --tripup-brand: #2563eb;
   --tripup-brand-text: #2563eb;
+  /* Quick to arrive, soft to settle: the curve the docs and the link notes use */
+  --tripup-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 
   min-height: 100dvh;
   display: flex;
@@ -152,22 +154,41 @@
   height: 100%;
   object-fit: cover;
 }
-/* The hero video's bar: play, where it is, sound, full screen. */
+/* The hero video's bar: play, where it is, sound, full screen. Hidden until
+   it's wanted, and when it shows it sits above the captions burned into the
+   video (they fill about 84-91% of its height), so it never covers one. */
 .videoBar {
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: 16px;
+  bottom: calc(17% + 4px);
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: opacity 0.25s ease;
-}
-
-/* Playing, untouched for a moment: out of the captions' way. */
-.videoBar[data-asleep]:not(:has(:focus-visible)) {
   opacity: 0;
   pointer-events: none;
+  transition: opacity 150ms var(--tripup-ease-out);
+}
+
+/* A mouse: while the pointer is over the video. */
+@media (hover: hover) and (pointer: fine) {
+  .heroMedia:hover .videoBar {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* A touch or a pen, a laptop's touch screen too: for a moment after a tap
+   (auto-video.tsx; a mouse never sets it). */
+.videoBar[data-awake] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* The keyboard: while one of its controls has focus. */
+.videoBar:has(:focus-visible) {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .videoBar .videoButton {
@@ -861,7 +882,7 @@
   .videoBar {
     left: 8px;
     right: 8px;
-    bottom: 8px;
+    bottom: calc(17% + 2px);   /* still above the captions */
     gap: 6px;
   }
 
