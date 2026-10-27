@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Fragment } from "react";
 import { SITE_NAME } from "@/lib/case-studies";
 import { hasTripUpAccess } from "@/lib/tripup-access";
@@ -29,6 +30,9 @@ export const metadata: Metadata = {
 // response holds only the password form; with it, the content is decrypted
 // here and nowhere else (lib/tripup-content.ts).
 export default async function TripUpPage() {
+  // Rendered per request, never at build time: a build without TRIPUP_PASSWORD
+  // would otherwise bake the password form in as a static page for good.
+  await connection();
   if (!(await hasTripUpAccess())) {
     return (
       <TripUpShell>
